@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔮 Tarot — Sakura Bot</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<style>
+:root{--tarot-ink:#171326;--tarot-gold:#f4c96b;--tarot-lilac:#cbb8ff}
+body{min-height:100vh;background:radial-gradient(circle at 15% 10%,rgba(244,201,107,.12),transparent 30%),radial-gradient(circle at 85% 30%,rgba(203,184,255,.12),transparent 32%),var(--bg-primary)}
+.tarot-nav{position:sticky;top:0;z-index:10;background:var(--bg-glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tarot-nav a{text-decoration:none}.tarot-brand{font-weight:800;color:var(--tarot-gold)}.tarot-wrap{max-width:1000px;margin:0 auto;padding:28px 16px 52px}.tarot-hero{text-align:center;margin-bottom:24px}.tarot-hero h1{margin:0;font-size:clamp(2rem,5vw,3.3rem);color:var(--tarot-gold)}.tarot-hero p{color:var(--text-muted);margin:10px auto 0;max-width:620px}.tarot-layout{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr);gap:18px;align-items:start}.tarot-panel{background:rgba(20,16,36,.72);border:1px solid var(--border-glass);border-radius:16px;padding:20px;box-shadow:var(--shadow-card)}.tarot-card{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid rgba(244,201,107,.35);border-radius:14px;background:linear-gradient(145deg,rgba(244,201,107,.13),rgba(203,184,255,.1));padding:24px}.tarot-card.empty{color:var(--text-muted)}.tarot-symbol{font-size:4rem;margin-bottom:18px}.tarot-card h2{margin:0 0 10px;color:var(--tarot-gold);font-size:1.3rem}.tarot-orientation{color:var(--tarot-lilac);font-weight:700}.tarot-meaning{color:var(--text-muted);line-height:1.6;margin:14px 0 0}.tarot-label{display:flex;flex-direction:column;gap:7px;color:var(--text-muted);font-size:.9rem}.tarot-label textarea{min-height:100px;resize:vertical;background:var(--bg-secondary);border:1px solid var(--border-glass);border-radius:8px;color:var(--text-main);padding:10px;font:inherit;box-sizing:border-box}.tarot-label textarea:focus{outline:2px solid var(--tarot-gold);outline-offset:1px}.tarot-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.tarot-actions .btn{flex:1;min-width:150px}.tarot-result{white-space:pre-line;color:var(--text-main);line-height:1.7;margin:0}.tarot-status{min-height:1.4em;color:var(--text-muted);font-size:.88rem;margin-top:12px}.tarot-note{color:var(--text-dim);font-size:.78rem;line-height:1.5;margin:18px 0 0}@media(max-width:700px){.tarot-layout{grid-template-columns:1fr}.tarot-card{min-height:280px}}
+</style>
+</head>
+<body>
+<nav class="tarot-nav">
+  <a href="/games" class="tarot-brand">🔮 Sakura Tarot</a>
+  <div style="display:flex;gap:8px"><a href="/games" class="btn btn-secondary btn-sm">Game Center</a><a href="/" class="btn btn-secondary btn-sm">Trang chủ</a></div>
+</nav>
+<main class="tarot-wrap">
+  <header class="tarot-hero"><h1>Trải bài Tarot</h1><p>Rút một lá bài để soi chiếu năng lượng hiện tại. AI Sakura sẽ giúp bạn đọc thông điệp theo câu hỏi riêng.</p></header>
+  <div class="tarot-layout">
+    <section class="tarot-panel">
+      <div id="tarotCard" class="tarot-card empty"><div class="tarot-symbol">🃏</div><div>Hãy rút một lá bài</div></div>
+      <button id="drawButton" class="btn btn-primary" style="width:100%;margin-top:14px" type="button">✨ Rút bài</button>
+      <p class="tarot-note">Tarot chỉ mang tính tham khảo và tự phản chiếu, không thay thế tư vấn chuyên môn.</p>
+    </section>
+    <section class="tarot-panel">
+      <label class="tarot-label">Câu hỏi hoặc bối cảnh của bạn (không bắt buộc)
+        <textarea id="tarotQuestion" maxlength="500" placeholder="Ví dụ: Mình nên tập trung điều gì trong công việc tháng này?"></textarea>
+      </label>
+      <div class="tarot-actions"><button id="interpretButton" class="btn btn-primary" type="button" disabled>🤖 AI luận giải</button><button id="clearButton" class="btn btn-secondary" type="button">Xóa</button></div>
+      <div id="tarotStatus" class="tarot-status"></div>
+      <div style="border-top:1px solid var(--border-subtle);margin-top:16px;padding-top:16px"><h3 style="margin:0 0 10px;color:var(--tarot-gold)">Lời luận giải</h3><p id="tarotResult" class="tarot-result" style="color:var(--text-muted)">Sau khi rút bài, hãy bấm AI luận giải để nhận thông điệp.</p></div>
+    </section>
+  </div>
+</main>
+<script>
+let drawnCard=null;
+const authHeaders=()=>{const token=localStorage.getItem('sakura_auth_token')||(document.cookie.match(/sakura_token=([^;]+)/)||[])[1]||'';return token?{'Authorization':'Bearer '+token,'Content-Type':'application/json'}:{'Content-Type':'application/json'}};
+const cardElement=document.getElementById('tarotCard'),drawButton=document.getElementById('drawButton'),interpretButton=document.getElementById('interpretButton'),statusElement=document.getElementById('tarotStatus'),resultElement=document.getElementById('tarotResult');
+function showStatus(message){statusElement.textContent=message}
+function renderCard(card){cardElement.classList.remove('empty');cardElement.innerHTML=`<div class="tarot-symbol">🔮</div><h2>${card.name}</h2><div class="tarot-orientation">${card.orientation}</div><p class="tarot-meaning">${card.meaning}</p>`}
+drawButton.addEventListener('click',async()=>{drawButton.disabled=true;interpretButton.disabled=true;showStatus('Đang xáo bài...');resultElement.textContent='Sau khi rút bài, hãy bấm AI luận giải để nhận thông điệp.';try{const response=await fetch('/api/tarot/draw',{method:'POST',headers:authHeaders()});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Không thể rút bài');drawnCard=data.card;renderCard(drawnCard);interpretButton.disabled=false;showStatus('Bạn đã rút được một lá bài.');}catch(error){showStatus(error.message||'Có lỗi xảy ra.')}finally{drawButton.disabled=false}});
+interpretButton.addEventListener('click',async()=>{if(!drawnCard)return;interpretButton.disabled=true;showStatus('AI đang luận giải...');try{const response=await fetch('/api/tarot/interpret',{method:'POST',headers:authHeaders(),body:JSON.stringify({...drawnCard,question:document.getElementById('tarotQuestion').value})});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Không thể luận giải');resultElement.textContent=data.reply;showStatus(data.ai?'Đã hoàn tất luận giải bằng AI.':'AI tạm thời không khả dụng, đang hiển thị ý nghĩa gốc.')}catch(error){showStatus(error.message||'Có lỗi xảy ra.')}finally{interpretButton.disabled=false}});
+document.getElementById('clearButton').addEventListener('click',()=>{drawnCard=null;cardElement.className='tarot-card empty';cardElement.innerHTML='<div class="tarot-symbol">🃏</div><div>Hãy rút một lá bài</div>';interpretButton.disabled=true;resultElement.textContent='Sau khi rút bài, hãy bấm AI luận giải để nhận thông điệp.';showStatus('')});
+</script>
+<script src="/static/js/sakura-fx.js"></script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

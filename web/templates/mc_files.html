@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📁 Sakura MC — Quản Lý Tệp Tin</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/mc_hosting.css">
+  <link rel="icon" href="/images/avatar-bot.jpg">
+  <style>
+    .mc-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #8b949e;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--mc-card-border);
+      flex: 1;
+      overflow-x: auto;
+    }
+    .mc-breadcrumb a {
+      color: #58a6ff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .mc-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+    .mc-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .mc-modal-overlay.active {
+      display: flex;
+    }
+    .mc-modal-box {
+      background: #161b22;
+      border: 1px solid var(--mc-card-border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 900px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+    .mc-modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--mc-card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mc-modal-body {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .mc-code-textarea {
+      width: 100%;
+      height: 480px;
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: var(--mc-font-mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      border: 1px solid var(--mc-card-border);
+      border-radius: 8px;
+      padding: 16px;
+      outline: none;
+      resize: vertical;
+      tab-size: 2;
+    }
+    .mc-code-textarea:focus {
+      border-color: var(--mc-accent);
+      box-shadow: 0 0 12px rgba(255, 121, 198, 0.2);
+    }
+  </style>
+</head>
+<body class="mc-hosting-body">
+  <div class="mc-layout">
+    <!-- Sidebar -->
+    <aside class="mc-sidebar" id="mcSidebar">
+      <div class="mc-brand">
+        <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Logo" class="mc-brand-avatar" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+        <div>
+          <div class="mc-brand-title">Sakura Hosting</div>
+          <div class="mc-brand-sub">Minecraft Cloud Panel</div>
+        </div>
+      </div>
+
+      <nav class="mc-nav">
+        <div class="mc-nav-section-title">Máy Chủ</div>
+        <a href="/minecraft" class="mc-nav-link">
+          <span class="nav-icon">🌐</span> Tất Cả Máy Chủ
+        </a>
+        <a href="/minecraft/console" class="mc-nav-link" id="navConsoleLink">
+          <span class="nav-icon">🖥️</span> Bảng Console
+        </a>
+        <a href="/minecraft/file" class="mc-nav-link active" id="navFilesLink">
+          <span class="nav-icon">📁</span> Quản Lý Tệp
+        </a>
+        <a href="/minecraft/properties" class="mc-nav-link" id="navPropsLink">
+          <span class="nav-icon">⚙️</span> Cấu Hình Server
+        </a>
+        <a href="/minecraft/player" class="mc-nav-link" id="navPlayersLink">
+          <span class="nav-icon">👤</span> Người Chơi
+        </a>
+        <a href="/minecraft/manager" class="mc-nav-link" id="navManagerLink">
+          <span class="nav-icon">🛡️</span> Phân Quyền
+        </a>
+
+        <div class="mc-nav-section-title">Điều Hướng</div>
+        <a href="/dashboard" class="mc-nav-link">
+          <span class="nav-icon">📊</span> Bot Dashboard
+        </a>
+        <a href="/profile" class="mc-nav-link">
+          <span class="nav-icon">👥</span> Hồ Sơ Cộng Đồng
+        </a>
+        <a href="/" class="mc-nav-link">
+          <span class="nav-icon">🌸</span> Trang Chủ
+        </a>
+      </nav>
+
+      <div class="mc-sidebar-footer">
+        <span>📁 File Manager</span>
+        <span id="activeServerName">server</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="mc-main">
+      <header class="mc-topbar">
+        <div class="mc-topbar-left">
+          <div style="display:flex;align-items:center;gap:10px">
+            <label style="font-size:0.85rem;font-weight:700;color:var(--mc-text-muted)">Máy chủ:</label>
+            <select id="serverSelect" onchange="changeServer(this.value)" class="form-control" style="background:#161b22;color:#fff;border:1px solid var(--mc-card-border);padding:6px 12px;border-radius:8px;font-weight:700">
+              <option value="server">server</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mc-topbar-right">
+          <button class="mc-btn mc-btn-primary" onclick="openNewFileModal()">
+            <span>➕</span> Tệp Mới
+          </button>
+          <button class="mc-btn mc-btn-secondary" onclick="openNewFolderModal()">
+            <span>📁</span> Thư Mục Mới
+          </button>
+          <label class="mc-btn mc-btn-secondary" style="cursor:pointer;margin:0">
+            <span>⬆️</span> Tải Lên
+            <input type="file" id="fileUploadInput" onchange="handleFileUpload(this)" style="display:none" multiple>
+          </label>
+          <button class="mc-btn mc-btn-secondary" onclick="loadDirectory(currentPath)">
+            <span>🔄</span> Tải Lại
+          </button>
+        </div>
+      </header>
+
+      <div class="mc-container">
+        <!-- Storage Analysis Section -->
+        <div class="mc-kpi-card" style="flex-direction:column;align-items:stretch;padding:20px;margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="margin:0;font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px">
+              <span>📊</span> Phân Tích Dung Lượng Ổ Đĩa Máy Chủ
+            </h3>
+            <span id="storageTotalLabel" style="font-family:var(--mc-font-mono);font-weight:700;color:var(--mc-accent)">Tổng: 0 MB</span>
+          </div>
+
+          <div class="mc-storage-bar-multi" id="storageSegmentsBar">
+            <div class="mc-storage-seg" style="width:100%;background:#30363d"></div>
+          </div>
+
+          <div id="storageBadgesContainer" style="display:flex;flex-wrap:wrap;gap:10px;font-size:0.82rem">
+            <!-- Badges dynamically inserted -->
+          </div>
+        </div>
+
+        <!-- Toolbar & Breadcrumb -->
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+          <div class="mc-breadcrumb" id="breadcrumbBar">
+            <a onclick="navigateTo('')">root</a>
+          </div>
+          <div style="width:260px">
+            <input type="text" id="fileSearchInput" oninput="filterFiles(this.value)" class="mc-terminal-input" placeholder="🔍 Tìm kiếm tệp trong thư mục..." style="padding:8px 12px;font-size:0.84rem">
+          </div>
+        </div>
+
+        <!-- Files Table -->
+        <div class="mc-kpi-card" style="padding:0;overflow:hidden;flex-direction:column;align-items:stretch">
+          <table class="mc-file-table">
+            <thead>
+              <tr>
+                <th style="width:50%">Tên Tệp / Thư Mục</th>
+                <th style="width:15%">Kích Thước</th>
+                <th style="width:20%">Ngày Sửa Đổi</th>
+                <th style="width:15%;text-align:right">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="filesTableBody">
+              <tr>
+                <td colspan="4" style="text-align:center;padding:40px;color:var(--mc-text-muted)">
+                  Đang tải danh sách tệp tin...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Editor -->
+  <div class="mc-modal-overlay" id="editorModal">
+    <div class="mc-modal-box">
+      <div class="mc-modal-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.3rem">📝</span>
+          <div>
+            <div id="editorFileName" style="font-weight:800;font-size:1rem;color:#fff">config.yml</div>
+            <div id="editorFilePath" style="font-size:0.75rem;color:var(--mc-text-muted)">server/plugins/config.yml</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="mc-btn mc-btn-primary" onclick="saveEditorContent()">
+            <span>💾</span> Lưu Thay Đổi (Ctrl+S)
+          </button>
+          <button class="mc-btn mc-btn-secondary" onclick="closeEditorModal()">
+            <span>✖</span> Đóng
+          </button>
+        </div>
+      </div>
+      <div class="mc-modal-body" style="padding:0">
+        <textarea id="editorContent" class="mc-code-textarea" spellcheck="false"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="mc-toast-container" id="toastContainer"></div>
+
+  <script>
+    let currentServerId = new URLSearchParams(window.location.search).get('server') || 'server';
+    let currentPath = '';
+    let rawItems = [];
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'mc-toast';
+      let icon = '🌸';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      if (type === 'warning') icon = '⚠️';
+      t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 4000);
+    }
+
+    function getToken() {
+      return localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/) || [])[1] || '';
+    }
+
+    function updateNavLinks() {
+      document.getElementById('navConsoleLink').href = `/minecraft/console?server=${encodeURIComponent(currentServerId)}`;
+      document.getElementById('navPropsLink').href = `/minecraft/properties?server=${encodeURIComponent(currentServerId)}`;
+      document.getElementById('navFilesLink').href = `/minecraft/file?server=${encodeURIComponent(currentServerId)}`;
+      if (document.getElementById('navPlayersLink')) {
+        document.getElementById('navPlayersLink').href = `/minecraft/player?server=${encodeURIComponent(currentServerId)}`;
+      }
+      document.getElementById('activeServerName').innerText = currentServerId;
+    }
+
+    async function loadServerList() {
+      try {
+        const res = await fetch('/api/mc/hosting/servers', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        const select = document.getElementById('serverSelect');
+        select.innerHTML = '';
+        if (data.ok && data.servers && data.servers.length > 0) {
+          data.servers.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.innerText = `${s.name} (${s.id})`;
+            if (s.id === currentServerId) opt.selected = true;
+            select.appendChild(opt);
+          });
+        }
+      } catch (e) {}
+    }
+
+    function changeServer(newId) {
+      if (!newId) return;
+      currentServerId = newId;
+      currentPath = '';
+      window.history.replaceState({}, '', `/minecraft/file?server=${encodeURIComponent(newId)}`);
+      updateNavLinks();
+      loadDirectory('');
+    }
+
+    function updateBreadcrumb(path) {
+      const bar = document.getElementById('breadcrumbBar');
+      let html = `<a onclick="navigateTo('')">root</a>`;
+      if (path) {
+        const parts = path.split('/');
+        let accum = '';
+        parts.forEach((p, idx) => {
+          accum += (idx === 0 ? '' : '/') + p;
+          const safeAccum = accum;
+          html += ` <span>/</span> <a onclick="navigateTo('${safeAccum}')">${p}</a>`;
+        });
+      }
+      bar.innerHTML = html;
+    }
+
+    function navigateTo(path) {
+      currentPath = path;
+      loadDirectory(path);
+    }
+
+    function getFileIcon(ext, isDir) {
+      if (isDir) return '📁';
+      switch (ext) {
+        case 'yml':
+        case 'yaml': return '⚙️';
+        case 'json': return '📜';
+        case 'properties': return '🔧';
+        case 'jar': return '☕';
+        case 'txt':
+        case 'md': return '📄';
+        case 'log': return '📋';
+        case 'bat':
+        case 'sh': return '⚡';
+        default: return '📄';
+      }
+    }
+
+    async function loadDirectory(path) {
+      currentPath = path || '';
+      updateBreadcrumb(currentPath);
+      const tbody = document.getElementById('filesTableBody');
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--mc-text-muted)">Đang tải tệp tin...</td></tr>`;
+
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/files?path=${encodeURIComponent(currentPath)}`, {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;color:#ff5555">${data.error || 'Lỗi tải danh mục'}</td></tr>`;
+          return;
+        }
+
+        rawItems = data.items || [];
+        renderFiles(rawItems);
+        renderDiskAnalysis(data.disk_analysis || {});
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;color:#ff5555">Lỗi kết nối: ${e.message}</td></tr>`;
+      }
+    }
+
+    function renderFiles(items) {
+      const tbody = document.getElementById('filesTableBody');
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--mc-text-muted)">Thư mục này đang trống.</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      if (currentPath) {
+        const parentPath = currentPath.includes('/') ? currentPath.substring(0, currentPath.lastIndexOf('/')) : '';
+        html += `
+          <tr>
+            <td colspan="4">
+              <a class="mc-file-link" onclick="navigateTo('${parentPath}')" style="color:#8b949e">
+                <span>📁</span> .. (Thư mục cha)
+              </a>
+            </td>
+          </tr>
+        `;
+      }
+
+      items.forEach(item => {
+        const icon = getFileIcon(item.extension, item.is_dir);
+        const dateStr = new Date(item.modified * 1000).toLocaleString('vi-VN');
+        const canEdit = !item.is_dir && ['yml', 'yaml', 'json', 'properties', 'txt', 'log', 'cfg', 'conf', 'toml'].includes(item.extension);
+        const rowAction = item.is_dir ? `navigateTo('${item.rel_path}')` : (canEdit ? `openEditor('${item.rel_path}', '${item.name}')` : '');
+
+        html += `
+          <tr style="cursor:pointer;transition:background 0.15s ease" 
+              onclick="if(!event.target.closest('button') && !event.target.closest('input')) { ${rowAction} }"
+              title="${item.is_dir ? 'Nhấp vào dòng để mở thư mục' : (canEdit ? 'Nhấp vào dòng để chỉnh sửa tệp' : '')}">
+            <td>
+              ${item.is_dir ? `
+                <a class="mc-file-link" onclick="event.stopPropagation(); navigateTo('${item.rel_path}')">
+                  <span>${icon}</span> <strong>${item.name}</strong>
+                </a>
+              ` : `
+                <a class="mc-file-link" ${canEdit ? `onclick=\"event.stopPropagation(); openEditor('${item.rel_path}', '${item.name}')\"` : ''}>
+                  <span>${icon}</span> ${item.name}
+                </a>
+              `}
+            </td>
+            <td style="font-family:var(--mc-font-mono);color:var(--mc-text-muted);font-size:0.82rem">${item.size_formatted}</td>
+            <td style="color:var(--mc-text-muted);font-size:0.82rem">${dateStr}</td>
+            <td style="text-align:right">
+              <div style="display:inline-flex;gap:4px">
+                ${canEdit ? `
+                  <button class="mc-btn mc-btn-secondary" style="padding:4px 8px;font-size:0.75rem" onclick="event.stopPropagation(); openEditor('${item.rel_path}', '${item.name}')" title="Chỉnh sửa">✏️ Sửa</button>
+                ` : ''}
+                <button class="mc-btn mc-btn-secondary" style="padding:4px 8px;font-size:0.75rem" onclick="event.stopPropagation(); renameItem('${item.rel_path}', '${item.name}')" title="Đổi tên">✏️</button>
+                <button class="mc-btn mc-btn-danger" style="padding:4px 8px;font-size:0.75rem" onclick="event.stopPropagation(); deleteItem('${item.rel_path}', '${item.name}')" title="Xóa">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function filterFiles(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        renderFiles(rawItems);
+        return;
+      }
+      const filtered = rawItems.filter(item => item.name.toLowerCase().includes(q));
+      renderFiles(filtered);
+    }
+
+    function renderDiskAnalysis(disk) {
+      const total = disk._total ? disk._total.size : 0;
+      document.getElementById('storageTotalLabel').innerText = `Tổng: ${disk._total ? disk._total.formatted : '0 MB'}`;
+
+      const bar = document.getElementById('storageSegmentsBar');
+      const badges = document.getElementById('storageBadgesContainer');
+
+      const colors = ['#ff79c6', '#50fa7b', '#8be9fd', '#bd93f9', '#ffb86c', '#ff5555', '#f1fa8c'];
+      let barHtml = '';
+      let badgeHtml = '';
+      let cIdx = 0;
+
+      for (const [k, v] of Object.entries(disk)) {
+        if (k === '_total') continue;
+        const color = colors[cIdx % colors.length];
+        cIdx++;
+        const pct = total > 0 ? (v.size / total * 100).toFixed(1) : 0;
+        if (pct > 1) {
+          barHtml += `<div class="mc-storage-seg" style="width:${pct}%;background:${color}" title="${k}: ${v.formatted} (${pct}%)"></div>`;
+        }
+        badgeHtml += `
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:6px;border:1px solid var(--mc-card-border)">
+            <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block"></span>
+            <span><strong>${k}:</strong> ${v.formatted} (${pct}%)</span>
+          </div>
+        `;
+      }
+
+      bar.innerHTML = barHtml || '<div class="mc-storage-seg" style="width:100%;background:#30363d"></div>';
+      badges.innerHTML = badgeHtml;
+    }
+
+    let activeEditPath = '';
+
+    async function openEditor(relPath, fileName) {
+      activeEditPath = relPath;
+      document.getElementById('editorFileName').innerText = fileName;
+      document.getElementById('editorFilePath').innerText = `server/${relPath}`;
+      const textarea = document.getElementById('editorContent');
+      textarea.value = 'Đang tải nội dung tệp...';
+      document.getElementById('editorModal').classList.add('active');
+
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/files/read?path=${encodeURIComponent(relPath)}`, {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (data.ok) {
+          textarea.value = data.file.content || '';
+        } else {
+          textarea.value = `// Lỗi mở tệp: ${data.error}`;
+        }
+      } catch (e) {
+        textarea.value = `// Lỗi kết nối: ${e.message}`;
+      }
+    }
+
+    function closeEditorModal() {
+      document.getElementById('editorModal').classList.remove('active');
+    }
+
+    async function saveEditorContent() {
+      if (!activeEditPath) return;
+      const content = document.getElementById('editorContent').value;
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/files/save`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ path: activeEditPath, content: content })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast('Đã lưu tệp tin thành công!', 'success');
+        } else {
+          showToast(data.error || 'Lỗi lưu tệp', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        const modal = document.getElementById('editorModal');
+        if (modal.classList.contains('active')) {
+          e.preventDefault();
+          saveEditorContent();
+        }
+      }
+    });
+
+    async function openNewFileModal() {
+      const name = prompt('Nhập tên tệp mới (ví dụ: test.txt, custom.yml):');
+      if (!name) return;
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/files/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ path: currentPath, name: name, is_folder: false })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message, 'success');
+          loadDirectory(currentPath);
+        } else {
+          showToast(data.error, 'error');
+        }
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    async function openNewFolderModal() {
+      const name = prompt('Nhập tên thư mục mới:');
+      if (!name) return;
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/files/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ path: currentPath, name: name, is_folder: true })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message, 'success');
+          loadDirectory(currentPath);
+        } else {
+          showToast(data.error, 'error');
+        }
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    async function deleteItem(relPath, name) {
+      if (!confirm(`Bạn có chắc chắn muốn xóa '${name}'? Thao tác này không thể hoàn tác!`)) return;
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/files/delete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ path: relPath })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message, 'success');
+          loadDirectory(currentPath);
+        } else {
+          showToast(data.error, 'error');
+        }
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    async function renameItem(relPath, oldName) {
+      const newName = prompt(`Đổi tên '${oldName}' thành:`, oldName);
+      if (!newName || newName === oldName) return;
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/files/rename`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ rel_path: relPath, new_name: newName })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message, 'success');
+          loadDirectory(currentPath);
+        } else {
+          showToast(data.error, 'error');
+        }
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+
+    async function handleFileUpload(input) {
+      const files = input.files;
+      if (!files || files.length === 0) return;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('path', currentPath);
+
+        showToast(`Đang tải lên: ${file.name}...`, 'info');
+        try {
+          const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/files/upload`, {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + getToken()
+            },
+            body: formData
+          });
+          const data = await res.json();
+          if (data.ok) {
+            showToast(`Đã tải lên ${file.name}!`, 'success');
+          } else {
+            showToast(`Lỗi tải lên ${file.name}: ${data.error}`, 'error');
+          }
+        } catch (e) {
+          showToast(`Lỗi: ${e.message}`, 'error');
+        }
+      }
+      input.value = '';
+      loadDirectory(currentPath);
+    }
+
+    // Init
+    updateNavLinks();
+    loadServerList();
+    loadDirectory('');
+  </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>
+

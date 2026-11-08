@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🖥️ Sakura MC — Bảng Điều Khiển Console</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/mc_hosting.css">
+  <link rel="icon" href="/images/avatar-bot.jpg">
+</head>
+<body class="mc-hosting-body">
+  <div class="mc-layout">
+    <!-- Sidebar -->
+    <aside class="mc-sidebar" id="mcSidebar">
+      <div class="mc-brand">
+        <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Logo" class="mc-brand-avatar" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+        <div>
+          <div class="mc-brand-title">Sakura Hosting</div>
+          <div class="mc-brand-sub">Minecraft Cloud Panel</div>
+        </div>
+      </div>
+
+      <nav class="mc-nav">
+        <div class="mc-nav-section-title">Máy Chủ</div>
+        <a href="/minecraft" class="mc-nav-link">
+          <span class="nav-icon">🌐</span> Tất Cả Máy Chủ
+        </a>
+        <a href="/minecraft/console" class="mc-nav-link active">
+          <span class="nav-icon">🖥️</span> Bảng Console
+        </a>
+        <a href="/minecraft/file" class="mc-nav-link" id="navFilesLink">
+          <span class="nav-icon">📁</span> Quản Lý Tệp
+        </a>
+        <a href="/minecraft/properties" class="mc-nav-link" id="navPropsLink">
+          <span class="nav-icon">⚙️</span> Cấu Hình Server
+        </a>
+
+        <div class="mc-nav-section-title">Điều Hướng</div>
+        <a href="/dashboard" class="mc-nav-link">
+          <span class="nav-icon">📊</span> Bot Dashboard
+        </a>
+        <a href="/profile" class="mc-nav-link">
+          <span class="nav-icon">👥</span> Hồ Sơ Cộng Đồng
+        </a>
+        <a href="/" class="mc-nav-link">
+          <span class="nav-icon">🌸</span> Trang Chủ
+        </a>
+      </nav>
+
+      <div class="mc-sidebar-footer">
+        <span>👑 Admin Console</span>
+        <span id="activeServerName">server</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="mc-main">
+      <header class="mc-topbar">
+        <div class="mc-topbar-left">
+          <div style="display:flex;align-items:center;gap:10px">
+            <label style="font-size:0.85rem;font-weight:700;color:var(--mc-text-muted)">Máy chủ:</label>
+            <select id="serverSelect" onchange="changeServer(this.value)" class="form-control" style="background:#161b22;color:#fff;border:1px solid var(--mc-card-border);padding:6px 12px;border-radius:8px;font-weight:700">
+              <option value="server">Đang tải danh sách...</option>
+            </select>
+          </div>
+          <div class="mc-server-badge">
+            <span class="status-dot offline" id="topStatusDot"></span>
+            <span id="topStatusText">Đang kiểm tra...</span>
+          </div>
+        </div>
+
+        <div class="mc-topbar-right">
+          <!-- Power buttons -->
+          <div style="display:flex;gap:8px">
+            <button class="mc-btn mc-btn-success" onclick="controlMC('start')" title="Khởi động server">
+              <span>▶</span> Bật Server
+            </button>
+            <button class="mc-btn mc-btn-warning" onclick="controlMC('restart')" title="Khởi động lại server qua RCON">
+              <span>🔄</span> Restart
+            </button>
+            <button class="mc-btn mc-btn-danger" onclick="controlMC('stop')" title="Dừng server an toàn">
+              <span>⏹</span> Tắt Server
+            </button>
+            <button class="mc-btn mc-btn-secondary" onclick="if(confirm('Chắc chắn muốn buộc dừng tiến trình Minecraft?')) controlMC('kill')" title="Buộc dừng process ngay lập tức">
+              <span>💀</span> Kill
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="mc-container">
+        <!-- Resource KPI Gauges -->
+        <div class="mc-kpi-grid">
+          <div class="mc-kpi-card pink">
+            <div class="mc-kpi-icon">⚡</div>
+            <div style="flex:1">
+              <div class="mc-kpi-val" id="metricCpu">0%</div>
+              <div class="mc-kpi-label">CPU Usage</div>
+              <div class="mc-progress-bar-bg">
+                <div class="mc-progress-bar-fill" id="barCpu" style="width:0%;background:var(--mc-accent)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mc-kpi-card blue">
+            <div class="mc-kpi-icon">🧠</div>
+            <div style="flex:1">
+              <div class="mc-kpi-val" id="metricRam">0 MB</div>
+              <div class="mc-kpi-label" id="labelRam">RAM: 0%</div>
+              <div class="mc-progress-bar-bg">
+                <div class="mc-progress-bar-fill" id="barRam" style="width:0%;background:var(--mc-blue)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mc-kpi-card purple">
+            <div class="mc-kpi-icon">💾</div>
+            <div style="flex:1">
+              <div class="mc-kpi-val" id="metricDisk">0 GB</div>
+              <div class="mc-kpi-label" id="labelDisk">Ổ Đĩa: 0%</div>
+              <div class="mc-progress-bar-bg">
+                <div class="mc-progress-bar-fill" id="barDisk" style="width:0%;background:var(--mc-purple)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mc-kpi-card green">
+            <div class="mc-kpi-icon">📶</div>
+            <div style="flex:1">
+              <div class="mc-kpi-val" id="metricNet">0 KB/s</div>
+              <div class="mc-kpi-label">Tốc Độ Mạng (I/O)</div>
+              <div style="font-size:0.75rem;color:var(--mc-text-muted);margin-top:4px" id="metricNetSub">▲ 0 KB/s | ▼ 0 KB/s</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px">
+          <!-- Live Terminal Console -->
+          <div class="mc-terminal-container">
+            <div class="mc-terminal-header">
+              <div class="mc-terminal-dots">
+                <div class="mc-terminal-dot red"></div>
+                <div class="mc-terminal-dot yellow"></div>
+                <div class="mc-terminal-dot green"></div>
+                <span class="mc-terminal-title" style="margin-left:8px">sakura@mc-server ~ console</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span id="logRefreshStatus" style="font-size:0.75rem;color:#8b949e">⬤ Live Stream</span>
+                <button class="mc-btn mc-btn-secondary" style="padding:4px 10px;font-size:0.78rem" onclick="clearConsole()">🗑 Xóa màn hình</button>
+                <button class="mc-btn mc-btn-secondary" style="padding:4px 10px;font-size:0.78rem" onclick="scrollBottom()">⬇ Cuộn cuối</button>
+              </div>
+            </div>
+
+            <div class="mc-terminal-body" id="consoleOutput">
+              <div class="mc-log-entry system">[Sakura MC] Đang khởi tạo kết nối Terminal Console...</div>
+            </div>
+
+            <div class="mc-terminal-input-bar">
+              <span style="color:#2ecc71;font-family:var(--mc-font-mono);font-weight:700">$&gt;</span>
+              <input type="text" id="cmdInput" class="mc-terminal-input" placeholder="Nhập lệnh console... (ví dụ: say Hello server, list, time set day)" onkeydown="if(event.key==='Enter') sendCommand()">
+              <button class="mc-btn mc-btn-primary" onclick="sendCommand()">Gửi ⏎</button>
+            </div>
+          </div>
+
+          <!-- Server Info & Discord Bridge Settings -->
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <!-- Server Info Card -->
+            <div class="mc-kpi-card" style="flex-direction:column;align-items:stretch;gap:12px;padding:20px">
+              <h3 style="margin:0;font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px">
+                <span>⛏️</span> Thông Tin Máy Chủ
+              </h3>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:0.85rem">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--mc-card-border);padding-bottom:6px">
+                  <span style="color:var(--mc-text-muted)">Địa chỉ IP & Cổng:</span>
+                  <code style="color:#58a6ff;font-weight:700" id="infoAddress">127.0.0.1:25565</code>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--mc-card-border);padding-bottom:6px">
+                  <span style="color:var(--mc-text-muted)">Phiên bản / Core:</span>
+                  <span id="infoCore" style="font-weight:700">1.20.1 (Paper)</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--mc-card-border);padding-bottom:6px">
+                  <span style="color:var(--mc-text-muted)">Người chơi trực tuyến:</span>
+                  <span id="infoPlayers" style="font-weight:700">0 / 20</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--mc-card-border);padding-bottom:6px">
+                  <span style="color:var(--mc-text-muted)">Thời gian chạy (Uptime):</span>
+                  <span id="infoUptime" style="font-weight:700">--</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                  <span style="color:var(--mc-text-muted)">PID Tiến trình:</span>
+                  <code id="infoPid" style="font-weight:700">--</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Discord Log & Chat Bridge Settings -->
+            <div class="mc-kpi-card" style="flex-direction:column;align-items:stretch;gap:14px;padding:20px">
+              <h3 style="margin:0;font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px">
+                <span>📢</span> Cấu Hình Discord Log & Chat
+              </h3>
+
+              <div>
+                <label style="font-size:0.8rem;font-weight:700;color:var(--mc-text-muted);display:block;margin-bottom:6px">
+                  Kênh Ghi Log Server (Discord):
+                </label>
+                <select id="logChannelSelect" class="form-control" style="background:#161b22;color:#fff;border:1px solid var(--mc-card-border);padding:8px 12px;border-radius:8px;width:100%">
+                  <option value="">-- Chưa chọn kênh ghi log --</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="font-size:0.8rem;font-weight:700;color:var(--mc-text-muted);display:block;margin-bottom:6px">
+                  Kênh Chat 2 Chiều (Discord &lt;-&gt; MC):
+                </label>
+                <select id="chatChannelSelect" class="form-control" style="background:#161b22;color:#fff;border:1px solid var(--mc-card-border);padding:8px 12px;border-radius:8px;width:100%">
+                  <option value="">-- Chưa chọn kênh chat đồng bộ --</option>
+                </select>
+              </div>
+
+              <button class="mc-btn mc-btn-primary" onclick="saveDiscordChannels()" style="justify-content:center">
+                <span>💾</span> Lưu Kênh Discord
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bidirectional Chat Bridge Box -->
+        <div class="mc-kpi-card" style="flex-direction:column;align-items:stretch;padding:22px;gap:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="margin:0;font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px">
+              <span>💬</span> Cầu Nối Trò Chuyện Trực Tuyến (Discord &lt;—&gt; Minecraft)
+            </h3>
+            <span style="font-size:0.8rem;color:var(--mc-text-muted)">Tin nhắn được đồng bộ tức thì giữa game và Discord</span>
+          </div>
+
+          <div id="chatBridgeFeed" style="background:#0d1117;border:1px solid var(--mc-card-border);border-radius:10px;height:180px;overflow-y:auto;padding:14px;font-family:var(--mc-font-mono);font-size:0.85rem;display:flex;flex-direction:column;gap:6px">
+            <div style="color:#6e7681">[System] Kênh trò chuyện 2 chiều đang hoạt động. Nhập nội dung bên dưới để gửi tin nhắn vào game.</div>
+          </div>
+
+          <div style="display:flex;gap:10px">
+            <input type="text" id="chatMsgInput" class="mc-terminal-input" placeholder="Gửi tin nhắn từ Web vào server Minecraft..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+            <button class="mc-btn mc-btn-primary" onclick="sendChatMessage()">
+              <span>💬</span> Gửi Vào Game
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="mc-toast-container" id="toastContainer"></div>
+
+  <script>
+    let currentServerId = new URLSearchParams(window.location.search).get('server') || 'server';
+    let autoScroll = true;
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'mc-toast';
+      let icon = '🌸';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      if (type === 'warning') icon = '⚠️';
+      t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 4000);
+    }
+
+    function getToken() {
+      return localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/) || [])[1] || '';
+    }
+
+    function updateNavLinks() {
+      document.getElementById('navFilesLink').href = `/minecraft/file?server=${encodeURIComponent(currentServerId)}`;
+      document.getElementById('navPropsLink').href = `/minecraft/properties?server=${encodeURIComponent(currentServerId)}`;
+      document.getElementById('activeServerName').innerText = currentServerId;
+    }
+
+    async function loadServerList() {
+      try {
+        const res = await fetch('/api/mc/hosting/servers', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        const select = document.getElementById('serverSelect');
+        select.innerHTML = '';
+        if (data.ok && data.servers && data.servers.length > 0) {
+          data.servers.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.innerText = `${s.name} (${s.id})`;
+            if (s.id === currentServerId) opt.selected = true;
+            select.appendChild(opt);
+          });
+        } else {
+          select.innerHTML = '<option value="">(Không có server)</option>';
+        }
+      } catch (e) {}
+    }
+
+    async function loadDiscordChannels() {
+      try {
+        const res = await fetch('/api/mc/hosting/discord_channels', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (data.ok && data.channels) {
+          const logSel = document.getElementById('logChannelSelect');
+          const chatSel = document.getElementById('chatChannelSelect');
+          data.channels.forEach(ch => {
+            const opt1 = document.createElement('option');
+            opt1.value = ch.id;
+            opt1.innerText = `#${ch.name} (${ch.guild})`;
+            logSel.appendChild(opt1);
+
+            const opt2 = document.createElement('option');
+            opt2.value = ch.id;
+            opt2.innerText = `#${ch.name} (${ch.guild})`;
+            chatSel.appendChild(opt2);
+          });
+        }
+      } catch (e) {}
+    }
+
+    function changeServer(newId) {
+      if (!newId) return;
+      currentServerId = newId;
+      window.history.replaceState({}, '', `/minecraft/console?server=${encodeURIComponent(newId)}`);
+      updateNavLinks();
+      refreshConsole();
+      refreshMetrics();
+    }
+
+    async function refreshMetrics() {
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/detail`, {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (!data.ok) return;
+
+        const s = data.server || {};
+        const m = data.metrics || {};
+
+        const isOnline = m.is_online || s.is_online;
+        const dot = document.getElementById('topStatusDot');
+        const text = document.getElementById('topStatusText');
+        if (isOnline) {
+          dot.className = 'status-dot online';
+          text.innerText = '🟢 Đang Chạy';
+        } else {
+          dot.className = 'status-dot offline';
+          text.innerText = '🔴 Đã Dừng';
+        }
+
+        const cpu = isOnline ? (m.srv_cpu || m.sys_cpu || 0) : 0;
+        document.getElementById('metricCpu').innerText = `${cpu}%`;
+        document.getElementById('barCpu').style.width = `${Math.min(cpu, 100)}%`;
+
+        const ramMb = isOnline ? (m.srv_ram_mb || 0) : 0;
+        document.getElementById('metricRam').innerText = `${ramMb} MB`;
+        document.getElementById('labelRam').innerText = `Hệ Thống: ${m.sys_ram_percent || 0}%`;
+        document.getElementById('barRam').style.width = `${Math.min(m.sys_ram_percent || 0, 100)}%`;
+
+        document.getElementById('metricDisk').innerText = `${m.disk_used_gb || 0} GB`;
+        document.getElementById('labelDisk').innerText = `Đã Dùng: ${m.disk_percent || 0}%`;
+        document.getElementById('barDisk').style.width = `${Math.min(m.disk_percent || 0, 100)}%`;
+
+        const upSpeed = m.net_up_speed_kb || 0;
+        const downSpeed = m.net_down_speed_kb || 0;
+        document.getElementById('metricNet').innerText = `${(upSpeed + downSpeed).toFixed(1)} KB/s`;
+        document.getElementById('metricNetSub').innerText = `▲ ${upSpeed} KB/s | ▼ ${downSpeed} KB/s`;
+
+        document.getElementById('infoAddress').innerText = `${s.ip || '127.0.0.1'}:${s.port || 25565}`;
+        document.getElementById('infoCore').innerText = s.version || '1.20.1';
+        document.getElementById('infoPlayers').innerText = `${s.players_online || 0} / ${s.max_players || 20}`;
+        document.getElementById('infoPid').innerText = s.pid ? `#${s.pid}` : 'None';
+
+        if (m.srv_uptime_sec) {
+          const h = Math.floor(m.srv_uptime_sec / 3600);
+          const min = Math.floor((m.srv_uptime_sec % 3600) / 60);
+          document.getElementById('infoUptime').innerText = `${h}h ${min}m`;
+        } else {
+          document.getElementById('infoUptime').innerText = isOnline ? 'Vừa bật' : 'Offline';
+        }
+
+        // Channels prefill
+        if (data.channels) {
+          if (data.channels.log_channel_id) {
+            document.getElementById('logChannelSelect').value = data.channels.log_channel_id;
+          }
+          if (data.channels.chat_channel_id) {
+            document.getElementById('chatChannelSelect').value = data.channels.chat_channel_id;
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function refreshConsole() {
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/console`, {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (!data.ok) return;
+
+        const out = document.getElementById('consoleOutput');
+        const lines = data.logs || [];
+        if (lines.length > 0) {
+          let html = '';
+          lines.forEach(l => {
+            let cls = '';
+            if (l.includes('WARN')) cls = 'warn';
+            else if (l.includes('ERROR') || l.includes('Exception')) cls = 'error';
+            else if (l.includes('INFO')) cls = 'info';
+            else if (l.includes('SUCCESS') || l.includes('Done')) cls = 'success';
+            html += `<div class="mc-log-entry ${cls}">${escapeHtml(l)}</div>`;
+          });
+          out.innerHTML = html;
+          if (autoScroll) scrollBottom();
+        }
+      } catch (e) {}
+    }
+
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function clearConsole() {
+      document.getElementById('consoleOutput').innerHTML = '<div class="mc-log-entry system">[Sakura MC] Màn hình console đã được xóa.</div>';
+    }
+
+    function scrollBottom() {
+      const out = document.getElementById('consoleOutput');
+      out.scrollTop = out.scrollHeight;
+    }
+
+    async function sendCommand() {
+      const inp = document.getElementById('cmdInput');
+      const cmd = inp.value.trim();
+      if (!cmd) return;
+
+      inp.value = '';
+      const out = document.getElementById('consoleOutput');
+      out.innerHTML += `<div class="mc-log-entry" style="color:#ff79c6">&gt; ${escapeHtml(cmd)}</div>`;
+      scrollBottom();
+
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/console/command`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ command: cmd })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          if (data.response) {
+            out.innerHTML += `<div class="mc-log-entry success">${escapeHtml(data.response)}</div>`;
+          }
+          scrollBottom();
+        } else {
+          showToast(data.error || 'Lỗi gửi lệnh', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi gửi lệnh: ' + e.message, 'error');
+      }
+    }
+
+    async function controlMC(action) {
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/power`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ action })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message || 'Thao tác thành công', 'success');
+          setTimeout(() => {
+            refreshMetrics();
+            refreshConsole();
+          }, 1500);
+        } else {
+          showToast(data.error || 'Thao tác thất bại', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    async function saveDiscordChannels() {
+      const logCh = document.getElementById('logChannelSelect').value;
+      const chatCh = document.getElementById('chatChannelSelect').value;
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/channels`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ log_channel_id: logCh, chat_channel_id: chatCh })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast('Đã lưu cấu hình kênh Discord thành công!', 'success');
+        } else {
+          showToast(data.error || 'Lỗi lưu kênh', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    async function sendChatMessage() {
+      const inp = document.getElementById('chatMsgInput');
+      const msg = inp.value.trim();
+      if (!msg) return;
+      inp.value = '';
+
+      const feed = document.getElementById('chatBridgeFeed');
+      feed.innerHTML += `<div style="color:#50fa7b"><strong>[Web Admin]:</strong> ${escapeHtml(msg)}</div>`;
+      feed.scrollTop = feed.scrollHeight;
+
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/chat/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast('Đã phát tin nhắn vào Minecraft server!', 'success');
+        } else {
+          showToast(data.error || 'Lỗi gửi tin nhắn', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    // Init
+    updateNavLinks();
+    loadServerList();
+    loadDiscordChannels();
+    refreshMetrics();
+    refreshConsole();
+
+    setInterval(refreshMetrics, 3000);
+    setInterval(refreshConsole, 2500);
+  </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>
+

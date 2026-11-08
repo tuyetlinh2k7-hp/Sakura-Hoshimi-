@@ -1,0 +1,39 @@
+# --- Discord & Âm nhạc ---
+# wavelink is built for discord.py; do not install py-cord alongside it.
+discord.py>=2.7.1
+wavelink
+PyNaCl
+davey>=0.2.0
+discord.py[voice]
+python-dotenv
+aiosqlite
+pypresence
+
+# --- Tương tác API & Web ---
+aiohttp
+websockets
+pyppeteer
+
+# --- AI & Dịch thuật ---
+groq
+gTTS
+deep-translator
+google-genai>=2.33.0
+openai
+
+# --- Tiện ích & Hệ thống ---
+psutil
+Pillow
+imageio-ffmpeg
+
+# --- Game & Minecraft ---
+genshin
+rsa
+mcstatus
+mctools
+
+# --- Tải video ---
+yt-dlp
+
+# --- Emoji ---
+emoji

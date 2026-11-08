@@ -1,0 +1,2396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎨 Scribble It! — Trò chơi Vẽ &amp; Đoán từ như Skribbl.io</title>
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  user-select: none;
+}
+
+:root {
+  --bg-main: #0c182a;
+  --bg-card: #152438;
+  --bg-card-hover: #1c2e47;
+  --bg-input: #101c2e;
+  --border-card: #223753;
+  --text-main: #ffffff;
+  --text-muted: #94a7c1;
+  --accent-green: #00cc00;
+  --accent-yellow: #ffe400;
+  --accent-red: #ef130b;
+  --accent-blue: #00b2ff;
+  --accent-pink: #ff79c6;
+  --canvas-bg: #ffffff;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* TOP LOGO BANNER */
+.skribbl-logo {
+  font-size: 2.8rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.skribbl-logo .c1 { color: #ef130b; }
+.skribbl-logo .c2 { color: #ff7100; }
+.skribbl-logo .c3 { color: #ffe400; }
+.skribbl-logo .c4 { color: #00cc00; }
+.skribbl-logo .c5 { color: #00b2ff; }
+.skribbl-logo .c6 { color: #231fd3; }
+.skribbl-logo .c7 { color: #a300ba; }
+.skribbl-logo .dot { color: #fff; }
+.skribbl-logo .io { color: #ffb86c; font-size: 2.4rem; }
+
+/* ================= 1. LOBBY INITIAL SCREEN ================= */
+.lobby-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.lobby-screen.hidden {
+  display: none !important;
+}
+
+.lobby-box {
+  background: var(--bg-card);
+  border: 3px solid var(--border-card);
+  border-radius: 24px;
+  padding: 30px;
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+  animation: popIn .3s ease;
+}
+
+/* AVATAR BUILDER */
+.avatar-customizer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.avatar-preview-box {
+  width: 130px;
+  height: 130px;
+  background: var(--bg-input);
+  border: 3px solid var(--border-card);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+.avatar-preview-box svg {
+  width: 100px;
+  height: 100px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.avatar-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+.avatar-ctrl-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 4px 8px;
+}
+.ctrl-arrow-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 900;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: .1s;
+}
+.ctrl-arrow-btn:hover {
+  background: rgba(255,255,255,0.15);
+  color: var(--accent-yellow);
+}
+.ctrl-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.btn-random-avatar {
+  background: #34495e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: .15s;
+}
+.btn-random-avatar:hover {
+  background: #47607a;
+  transform: translateY(-1px);
+}
+
+.name-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 2px solid var(--border-card);
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  outline: none;
+  transition: .15s;
+  user-select: text;
+}
+.name-input:focus {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 10px rgba(0, 204, 0, 0.4);
+}
+
+.btn-play-public {
+  width: 100%;
+  background: linear-gradient(180deg, #2ecc71, #27ae60);
+  border: none;
+  border-bottom: 5px solid #1e8449;
+  border-radius: 16px;
+  padding: 14px;
+  color: #fff;
+  font-size: 1.45rem;
+  font-weight: 900;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: transform .1s, border-bottom .1s;
+}
+.btn-play-public:hover {
+  filter: brightness(1.08);
+}
+.btn-play-public:active {
+  transform: translateY(3px);
+  border-bottom: 2px solid #1e8449;
+}
+
+.btn-create-private {
+  width: 100%;
+  background: linear-gradient(180deg, #3498db, #2980b9);
+  border: none;
+  border-bottom: 5px solid #1c5980;
+  border-radius: 16px;
+  padding: 12px;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .1s, border-bottom .1s;
+}
+.btn-create-private:hover {
+  filter: brightness(1.08);
+}
+.btn-create-private:active {
+  transform: translateY(3px);
+  border-bottom: 2px solid #1c5980;
+}
+
+/* ================= 2. ROOM SETTINGS & WAITING ROOM SCREEN ================= */
+.waiting-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  gap: 16px;
+}
+.waiting-screen.hidden {
+  display: none !important;
+}
+
+.waiting-top-card {
+  width: 100%;
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-radius: 20px;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.room-code-tag {
+  background: #192b45;
+  border: 2px solid var(--accent-blue);
+  border-radius: 12px;
+  padding: 6px 14px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* PLAYERS GRID IN WAITING ROOM */
+.waiting-players-card {
+  width: 100%;
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-radius: 20px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.players-waiting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+.player-waiting-blob {
+  background: var(--bg-input);
+  border: 2px solid var(--border-card);
+  border-radius: 16px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  text-align: center;
+  transition: transform .15s;
+}
+.player-waiting-blob.is-host {
+  border-color: var(--accent-yellow);
+}
+.player-waiting-blob svg {
+  width: 54px;
+  height: 54px;
+}
+.host-badge-tag {
+  position: absolute;
+  top: -8px;
+  background: var(--accent-yellow);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+/* SETTINGS PANEL IN WAITING ROOM */
+.settings-panel-card {
+  width: 100%;
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-radius: 20px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.settings-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+}
+@media (max-width: 680px) {
+  .settings-grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.setting-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.setting-label {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.setting-select, .setting-input {
+  background: var(--bg-input);
+  border: 2px solid var(--border-card);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  outline: none;
+  transition: border-color .15s;
+}
+.setting-select:focus, .setting-input:focus {
+  border-color: var(--accent-blue);
+}
+
+.custom-words-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  background: var(--bg-input);
+  border: 2px solid var(--border-card);
+  border-radius: 16px;
+  padding: 14px;
+}
+.custom-words-stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+.badge-metric {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+.badge-metric.green {
+  background: rgba(0, 204, 0, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(0, 204, 0, 0.3);
+}
+.badge-metric.yellow {
+  background: rgba(255, 228, 0, 0.15);
+  color: var(--accent-yellow);
+  border: 1px solid rgba(255, 228, 0, 0.3);
+}
+
+.custom-words-textarea {
+  width: 100%;
+  min-height: 85px;
+  background: #142236;
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  color: #fff;
+  padding: 10px;
+  font-size: 0.95rem;
+  resize: vertical;
+  outline: none;
+  user-select: text;
+}
+.custom-words-textarea:focus {
+  border-color: var(--accent-green);
+}
+
+.waiting-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ================= 3. IN-GAME SCREEN (SKRIBBL 3-COLUMNS) ================= */
+.game-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 1360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 12px 14px;
+  gap: 10px;
+}
+.game-screen.hidden {
+  display: none !important;
+}
+
+/* HEADER BAR */
+.skribbl-header {
+  display: grid;
+  grid-template-columns: 220px 1fr 220px;
+  align-items: center;
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-radius: 16px;
+  padding: 8px 18px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.btn-exit-room {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.round-indicator {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+.round-indicator strong {
+  color: #fff;
+}
+
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.word-banner-text {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2.1rem;
+  font-weight: 900;
+  letter-spacing: 8px;
+  color: var(--accent-green);
+  text-shadow: 0 0 10px rgba(0, 204, 0, 0.4);
+}
+.word-banner-text.drawing-word {
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: 2px;
+  font-size: 1.6rem;
+  color: var(--accent-yellow);
+}
+.word-banner-lengths {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* CIRCULAR TIMER */
+.skribbl-timer {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #192b45;
+  border: 4px solid var(--accent-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 204, 0, 0.3);
+  transition: border-color .3s, transform .2s;
+}
+.skribbl-timer.warning {
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+  box-shadow: 0 0 12px rgba(255, 228, 0, 0.4);
+}
+.skribbl-timer.danger {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+  box-shadow: 0 0 15px rgba(239, 19, 11, 0.6);
+  animation: pulseTimer .7s infinite alternate;
+}
+@keyframes pulseTimer {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.12); }
+}
+
+/* 3-COLUMN BODY */
+.skribbl-body {
+  display: grid;
+  grid-template-columns: 220px 1fr 290px;
+  gap: 10px;
+  align-items: stretch;
+  min-height: 580px;
+}
+
+@media (max-width: 1050px) {
+  .skribbl-body {
+    grid-template-columns: 190px 1fr 250px;
+  }
+}
+@media (max-width: 860px) {
+  .skribbl-body {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+/* LEFT: PLAYERS LIST */
+.players-column {
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-radius: 18px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-input);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 8px 10px;
+  position: relative;
+  transition: .15s;
+}
+.player-item.is-me {
+  border-color: #3498db;
+}
+.player-item.is-drawer {
+  border-color: var(--accent-yellow);
+  background: rgba(255, 228, 0, 0.08);
+}
+.player-item.has-guessed {
+  background: rgba(0, 204, 0, 0.15);
+  border-color: var(--accent-green);
+}
+
+.player-rank {
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text-muted);
+  min-width: 20px;
+}
+.player-avatar-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.player-avatar-small svg {
+  width: 34px;
+  height: 34px;
+}
+
+.player-details {
+  flex: 1;
+  min-width: 0;
+}
+.player-name-text {
+  font-size: 0.92rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-score-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.player-badge-icon {
+  font-size: 1.25rem;
+}
+
+/* CENTER: CANVAS & TOOLBAR */
+.canvas-column {
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-radius: 18px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+/* STATUS BANNER ABOVE CANVAS */
+.canvas-status-pill {
+  background: #192b45;
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.canvas-status-pill.is-drawer-pill {
+  background: rgba(255, 228, 0, 0.12);
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+
+.canvas-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 440px;
+  background: var(--canvas-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+  touch-action: none;
+}
+#gameCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+/* REACTION BUTTONS */
+.reactions-box {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.btn-rx {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(25, 43, 69, 0.85);
+  border: 2px solid var(--border-card);
+  color: #fff;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  transition: transform .15s, background .15s;
+}
+.btn-rx:hover {
+  transform: scale(1.15);
+  background: #243956;
+}
+
+.flying-emoji {
+  position: absolute;
+  font-size: 2.2rem;
+  pointer-events: none;
+  animation: floatUpFade 1.6s ease-out forwards;
+  z-index: 99;
+}
+@keyframes floatUpFade {
+  0% { transform: translateY(0) scale(0.6); opacity: 1; }
+  50% { transform: translateY(-70px) scale(1.2); opacity: 0.9; }
+  100% { transform: translateY(-140px) scale(0.9); opacity: 0; }
+}
+
+/* TOOLBAR - FULLY INTERACTIVE */
+.skribbl-toolbar {
+  background: var(--bg-input);
+  border: 2px solid var(--border-card);
+  border-radius: 14px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  transition: opacity .2s;
+}
+
+/* 22-COLOR PALETTE */
+.palette-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.active-color-preview {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  flex-shrink: 0;
+}
+.palette-22-grid {
+  display: grid;
+  grid-template-columns: repeat(11, 20px);
+  grid-template-rows: repeat(2, 20px);
+  gap: 3px;
+}
+.color-swatch-22 {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid rgba(0,0,0,0.4);
+  transition: transform .1s;
+}
+.color-swatch-22:hover {
+  transform: scale(1.25);
+  z-index: 2;
+  outline: 2px solid #fff;
+}
+.color-swatch-22.active {
+  outline: 2px solid #fff;
+  transform: scale(1.2);
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+}
+
+/* BRUSH SIZES */
+.sizes-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brush-size-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #192b45;
+  border: 2px solid var(--border-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: .1s;
+}
+.brush-size-btn:hover {
+  border-color: #fff;
+}
+.brush-size-btn.active {
+  border-color: var(--accent-yellow);
+  background: #243956;
+}
+.brush-size-btn .dot {
+  background: #fff;
+  border-radius: 50%;
+}
+
+/* DRAWING TOOLS BUTTONS */
+.tools-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tool-action-btn {
+  background: #192b45;
+  border: 2px solid var(--border-card);
+  border-radius: 10px;
+  padding: 7px 12px;
+  color: #fff;
+  font-size: 1.15rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: .15s;
+}
+.tool-action-btn:hover {
+  border-color: #fff;
+  background: #243956;
+}
+.tool-action-btn.active {
+  border-color: var(--accent-green);
+  background: #27ae60;
+}
+
+/* RIGHT: CHAT & GUESSING */
+.chat-column {
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-radius: 18px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-history {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+.chat-msg {
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  word-break: break-word;
+}
+.chat-msg:nth-child(even) {
+  background: rgba(255,255,255,0.02);
+}
+.chat-msg.system {
+  color: var(--accent-blue);
+  font-weight: 700;
+  text-align: center;
+  background: rgba(0, 178, 255, 0.08);
+}
+.chat-msg.correct {
+  background: rgba(0, 204, 0, 0.2);
+  color: var(--accent-green);
+  font-weight: 800;
+  text-align: center;
+}
+.chat-msg.close-hint {
+  background: rgba(255, 228, 0, 0.15);
+  color: var(--accent-yellow);
+  font-weight: 700;
+  text-align: center;
+}
+.chat-msg.green-chat {
+  color: #2ecc71;
+  font-weight: 700;
+}
+
+.chat-input-box {
+  display: flex;
+  gap: 6px;
+}
+.chat-text-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 2px solid var(--border-card);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  outline: none;
+  user-select: text;
+}
+.chat-text-input:focus {
+  border-color: var(--accent-green);
+}
+.btn-send-guess {
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* OVERLAYS */
+.overlay-curtain {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 24, 42, 0.88);
+  backdrop-filter: blur(6px);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  z-index: 20;
+  padding: 20px;
+  text-align: center;
+  animation: fadeIn .2s;
+}
+.overlay-curtain.active {
+  display: flex;
+}
+
+.word-choice-cards {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.btn-word-choice {
+  background: #2980b9;
+  border: 3px solid #3498db;
+  border-radius: 16px;
+  color: #fff;
+  padding: 16px 24px;
+  font-size: 1.35rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .15s, background .15s;
+}
+.btn-word-choice:hover {
+  background: #2ecc71;
+  border-color: #27ae60;
+  transform: translateY(-4px) scale(1.05);
+}
+
+.btn-restart-game {
+  background: linear-gradient(180deg, #2ecc71, #27ae60);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  padding: 12px 26px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+.open-rooms-card {
+  width: 100%;
+  margin-top: 14px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.open-rooms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.open-rooms-title {
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: var(--accent-yellow);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-refresh-rooms {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border-card);
+  color: #fff;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.btn-refresh-rooms:hover {
+  background: rgba(255,255,255,0.18);
+}
+.open-rooms-list {
+  max-height: 160px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.open-room-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 8px 12px;
+  transition: background .15s;
+}
+.open-room-item:hover {
+  background: rgba(52, 152, 219, 0.12);
+  border-color: #3498db;
+}
+.btn-join-room-fast {
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .15s, background .15s;
+}
+.btn-join-room-fast:hover {
+  background: #2ecc71;
+  transform: scale(1.05);
+}
+
+</style>
+</head>
+<body>
+
+<!-- ================= 1. LOBBY SCREEN (INITIAL) ================= -->
+<div class="lobby-screen" id="lobbyScreen">
+  <div class="skribbl-logo" onclick="window.location.href='/game'" style="cursor:pointer;user-select:none" title="Trở về danh sách Game">
+    <span class="c1">V</span><span class="c2">ẽ</span>
+    <span style="display:inline-block;width:12px"></span>
+    <span class="c3">H</span><span class="c4">ì</span><span class="c5">n</span><span class="c6">h</span>
+    <span style="display:inline-block;width:12px"></span>
+    <span class="c7">Đ</span><span class="c1">o</span><span class="c2">á</span><span class="c3">n</span>
+    <span style="display:inline-block;width:12px"></span>
+    <span class="c4">C</span><span class="c5">h</span><span class="c6">ữ</span>
+  </div>
+
+  <div class="lobby-box">
+    <!-- AVATAR CUSTOMIZER -->
+    <div class="avatar-customizer">
+      <div class="avatar-preview-box" id="avatarPreviewBox"></div>
+
+      <div class="avatar-controls-grid">
+        <div class="avatar-ctrl-item">
+          <button class="ctrl-arrow-btn" onclick="cycleAvatar('color', -1)">◀</button>
+          <span class="ctrl-label">Màu</span>
+          <button class="ctrl-arrow-btn" onclick="cycleAvatar('color', 1)">▶</button>
+        </div>
+        <div class="avatar-ctrl-item">
+          <button class="ctrl-arrow-btn" onclick="cycleAvatar('eyes', -1)">◀</button>
+          <span class="ctrl-label">Mắt</span>
+          <button class="ctrl-arrow-btn" onclick="cycleAvatar('eyes', 1)">▶</button>
+        </div>
+        <div class="avatar-ctrl-item">
+          <button class="ctrl-arrow-btn" onclick="cycleAvatar('mouth', -1)">◀</button>
+          <span class="ctrl-label">Miệng</span>
+          <button class="ctrl-arrow-btn" onclick="cycleAvatar('mouth', 1)">▶</button>
+        </div>
+      </div>
+
+      <button class="btn-random-avatar" onclick="randomizeAvatar()">
+        <span>🎲</span> Đổi ngẫu nhiên
+      </button>
+    </div>
+
+    <!-- PLAYER NAME -->
+    <input type="text" id="playerNameInput" class="name-input" placeholder="Nhập tên của bạn..." maxlength="18">
+
+    <!-- PLAY PUBLIC -->
+    <button class="btn-play-public" onclick="enterRoom('public')">
+      ▶ VÀO PHÒNG CHƠI CHUNG
+    </button>
+
+    <!-- CREATE PRIVATE ROOM -->
+    <button class="btn-create-private" onclick="enterRoom('private')">
+      ⚙️ TẠO PHÒNG RIÊNG &amp; CÀI ĐẶT
+    </button>
+
+    <!-- CÁC PHÒNG ĐANG MỞ -->
+    <div class="open-rooms-card">
+      <div class="open-rooms-header">
+        <div class="open-rooms-title">
+          <span>🎮</span> Các Phòng Hiện Đang Mở (<span id="openRoomsCount">0</span>)
+        </div>
+        <button class="btn-refresh-rooms" onclick="loadActiveRooms()">🔄 Làm mới</button>
+      </div>
+      <div class="open-rooms-list" id="openRoomsList">
+        <div style="text-align:center;color:var(--text-muted);padding:14px;font-size:0.88rem;font-weight:700">Đang quét danh sách phòng...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 2. ROOM SETTINGS & WAITING ROOM SCREEN ================= -->
+<div class="waiting-screen hidden" id="waitingScreen">
+  <!-- TOP CARD: ROOM INFO & SHARE -->
+  <div class="waiting-top-card">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="room-code-tag">
+        <span>🎮 Phòng:</span>
+        <span id="waitingRoomCode" style="color:#fff">lobby</span>
+      </div>
+      <div style="font-weight:800;color:var(--text-muted)">
+        👑 Chủ phòng: <strong id="lblHostName" style="color:var(--accent-yellow)">Đang tải...</strong>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn-exit-room" style="background:#2980b9;padding:8px 16px;font-size:0.95rem" onclick="copyRoomLink()">📋 Copy Link Phòng</button>
+      <button class="btn-exit-room" onclick="leaveRoom()">✕ Thoát</button>
+    </div>
+  </div>
+
+  <!-- PLAYERS IN ROOM -->
+  <div class="waiting-players-card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:1.1rem;font-weight:900">👥 Người chơi trong phòng (<span id="waitingPlayerCount">1</span>/<span id="waitingMaxPlayerDisplay">8</span>)</div>
+      <div id="hostHintBadge" style="font-size:0.85rem;color:var(--accent-yellow);font-weight:800"></div>
+    </div>
+    <div class="players-waiting-grid" id="waitingPlayersGrid"></div>
+  </div>
+
+  <!-- SETTINGS PANEL LAYER -->
+  <div class="settings-panel-card" id="settingsPanelCard">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-card);padding-bottom:12px">
+      <h2 style="font-size:1.35rem;font-weight:900;color:var(--accent-blue);display:flex;align-items:center;gap:8px">
+        <span>⚙️</span> Cài Đặt Phòng Chơi
+      </h2>
+      <div id="readOnlyWarning" style="font-size:0.85rem;color:var(--text-muted);font-weight:700"></div>
+    </div>
+
+    <div class="settings-grid-2col">
+      <!-- 1. Max Players -->
+      <div class="setting-field">
+        <label class="setting-label">👥 Số người chơi tối đa</label>
+        <select class="setting-select" id="cfgMaxPlayers" onchange="onSettingsFieldChange()">
+          <option value="2">2 Người</option>
+          <option value="4">4 Người</option>
+          <option value="6">6 Người</option>
+          <option value="8" selected>8 Người (Tiêu chuẩn)</option>
+          <option value="10">10 Người</option>
+          <option value="12">12 Người</option>
+          <option value="16">16 Người</option>
+        </select>
+      </div>
+
+      <!-- 2. Language -->
+      <div class="setting-field">
+        <label class="setting-label">🌐 Ngôn ngữ từ vựng</label>
+        <select class="setting-select" id="cfgLanguage" onchange="onSettingsFieldChange()">
+          <option value="vi" selected>🇻🇳 Tiếng Việt</option>
+          <option value="en">🇺🇸 English</option>
+          <option value="bilingual">🌐 Song ngữ (Việt - Anh)</option>
+        </select>
+      </div>
+
+      <!-- 3. Draw Time -->
+      <div class="setting-field">
+        <label class="setting-label">⏱️ Thời gian vẽ mỗi lượt</label>
+        <select class="setting-select" id="cfgDrawTime" onchange="onSettingsFieldChange()">
+          <option value="30">30 Giây (Siêu tốc)</option>
+          <option value="45">45 Giây</option>
+          <option value="60">60 Giây</option>
+          <option value="80" selected>80 Giây (Chuẩn Skribbl)</option>
+          <option value="100">100 Giây</option>
+          <option value="120">120 Giây</option>
+          <option value="150">150 Giây</option>
+          <option value="180">180 Giây (Thoải mái)</option>
+        </select>
+      </div>
+
+      <!-- 4. Max Rounds -->
+      <div class="setting-field">
+        <label class="setting-label">🔄 Số vòng chơi (Rounds)</label>
+        <select class="setting-select" id="cfgRounds" onchange="onSettingsFieldChange()">
+          <option value="1">1 Vòng (Nhanh)</option>
+          <option value="2">2 Vòng</option>
+          <option value="3" selected>3 Vòng (Tiêu chuẩn)</option>
+          <option value="4">4 Vòng</option>
+          <option value="5">5 Vòng</option>
+          <option value="6">6 Vòng</option>
+          <option value="8">8 Vòng</option>
+          <option value="10">10 Vòng</option>
+        </select>
+      </div>
+
+      <!-- 5. Game Mode -->
+      <div class="setting-field">
+        <label class="setting-label">🎮 Chế độ chơi</label>
+        <select class="setting-select" id="cfgGameMode" onchange="onSettingsFieldChange()">
+          <option value="classic" selected>🎨 Cổ Điển (Chuẩn Skribbl)</option>
+          <option value="mystery">🕵️ Ẩn Danh (Giấu ký tự &amp; độ dài)</option>
+          <option value="speed">⚡ Tốc Độ (35s vẽ, x2 điểm đoán sớm)</option>
+          <option value="practice">🤖 Luyện Tập (Vẽ tự do cùng Bot)</option>
+        </select>
+      </div>
+
+      <!-- 6. Word choices count -->
+      <div class="setting-field">
+        <label class="setting-label">🔤 Số từ được chọn mỗi lượt</label>
+        <select class="setting-select" id="cfgWordChoices" onchange="onSettingsFieldChange()">
+          <option value="2">2 Từ</option>
+          <option value="3" selected>3 Từ (Chuẩn)</option>
+          <option value="4">4 Từ</option>
+          <option value="5">5 Từ</option>
+        </select>
+      </div>
+
+      <!-- 7. Hints count -->
+      <div class="setting-field" style="grid-column: 1 / -1">
+        <label class="setting-label">💡 Số ký tự gợi ý</label>
+        <select class="setting-select" id="cfgHints" onchange="onSettingsFieldChange()">
+          <option value="-1" selected>Tự Động (dựa theo độ dài từ khóa)</option>
+          <option value="0">Không gợi ý (Hardcore)</option>
+          <option value="1">1 Ký tự</option>
+          <option value="2">2 Ký tự</option>
+          <option value="3">3 Ký tự</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 8. Custom Words list with formula calculation -->
+    <div class="custom-words-box">
+      <div class="custom-words-stats-bar">
+        <label class="setting-label" style="color:#fff">
+          <span>📜</span> Danh sách từ tùy chọn (Custom Words)
+        </label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="color:var(--text-muted)">Cần tối thiểu: <strong id="lblWordsNeeded" style="color:var(--accent-yellow)">18</strong> từ</span>
+          <span id="badgeCustomStatus" class="badge-metric green">Chưa nhập từ custom</span>
+        </div>
+      </div>
+      <textarea id="cfgCustomWords" class="custom-words-textarea" placeholder="Nhập các từ tùy chọn, cách nhau bằng dấu phẩy hoặc xuống dòng (Ví dụ: Naruto, Kimetsu no Yaiba, Doraemon, Sakura, Minecraft...)" oninput="onCustomWordsInput()"></textarea>
+      <div style="font-size:0.8rem;color:var(--text-muted);font-weight:700">
+        💡 <em>Quy tắc thông minh:</em> Nếu từ custom đủ nhiều (≥ số từ cần: số từ mỗi lượt × số người chơi × số vòng), hệ thống sẽ dùng 100% từ custom. Nếu thiếu, hệ thống tự động bù thêm từ từ điển chuẩn để đảm bảo trận đấu trọn vẹn không lặp lại!
+      </div>
+    </div>
+
+    <!-- ACTIONS BAR -->
+    <div class="waiting-actions-bar">
+      <button class="btn-exit-room" style="background:#8e44ad;padding:12px 18px;font-size:1rem" id="btnBotToggleWaiting" onclick="toggleBot()">🤖 Bot Sakura: Tắt</button>
+      <button class="btn-exit-room" style="background:#2980b9;padding:12px 20px;font-size:1rem" id="btnSaveSettings" onclick="saveRoomSettings()">💾 Lưu Cài Đặt</button>
+      <button class="btn-play-public" style="width:auto;padding:12px 32px;font-size:1.25rem" id="btnStartGameWaiting" onclick="requestStartGame()">🚀 BẮT ĐẦU CHƠI</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 3. IN-GAME SCREEN ================= -->
+<div class="game-screen hidden" id="gameScreen">
+  <!-- HEADER -->
+  <div class="skribbl-header">
+    <div class="header-left">
+      <button class="btn-exit-room" onclick="leaveRoom()">✕ Thoát</button>
+      <div class="round-indicator">Vòng <strong id="lblRound">1</strong> / <span id="lblMaxRound">3</span></div>
+    </div>
+
+    <div class="header-center">
+      <div class="word-banner-text" id="lblWordHint">_ _ _ _</div>
+      <div class="word-banner-lengths" id="lblWordLengths"></div>
+    </div>
+
+    <div class="header-right">
+      <button class="btn-exit-room" style="background:#2980b9" onclick="copyRoomLink()" title="Copy Link Mời">📋 Mời</button>
+      <button class="btn-exit-room" style="background:#34495e" onclick="toggleInGameSettingsModal()" title="Xem cài đặt phòng">⚙️ Phòng</button>
+      <div class="skribbl-timer" id="clockCircle">80</div>
+    </div>
+  </div>
+
+  <!-- 3 COLUMNS -->
+  <div class="skribbl-body">
+    <!-- LEFT: PLAYERS -->
+    <div class="players-column" id="playersListContainer"></div>
+
+    <!-- CENTER: CANVAS -->
+    <div class="canvas-column">
+      <!-- Status pill banner -->
+      <div class="canvas-status-pill" id="canvasStatusPill">
+        <span id="canvasStatusText">🖌️ Chuẩn bị bảng vẽ...</span>
+        <span id="canvasStatusAction" style="color:var(--text-muted)"></span>
+      </div>
+
+      <div class="canvas-frame" id="canvasFrame">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <div id="flyingEmojisLayer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden"></div>
+
+        <div class="reactions-box" id="reactionsBox">
+          <button class="btn-rx" onclick="sendReaction('like')" title="Thích nét vẽ này!">👍</button>
+          <button class="btn-rx" onclick="sendReaction('dislike')" title="Vẽ khó hiểu quá!">👎</button>
+        </div>
+
+        <!-- OVERLAY: WORD SELECTION -->
+        <div class="overlay-curtain" id="overlayWordChoice">
+          <h2 style="font-size:1.8rem;font-weight:900;color:var(--accent-yellow)">🎨 ĐẾN LƯỢT BẠN VẼ!</h2>
+          <p style="color:var(--text-muted);font-weight:700;margin-top:4px">Chọn 1 từ khóa dưới đây:</p>
+          <div class="word-choice-cards" id="wordChoiceButtons"></div>
+        </div>
+
+        <!-- OVERLAY: ROUND END WORD REVEAL -->
+        <div class="overlay-curtain" id="overlayRoundEnd">
+          <h3 style="font-size:1.3rem;color:var(--text-muted)" id="overlayEndReason">Hết thời gian!</h3>
+          <div style="font-size:2.4rem;font-weight:900;color:var(--accent-yellow);margin-top:8px" id="overlayRevealedWord">CON MÈO</div>
+        </div>
+
+        <!-- OVERLAY: GAME OVER PODIUM -->
+        <div class="overlay-curtain" id="overlayGameOver">
+          <div style="font-size:3.5rem">🏆</div>
+          <h1 style="font-size:2.2rem;font-weight:900;color:var(--accent-yellow)">KẾT THÚC VÁN ĐẤU!</h1>
+          <div id="podiumResults" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;max-width:320px;width:100%"></div>
+          <div style="display:flex;gap:10px;margin-top:16px">
+            <button class="btn-restart-game" style="background:#2980b9" onclick="returnToWaitingRoom()">⚙️ Về Phòng Chờ</button>
+            <button class="btn-restart-game" onclick="requestStartGame()">🚀 Chơi Lại Ngay</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM TOOLBAR (ALWAYS ACTIVE & INTERACTIVE) -->
+      <div class="skribbl-toolbar" id="drawerToolbar">
+        <div class="palette-container">
+          <div class="active-color-preview" id="activeColorPreview" style="background:#000000"></div>
+          <div class="palette-22-grid" id="paletteGrid"></div>
+        </div>
+
+        <div class="sizes-container">
+          <div class="brush-size-btn" onclick="setBrushSize(4, this)" title="Nét nhỏ (4px)"><div class="dot" style="width:6px;height:6px"></div></div>
+          <div class="brush-size-btn active" onclick="setBrushSize(10, this)" title="Nét vừa (10px)"><div class="dot" style="width:11px;height:11px"></div></div>
+          <div class="brush-size-btn" onclick="setBrushSize(22, this)" title="Nét to (22px)"><div class="dot" style="width:18px;height:18px"></div></div>
+          <div class="brush-size-btn" onclick="setBrushSize(40, this)" title="Nét cực to (40px)"><div class="dot" style="width:24px;height:24px"></div></div>
+        </div>
+
+        <div class="tools-actions">
+          <button class="tool-action-btn active" id="btnPen" onclick="selectTool('pen')" title="Bút vẽ">✏️ Bút</button>
+          <button class="tool-action-btn" id="btnEraser" onclick="selectTool('eraser')" title="Tẩy trắng">🧹 Tẩy</button>
+          <button class="tool-action-btn" id="btnBucket" onclick="selectTool('bucket')" title="Thùng sơn đổ màu">🪣 Đổ màu</button>
+          <button class="tool-action-btn" onclick="undoStroke()" title="Hoàn tác nét vẽ">↩️</button>
+          <button class="tool-action-btn" onclick="clearBoard()" title="Xóa toàn bộ">🗑️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CHAT & GUESSES -->
+    <div class="chat-column">
+      <div class="chat-history" id="chatHistoryBox">
+        <div class="chat-msg system">🌸 Chào mừng đến với Scribble It!</div>
+      </div>
+
+      <form class="chat-input-box" onsubmit="handleSendGuess(event)">
+        <input type="text" id="guessTextInput" class="chat-text-input" placeholder="Gõ từ bạn đoán..." autocomplete="off">
+        <button type="submit" class="btn-send-guess">Gửi</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================= 1. CONSTANTS & AUDIO =================
+const SKRIBBL_PALETTE = [
+  '#ffffff', '#c1c1c1', '#ef130b', '#ff7100', '#ffe400', '#00cc00', '#00b2ff', '#231fd3', '#a300ba', '#df69a7', '#ffac8e', '#a0522d',
+  '#000000', '#4c4c4c', '#740b07', '#c23800', '#e8a200', '#005510', '#00569e', '#0e0865', '#550069', '#a75574', '#63300d'
+];
+
+const BLOB_COLORS = [
+  '#fed330', '#ff9f43', '#ee5253', '#ff6b6b', '#ff9ff3', '#f368e0',
+  '#54a0ff', '#2e86de', '#00d2d3', '#1dd1a1', '#10ac84', '#5f27cd',
+  '#341f97', '#8395a7', '#576574', '#c8d6e5', '#ffda79', '#d1ccc0'
+];
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playAudio(type) {
+  try {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+
+    if (type === 'correct') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.setValueAtTime(659.25, now + 0.1);
+      osc.frequency.setValueAtTime(783.99, now + 0.2);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    } else if (type === 'tick') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(900, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    }
+  } catch (e) {}
+}
+
+// ================= 2. AVATAR VECTOR GENERATOR =================
+let myAvatar = {
+  color: Math.floor(Math.random() * BLOB_COLORS.length),
+  eyes: Math.floor(Math.random() * 8),
+  mouth: Math.floor(Math.random() * 8),
+};
+
+function renderBlobSvg(av) {
+  const c = BLOB_COLORS[(av.color || 0) % BLOB_COLORS.length] || '#fed330';
+  const eyesIdx = (av.eyes || 0) % 8;
+  const mouthIdx = (av.mouth || 0) % 8;
+
+  let eyesSvg = '';
+  switch(eyesIdx) {
+    case 0: eyesSvg = `<circle cx="38" cy="45" r="5" fill="#000"/><circle cx="62" cy="45" r="5" fill="#000"/>`; break;
+    case 1: eyesSvg = `<path d="M 32 46 Q 38 38 44 46" stroke="#000" stroke-width="4" stroke-linecap="round" fill="none"/>
+                       <path d="M 56 46 Q 62 38 68 46" stroke="#000" stroke-width="4" stroke-linecap="round" fill="none"/>`; break;
+    case 2: eyesSvg = `<circle cx="38" cy="44" r="7" fill="#000"/><circle cx="40" cy="42" r="2.5" fill="#fff"/>
+                       <circle cx="62" cy="44" r="7" fill="#000"/><circle cx="64" cy="42" r="2.5" fill="#fff"/>`; break;
+    case 3: eyesSvg = `<line x1="32" y1="45" x2="44" y2="45" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+                       <line x1="56" y1="45" x2="68" y2="45" stroke="#000" stroke-width="4" stroke-linecap="round"/>`; break;
+    case 4: eyesSvg = `<circle cx="38" cy="44" r="6" fill="#000"/><circle cx="39.5" cy="42" r="2" fill="#fff"/>
+                       <path d="M 56 42 L 64 46 L 56 50" stroke="#000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`; break;
+    case 5: eyesSvg = `<line x1="32" y1="42" x2="44" y2="47" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+                       <line x1="68" y1="42" x2="56" y2="47" stroke="#000" stroke-width="4" stroke-linecap="round"/>`; break;
+    case 6: eyesSvg = `<circle cx="37" cy="45" r="9" stroke="#000" stroke-width="3" fill="none"/>
+                       <circle cx="63" cy="45" r="9" stroke="#000" stroke-width="3" fill="none"/>
+                       <line x1="46" y1="45" x2="54" y2="45" stroke="#000" stroke-width="3"/>
+                       <circle cx="37" cy="45" r="4" fill="#000"/><circle cx="63" cy="45" r="4" fill="#000"/>`; break;
+    case 7: eyesSvg = `<polygon points="28,40 46,40 43,54 31,54" fill="#111"/>
+                       <polygon points="54,40 72,40 69,54 57,54" fill="#111"/>
+                       <line x1="46" y1="43" x2="54" y2="43" stroke="#111" stroke-width="4"/>`; break;
+  }
+
+  let mouthSvg = '';
+  switch(mouthIdx) {
+    case 0: mouthSvg = `<path d="M 40 62 Q 50 72 60 62" stroke="#000" stroke-width="4" stroke-linecap="round" fill="none"/>`; break;
+    case 1: mouthSvg = `<path d="M 38 60 Q 50 78 62 60 Z" fill="#740b07" stroke="#000" stroke-width="3"/>
+                        <path d="M 45 68 Q 50 72 55 68" fill="#df69a7"/>`; break;
+    case 2: mouthSvg = `<path d="M 38 62 Q 50 72 62 62 Z" fill="#fff" stroke="#000" stroke-width="3"/>`; break;
+    case 3: mouthSvg = `<path d="M 42 62 Q 46 66 50 62 Q 54 66 58 62" stroke="#000" stroke-width="3.5" stroke-linecap="round" fill="none"/>`; break;
+    case 4: mouthSvg = `<line x1="42" y1="64" x2="58" y2="64" stroke="#000" stroke-width="4" stroke-linecap="round"/>`; break;
+    case 5: mouthSvg = `<ellipse cx="50" cy="65" rx="5" ry="7" fill="#740b07" stroke="#000" stroke-width="2.5"/>`; break;
+    case 6: mouthSvg = `<path d="M 50 62 Q 42 56 36 62 Q 44 68 50 64 Q 56 68 64 62 Q 58 56 50 62 Z" fill="#333"/>`; break;
+    case 7: mouthSvg = `<path d="M 40 62 Q 50 70 60 62 Z" fill="#000"/>
+                        <polygon points="43,62 45,67 47,62" fill="#fff"/>
+                        <polygon points="53,62 55,67 57,62" fill="#fff"/>`; break;
+  }
+
+  return `
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 50 14 C 74 14 88 28 88 56 C 88 82 72 88 50 88 C 28 88 12 82 12 56 C 12 28 26 14 50 14 Z" 
+            fill="${c}" stroke="#000" stroke-width="4.5" stroke-linejoin="round"/>
+      <path d="M 30 24 C 42 18 60 18 70 24" stroke="rgba(255,255,255,0.45)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      ${eyesSvg}
+      ${mouthSvg}
+    </svg>
+  `;
+}
+
+function updateAvatarPreview() {
+  document.getElementById('avatarPreviewBox').innerHTML = renderBlobSvg(myAvatar);
+}
+function cycleAvatar(prop, delta) {
+  const max = (prop === 'color' ? BLOB_COLORS.length : 8);
+  myAvatar[prop] = (myAvatar[prop] + delta + max) % max;
+  updateAvatarPreview();
+}
+function randomizeAvatar() {
+  myAvatar.color = Math.floor(Math.random() * BLOB_COLORS.length);
+  myAvatar.eyes = Math.floor(Math.random() * 8);
+  myAvatar.mouth = Math.floor(Math.random() * 8);
+  updateAvatarPreview();
+}
+
+// ================= 3. STATE & GLOBALS =================
+// Guest identifier if not logged in
+let guestNum = localStorage.getItem('guest_player_num');
+if (!guestNum) {
+  guestNum = Math.floor(1000 + Math.random() * 9000);
+  localStorage.setItem('guest_player_num', guestNum);
+}
+const defaultGuestName = `unknowplayer#${guestNum}`;
+
+let gameState = {
+  room: 'lobby',
+  myId: defaultGuestName,
+  myName: defaultGuestName,
+  currentStrokeId: null,
+  hostId: null,
+  isHost: false,
+  isDrawer: false,
+  currentWord: '',
+  hasGuessed: false,
+  state: 'waiting',
+  activeTool: 'pen',
+  activeColor: '#000000',
+  activeSize: 10,
+  isDrawing: false,
+  lastX: 0,
+  lastY: 0,
+  currentPlayers: [],
+  settings: {},
+};
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+let ws = null;
+
+function initSkribblPalette() {
+  const grid = document.getElementById('paletteGrid');
+  grid.innerHTML = '';
+  SKRIBBL_PALETTE.forEach((c, idx) => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch-22' + (idx === 12 ? ' active' : ''); // black active by default
+    sw.style.backgroundColor = c;
+    sw.onclick = () => selectColor(c, sw);
+    grid.appendChild(sw);
+  });
+}
+
+function selectColor(hex, el) {
+  gameState.activeColor = hex;
+  document.getElementById('activeColorPreview').style.backgroundColor = hex;
+  document.querySelectorAll('.color-swatch-22').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (gameState.activeTool === 'eraser') selectTool('pen');
+}
+
+function setBrushSize(sz, el) {
+  gameState.activeSize = sz;
+  document.querySelectorAll('.brush-size-btn').forEach(btn => btn.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function selectTool(tool) {
+  gameState.activeTool = tool;
+  document.querySelectorAll('.tool-action-btn').forEach(b => b.classList.remove('active'));
+  if (tool === 'pen') document.getElementById('btnPen').classList.add('active');
+  else if (tool === 'eraser') document.getElementById('btnEraser').classList.add('active');
+  else if (tool === 'bucket') document.getElementById('btnBucket').classList.add('active');
+}
+
+// Canvas coords & drawing
+function getCoords(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / Math.max(1, rect.width);
+  const scaleY = canvas.height / Math.max(1, rect.height);
+  let cx, cy;
+  if (e.touches && e.touches.length > 0) {
+    cx = e.touches[0].clientX; cy = e.touches[0].clientY;
+  } else {
+    cx = e.clientX; cy = e.clientY;
+  }
+  return {
+    x: Math.max(0, Math.min(canvas.width, (cx - rect.left) * scaleX)),
+    y: Math.max(0, Math.min(canvas.height, (cy - rect.top) * scaleY))
+  };
+}
+
+function canDrawNow() {
+  // Có thể vẽ khi: là drawer trong ván, hoặc ở chế độ practice, hoặc ở trạng thái tự do
+  return gameState.isDrawer || gameState.settings.game_mode === 'practice' || gameState.state === 'waiting';
+}
+
+function onDrawStart(e) {
+  if (!canDrawNow()) {
+    if (gameState.state === 'drawing' && !gameState.isDrawer) {
+      const statusPill = document.getElementById('canvasStatusPill');
+      if (statusPill) {
+        statusPill.style.transition = 'transform 0.15s';
+        statusPill.style.transform = 'scale(1.05)';
+        setTimeout(() => { statusPill.style.transform = 'scale(1)'; }, 180);
+      }
+    }
+    return;
+  }
+
+  e.preventDefault();
+  const pt = getCoords(e);
+  gameState.isDrawing = true;
+  gameState.currentStrokeId = 'stk_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+  gameState.lastX = pt.x;
+  gameState.lastY = pt.y;
+
+  if (gameState.activeTool === 'bucket') {
+    floodFill(Math.round(pt.x), Math.round(pt.y), gameState.activeColor);
+    sendStroke({
+      id: gameState.currentStrokeId,
+      tool: 'bucket',
+      color: gameState.activeColor,
+      x0: pt.x / canvas.width,
+      y0: pt.y / canvas.height
+    });
+    gameState.isDrawing = false;
+    return;
+  }
+
+  drawSegment(gameState.lastX, gameState.lastY, pt.x, pt.y, gameState.activeColor, gameState.activeSize, gameState.activeTool);
+  sendDrawSegment({
+    stroke_id: gameState.currentStrokeId,
+    tool: gameState.activeTool,
+    color: gameState.activeColor,
+    size: gameState.activeSize,
+    x0: gameState.lastX / canvas.width,
+    y0: gameState.lastY / canvas.height,
+    x1: pt.x / canvas.width,
+    y1: pt.y / canvas.height
+  });
+}
+
+function onDrawMove(e) {
+  if (!gameState.isDrawing || !canDrawNow()) return;
+  if (gameState.activeTool === 'bucket') return;
+  e.preventDefault();
+  const pt = getCoords(e);
+  drawSegment(gameState.lastX, gameState.lastY, pt.x, pt.y, gameState.activeColor, gameState.activeSize, gameState.activeTool);
+  sendDrawSegment({
+    stroke_id: gameState.currentStrokeId,
+    tool: gameState.activeTool,
+    color: gameState.activeColor,
+    size: gameState.activeSize,
+    x0: gameState.lastX / canvas.width,
+    y0: gameState.lastY / canvas.height,
+    x1: pt.x / canvas.width,
+    y1: pt.y / canvas.height
+  });
+  gameState.lastX = pt.x;
+  gameState.lastY = pt.y;
+}
+
+function onDrawEnd() { gameState.isDrawing = false; }
+
+function drawSegment(x0, y0, x1, y1, color, size, tool) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  if (tool === 'eraser') {
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = size * 2.2;
+  } else {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = size;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x0, y0);
+  ctx.lineTo(x1, y1);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function clearCanvasLocal() {
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function clearBoard() {
+  if (!canDrawNow()) return;
+  clearCanvasLocal();
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'clear' }));
+}
+
+function undoStroke() {
+  if (!canDrawNow()) return;
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'undo' }));
+}
+
+function sendStroke(stroke) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'draw', stroke }));
+}
+function sendDrawSegment(data) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'draw_segment', ...data }));
+}
+
+// Flood Fill
+function hexToRgb(hex) {
+  const b = parseInt(hex.replace('#', ''), 16);
+  return [(b >> 16) & 255, (b >> 8) & 255, b & 255];
+}
+function floodFill(startX, startY, fillColorHex) {
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imgData.data;
+  const targetRgb = hexToRgb(fillColorHex);
+  const startIndex = (startY * canvas.width + startX) * 4;
+  const startR = data[startIndex]; const startG = data[startIndex + 1]; const startB = data[startIndex + 2];
+  if (startR === targetRgb[0] && startG === targetRgb[1] && startB === targetRgb[2]) return;
+
+  function matchStartColor(pos) {
+    return Math.abs(data[pos] - startR) < 30 &&
+           Math.abs(data[pos + 1] - startG) < 30 &&
+           Math.abs(data[pos + 2] - startB) < 30;
+  }
+  function colorPixel(pos) {
+    data[pos] = targetRgb[0]; data[pos + 1] = targetRgb[1]; data[pos + 2] = targetRgb[2]; data[pos + 3] = 255;
+  }
+
+  const stack = [[startX, startY]];
+  while (stack.length) {
+    const pos = stack.pop();
+    const x = pos[0]; let y = pos[1];
+    let pixelPos = (y * canvas.width + x) * 4;
+    while (y >= 0 && matchStartColor(pixelPos)) { y--; pixelPos -= canvas.width * 4; }
+    pixelPos += canvas.width * 4; y++;
+    let reachLeft = false; let reachRight = false;
+    while (y < canvas.height && matchStartColor(pixelPos)) {
+      colorPixel(pixelPos);
+      if (x > 0) {
+        if (matchStartColor(pixelPos - 4)) { if (!reachLeft) { stack.push([x - 1, y]); reachLeft = true; } }
+        else if (reachLeft) reachLeft = false;
+      }
+      if (x < canvas.width - 1) {
+        if (matchStartColor(pixelPos + 4)) { if (!reachRight) { stack.push([x + 1, y]); reachRight = true; } }
+        else if (reachRight) reachRight = false;
+      }
+      y++; pixelPos += canvas.width * 4;
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
+// ================= 4. WAITING ROOM & SETTINGS LOGIC =================
+function enterRoom(mode) {
+  const nameInput = document.getElementById('playerNameInput');
+  gameState.myName = nameInput.value.trim() || 'Người chơi';
+
+  if (mode === 'private') {
+    const pCode = 'room_' + Math.random().toString(36).substring(2, 8);
+    gameState.room = pCode;
+    const url = new URL(window.location.href);
+    url.searchParams.set('room', pCode);
+    window.history.pushState({}, '', url);
+  } else {
+    const urlParams = new URLSearchParams(window.location.search);
+    gameState.room = (urlParams.get('room') || 'lobby').trim().toLowerCase();
+  }
+
+  document.getElementById('waitingRoomCode').textContent = gameState.room;
+  document.getElementById('lobbyScreen').classList.add('hidden');
+  document.getElementById('waitingScreen').classList.remove('hidden');
+
+  connectWebSocket();
+}
+
+function leaveRoom() {
+  if (ws) ws.close();
+  window.location.href = '/game';
+}
+
+function returnToWaitingRoom() {
+  document.getElementById('overlayGameOver').classList.remove('active');
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('waitingScreen').classList.remove('hidden');
+}
+
+function connectWebSocket() {
+  const loc = window.location;
+  const protocol = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${protocol}//${loc.host}/ws/scribble?room=${encodeURIComponent(gameState.room)}`;
+  ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({
+      type: 'join',
+      id: gameState.myId,
+      name: gameState.myName,
+      avatar_data: myAvatar,
+    }));
+  };
+
+  ws.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      handleServerMsg(data);
+    } catch (err) {
+      console.error('WS Error:', err);
+    }
+  };
+
+  ws.onclose = () => {
+    setTimeout(() => {
+      if (!document.getElementById('lobbyScreen').classList.contains('hidden')) return;
+      connectWebSocket();
+    }, 2500);
+  };
+}
+
+function handleServerMsg(msg) {
+  if (msg.type === 'welcome') {
+    gameState.myId = String(msg.your_id);
+    if (msg.your_name && msg.your_name !== '[object Object]') {
+      gameState.myName = msg.your_name;
+    }
+    gameState.isHost = Boolean(msg.is_host);
+    return;
+  }
+
+  if (msg.type === 'room_state') {
+    gameState.state = msg.state;
+    gameState.hostId = msg.host_id;
+    gameState.isHost = (String(msg.host_id) === String(gameState.myId));
+    gameState.currentPlayers = msg.players || [];
+    gameState.settings = msg.settings || {};
+
+    if (msg.state === 'waiting') {
+      gameState.isDrawer = false;
+      gameState.currentWord = '';
+      document.getElementById('waitingScreen').classList.remove('hidden');
+      document.getElementById('gameScreen').classList.add('hidden');
+      renderWaitingRoom(msg);
+    } else {
+      document.getElementById('waitingScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+      renderInGame(msg);
+    }
+  } else if (msg.type === 'your_word') {
+    gameState.isDrawer = true;
+    gameState.currentWord = msg.word;
+    const lbl = document.getElementById('lblWordHint');
+    lbl.textContent = `BẠN ĐANG VẼ: ${msg.word.toUpperCase()}`;
+    lbl.classList.add('drawing-word');
+    document.getElementById('lblWordLengths').textContent = 'Hãy vẽ thật dễ hiểu để mọi người đoán!';
+    document.getElementById('overlayWordChoice').classList.remove('active');
+    
+    const statusPill = document.getElementById('canvasStatusPill');
+    statusPill.className = 'canvas-status-pill is-drawer-pill';
+    document.getElementById('canvasStatusText').innerHTML = `✏️ <strong>BẠN ĐANG VẼ TỪ: "${escapeHtml(msg.word.toUpperCase())}"</strong>`;
+    document.getElementById('canvasStatusAction').textContent = 'Bộ công cụ vẽ sẵn sàng!';
+
+    clearCanvasLocal();
+    playAudio('correct');
+  } else if (msg.type === 'word_choices') {
+    gameState.isDrawer = true;
+    const container = document.getElementById('wordChoiceButtons');
+    container.innerHTML = '';
+    msg.words.forEach(w => {
+      const b = document.createElement('button');
+      b.className = 'btn-word-choice';
+      b.textContent = w;
+      b.onclick = () => selectWord(w);
+      container.appendChild(b);
+    });
+    document.getElementById('overlayWordChoice').classList.add('active');
+
+    document.getElementById('lblWordHint').textContent = 'CHỌN TỪ KHÓA...';
+    document.getElementById('lblWordHint').classList.add('drawing-word');
+    document.getElementById('lblWordLengths').textContent = 'Bấm chọn 1 từ khóa bên dưới để bắt đầu vẽ!';
+    const statusPill = document.getElementById('canvasStatusPill');
+    statusPill.className = 'canvas-status-pill is-drawer-pill';
+    document.getElementById('canvasStatusText').innerHTML = '🎨 <strong>ĐẾN LƯỢT BẠN!</strong> Hãy chọn 1 từ khóa để vẽ.';
+    document.getElementById('canvasStatusAction').textContent = 'Đang chờ bạn chọn từ...';
+  } else if (msg.type === 'draw_segment') {
+    drawSegment(
+      msg.x0 * canvas.width, msg.y0 * canvas.height,
+      msg.x1 * canvas.width, msg.y1 * canvas.height,
+      msg.color, msg.size, msg.tool
+    );
+  } else if (msg.type === 'redraw_stroke' || msg.type === 'draw') {
+    const s = msg.stroke;
+    if (s.tool === 'bucket') {
+      floodFill(Math.round(s.x0 * canvas.width), Math.round(s.y0 * canvas.height), s.color);
+    } else if (s.segments && Array.isArray(s.segments)) {
+      s.segments.forEach(seg => {
+        drawSegment(
+          seg.x0 * canvas.width, seg.y0 * canvas.height,
+          seg.x1 * canvas.width, seg.y1 * canvas.height,
+          s.color, s.size, s.tool
+        );
+      });
+    } else if (s.x0 !== undefined && s.x1 !== undefined) {
+      drawSegment(s.x0 * canvas.width, s.y0 * canvas.height, s.x1 * canvas.width, s.y1 * canvas.height, s.color, s.size, s.tool);
+    }
+  } else if (msg.type === 'clear') {
+    clearCanvasLocal();
+  } else if (msg.type === 'timer_tick') {
+    const clock = document.getElementById('clockCircle');
+    clock.textContent = msg.timer;
+    clock.classList.remove('warning', 'danger');
+    if (msg.timer <= 15 && msg.timer > 5) clock.classList.add('warning');
+    else if (msg.timer <= 5 && msg.timer > 0) { clock.classList.add('danger'); playAudio('tick'); }
+  } else if (msg.type === 'hint_update') {
+    if (!gameState.isDrawer) document.getElementById('lblWordHint').textContent = msg.hint;
+  } else if (msg.type === 'chat') {
+    appendChatMessage(msg);
+    if (msg.correct) {
+      playAudio('correct');
+      if (msg.sender_id === gameState.myId || (msg.sender && msg.sender === gameState.myName)) {
+        gameState.hasGuessed = true;
+        const chatInput = document.getElementById('guessTextInput');
+        chatInput.placeholder = '🎉 Bạn đã đoán đúng từ khóa! (Chờ hết giờ nhé)';
+      }
+    }
+  } else if (msg.type === 'turn_summary') {
+    gameState.isDrawer = false;
+    gameState.hasGuessed = false;
+    gameState.currentWord = '';
+    clearCanvasLocal();
+    document.getElementById('overlayWordChoice').classList.remove('active');
+    document.getElementById('overlayRevealedWord').textContent = msg.word.toUpperCase();
+    document.getElementById('overlayEndReason').textContent = msg.reason || 'Hết giờ!';
+    document.getElementById('overlayRoundEnd').classList.add('active');
+    renderSkribblPlayers(msg.players, '');
+    setTimeout(() => { document.getElementById('overlayRoundEnd').classList.remove('active'); }, 4500);
+  } else if (msg.type === 'game_over') {
+    gameState.isDrawer = false;
+    gameState.hasGuessed = false;
+    gameState.currentWord = '';
+    clearCanvasLocal();
+    showGameOverPodium(msg.leaderboard);
+    // Gửi điểm lên BXH
+    try {
+      const myRank = (msg.leaderboard || []).find(p => String(p.id) === String(gameState.myId) || (p.name && p.name === gameState.myName));
+      const resType = myRank && (msg.leaderboard[0] && (msg.leaderboard[0].id === myRank.id || msg.leaderboard[0].name === myRank.name)) ? 'win' : 'loss';
+      fetch('/api/game/scribble/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ result: resType, username: gameState.myName })
+      }).catch(() => {});
+    } catch (e) {}
+  } else if (msg.type === 'reaction_fly') {
+    spawnFlyingEmoji(msg.reaction);
+  }
+}
+
+// Render Waiting Room & Settings Controls
+function renderWaitingRoom(msg) {
+  const host = msg.players.find(p => p.id === msg.host_id);
+  const hostName = host ? host.name : 'Chưa có';
+  document.getElementById('lblHostName').textContent = hostName + (gameState.isHost ? ' (Bạn)' : '');
+  document.getElementById('waitingPlayerCount').textContent = msg.players.length;
+  document.getElementById('waitingMaxPlayerDisplay').textContent = msg.settings.max_players || 8;
+
+  const grid = document.getElementById('waitingPlayersGrid');
+  grid.innerHTML = msg.players.map(p => {
+    const isH = (p.id === msg.host_id);
+    const svg = renderBlobSvg(p.avatar_data || { color: 0, eyes: 0, mouth: 0 });
+    return `
+      <div class="player-waiting-blob ${isH ? 'is-host' : ''}">
+        ${isH ? '<span class="host-badge-tag">👑 CHỦ PHÒNG</span>' : ''}
+        ${svg}
+        <strong style="font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${escapeHtml(p.name)}</strong>
+      </div>
+    `;
+  }).join('');
+
+  const hostHint = document.getElementById('hostHintBadge');
+  const readOnlyWarn = document.getElementById('readOnlyWarning');
+  const btnSave = document.getElementById('btnSaveSettings');
+  const btnStart = document.getElementById('btnStartGameWaiting');
+  const fields = ['cfgMaxPlayers', 'cfgLanguage', 'cfgDrawTime', 'cfgRounds', 'cfgGameMode', 'cfgWordChoices', 'cfgHints', 'cfgCustomWords'];
+
+  if (gameState.isHost) {
+    hostHint.textContent = '👑 Bạn là chủ phòng (Có quyền thay đổi cài đặt & bắt đầu)';
+    readOnlyWarn.textContent = '';
+    btnSave.style.display = 'inline-block';
+    btnStart.style.display = 'inline-block';
+    fields.forEach(id => { document.getElementById(id).disabled = false; });
+  } else {
+    hostHint.textContent = '⏳ Đang chờ chủ phòng bắt đầu trận đấu...';
+    readOnlyWarn.textContent = '🔒 Chỉ chủ phòng mới có thể lưu thay đổi cài đặt';
+    btnSave.style.display = 'none';
+    btnStart.style.display = 'none';
+    fields.forEach(id => { document.getElementById(id).disabled = true; });
+  }
+
+  if (document.activeElement !== document.getElementById('cfgCustomWords')) {
+    const s = msg.settings || {};
+    if (s.max_players) document.getElementById('cfgMaxPlayers').value = s.max_players;
+    if (s.language) document.getElementById('cfgLanguage').value = s.language;
+    if (s.draw_time) document.getElementById('cfgDrawTime').value = s.draw_time;
+    if (s.max_rounds) document.getElementById('cfgRounds').value = s.max_rounds;
+    if (s.game_mode) document.getElementById('cfgGameMode').value = s.game_mode;
+    if (s.word_choices_count) document.getElementById('cfgWordChoices').value = s.word_choices_count;
+    if (s.hint_count !== undefined) document.getElementById('cfgHints').value = s.hint_count;
+    if (s.custom_words !== undefined) document.getElementById('cfgCustomWords').value = s.custom_words;
+  }
+
+  updateCustomWordsMetric();
+  document.getElementById('btnBotToggleWaiting').textContent = msg.bot_enabled ? '🤖 Bot Sakura: Bật (Chỉ đoán)' : '🤖 Bot Sakura: Tắt';
+}
+
+function onSettingsFieldChange() {
+  updateCustomWordsMetric();
+  if (gameState.isHost) saveRoomSettings();
+}
+
+function onCustomWordsInput() {
+  updateCustomWordsMetric();
+}
+
+function updateCustomWordsMetric() {
+  const choices = parseInt(document.getElementById('cfgWordChoices').value) || 3;
+  const rounds = parseInt(document.getElementById('cfgRounds').value) || 3;
+  const pCount = Math.max(1, gameState.currentPlayers.length || 1);
+  const needed = choices * pCount * rounds;
+
+  document.getElementById('lblWordsNeeded').textContent = `${needed} (${choices} từ/lượt × ${pCount} người × ${rounds} vòng)`;
+
+  const rawText = document.getElementById('cfgCustomWords').value;
+  const words = rawText.split(/[,\n]/).map(w => w.trim()).filter(w => w.length > 0);
+  const count = words.length;
+
+  const badge = document.getElementById('badgeCustomStatus');
+  if (count === 0) {
+    badge.className = 'badge-metric yellow';
+    badge.textContent = `0 từ custom (Dùng 100% từ điển)`;
+  } else if (count >= needed) {
+    badge.className = 'badge-metric green';
+    badge.textContent = `✅ ĐỦ TỪ CUSTOM (${count}/${needed}) — Dùng 100% từ custom!`;
+  } else {
+    const missing = needed - count;
+    badge.className = 'badge-metric yellow';
+    badge.textContent = `ℹ️ Đã có ${count} từ, TỰ ĐỘNG BÙ THÊM ${missing} từ điển cho đủ ${needed}!`;
+  }
+}
+
+function saveRoomSettings() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  const maxPlayers = parseInt(document.getElementById('cfgMaxPlayers').value) || 8;
+  const lang = document.getElementById('cfgLanguage').value || 'vi';
+  const drawTime = parseInt(document.getElementById('cfgDrawTime').value) || 80;
+  const rounds = parseInt(document.getElementById('cfgRounds').value) || 3;
+  const mode = document.getElementById('cfgGameMode').value || 'classic';
+  const choices = parseInt(document.getElementById('cfgWordChoices').value) || 3;
+  const hints = parseInt(document.getElementById('cfgHints').value) || -1;
+  const customWords = document.getElementById('cfgCustomWords').value;
+
+  ws.send(JSON.stringify({
+    type: 'update_settings',
+    max_players: maxPlayers,
+    language: lang,
+    draw_time: drawTime,
+    max_rounds: rounds,
+    game_mode: mode,
+    word_choices_count: choices,
+    hint_count: hints,
+    custom_words: customWords
+  }));
+}
+
+function requestStartGame() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    saveRoomSettings();
+    ws.send(JSON.stringify({ type: 'start_game' }));
+  }
+}
+
+// In-Game Rendering
+function renderInGame(msg) {
+  document.getElementById('lblRound').textContent = msg.round;
+  document.getElementById('lblMaxRound').textContent = msg.max_rounds;
+
+  // Xác định người vẽ: đối chiếu ID hoặc Display Name
+  const isMe = Boolean(
+    (msg.drawer_id && String(msg.drawer_id) === String(gameState.myId)) ||
+    (msg.drawer_name && gameState.myName && msg.drawer_name.trim().toLowerCase() === gameState.myName.trim().toLowerCase()) ||
+    (gameState.isDrawer && (msg.state === 'drawing' || msg.state === 'selecting'))
+  );
+  gameState.isDrawer = isMe;
+
+  // Status pill bar updates
+  const statusPill = document.getElementById('canvasStatusPill');
+  const statusText = document.getElementById('canvasStatusText');
+  const statusAction = document.getElementById('canvasStatusAction');
+
+  if (gameState.isDrawer) {
+    statusPill.className = 'canvas-status-pill is-drawer-pill';
+    if (msg.state === 'selecting') {
+      statusText.innerHTML = '🎨 <strong>ĐẾN LƯỢT BẠN!</strong> Hãy chọn 1 từ khóa trên màn hình.';
+      statusAction.textContent = 'Đang chờ bạn chọn từ...';
+    } else {
+      statusText.innerHTML = `✏️ <strong>BẠN LÀ HỌA SĨ TRONG LƯỢT NÀY!</strong> ${gameState.currentWord ? `Từ: <u>${escapeHtml(gameState.currentWord.toUpperCase())}</u>` : 'Hãy vẽ từ khóa'}`;
+      statusAction.textContent = 'Bộ công cụ vẽ sẵn sàng!';
+    }
+  } else {
+    statusPill.className = 'canvas-status-pill';
+    if (msg.state === 'selecting') {
+      statusText.innerHTML = `⏳ <strong>${escapeHtml(msg.drawer_name || 'Họa sĩ')}</strong> đang chọn từ khóa...`;
+      statusAction.textContent = 'Chuẩn bị đoán từ nhé!';
+    } else {
+      statusText.innerHTML = `🖌️ <strong>${escapeHtml(msg.drawer_name || 'Họa sĩ')}</strong> đang vẽ...`;
+      statusAction.textContent = 'Gõ từ bạn đoán vào khung chat bên phải!';
+    }
+  }
+
+  // Ẩn bộ công cụ vẽ đối với người đoán, CHỈ HIỆN VỚI NGƯỜI ĐANG VẼ
+  const toolbar = document.getElementById('drawerToolbar');
+  if (msg.state === 'drawing' || msg.state === 'selecting') {
+    toolbar.style.display = gameState.isDrawer ? 'flex' : 'none';
+  } else {
+    toolbar.style.display = 'flex';
+  }
+
+  // Khóa chat đối với người vẽ; cập nhật placeholder phù hợp
+  const chatInput = document.getElementById('guessTextInput');
+  const sendBtn = document.getElementById('btnSendGuess');
+  if (gameState.isDrawer) {
+    chatInput.disabled = true;
+    chatInput.placeholder = '✏️ Bạn đang vẽ, bị cấm chat trong lượt này!';
+    sendBtn.disabled = true;
+    sendBtn.style.opacity = '0.5';
+  } else if (gameState.hasGuessed) {
+    chatInput.disabled = false;
+    chatInput.placeholder = '🎉 Bạn đã đoán đúng từ khóa! (Chat chỉ người đã đoán mới thấy)';
+    sendBtn.disabled = false;
+    sendBtn.style.opacity = '1';
+  } else {
+    chatInput.disabled = false;
+    chatInput.placeholder = 'Gõ từ bạn đoán vào đây...';
+    sendBtn.disabled = false;
+    sendBtn.style.opacity = '1';
+  }
+
+  const rxBox = document.getElementById('reactionsBox');
+  rxBox.style.display = (gameState.isDrawer || msg.state !== 'drawing') ? 'none' : 'flex';
+
+  renderSkribblPlayers(msg.players, msg.drawer_id);
+
+  if (msg.state === 'selecting') {
+    if (gameState.isDrawer) {
+      document.getElementById('lblWordHint').textContent = 'CHỌN TỪ KHÓA...';
+      document.getElementById('lblWordHint').classList.add('drawing-word');
+      document.getElementById('lblWordLengths').textContent = 'Bấm chọn 1 từ khóa ở bảng hiện trên màn hình!';
+    } else {
+      document.getElementById('lblWordHint').textContent = 'CHỌN TỪ...';
+      document.getElementById('lblWordHint').classList.remove('drawing-word');
+      document.getElementById('lblWordLengths').textContent = `${escapeHtml(msg.drawer_name || 'Họa sĩ')} đang chọn từ khóa`;
+    }
+  } else if (msg.state === 'drawing') {
+    if (gameState.isDrawer) {
+      if (gameState.currentWord) {
+        document.getElementById('lblWordHint').textContent = `BẠN ĐANG VẼ: ${gameState.currentWord.toUpperCase()}`;
+        document.getElementById('lblWordHint').classList.add('drawing-word');
+      }
+      document.getElementById('lblWordLengths').textContent = 'Hãy vẽ thật dễ hiểu để mọi người đoán!';
+    } else {
+      document.getElementById('lblWordHint').textContent = msg.hint || '_ _ _ _';
+      document.getElementById('lblWordHint').classList.remove('drawing-word');
+      document.getElementById('lblWordLengths').textContent = `(${msg.lengths_str || '?'})`;
+    }
+  }
+}
+
+function renderSkribblPlayers(players, drawerId) {
+  const container = document.getElementById('playersListContainer');
+  if (!players) return;
+  container.innerHTML = players.map((p, idx) => {
+    const isMe = Boolean(
+      (p.id && String(p.id) === String(gameState.myId)) ||
+      (p.name && gameState.myName && p.name.trim().toLowerCase() === gameState.myName.trim().toLowerCase())
+    );
+    const isDrawer = Boolean(
+      (p.id && String(p.id) === String(drawerId)) ||
+      (isMe && gameState.isDrawer)
+    );
+    const svg = renderBlobSvg(p.avatar_data || { color: 0, eyes: 0, mouth: 0 });
+    return `
+      <div class="player-item ${isMe ? 'is-me' : ''} ${isDrawer ? 'is-drawer' : ''} ${p.has_guessed ? 'has-guessed' : ''}">
+        <div class="player-rank">#${idx + 1}</div>
+        <div class="player-avatar-small">${svg}</div>
+        <div class="player-details">
+          <div class="player-name-text">${escapeHtml(p.name)}${isMe ? ' (Bạn)' : ''}</div>
+          <div class="player-score-text">${p.score} điểm</div>
+        </div>
+        <div class="player-badge-icon">${isDrawer ? '✏️' : (p.has_guessed ? '✅' : '')}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectWord(word) {
+  document.getElementById('overlayWordChoice').classList.remove('active');
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'select_word', word }));
+  }
+}
+
+function appendChatMessage(msg) {
+  const box = document.getElementById('chatHistoryBox');
+  const div = document.createElement('div');
+  div.className = 'chat-msg' + 
+    (msg.system ? ' system' : '') + 
+    (msg.correct ? ' correct' : '') + 
+    (msg.close ? ' close-hint' : '') +
+    (msg.green_chat ? ' green-chat' : '');
+
+  if (msg.system) div.textContent = msg.text;
+  else div.innerHTML = `<strong>${escapeHtml(msg.sender)}:</strong> ${escapeHtml(msg.text)}`;
+
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function handleSendGuess(e) {
+  e.preventDefault();
+  const input = document.getElementById('guessTextInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'guess', text }));
+  }
+}
+
+function sendReaction(rx) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'reaction', reaction: rx }));
+  }
+}
+
+function spawnFlyingEmoji(rx) {
+  const layer = document.getElementById('flyingEmojisLayer');
+  const el = document.createElement('div');
+  el.className = 'flying-emoji';
+  el.textContent = rx === 'like' ? '👍' : '👎';
+  el.style.left = Math.floor(Math.random() * 80 + 10) + '%';
+  el.style.bottom = '20px';
+  layer.appendChild(el);
+  setTimeout(() => el.remove(), 1700);
+}
+
+function showGameOverPodium(leaderboard) {
+  const pod = document.getElementById('podiumResults');
+  pod.innerHTML = '';
+  if (leaderboard) {
+    leaderboard.slice(0, 3).forEach((p, idx) => {
+      const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : '🥉');
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#192b45;padding:10px 14px;border-radius:12px;font-weight:800;';
+      item.innerHTML = `<span>${medal} ${escapeHtml(p.name)}</span><span style="color:var(--accent-yellow)">${p.score} điểm</span>`;
+      pod.appendChild(item);
+    });
+  }
+  document.getElementById('overlayGameOver').classList.add('active');
+}
+
+function toggleBot() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'toggle_bot' }));
+  }
+}
+
+function toggleInGameSettingsModal() {
+  alert(`Cài đặt phòng hiện tại:\n• Ngôn ngữ: ${gameState.settings.language || 'vi'}\n• Số vòng: ${gameState.settings.max_rounds || 3}\n• Thời gian vẽ: ${gameState.settings.draw_time || 80}s\n• Chế độ: ${gameState.settings.game_mode || 'classic'}\n• Số từ chọn: ${gameState.settings.word_choices_count || 3}\n• Từ custom: ${gameState.settings.custom_words_count || 0} từ`);
+}
+
+function copyRoomLink() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    alert('📋 Đã sao chép link phòng chơi! Gửi cho bạn bè để cùng vào phòng chờ.');
+  }).catch(() => {
+    prompt('Link phòng chơi:', url);
+  });
+}
+
+
+async function loadActiveRooms() {
+  const container = document.getElementById('openRoomsList');
+  const countEl = document.getElementById('openRoomsCount');
+  if (!container) return;
+  try {
+    const res = await fetch('/api/scribble/rooms');
+    const data = await res.json();
+    if (data.ok && Array.isArray(data.rooms)) {
+      countEl.textContent = data.rooms.length;
+      if (data.rooms.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:14px;font-size:0.88rem;font-weight:700">Chưa có phòng riêng nào. Hãy bấm "TẠO PHÒNG RIÊNG" hoặc vào phòng chung (lobby)!</div>';
+        return;
+      }
+      container.innerHTML = data.rooms.map(r => {
+        const isPlaying = (r.state === 'drawing' || r.state === 'selecting');
+        const stateBadge = isPlaying ? `<span style="color:var(--accent-yellow);font-weight:800">🎨 Đang chơi (Vòng ${r.round}/${r.max_rounds})</span>` : `<span style="color:var(--accent-green);font-weight:800">🟢 Đang chờ (${r.player_count}/${r.max_players})</span>`;
+        return `
+          <div class="open-room-item">
+            <div>
+              <div style="font-weight:900;color:#fff;font-size:0.95rem">🎮 #${escapeHtml(r.room_id)}</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px">${stateBadge} • ${r.language === 'en' ? 'English' : 'Tiếng Việt'}</div>
+            </div>
+            <button class="btn-join-room-fast" onclick="joinSpecificRoom('${escapeHtml(r.room_id)}')">Tham Gia →</button>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (err) {
+    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:10px;font-size:0.85rem">Không thể tải danh sách phòng.</div>';
+  }
+}
+
+function joinSpecificRoom(roomId) {
+  const nameInput = document.getElementById('playerNameInput');
+  gameState.myName = nameInput.value.trim() || defaultGuestName;
+  gameState.room = roomId;
+  const url = new URL(window.location.href);
+  url.searchParams.set('room', roomId);
+  window.history.pushState({}, '', url);
+  document.getElementById('waitingRoomCode').textContent = gameState.room;
+  document.getElementById('lobbyScreen').classList.add('hidden');
+  document.getElementById('waitingScreen').classList.remove('hidden');
+  connectWebSocket();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function fetchUserInfo() {
+  try {
+    const res = await fetch('/api/auth/me');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.user) {
+        const u = data.user;
+        const validId = u.id || u.user_id || u.discord_id || u.username;
+        if (validId) gameState.myId = String(validId);
+        let name = u.global_name || '';
+        if (!name) {
+          if (typeof u.username === 'string') name = u.username;
+          else if (u.username && typeof u.username === 'object') name = u.username.username || '';
+        }
+        if (name && name !== '[object Object]') {
+          gameState.myName = name;
+          document.getElementById('playerNameInput').value = name;
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+canvas.addEventListener('mousedown', onDrawStart);
+canvas.addEventListener('mousemove', onDrawMove);
+window.addEventListener('mouseup', onDrawEnd);
+
+canvas.addEventListener('touchstart', onDrawStart, { passive: false });
+canvas.addEventListener('touchmove', onDrawMove, { passive: false });
+window.addEventListener('touchend', onDrawEnd);
+
+window.addEventListener('DOMContentLoaded', async () => {
+  initSkribblPalette();
+  updateAvatarPreview();
+  clearCanvasLocal();
+  document.getElementById('playerNameInput').value = gameState.myName;
+  await fetchUserInfo();
+  loadActiveRooms();
+  setInterval(loadActiveRooms, 6000);
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('room')) {
+    document.getElementById('playerNameInput').value = gameState.myName;
+  }
+});
+</script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

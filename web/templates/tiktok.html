@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸 Sakura TikTok — Xem Trước & Tải Video / Album Ảnh TikTok Không Logo</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+  <style>
+    :root {
+      --tk-red: #fe2c55;
+      --tk-cyan: #25f4ee;
+      --tk-dark: #121212;
+    }
+
+    body {
+      background: var(--bg-primary, #07090e);
+      color: var(--text-main, #f0f2f8);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    .tk-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+      width: 100%;
+    }
+
+    /* Top Nav */
+    .tk-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass, rgba(12, 16, 26, 0.85));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass, rgba(255, 121, 198, 0.18));
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tk-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .tk-nav-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--sakura-pink, #ff79c6);
+      box-shadow: 0 0 14px rgba(255, 121, 198, 0.35);
+    }
+
+    .tk-brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fe2c55, #ff79c6 50%, #25f4ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Hero Section */
+    .tk-hero {
+      text-align: center;
+      padding: 36px 16px 28px;
+      position: relative;
+    }
+
+    .tk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(254, 44, 85, 0.12);
+      border: 1px solid rgba(254, 44, 85, 0.35);
+      color: #ff5e82;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tk-title {
+      font-size: 2.3rem;
+      font-weight: 900;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 20%, #ffb8e2 60%, #25f4ee 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tk-subtitle {
+      color: var(--text-muted, #94a3b8);
+      font-size: 1rem;
+      max-width: 680px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+
+    /* Input Card */
+    .tk-input-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.75));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.2));
+      border-radius: 20px;
+      padding: 16px;
+      max-width: 760px;
+      margin: 0 auto 36px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(16px);
+      transition: all 0.3s ease;
+    }
+
+    .tk-input-card:focus-within {
+      border-color: rgba(254, 44, 85, 0.6);
+      box-shadow: 0 16px 45px rgba(254, 44, 85, 0.18);
+    }
+
+    .tk-input-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tk-input {
+      flex: 1;
+      min-width: 260px;
+      background: var(--bg-input, rgba(10, 14, 23, 0.85));
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .tk-input:focus {
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    .tk-btn-paste {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+      color: var(--text-main, #fff);
+      padding: 0 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .tk-btn-paste:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 121, 198, 0.4);
+    }
+
+    .tk-btn-submit {
+      background: linear-gradient(135deg, #fe2c55 0%, #ff2a85 50%, #bd93f9 100%);
+      border: none;
+      color: #fff;
+      padding: 14px 26px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(254, 44, 85, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .tk-btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(254, 44, 85, 0.5);
+    }
+
+    .tk-btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .tk-btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Status & Alerts */
+    .tk-status {
+      display: none;
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-card, rgba(18, 24, 38, 0.6));
+      border: 1px dashed var(--border-glass, rgba(255, 121, 198, 0.3));
+      border-radius: 16px;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+
+    .tk-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(254, 44, 85, 0.15);
+      border-top-color: #fe2c55;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .tk-error {
+      display: none;
+      max-width: 760px;
+      margin: 0 auto 30px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      color: #ff6b6b;
+      font-size: 0.92rem;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Result Container */
+    .tk-result {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tk-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.8));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.25));
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+    }
+
+    /* Video Layout */
+    .tk-media-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .tk-media-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Video Player Box */
+    .tk-player-box {
+      border-radius: 18px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .tk-video-player {
+      width: 100%;
+      max-height: 540px;
+      display: block;
+      object-fit: contain;
+      background: #000;
+    }
+
+    /* Info Column */
+    .tk-info-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .tk-author-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .tk-author-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid var(--sakura-pink, #ff79c6);
+      object-fit: cover;
+    }
+
+    .tk-author-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tk-author-tag {
+      font-size: 0.85rem;
+      color: var(--text-muted, #94a3b8);
+    }
+
+    .tk-post-title {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: var(--text-main, #f0f2f8);
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+    }
+
+    .tk-stats-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .tk-stat-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tk-music-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(189, 147, 249, 0.12);
+      border: 1px solid rgba(189, 147, 249, 0.3);
+      padding: 10px 16px;
+      border-radius: 14px;
+      color: #d1b3ff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    /* Download Buttons Section */
+    .tk-download-section {
+      margin-top: 10px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.15));
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .tk-download-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--sakura-pink, #ff79c6);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tk-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .tk-dl-btn {
+      padding: 13px 18px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      color: #fff;
+    }
+
+    .tk-dl-btn-hd {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    }
+    .tk-dl-btn-hd:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45);
+    }
+
+    .tk-dl-btn-sd {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+    }
+    .tk-dl-btn-sd:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(59, 130, 246, 0.45);
+    }
+
+    .tk-dl-btn-wm {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+    }
+    .tk-dl-btn-wm:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .tk-dl-btn-music {
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+    }
+    .tk-dl-btn-music:hover {
+      background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(139, 92, 246, 0.45);
+    }
+
+    .tk-size-badge {
+      font-size: 0.76rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    /* Photo Slideshow Specific */
+    .tk-slideshow-box {
+      border-radius: 18px;
+      overflow: hidden;
+      background: #0d111b;
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.25));
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .tk-main-photo-wrapper {
+      position: relative;
+      background: #000;
+      min-height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tk-main-photo {
+      max-width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .tk-slide-counter {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .tk-slide-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: rgba(12, 16, 26, 0.9);
+      border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    }
+
+    .tk-nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tk-nav-btn:hover:not(:disabled) {
+      background: var(--sakura-pink, #ff79c6);
+      color: #fff;
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    .tk-nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Thumbnails Strip */
+    .tk-thumb-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.4);
+      scrollbar-width: thin;
+    }
+
+    .tk-thumb-item {
+      width: 58px;
+      height: 58px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      cursor: pointer;
+      border: 2px solid transparent;
+      opacity: 0.6;
+      transition: all 0.2s;
+    }
+
+    .tk-thumb-item.active,
+    .tk-thumb-item:hover {
+      opacity: 1;
+      border-color: var(--sakura-pink, #ff79c6);
+      transform: scale(1.05);
+    }
+
+    .tk-thumb-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* History / Quick test links */
+    .tk-quick-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted, #94a3b8);
+      flex-wrap: wrap;
+    }
+
+    .tk-quick-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+      padding: 4px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-main, #fff);
+      transition: all 0.2s;
+    }
+
+    .tk-quick-chip:hover {
+      border-color: var(--sakura-pink, #ff79c6);
+      color: var(--sakura-pink, #ff79c6);
+    }
+
+    /* Instructions / Features cards */
+    .tk-features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .tk-feature-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.5));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.15));
+      border-radius: 18px;
+      padding: 22px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .tk-feature-icon {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .tk-feature-card h3 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--text-main, #fff);
+    }
+
+    .tk-feature-card p {
+      color: var(--text-muted, #94a3b8);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* Footer */
+    .tk-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border-glass, rgba(255, 121, 198, 0.15));
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--text-muted, #94a3b8);
+      font-size: 0.86rem;
+      background: var(--bg-card, rgba(18, 24, 38, 0.7));
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="tk-nav">
+    <a href="/" class="tk-nav-brand">
+      <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot" onerror="this.src='/images/avatar-bot.jpg'">
+      <div>
+        <div class="tk-brand-title">Sakura TikTok</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">Trình Tải Video & Album Ảnh Không Logo</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/dashboard" class="btn btn-secondary btn-sm" style="text-decoration:none">🌐 Dashboard</a>
+      <a href="/" class="btn btn-secondary btn-sm" style="text-decoration:none">Trang Chủ</a>
+    </div>
+  </nav>
+
+  <div class="tk-wrap">
+    <!-- Hero Header -->
+    <div class="tk-hero">
+      <div class="tk-badge">✨ Trình Tải TikTok & Douyin Đa Năng</div>
+      <h1 class="tk-title">Xem Trước & Tải Video TikTok Không Logo</h1>
+      <p class="tk-subtitle">Dán liên kết TikTok hoặc Douyin bất kỳ để xem trước video, chọn độ phân giải Full HD / SD, tải âm thanh MP3 hoặc trọn bộ album ảnh Slideshow chất lượng gốc.</p>
+
+      <!-- Input Bar Card -->
+      <div class="tk-input-card">
+        <div class="tk-input-group">
+          <input type="text" id="urlInput" class="tk-input" placeholder="Dán link TikTok (vd: https://vt.tiktok.com/... hoặc https://www.tiktok.com/@.../video/...)" autocomplete="off">
+          <button type="button" class="tk-btn-paste" id="btnPaste" title="Dán từ bộ nhớ tạm">
+            📋 Dán
+          </button>
+          <button type="button" class="tk-btn-submit" id="btnAnalyze" onclick="analyzeTikTokUrl()">
+            ⚡ Xem Trước & Tải
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick hints -->
+      <div class="tk-quick-bar">
+        <span>💡 Hỗ trợ:</span>
+        <span class="tk-quick-chip" onclick="setInput('https://www.tiktok.com/@tiktok')">Link video thường</span>
+        <span class="tk-quick-chip" onclick="setInput('https://vt.tiktok.com/')">Link rút gọn vt.tiktok.com</span>
+        <span class="tk-quick-chip" onclick="setInput('https://www.tiktok.com/')">Bộ ảnh Photo Slideshow</span>
+        <span class="tk-quick-chip" onclick="setInput('https://www.douyin.com/')">Douyin (TikTok Trung)</span>
+      </div>
+    </div>
+
+    <!-- Error Alert Box -->
+    <div id="errorAlert" class="tk-error">
+      <span style="font-size:1.4rem">⚠️</span>
+      <span id="errorMessage">Đã xảy ra lỗi</span>
+    </div>
+
+    <!-- Loading Spinner Box -->
+    <div id="loadingStatus" class="tk-status">
+      <div class="tk-spinner"></div>
+      <h4 style="margin:0 0 6px;color:#fff;font-weight:700">Đang phân tích bài viết TikTok...</h4>
+      <p style="margin:0;color:var(--text-muted);font-size:0.86rem" id="loadingStep">Đang trích xuất luồng video chất lượng cao & dữ liệu album...</p>
+    </div>
+
+    <!-- Result Display Container -->
+    <div id="resultContainer" class="tk-result">
+      <div class="tk-card">
+
+        <!-- ================= CASE 1: VIDEO POST ================= -->
+        <div id="videoLayout" class="tk-media-grid" style="display:none">
+          <!-- Left: Video Player -->
+          <div class="tk-player-box">
+            <video id="videoPlayer" class="tk-video-player" controls playsinline preload="metadata">
+              Trình duyệt của bạn không hỗ trợ thẻ video HTML5.
+            </video>
+          </div>
+
+          <!-- Right: Video Info & Download Options -->
+          <div class="tk-info-col">
+            <div class="tk-author-bar">
+              <img id="videoAuthorAvatar" class="tk-author-avatar" src="" alt="Avatar">
+              <div>
+                <div id="videoAuthorName" class="tk-author-name">TikTok User</div>
+                <div id="videoAuthorTag" class="tk-author-tag">@username</div>
+              </div>
+            </div>
+
+            <div id="videoTitle" class="tk-post-title">Mô tả video</div>
+
+            <div class="tk-stats-bar">
+              <div class="tk-stat-chip">❤️ <span id="videoLikes">0</span></div>
+              <div class="tk-stat-chip">💬 <span id="videoComments">0</span></div>
+              <div class="tk-stat-chip">🔁 <span id="videoShares">0</span></div>
+              <div class="tk-stat-chip">👁️ <span id="videoViews">0</span></div>
+              <div class="tk-stat-chip">⏱️ <span id="videoDuration">0s</span></div>
+            </div>
+
+            <div id="videoMusicBox" class="tk-music-badge">
+              <span>🎶</span>
+              <span id="videoMusicTitle">Âm thanh gốc</span>
+            </div>
+
+            <!-- Download Options Grid -->
+            <div class="tk-download-section">
+              <div class="tk-download-title">
+                <span>📥 TÙY CHỌN CHẤT LƯỢNG & TẢI XUỐNG</span>
+              </div>
+              <div class="tk-btn-grid">
+                <a id="btnDownloadHd" href="#" class="tk-dl-btn tk-dl-btn-hd">
+                  <span>🎬 Tải Video HD (Không Logo)</span>
+                  <span id="sizeBadgeHd" class="tk-size-badge">1080p</span>
+                </a>
+                <a id="btnDownloadSd" href="#" class="tk-dl-btn tk-dl-btn-sd">
+                  <span>📹 Tải Thường SD (Không Logo)</span>
+                  <span id="sizeBadgeSd" class="tk-size-badge">Chuẩn</span>
+                </a>
+                <a id="btnDownloadWm" href="#" class="tk-dl-btn tk-dl-btn-wm">
+                  <span>🏷️ Tải Có Logo (Watermark)</span>
+                  <span class="tk-size-badge">Bản gốc</span>
+                </a>
+                <a id="btnDownloadMusic" href="#" class="tk-dl-btn tk-dl-btn-music">
+                  <span>🎵 Tải Âm Thanh MP3</span>
+                  <span class="tk-size-badge">320kbps</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= CASE 2: PHOTO SLIDESHOW POST ================= -->
+        <div id="slideshowLayout" class="tk-media-grid" style="display:none">
+          <!-- Left: Photo Slideshow Viewer -->
+          <div class="tk-slideshow-box">
+            <div class="tk-main-photo-wrapper">
+              <img id="mainPhoto" class="tk-main-photo" src="" alt="Photo Slide">
+              <div id="photoCounter" class="tk-slide-counter">Ảnh 1 / 1</div>
+            </div>
+            <!-- Slide Navigation Buttons -->
+            <div class="tk-slide-nav-bar">
+              <button type="button" id="btnSlidePrev" class="tk-nav-btn" onclick="prevSlide()">
+                ◀️ Trước
+              </button>
+              <span style="font-size:0.85rem;color:var(--text-muted);font-weight:600" id="slideStatusText">Dùng phím ← và → để đổi ảnh</span>
+              <button type="button" id="btnSlideNext" class="tk-nav-btn" onclick="nextSlide()">
+                Tiếp ▶️
+              </button>
+            </div>
+            <!-- Thumbnails List -->
+            <div id="thumbStrip" class="tk-thumb-strip"></div>
+          </div>
+
+          <!-- Right: Album Info & Download Options -->
+          <div class="tk-info-col">
+            <div class="tk-author-bar">
+              <img id="photoAuthorAvatar" class="tk-author-avatar" src="" alt="Avatar">
+              <div>
+                <div id="photoAuthorName" class="tk-author-name">TikTok User</div>
+                <div id="photoAuthorTag" class="tk-author-tag">@username</div>
+              </div>
+            </div>
+
+            <div id="photoTitle" class="tk-post-title">Mô tả bài đăng album</div>
+
+            <div class="tk-stats-bar">
+              <div class="tk-stat-chip">📷 <span id="photoTotalCount">0</span> ảnh</div>
+              <div class="tk-stat-chip">❤️ <span id="photoLikes">0</span></div>
+              <div class="tk-stat-chip">💬 <span id="photoComments">0</span></div>
+              <div class="tk-stat-chip">🔁 <span id="photoShares">0</span></div>
+            </div>
+
+            <div id="photoMusicBox" class="tk-music-badge">
+              <span>🎶</span>
+              <span id="photoMusicTitle">Âm thanh nền</span>
+            </div>
+
+            <!-- Download Options for Album -->
+            <div class="tk-download-section">
+              <div class="tk-download-title">
+                <span>📥 TÙY CHỌN TẢI ALBUM ẢNH</span>
+              </div>
+              <div class="tk-btn-grid">
+                <a id="btnDownloadCurrentPhoto" href="#" class="tk-dl-btn tk-dl-btn-hd">
+                  <span>📥 Tải Ảnh Đang Xem</span>
+                  <span id="photoDownloadCurrentBadge" class="tk-size-badge">JPG Gốc</span>
+                </a>
+                <button type="button" id="btnDownloadZip" class="tk-dl-btn tk-dl-btn-sd" onclick="downloadAllPhotosZip()">
+                  <span>📦 Tải Toàn Bộ Ảnh (.ZIP)</span>
+                  <span id="zipCountBadge" class="tk-size-badge">Trọn bộ</span>
+                </button>
+                <a id="btnDownloadPhotoMusic" href="#" class="tk-dl-btn tk-dl-btn-music">
+                  <span>🎵 Tải Nhạc Nền MP3</span>
+                  <span class="tk-size-badge">Audio</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="tk-features-grid">
+      <div class="tk-feature-card">
+        <span class="tk-feature-icon">🎬</span>
+        <h3>Video HD Không Logo</h3>
+        <p>Tải video TikTok với độ phân giải Full HD gốc, xóa sạch hoàn toàn watermark và logo mờ bản quyền.</p>
+      </div>
+      <div class="tk-feature-card">
+        <span class="tk-feature-icon">📸</span>
+        <h3>Hỗ Trợ Album Slideshow</h3>
+        <p>Xem lướt qua từng bức ảnh với giao diện mượt mà và tải toàn bộ bộ sưu tập ảnh dưới dạng file ZIP chỉ với 1 cú click.</p>
+      </div>
+      <div class="tk-feature-card">
+        <span class="tk-feature-icon">🎵</span>
+        <h3>Tách Nhạc Nền MP3</h3>
+        <p>Trích xuất âm thanh chất lượng cao 320kbps từ bất kỳ video hoặc bài đăng TikTok nào dễ dàng.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="tk-footer">
+    Sakura TikTok Downloader • Phát triển bởi SakuraBot Team 🌸 • Không lưu trữ bất kỳ video nào trên máy chủ của chúng tôi.
+  </footer>
+
+  <script>
+    // State variables
+    let currentPostData = null;
+    let currentSlideIdx = 0;
+    let slideImages = [];
+
+    // Helper: Format numbers
+    function formatNum(n) {
+      if (!n && n !== 0) return '0';
+      return Number(n).toLocaleString('vi-VN');
+    }
+
+    // Helper: Quick Set input
+    function setInput(val) {
+      const input = document.getElementById('urlInput');
+      input.value = val;
+      input.focus();
+    }
+
+    // Paste button handler
+    document.getElementById('btnPaste').addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          document.getElementById('urlInput').value = text.trim();
+          analyzeTikTokUrl();
+        }
+      } catch (err) {
+        alert('Không thể đọc bộ nhớ tạm. Vui lòng nhấn Ctrl + V để dán.');
+      }
+    });
+
+    // Enter key trigger
+    document.getElementById('urlInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        analyzeTikTokUrl();
+      }
+    });
+
+    // Show error helper
+    function showError(msg) {
+      const errBox = document.getElementById('errorAlert');
+      const errMsg = document.getElementById('errorMessage');
+      errMsg.textContent = msg;
+      errBox.style.display = 'flex';
+      document.getElementById('loadingStatus').style.display = 'none';
+      document.getElementById('resultContainer').style.display = 'none';
+    }
+
+    function hideError() {
+      document.getElementById('errorAlert').style.display = 'none';
+    }
+
+    // Main Analyze Function
+    async function analyzeTikTokUrl() {
+      const input = document.getElementById('urlInput');
+      const url = input.value.trim();
+      hideError();
+
+      if (!url) {
+        showError('Vui lòng nhập hoặc dán đường dẫn TikTok / Douyin hợp lệ!');
+        return;
+      }
+
+      if (!url.includes('tiktok.com') && !url.includes('douyin.com')) {
+        showError('Đường dẫn không hợp lệ. Vui lòng sử dụng liên kết từ tiktok.com, vt.tiktok.com hoặc douyin.com!');
+        return;
+      }
+
+      // UI Loading State
+      const btn = document.getElementById('btnAnalyze');
+      const loading = document.getElementById('loadingStatus');
+      const result = document.getElementById('resultContainer');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Đang Xử Lý...';
+      loading.style.display = 'block';
+      result.style.display = 'none';
+
+      // Pause existing video if any
+      const videoPlayer = document.getElementById('videoPlayer');
+      if (videoPlayer) {
+        videoPlayer.pause();
+        videoPlayer.src = '';
+      }
+
+      try {
+        const resp = await fetch('/api/tiktok/info', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url })
+        });
+
+        const data = await resp.json();
+        if (!data.ok) {
+          showError(data.error || 'Không thể trích xuất dữ liệu từ liên kết này.');
+          return;
+        }
+
+        currentPostData = data;
+        renderResult(data);
+
+        // Update URL query string without reloading
+        try {
+          const newUrl = window.location.pathname + '?url=' + encodeURIComponent(url);
+          window.history.replaceState({ path: newUrl }, '', newUrl);
+        } catch (_) {}
+
+      } catch (err) {
+        showError('Lỗi kết nối máy chủ: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Xem Trước & Tải';
+        loading.style.display = 'none';
+      }
+    }
+
+    // Render Preview and Download Options
+    function renderResult(data) {
+      const resultContainer = document.getElementById('resultContainer');
+      const videoLayout = document.getElementById('videoLayout');
+      const slideshowLayout = document.getElementById('slideshowLayout');
+
+      resultContainer.style.display = 'block';
+
+      if (data.type === 'slideshow') {
+        // RENDER SLIDESHOW
+        videoLayout.style.display = 'none';
+        slideshowLayout.style.display = 'grid';
+
+        slideImages = data.images || [];
+        currentSlideIdx = 0;
+
+        document.getElementById('photoAuthorAvatar').src = data.author.avatar || '/images/avatar-bot.jpg';
+        document.getElementById('photoAuthorName').textContent = data.author.nickname || 'TikTok User';
+        document.getElementById('photoAuthorTag').textContent = data.author.unique_id ? '@' + data.author.unique_id : '';
+        document.getElementById('photoTitle').textContent = data.title || 'Bộ ảnh TikTok';
+        document.getElementById('photoTotalCount').textContent = slideImages.length;
+        document.getElementById('photoLikes').textContent = formatNum(data.stats.likes);
+        document.getElementById('photoComments').textContent = formatNum(data.stats.comments);
+        document.getElementById('photoShares').textContent = formatNum(data.stats.shares);
+        document.getElementById('photoMusicTitle').textContent = data.music.title || 'Âm thanh nền';
+
+        // Set download music
+        const btnMusic = document.getElementById('btnDownloadPhotoMusic');
+        if (data.music.url) {
+          btnMusic.style.display = 'flex';
+          btnMusic.href = `/api/tiktok/download?url=${encodeURIComponent(data.music.url)}&filename=tiktok_audio_${data.id}.mp3`;
+        } else {
+          btnMusic.style.display = 'none';
+        }
+
+        document.getElementById('zipCountBadge').textContent = `${slideImages.length} ảnh`;
+
+        // Render thumbs
+        renderThumbnails();
+        updateSlideView();
+
+      } else {
+        // RENDER VIDEO
+        slideshowLayout.style.display = 'none';
+        videoLayout.style.display = 'grid';
+
+        const player = document.getElementById('videoPlayer');
+        const playUrl = data.video.hd || data.video.sd || '';
+        player.src = playUrl;
+        player.poster = data.cover || '';
+        player.load();
+
+        document.getElementById('videoAuthorAvatar').src = data.author.avatar || '/images/avatar-bot.jpg';
+        document.getElementById('videoAuthorName').textContent = data.author.nickname || 'TikTok User';
+        document.getElementById('videoAuthorTag').textContent = data.author.unique_id ? '@' + data.author.unique_id : '';
+        document.getElementById('videoTitle').textContent = data.title || 'Video TikTok';
+        document.getElementById('videoLikes').textContent = formatNum(data.stats.likes);
+        document.getElementById('videoComments').textContent = formatNum(data.stats.comments);
+        document.getElementById('videoShares').textContent = formatNum(data.stats.shares);
+        document.getElementById('videoViews').textContent = formatNum(data.stats.views);
+        document.getElementById('videoDuration').textContent = (data.duration || 0) + 's';
+        document.getElementById('videoMusicTitle').textContent = data.music.title || 'Âm thanh gốc';
+
+        // Setup Download Buttons
+        const btnHd = document.getElementById('btnDownloadHd');
+        const btnSd = document.getElementById('btnDownloadSd');
+        const btnWm = document.getElementById('btnDownloadWm');
+        const btnMusic = document.getElementById('btnDownloadMusic');
+
+        // HD Button
+        if (data.video.hd) {
+          btnHd.style.display = 'flex';
+          btnHd.href = `/api/tiktok/download?url=${encodeURIComponent(data.video.hd)}&filename=tiktok_hd_${data.id}.mp4`;
+          if (data.video.hd_size) {
+            document.getElementById('sizeBadgeHd').textContent = (data.video.hd_size / 1024 / 1024).toFixed(1) + ' MB';
+          }
+        } else if (data.video.sd) {
+          btnHd.style.display = 'flex';
+          btnHd.href = `/api/tiktok/download?url=${encodeURIComponent(data.video.sd)}&filename=tiktok_hd_${data.id}.mp4`;
+        } else {
+          btnHd.style.display = 'none';
+        }
+
+        // SD Button
+        if (data.video.sd) {
+          btnSd.style.display = 'flex';
+          btnSd.href = `/api/tiktok/download?url=${encodeURIComponent(data.video.sd)}&filename=tiktok_sd_${data.id}.mp4`;
+          if (data.video.sd_size) {
+            document.getElementById('sizeBadgeSd').textContent = (data.video.sd_size / 1024 / 1024).toFixed(1) + ' MB';
+          }
+        } else {
+          btnSd.style.display = 'none';
+        }
+
+        // Watermark Button
+        if (data.video.wm) {
+          btnWm.style.display = 'flex';
+          btnWm.href = `/api/tiktok/download?url=${encodeURIComponent(data.video.wm)}&filename=tiktok_wm_${data.id}.mp4`;
+        } else {
+          btnWm.style.display = 'none';
+        }
+
+        // MP3 Audio Button
+        if (data.music.url) {
+          btnMusic.style.display = 'flex';
+          btnMusic.href = `/api/tiktok/download?url=${encodeURIComponent(data.music.url)}&filename=tiktok_audio_${data.id}.mp3`;
+        } else {
+          btnMusic.style.display = 'none';
+        }
+      }
+
+      // Scroll smoothly to results
+      resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Slideshow functions
+    function renderThumbnails() {
+      const container = document.getElementById('thumbStrip');
+      container.innerHTML = '';
+      slideImages.forEach((imgUrl, idx) => {
+        const item = document.createElement('div');
+        item.className = 'tk-thumb-item' + (idx === currentSlideIdx ? ' active' : '');
+        item.onclick = () => {
+          currentSlideIdx = idx;
+          updateSlideView();
+        };
+        const img = document.createElement('img');
+        img.src = imgUrl;
+        img.alt = 'Thumb ' + (idx + 1);
+        item.appendChild(img);
+        container.appendChild(item);
+      });
+    }
+
+    function updateSlideView() {
+      if (!slideImages.length) return;
+      const imgElem = document.getElementById('mainPhoto');
+      imgElem.src = slideImages[currentSlideIdx];
+
+      document.getElementById('photoCounter').textContent = `Ảnh ${currentSlideIdx + 1} / ${slideImages.length}`;
+      document.getElementById('btnSlidePrev').disabled = (currentSlideIdx === 0);
+      document.getElementById('btnSlideNext').disabled = (currentSlideIdx === slideImages.length - 1);
+
+      // Update current photo download button
+      const currentUrl = slideImages[currentSlideIdx];
+      const btnCur = document.getElementById('btnDownloadCurrentPhoto');
+      btnCur.href = `/api/tiktok/download?url=${encodeURIComponent(currentUrl)}&filename=tiktok_photo_${currentPostData.id}_${currentSlideIdx + 1}.jpg`;
+      document.getElementById('photoDownloadCurrentBadge').textContent = `Ảnh ${currentSlideIdx + 1}`;
+
+      // Update thumb selection
+      const thumbs = document.querySelectorAll('.tk-thumb-item');
+      thumbs.forEach((el, idx) => {
+        if (idx === currentSlideIdx) {
+          el.classList.add('active');
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    }
+
+    function prevSlide() {
+      if (currentSlideIdx > 0) {
+        currentSlideIdx--;
+        updateSlideView();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlideIdx < slideImages.length - 1) {
+        currentSlideIdx++;
+        updateSlideView();
+      }
+    }
+
+    // Keyboard Arrow Keys Navigation
+    window.addEventListener('keydown', (e) => {
+      const slideshowLayout = document.getElementById('slideshowLayout');
+      if (slideshowLayout.style.display !== 'none' && slideImages.length > 0) {
+        if (e.key === 'ArrowLeft') prevSlide();
+        if (e.key === 'ArrowRight') nextSlide();
+      }
+    });
+
+    // Download All Photos as ZIP
+    async function downloadAllPhotosZip() {
+      if (!currentPostData || !slideImages.length) return;
+      const btn = document.getElementById('btnDownloadZip');
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Đang nén ZIP...';
+
+      try {
+        const resp = await fetch('/api/tiktok/download-zip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            images: slideImages,
+            title: currentPostData.title || 'tiktok_photos'
+          })
+        });
+
+        if (!resp.ok) {
+          throw new Error('Lỗi từ máy chủ (' + resp.status + ')');
+        }
+
+        const blob = await resp.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = downloadUrl;
+        a.download = `tiktok_album_${currentPostData.id || Date.now()}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        a.remove();
+      } catch (err) {
+        alert('Không thể tạo file ZIP: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+    }
+
+    // Auto-load if URL query param is present on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const urlParam = params.get('url');
+      if (urlParam) {
+        document.getElementById('urlInput').value = urlParam;
+        analyzeTikTokUrl();
+      }
+    });
+  </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>
+

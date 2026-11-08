@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>👤 Tài khoản — Sakura Bot</title>
+<script>
+    (function(){
+        const t = localStorage.getItem('sakura_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+    })();
+</script>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/images/avatar-bot.jpg">
+<style>
+.account-nav{position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;transition:.3s}
+.account-wrap{max-width:900px;margin:0 auto;padding:36px 24px}
+.tabs{display:flex;gap:8px;background:rgba(255,255,255,0.06);padding:6px;border-radius:14px;margin:20px 0;border:1px solid var(--border-subtle)}
+[data-theme="light"] .tabs{background:rgba(0,0,0,0.04)}
+.tab{flex:1;padding:11px;border-radius:10px;border:none;background:transparent;color:var(--text-muted);font-weight:600;cursor:pointer;transition:all .2s ease}
+.tab.active{background:var(--sakura-gradient);color:#fff;box-shadow:0 4px 15px rgba(255,121,198,0.35)}
+.pane{display:none}.pane.active{display:block;animation:fadeIn .2s}
+.info-card{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:18px;padding:26px;box-shadow:var(--shadow-card);backdrop-filter:blur(16px)}
+.avatar{width:72px;height:72px;border-radius:18px;border:2.5px solid var(--sakura-pink);object-fit:cover;box-shadow:0 0 15px rgba(255,121,198,0.3)}
+@media(max-width:768px){
+  .account-nav{padding:10px 14px; flex-wrap:wrap; gap:10px}
+  .account-wrap{padding:16px}
+  .tabs{flex-wrap:wrap}
+  #pane-view .info-card div[style*="grid-template-columns"]{grid-template-columns:1fr !important}
+  .info-card{padding:18px}
+  #pane-change div[style*="display:flex"]{flex-direction:column; align-items:stretch !important}
+}
+</style>
+</head>
+<body>
+<nav class="account-nav">
+  <a href="/" style="display:flex;gap:12px;align-items:center;text-decoration:none">
+    <div class="avatar-aura-wrapper">
+      <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" class="bot-avatar-animated" style="width:36px;height:36px;border-radius:10px;border:2px solid var(--sakura-pink)" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+    </div>
+    <span style="font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Sakura Bot</span>
+    <span style="color:var(--text-muted)">/ Tài khoản</span>
+  </a>
+  <div style="display:flex;gap:10px;align-items:center">
+    <button class="theme-toggle-btn" aria-label="Đổi giao diện">
+      <span class="theme-icon">🌙</span>
+    </button>
+            <div class="lang-switch-dropdown">
+                <button type="button" class="lang-switch-btn" aria-label="Đổi ngôn ngữ" title="Ngôn ngữ / Language">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VI</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div class="lang-menu">
+                    <button type="button" class="lang-option active" data-lang="vi"><span>🇻🇳 Tiếng Việt</span><span class="lang-check">✓</span></button>
+                    <button type="button" class="lang-option" data-lang="en"><span>🇬🇧 English</span><span class="lang-check"></span></button>
+                    <button type="button" class="lang-option" data-lang="ja"><span>🇯🇵 日本語</span><span class="lang-check"></span></button>
+                </div>
+            </div>
+    <a href="/dashboard" class="btn btn-secondary btn-sm">Dashboard</a>
+    <a href="/" class="btn btn-secondary btn-sm">Trang chủ</a>
+    <button class="btn btn-secondary btn-sm" onclick="doLogout()">Đăng xuất</button>
+  </div>
+</nav>
+
+<div class="account-wrap">
+  <div class="tabs">
+    <button class="tab active" data-pane="view" onclick="switchPane('view')">Thông tin</button>
+    <button class="tab" data-pane="change" onclick="switchPane('change')">Đổi thông tin</button>
+    <button class="tab" data-pane="achievements" onclick="switchPane('achievements')">🏆 Thành Tựu & Danh Hiệu</button>
+  </div>
+
+  <!-- View -->
+  <div id="pane-view" class="pane active">
+    <div class="info-card">
+      <div style="display:flex;gap:18px;align-items:center">
+        <div class="avatar-aura-wrapper">
+          <img id="accAvatar" class="avatar bot-avatar-animated" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="avatar">
+        </div>
+        <div>
+          <h2 id="accUsername" style="font-size:1.5rem;font-weight:800">—</h2>
+          <div id="accRole" class="badge badge-sakura" style="margin-top:6px;display:inline-block">—</div>
+          <div id="accDiscordTag" style="color:var(--text-muted);font-size:.9rem;margin-top:4px">—</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px">
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)"><div style="color:var(--text-muted);font-size:.8rem">Discord ID</div><div id="accDiscordId" style="font-weight:600;margin-top:2px">—</div></div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)"><div style="color:var(--text-muted);font-size:.8rem">Ngày tạo</div><div id="accCreated" style="font-weight:600;margin-top:2px">—</div></div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)"><div style="color:var(--text-muted);font-size:.8rem">Server quản lý</div><div id="accGuilds" style="font-weight:600;margin-top:2px">—</div></div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)"><div style="color:var(--text-muted);font-size:.8rem">Loại tài khoản</div><div id="accType" style="font-weight:600;margin-top:2px">—</div></div>
+      </div>
+
+      <!-- Financial Info Section -->
+      <h3 style="margin-top:24px;font-size:1.1rem;display:flex;align-items:center;gap:8px">💳 Thông tin tài chính</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:14px;margin-top:12px">
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)">
+          <div style="color:var(--text-muted);font-size:.8rem">🪙 Ví Coins</div>
+          <div id="accCoins" style="font-weight:700;font-size:1.1rem;color:var(--accent-gold, #ffb86c);margin-top:4px">0 coins</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)">
+          <div style="color:var(--text-muted);font-size:.8rem">🏦 Ngân hàng</div>
+          <div id="accBank" style="font-weight:700;font-size:1.1rem;color:#8be9fd;margin-top:4px">0 coins</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)">
+          <div style="color:var(--text-muted);font-size:.8rem">✨ Xu VIP</div>
+          <div id="accXu" style="font-weight:700;font-size:1.1rem;color:var(--sakura-pink, #ff79c6);margin-top:4px">0 xu</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)">
+          <div style="color:var(--text-muted);font-size:.8rem">💎 Tổng tài sản</div>
+          <div id="accNetworth" style="font-weight:700;font-size:1.1rem;color:#50fa7b;margin-top:4px">0 coins</div>
+        </div>
+      </div>
+
+      <!-- Trạng thái liên kết Minecraft & Hôn nhân -->
+      <h3 style="margin-top:24px;font-size:1.1rem;display:flex;align-items:center;gap:8px">✨ Trạng thái kết nối & Xã hội</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px;margin-top:12px">
+        <!-- Minecraft Card -->
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:16px;border:1px solid var(--border-subtle);display:flex;gap:14px;align-items:center;">
+          <img id="accMcAvatar" src="https://mc-heads.net/avatar/Steve/64" alt="MC Avatar" style="width:52px;height:52px;border-radius:10px;border:1px solid var(--border-subtle);background:#222;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-weight:700;font-size:0.95rem;">🎮 Minecraft Plugin</span>
+              <span id="accMcBadge" class="badge" style="font-size:0.72rem;background:rgba(255,255,255,0.08);">Chưa liên kết</span>
+            </div>
+            <div id="accMcName" style="color:var(--text-main);font-size:0.88rem;margin-top:4px;font-weight:600;">—</div>
+            <div id="accMcHint" style="color:var(--text-dim);font-size:0.75rem;margin-top:2px;">Dùng lệnh <code>/link</code> trong game để kết nối</div>
+          </div>
+        </div>
+
+        <!-- Marriage Card -->
+        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:16px;border:1px solid var(--border-subtle);display:flex;gap:14px;align-items:center;">
+          <div style="font-size:2.5rem;line-height:1;">💍</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-weight:700;font-size:0.95rem;">💒 Hôn Nhân & Cặp Đôi</span>
+              <span id="accMarriageBadge" class="badge" style="font-size:0.72rem;background:rgba(255,255,255,0.08);">Độc thân</span>
+            </div>
+            <div id="accMarriagePartner" style="color:var(--sakura-pink);font-size:0.88rem;margin-top:4px;font-weight:600;">Đang độc thân</div>
+            <div id="accMarriageDetails" style="color:var(--text-dim);font-size:0.75rem;margin-top:2px;">Dùng lệnh <code>s!wedding</code> trên Discord để kết duyên</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change info -->
+  <div id="pane-change" class="pane">
+    <div class="info-card">
+      <h3 style="font-size:1.2rem;margin-bottom:6px">🖼️ Đổi avatar</h3>
+      <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:16px">Chọn ảnh GIF, PNG, JPG, WEBP (tối đa 5MB). Hỗ trợ GIF động.</p>
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
+        <img id="avatarPreview" class="avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="preview" style="width:84px;height:84px">
+        <div style="flex:1">
+          <input type="file" id="avatarFile" accept="image/gif,image/png,image/jpeg,image/webp,image/jpg" class="form-control" onchange="previewAvatar(event)">
+          <div id="avatarHint" style="color:var(--text-dim);font-size:.8rem;margin-top:6px">Hỗ trợ GIF động (nếu file là GIF sẽ giữ animation)</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="uploadAvatar()">📤 Tải lên avatar</button>
+      <div id="avatarMsg" style="margin-top:10px;font-size:.9rem"></div>
+    </div>
+    <div class="info-card" style="margin-top:18px">
+      <h3 style="font-size:1.2rem;margin-bottom:6px">✏️ Đổi tên hiển thị</h3>
+      <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:16px">Đổi tên tài khoản. Không được trùng với người khác.</p>
+      <div class="form-group"><label>Tên mới</label><input type="text" id="newUsername" class="form-control" placeholder="tên mới (≥3 ký tự)"></div>
+      <button class="btn btn-primary" onclick="doChange()">💾 Lưu thay đổi</button>
+      <div id="changeMsg" style="margin-top:10px;font-size:.9rem"></div>
+    </div>
+  </div>
+
+  <!-- Pane Achievements -->
+  <div id="pane-achievements" class="pane">
+    <div class="info-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h3 style="font-size:1.3rem; margin:0; display:flex; align-items:center; gap:8px;">
+            <i>🏆</i> Thành Tựu & Danh Hiệu Minigame
+          </h3>
+          <div style="color:var(--text-muted); font-size:.85rem; margin-top:4px;">
+            Khám phá thế giới Sakura Bot, hoàn thành thử thách và nhận thưởng Coin, Xu VIP cùng Danh hiệu độc quyền.
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="loadAchievements()">🔄 Làm mới</button>
+      </div>
+
+      <!-- Discord Link Alert -->
+      <div id="achDiscordNotice" style="display:none; margin-top:16px; background:rgba(255, 183, 77, 0.12); border:1px solid rgba(255, 183, 77, 0.35); border-radius:10px; padding:12px 16px; font-size:0.88rem; color:#ffd777;">
+        ℹ️ <i>Tài khoản hiện chưa liên kết Discord. Hãy liên kết tài khoản Discord ở tab <strong>Hồ Sơ</strong> để đồng bộ tiến độ và tự động nhận thưởng Coins / Xu khi chơi minigame! Dưới đây là danh mục toàn bộ thành tựu của bot:</i>
+      </div>
+
+      <!-- Progress bar -->
+      <div style="margin-top:20px; background:rgba(255,255,255,0.04); border-radius:14px; padding:18px; border:1px solid var(--border-subtle);">
+        <div style="display:flex; justify-content:space-between; font-weight:700; font-size:.95rem;">
+          <span>Tiến độ hoàn thành: <strong id="achProgressText" style="color:var(--sakura-pink);">0 / 0</strong></span>
+          <span id="achProgressPct" style="color:#50fa7b;">0%</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.08); border-radius:10px; height:12px; overflow:hidden; margin-top:10px;">
+          <div id="achProgressBar" style="background:var(--sakura-gradient); height:100%; width:0%; transition:width .6s ease;"></div>
+        </div>
+        <div style="display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; font-size:.85rem;">
+          <span>🪙 Coins tích lũy: <strong id="achEarnedCoins" style="color:#ffd700;">0</strong></span>
+          <span>💎 Xu VIP: <strong id="achEarnedXu" style="color:#8be9fd;">0</strong></span>
+          <span>🏷️ Danh hiệu: <strong id="achTitlesCount" style="color:var(--sakura-pink);">0</strong></span>
+        </div>
+      </div>
+
+      <!-- Titles Section -->
+      <div id="achTitlesSection" style="margin-top:20px; display:none;">
+        <h4 style="font-size:1rem; margin-bottom:10px;">🏷️ Danh Hiệu Đã Mở Khóa</h4>
+        <div id="achTitlesList" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+      </div>
+
+      <!-- Categories Filter -->
+      <div style="margin-top:24px; display:flex; gap:8px; flex-wrap:wrap;" id="achCatPills">
+        <button class="btn btn-secondary btn-sm" data-cat="all" onclick="filterAchCategory('all')" style="background:var(--sakura-gradient); color:#fff;">🌟 Tất Cả</button>
+        <button class="btn btn-secondary btn-sm" data-cat="fishing" onclick="filterAchCategory('fishing')">🎣 Câu Cá</button>
+        <button class="btn btn-secondary btn-sm" data-cat="mining" onclick="filterAchCategory('mining')">⛏️ Đào Khoáng</button>
+        <button class="btn btn-secondary btn-sm" data-cat="farming" onclick="filterAchCategory('farming')">🌾 Nông Trại</button>
+        <button class="btn btn-secondary btn-sm" data-cat="casino_gacha" onclick="filterAchCategory('casino_gacha')">🎲 Casino & Gacha</button>
+        <button class="btn btn-secondary btn-sm" data-cat="words_trivia" onclick="filterAchCategory('words_trivia')">🧵 Nối Từ & Đố Vui</button>
+        <button class="btn btn-secondary btn-sm" data-cat="social_level" onclick="filterAchCategory('social_level')">💖 Xã Hội & Cấp Độ</button>
+      </div>
+
+      <!-- Achievement Cards Grid -->
+      <div id="achCardsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px; margin-top:18px;">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Sakura FX Engine (Petals + Swaying Branches + Theme) -->
+<script src="/static/js/sakura-fx.js"></script>
+    <script src="/static/js/i18n.js"></script>
+
+<script>
+function showToast(m,t='info'){const c=document.getElementById('toastContainer');if(!c)return;const d=document.createElement('div');d.className='toast-message';let i='🌸';if(t==='success')i='✅';if(t==='error')i='❌';if(t==='warning')i='⚠️';d.innerHTML=`<span>${i}</span><span>${m}</span>`;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transform='translateY(10px)';d.style.transition='all .3s';setTimeout(()=>d.remove(),300)},4000)}
+function getToken(){return localStorage.getItem('sakura_auth_token') || localStorage.getItem('token') || (document.cookie.match(/sakura_token=([^;]+)/)||[])[1] || '';}
+function doLogout(){const t=getToken(); fetch('/api/auth/logout',{method:'POST',headers:t?{'Authorization':'Bearer '+t}:{}}).finally(()=>{localStorage.removeItem('sakura_auth_token');document.cookie='sakura_token=; path=/; max-age=0'; location.href='/login';});}
+function switchPane(n){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.pane===n));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.id==='pane-'+n));
+  if(n === 'achievements') loadAchievements();
+}
+
+let allAchievements = [];
+let userUnlockedAch = {};
+let currentAchCat = 'all';
+
+async function loadAchievements() {
+  const t = getToken();
+  if (!t) return;
+  const grid = document.getElementById('achCardsGrid');
+  if (grid) grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--text-muted);">⏳ Đang đồng bộ và kiểm tra thành tựu...</div>';
+
+  try {
+    const r = await fetch('/api/account/achievements', {headers: {'Authorization': 'Bearer ' + t}});
+    const j = await r.json();
+    if (!j.ok) {
+      if (grid) grid.innerHTML = `<div style="grid-column:1/-1; color:var(--accent-red);">${j.error || 'Lỗi tải thành tựu'}</div>`;
+      return;
+    }
+
+    const notice = document.getElementById('achDiscordNotice');
+    if (!j.has_discord) {
+      if (notice) notice.style.display = 'block';
+    } else {
+      if (notice) notice.style.display = 'none';
+    }
+
+    allAchievements = j.catalog || [];
+    userUnlockedAch = j.unlocked || {};
+    const titles = j.titles || [];
+
+    const totalAll = j.total_all || allAchievements.length;
+    const totalUser = j.total_user || Object.keys(userUnlockedAch).length;
+    const pct = j.percentage !== undefined ? j.percentage : (totalAll ? Math.round((totalUser / totalAll) * 100) : 0);
+
+    document.getElementById('achProgressText').innerText = `${totalUser} / ${totalAll}`;
+    document.getElementById('achProgressPct').innerText = `${pct}%`;
+    document.getElementById('achProgressBar').style.width = `${pct}%`;
+
+    let earnedCoins = 0;
+    let earnedXu = 0;
+    allAchievements.forEach(a => {
+      if (userUnlockedAch[a.id]) {
+        earnedCoins += (a.reward_coins || 0);
+        earnedXu += (a.reward_xu || 0);
+      }
+    });
+
+    document.getElementById('achEarnedCoins').innerText = earnedCoins.toLocaleString() + ' coins';
+    document.getElementById('achEarnedXu').innerText = earnedXu.toLocaleString() + ' xu';
+    document.getElementById('achTitlesCount').innerText = titles.length + ' danh hiệu';
+
+    const titlesSec = document.getElementById('achTitlesSection');
+    const titlesList = document.getElementById('achTitlesList');
+    if (titles.length > 0) {
+      titlesSec.style.display = 'block';
+      titlesList.innerHTML = titles.map(tit => {
+        return `<span class="badge badge-sakura" style="font-size:0.85rem; padding:6px 12px; font-weight:700;">🏷️ [${tit}]</span>`;
+      }).join('');
+    } else {
+      titlesSec.style.display = 'none';
+    }
+
+    renderAchCards();
+  } catch (e) {
+    console.error(e);
+    if (grid) grid.innerHTML = `<div style="grid-column:1/-1; color:var(--accent-red);">Lỗi: ${e.message}</div>`;
+  }
+}
+
+function filterAchCategory(cat) {
+  currentAchCat = cat;
+  document.querySelectorAll('#achCatPills button').forEach(b => {
+    b.style.background = (b.dataset.cat === cat) ? 'var(--sakura-gradient)' : '';
+    b.style.color = (b.dataset.cat === cat) ? '#fff' : '';
+  });
+  renderAchCards();
+}
+
+function renderAchCards() {
+  const grid = document.getElementById('achCardsGrid');
+  if (!grid) return;
+
+  const filtered = allAchievements.filter(a => {
+    if (currentAchCat !== 'all' && a.category !== currentAchCat) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--text-muted);">Không có thành tựu nào trong danh mục này.</div>';
+    return;
+  }
+
+  filtered.sort((a, b) => {
+    const aUnlocked = !!userUnlockedAch[a.id];
+    const bUnlocked = !!userUnlockedAch[b.id];
+    if (aUnlocked && !bUnlocked) return -1;
+    if (!aUnlocked && bUnlocked) return 1;
+    return 0;
+  });
+
+  grid.innerHTML = filtered.map(a => {
+    const isUnlocked = !!userUnlockedAch[a.id];
+    const unlockTime = userUnlockedAch[a.id];
+    const timeStr = unlockTime ? new Date(unlockTime * 1000).toLocaleDateString('vi-VN') : '';
+
+    const rewards = [];
+    if (a.reward_coins) rewards.push(`🪙 <strong>${a.reward_coins.toLocaleString()}</strong>c`);
+    if (a.reward_xu) rewards.push(`💎 <strong>${a.reward_xu}</strong>x`);
+    if (a.reward_title) rewards.push(`🏷️ [${a.reward_title}]`);
+    const rewStr = rewards.length ? rewards.join(' • ') : 'Danh dự';
+
+    return `
+      <div style="background:rgba(255,255,255,${isUnlocked ? '0.06' : '0.02'}); border:1px solid ${isUnlocked ? 'rgba(255,121,198,0.35)' : 'var(--border-subtle)'}; border-radius:14px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden; opacity:${isUnlocked ? '1' : '0.65'};">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <span style="font-size:1.8rem;">${a.icon || '🏆'}</span>
+            <span class="badge ${isUnlocked ? 'badge-sakura' : ''}" style="font-size:0.7rem; ${!isUnlocked ? 'background:rgba(255,255,255,0.06); color:var(--text-muted);' : ''}">
+              ${isUnlocked ? '✅ Đã Đạt' : '🔒 Chưa Mở'}
+            </span>
+          </div>
+          <div style="font-weight:700; font-size:1rem; color:${isUnlocked ? 'var(--text-main, #fff)' : 'var(--text-muted)'}; margin-bottom:4px;">
+            ${a.name}
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">
+            ${a.desc || '—'}
+          </div>
+        </div>
+        <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px; font-size:0.75rem;">
+          <div style="color:var(--text-muted);">Phần thưởng: <span style="color:var(--text-main);">${rewStr}</span></div>
+          ${isUnlocked && timeStr ? `<div style="color:#50fa7b; font-size:0.72rem; margin-top:4px;">✨ Đạt ngày: ${timeStr}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+async function loadMe(){
+  const t=getToken();
+  if(!t){location.href='/login';return;}
+  try{
+    const r=await fetch('/api/account/info',{headers:{'Authorization':'Bearer '+t}});
+    if(r.status===401){location.href='/login';return;}
+    const j=await r.json();
+    if(!j.ok){showToast(j.error||'Lỗi tải info','error');return;}
+    const u=j.info || j.user || {};
+    const isAdmin = u.role === 'admin' || u.is_admin === true;
+    const avatarUrl = u.avatar || u.avatar_url || 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+    document.getElementById('accUsername').innerText = u.username || '—';
+    document.getElementById('accRole').innerText = isAdmin ? '👑 Quản trị viên (Admin)' : '👤 Người dùng (User)';
+    document.getElementById('accRole').className = isAdmin ? 'badge badge-sakura' : 'badge badge-green';
+    document.getElementById('accAvatar').src = avatarUrl;
+    document.getElementById('avatarPreview').src = avatarUrl;
+    document.getElementById('accDiscordId').innerText = u.discord_id || 'Chưa liên kết';
+    document.getElementById('accDiscordTag').innerText = u.discord_tag ? ('Discord: ' + u.discord_tag) : (u.discord_id ? 'Đã liên kết' : '—');
+    document.getElementById('accCreated').innerText = u.created_at ? new Date(u.created_at * 1000).toLocaleString('vi-VN') : '—';
+    
+    let guildCountText = '0 server';
+    if (isAdmin) {
+      guildCountText = 'Tất cả (Admin)';
+    } else if (Array.isArray(u.guilds_filter)) {
+      guildCountText = u.guilds_filter.length + ' server';
+    } else if (u.guild_count !== undefined) {
+      guildCountText = u.guild_count + ' server';
+    }
+    document.getElementById('accGuilds').innerText = guildCountText;
+    document.getElementById('accType').innerText = u.discord_id ? 'Tài khoản Discord OAuth' : 'Tài khoản thường (Web)';
+    document.getElementById('newUsername').value = u.username || '';
+
+    const fin = u.finance || {};
+    if (document.getElementById('accCoins')) {
+      document.getElementById('accCoins').innerText = (fin.coins || 0).toLocaleString() + ' coins';
+      document.getElementById('accBank').innerText = (fin.bank || 0).toLocaleString() + ' coins';
+      document.getElementById('accXu').innerText = (fin.xu || 0).toLocaleString() + ' xu';
+      document.getElementById('accNetworth').innerText = (fin.networth || 0).toLocaleString() + ' coins';
+    }
+
+    // Minecraft link
+    const mc = u.mc_link || {};
+    if (document.getElementById('accMcName')) {
+      if (mc.linked && mc.minecraft_name) {
+        document.getElementById('accMcName').innerText = mc.minecraft_name;
+        document.getElementById('accMcAvatar').src = `https://mc-heads.net/avatar/${encodeURIComponent(mc.minecraft_name)}/64`;
+        document.getElementById('accMcBadge').className = 'badge badge-success';
+        document.getElementById('accMcBadge').innerText = '🟢 Đã liên kết';
+        document.getElementById('accMcHint').innerText = `UUID: ${mc.minecraft_uuid || '—'}`;
+      } else {
+        document.getElementById('accMcName').innerText = 'Chưa liên kết Minecraft';
+        document.getElementById('accMcAvatar').src = 'https://mc-heads.net/avatar/Steve/64';
+        document.getElementById('accMcBadge').className = 'badge';
+        document.getElementById('accMcBadge').innerText = 'Chưa liên kết';
+        document.getElementById('accMcHint').innerHTML = 'Vào server MC gõ <code>/link</code> để kết nối';
+      }
+    }
+
+    // Marriage status
+    const m = u.marriage || {};
+    if (document.getElementById('accMarriagePartner')) {
+      if (m.is_married) {
+        document.getElementById('accMarriageBadge').className = 'badge badge-sakura';
+        document.getElementById('accMarriageBadge').innerText = '💖 Đã kết hôn';
+        document.getElementById('accMarriagePartner').innerText = `Bạn đời: ${m.partner_name || m.partner_id}`;
+        document.getElementById('accMarriageDetails').innerText = `${m.ring_name || '💍 Nhẫn'} • Bên nhau ${m.days || 0} ngày • ${m.affection || 0} Điểm tình cảm • Quỹ: ${(m.common_coins || 0).toLocaleString()} coins`;
+      } else {
+        document.getElementById('accMarriageBadge').className = 'badge';
+        document.getElementById('accMarriageBadge').innerText = 'Độc thân';
+        document.getElementById('accMarriagePartner').innerText = 'Đang độc thân';
+        document.getElementById('accMarriageDetails').innerHTML = 'Dùng lệnh <code>s!wedding</code> trên Discord để kết duyên';
+      }
+    }
+  }catch(e){
+    console.error(e);
+    showToast('Lỗi nạp thông tin: ' + e.message, 'error');
+  }
+}
+function previewAvatar(e){
+  const f=e.target.files[0];
+  if(!f) return;
+  if(f.size>5*1024*1024){showToast('Ảnh tối đa 5MB','warning');e.target.value='';return;}
+  const r=new FileReader();
+  r.onload=function(ev){document.getElementById('avatarPreview').src=ev.target.result;};
+  r.readAsDataURL(f);
+}
+async function uploadAvatar(){
+  const f=document.getElementById('avatarFile').files[0];
+  if(!f) return showToast('Hãy chọn file ảnh','warning');
+  const t=getToken();
+  const form=new FormData();
+  form.append('avatar',f);
+  try{
+    const r=await fetch('/api/account/avatar',{method:'POST',headers:{'Authorization':'Bearer '+t}, body:form});
+    const j=await r.json();
+    if(j.ok){
+      showToast('Cập nhật avatar thành công!','success');
+      const newAv = j.avatar || j.avatar_url;
+      if (newAv) {
+        document.getElementById('accAvatar').src = newAv;
+        document.getElementById('avatarPreview').src = newAv;
+      }
+      document.getElementById('avatarMsg').innerHTML='<span style="color:var(--accent-green)">✅ Đã cập nhật avatar thành công!</span>';
+    }else{
+      showToast(j.error||'Thất bại','error');
+      document.getElementById('avatarMsg').innerHTML='<span style="color:var(--accent-red)">❌ '+(j.error||'Lỗi')+'</span>';
+    }
+  }catch(e){showToast('Lỗi: '+e.message,'error')}
+}
+async function doChange(){
+  const t=getToken();
+  const newUsername=document.getElementById('newUsername').value.trim();
+  if(!newUsername||newUsername.length<3) return showToast('Tên phải ≥3 ký tự','warning');
+  const r=await fetch('/api/account/change',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t}, body: JSON.stringify({new_username:newUsername})});
+  const j=await r.json();
+  if(j.ok){
+    showToast('Đổi tên thành công','success');
+    setTimeout(()=> location.reload(), 800);
+  } else showToast(j.error||'Lỗi','error');
+  document.getElementById('changeMsg').innerText=j.message||j.error||'';
+}
+async function doReset(){
+  const t=getToken();
+  const oldPass=document.getElementById('oldPass').value;
+  const newPass=document.getElementById('newPass').value;
+  const newPass2=document.getElementById('newPass2').value;
+  if(newPass!==newPass2) return showToast('Mật khẩu nhập lại không khớp','warning');
+  if(newPass.length<4) return showToast('Mật khẩu ≥4 ký tự','warning');
+  const r=await fetch('/api/account/resetpass',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t}, body: JSON.stringify({old_password:oldPass, new_password:newPass})});
+  const j=await r.json();
+  if(j.ok) showToast('Đổi mật khẩu thành công','success');
+  else showToast(j.error||'Lỗi','error');
+  document.getElementById('resetMsg').innerText=j.message||j.error||'';
+}
+loadMe();
+</script>
+</body>
+</html>

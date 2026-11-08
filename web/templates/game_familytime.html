@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🐺 Family Time: Sinh Tồn Gia Đình Sói — Sakura Game</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f43a.png">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #121820;
+  color: #f1f5f9;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  user-select: none;
+}
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.header-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 12px;
+}
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #ff9ac2;
+}
+.header-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Canvas Area */
+#gameCanvas {
+  background: #223524;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  display: block;
+  max-width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+/* HUD Overlay */
+.hud-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+}
+.hud-top {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.hud-box {
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 14px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+.bars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 170px;
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.bar-track {
+  flex: 1;
+  height: 10px;
+  background: #334155;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  transition: width 0.2s ease;
+}
+.bar-hp { background: linear-gradient(90deg, #ef4444, #f87171); }
+.bar-stamina { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.bar-hunger { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+.inventory-bar {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 8px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+.inv-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.25rem;
+  position: relative;
+  transition: all 0.15s ease;
+}
+.inv-slot.active {
+  border-color: #ff9ac2;
+  box-shadow: 0 0 10px rgba(255, 154, 194, 0.4);
+  transform: translateY(-2px);
+}
+.inv-count {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+/* Modals & Dialogs */
+.game-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.game-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-content {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  text-align: center;
+}
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #ff9ac2;
+}
+.btn-game {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  margin: 6px;
+}
+.btn-game:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(225, 29, 72, 0.4);
+}
+.craft-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+  text-align: left;
+}
+.craft-item {
+  background: rgba(15, 23, 42, 0.6);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.craft-item.can-craft {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+/* Mobile Controls */
+.mobile-controls {
+  display: none;
+  position: absolute;
+  bottom: 80px;
+  left: 16px;
+  right: 16px;
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .mobile-controls { display: flex; justify-content: space-between; }
+  .joy-base {
+    width: 110px; height: 110px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    pointer-events: auto;
+    position: relative;
+    touch-action: none;
+  }
+  .joy-stick {
+    width: 45px; height: 45px;
+    background: #ff9ac2;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+  .btn-action-mobile {
+    width: 65px; height: 65px;
+    background: linear-gradient(135deg, #ff9ac2, #e11d48);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    pointer-events: auto;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+  <div class="header-bar">
+    <div class="header-title">
+      <span>🐺</span>
+      <span>Family Time: Sinh Tồn Nàng Sói</span>
+    </div>
+    <div class="header-stats">
+      <div class="stat-badge"><span>📅</span> <span id="dayLabel">Ngày 1</span></div>
+      <div class="stat-badge"><span>⏰</span> <span id="timeLabel">08:00 (Sáng)</span></div>
+      <div class="stat-badge"><span>🐾</span> <span id="pupsLabel">Đàn con: 1</span></div>
+      <a href="/games" class="btn btn-secondary btn-sm" style="text-decoration:none;padding:6px 14px;border-radius:20px;font-size:0.85rem">🎮 Trở về Game Hub</a>
+    </div>
+  </div>
+
+  <div class="hud-wrap">
+    <canvas id="gameCanvas" width="1000" height="600"></canvas>
+
+    <!-- Top HUD: Stats & Quest -->
+    <div class="hud-top">
+      <div class="hud-box">
+        <div class="bars-container">
+          <div class="bar-row">
+            <span>❤️ Máu:</span>
+            <div class="bar-track"><div id="hpFill" class="bar-fill bar-hp" style="width: 100%;"></div></div>
+          </div>
+          <div class="bar-row">
+            <span>⚡ Thể lực:</span>
+            <div class="bar-track"><div id="staminaFill" class="bar-fill bar-stamina" style="width: 100%;"></div></div>
+          </div>
+          <div class="bar-row">
+            <span>🍖 No:</span>
+            <div class="bar-track"><div id="hungerFill" class="bar-fill bar-hunger" style="width: 100%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wolf Mama & Family Status -->
+      <div class="hud-box" style="text-align: right;">
+        <div style="font-weight: 800; font-size: 0.95rem; color: #ff9ac2;">🐺 Nàng Sói (Vợ): <span id="mamaAffection">❤️ 100%</span></div>
+        <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 4px;">Tâm trạng: <span id="mamaMood" style="color:#4ade80">Hạnh phúc ✨</span></div>
+        <div style="font-size: 0.82rem; color: #fbbf24; margin-top: 2px;">Cơn đói đàn con: <span id="pupsHungerStatus">Bình yên 🍼</span></div>
+      </div>
+    </div>
+
+    <!-- Inventory Quick Bar -->
+    <div class="inventory-bar">
+      <div class="inv-slot" title="Gỗ (Chặt cây)"><span class="inv-icon">🪵</span><span class="inv-count" id="countWood">0</span></div>
+      <div class="inv-slot" title="Đá (Đập mỏ đá)"><span class="inv-icon">🪨</span><span class="inv-count" id="countStone">0</span></div>
+      <div class="inv-slot" title="Quả dại (Hái bụi cây)"><span class="inv-icon">🍓</span><span class="inv-count" id="countBerries">0</span></div>
+      <div class="inv-slot" title="Thịt tươi (Săn bắn)"><span class="inv-icon">🥩</span><span class="inv-count" id="countMeat">0</span></div>
+      <div class="inv-slot" title="Cá tươi (Câu cá)"><span class="inv-icon">🐟</span><span class="inv-count" id="countFish">0</span></div>
+      <button onclick="toggleCraftMenu()" class="inv-slot" style="background:#0284c7;cursor:pointer;border-color:#38bdf8" title="Chế Tạo & Xây Dựng (Phím C/E)">
+        <span>🔨</span>
+      </button>
+    </div>
+
+    <!-- Mobile Virtual Controls -->
+    <div class="mobile-controls">
+      <div class="joy-base" id="joyBase">
+        <div class="joy-stick" id="joyStick"></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-end">
+        <div class="btn-action-mobile" id="btnInteractMobile">⚔️</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instruction Guide -->
+  <div style="max-width:1000px;width:100%;margin-top:14px;background:rgba(30,41,59,0.7);padding:14px 20px;border-radius:12px;font-size:0.9rem;line-height:1.6;color:#cbd5e1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <strong style="color:#ff9ac2">🎮 Phím điều khiển:</strong>
+      <code style="background:#0f172a;padding:2px 6px;border-radius:4px">W A S D</code> hoặc phím Mũi tên: Di chuyển |
+      <code style="background:#0f172a;padding:2px 6px;border-radius:4px">Space / Click Chuột</code>: Chặt cây, Đập đá, Hái quả, Cho ăn |
+      <code style="background:#0f172a;padding:2px 6px;border-radius:4px">C / E</code>: Mở bảng Chế tạo
+    </div>
+    <div>
+      <strong style="color:#fbbf24">💡 Mục tiêu:</strong> Thu thập thức ăn & củi, xây nhà và chăm sóc Nàng Sói cùng đàn con sói ngày càng đông đúc!
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Chế Tạo & Xây Dựng -->
+<div class="game-modal" id="craftModal">
+  <div class="modal-content">
+    <div class="modal-title">🔨 Chế Tạo & Xây Dựng Căn Cứ</div>
+    <p style="color:#94a3b8;font-size:0.85rem">Xây dựng các công trình để bảo vệ gia đình và dự trữ thức ăn cho đàn con.</p>
+    
+    <div class="craft-grid">
+      <div class="craft-item" id="craft_fire">
+        <div>
+          <div style="font-weight:700">🔥 Lửa Trại (Campfire)</div>
+          <div style="font-size:0.75rem;color:#cbd5e1">Sưởi ấm ban đêm & tự động nướng thịt.</div>
+          <div style="font-size:0.75rem;color:#fbbf24;margin-top:4px">Yêu cầu: 5 Gỗ, 3 Đá</div>
+        </div>
+        <button class="btn-game" onclick="craftBuilding('fire')" style="padding:4px 10px;font-size:0.85rem;margin-top:6px">Xây Dựng</button>
+      </div>
+
+      <div class="craft-item" id="craft_basket">
+        <div>
+          <div style="font-weight:700">🧺 Giỏ Đựng Thức Ăn</div>
+          <div style="font-size:0.75rem;color:#cbd5e1">Chứa lương thực, đàn con sẽ tự đến ăn.</div>
+          <div style="font-size:0.75rem;color:#fbbf24;margin-top:4px">Yêu cầu: 8 Gỗ, 2 Quả dại</div>
+        </div>
+        <button class="btn-game" onclick="craftBuilding('basket')" style="padding:4px 10px;font-size:0.85rem;margin-top:6px">Xây Dựng</button>
+      </div>
+
+      <div class="craft-item" id="craft_crib">
+        <div>
+          <div style="font-weight:700">🪵 Nôi Em Bé (Baby Crib)</div>
+          <div style="font-size:0.75rem;color:#cbd5e1">Chỗ ngủ ấm áp, giúp đàn con bớt đói nhanh.</div>
+          <div style="font-size:0.75rem;color:#fbbf24;margin-top:4px">Yêu cầu: 15 Gỗ, 5 Đá</div>
+        </div>
+        <button class="btn-game" onclick="craftBuilding('crib')" style="padding:4px 10px;font-size:0.85rem;margin-top:6px">Xây Dựng</button>
+      </div>
+
+      <div class="craft-item" id="craft_cabin">
+        <div>
+          <div style="font-weight:700">🏠 Nhà Gỗ Lớn (Cabin)</div>
+          <div style="font-size:0.75rem;color:#cbd5e1">Tổ ấm hoàn hảo, Nàng Sói sinh con nhanh hơn!</div>
+          <div style="font-size:0.75rem;color:#fbbf24;margin-top:4px">Yêu cầu: 30 Gỗ, 15 Đá</div>
+        </div>
+        <button class="btn-game" onclick="craftBuilding('cabin')" style="padding:4px 10px;font-size:0.85rem;margin-top:6px">Xây Dựng</button>
+      </div>
+    </div>
+
+    <button class="btn-game" onclick="toggleCraftMenu()" style="background:#475569">Đóng (ESC)</button>
+  </div>
+</div>
+
+<!-- Modal: Game Over / Victory -->
+<div class="game-modal" id="gameOverModal">
+  <div class="modal-content">
+    <div class="modal-title" id="gameOverTitle">💀 Gia Đình Kiệt Sức!</div>
+    <p id="gameOverDesc" style="color:#cbd5e1;font-size:0.95rem;margin:12px 0;line-height:1.6"></p>
+    <div style="background:rgba(15,23,42,0.8);padding:12px;border-radius:12px;margin-bottom:16px">
+      <div>Sống sót: <strong id="resDays" style="color:#ff9ac2">0 ngày</strong></div>
+      <div>Đàn con đông nhất: <strong id="resPups" style="color:#fbbf24">0 con</strong></div>
+    </div>
+    <button class="btn-game" onclick="restartGame()">🔄 Thử Thách Lại</button>
+  </div>
+</div>
+
+<script>
+// ==============================================================================
+// 1. ÂM THANH NGUYÊN BẢN (WEB AUDIO SYNTHESIZER - KHÔNG CẦN TẢI FILE NGOÀI)
+// ==============================================================================
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playSound(type) {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  if (type === 'chop') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  } else if (type === 'mine') {
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    osc.start(now);
+    osc.stop(now + 0.1);
+  } else if (type === 'pickup') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  } else if (type === 'feed') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523, now);
+    osc.frequency.setValueAtTime(659, now + 0.08);
+    osc.frequency.setValueAtTime(783, now + 0.16);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+    osc.start(now);
+    osc.stop(now + 0.25);
+  } else if (type === 'birth') {
+    osc.type = 'sine';
+    [440, 554, 659, 880].forEach((freq, idx) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.frequency.setValueAtTime(freq, now + idx * 0.1);
+      g.gain.setValueAtTime(0.2, now + idx * 0.1);
+      g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
+      o.start(now + idx * 0.1);
+      o.stop(now + idx * 0.1 + 0.3);
+    });
+  }
+}
+
+// ==============================================================================
+// 2. KHỞI TẠO THẾ GIỚI GAME & THỰC THỂ
+// ==============================================================================
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const WORLD_WIDTH = 2000;
+const WORLD_HEIGHT = 1400;
+
+// Trạng thái nhân vật chính (Người cha)
+const player = {
+  x: 1000,
+  y: 700,
+  speed: 3.5,
+  hp: 100,
+  stamina: 100,
+  hunger: 100,
+  inventory: { wood: 10, stone: 5, berries: 8, meat: 0, fish: 0 },
+  facing: 'down'
+};
+
+// Nàng Sói (Wolf Mama)
+const mama = {
+  x: 960,
+  y: 650,
+  affection: 100,
+  hunger: 100,
+  pregnancyProgress: 0,
+  dialogue: "Anh yêu, hãy mang thêm thức ăn về cho các con nhé! ❤️",
+  dialogueTimer: 0
+};
+
+// Đàn con (Wolf Pups)
+let pups = [
+  { id: 1, x: 930, y: 680, hunger: 90, maxHunger: 100, age: 1, targetX: 930, targetY: 680, timer: 0 }
+];
+
+// Công trình đã xây
+let buildings = [
+  { type: 'fire', x: 1000, y: 650, hp: 100, fuel: 100 }
+];
+
+// Tài nguyên thiên nhiên (Cây, Đá, Quả)
+let resources = [];
+function spawnResources() {
+  resources = [];
+  // Cây gỗ
+  for (let i = 0; i < 45; i++) {
+    const rx = Math.random() * (WORLD_WIDTH - 200) + 100;
+    const ry = Math.random() * (WORLD_HEIGHT - 200) + 100;
+    if (Math.hypot(rx - 1000, ry - 700) > 160) {
+      resources.push({ type: 'tree', x: rx, y: ry, hp: 4, maxHp: 4 });
+    }
+  }
+  // Mỏ đá
+  for (let i = 0; i < 25; i++) {
+    const rx = Math.random() * (WORLD_WIDTH - 200) + 100;
+    const ry = Math.random() * (WORLD_HEIGHT - 200) + 100;
+    if (Math.hypot(rx - 1000, ry - 700) > 160) {
+      resources.push({ type: 'rock', x: rx, y: ry, hp: 5, maxHp: 5 });
+    }
+  }
+  // Bụi quả dại
+  for (let i = 0; i < 30; i++) {
+    const rx = Math.random() * (WORLD_WIDTH - 200) + 100;
+    const ry = Math.random() * (WORLD_HEIGHT - 200) + 100;
+    resources.push({ type: 'berry', x: rx, y: ry, count: 3 });
+  }
+}
+spawnResources();
+
+// Chu kỳ Thời gian & Ngày Đêm
+let gameTime = 8 * 60; // 08:00 sáng
+let gameDay = 1;
+const DAY_LENGTH = 150; // 150 giây thực = 1 ngày trong game
+let isGameOver = false;
+
+// Bàn phím
+const keys = {};
+window.addEventListener('keydown', e => {
+  initAudio();
+  keys[e.key.toLowerCase()] = true;
+  if (e.key.toLowerCase() === 'e' || e.key.toLowerCase() === 'c') toggleCraftMenu();
+  if (e.key === 'Escape') closeModals();
+});
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// Click / Tương tác chuột
+canvas.addEventListener('mousedown', e => {
+  initAudio();
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mouseScreenX = (e.clientX - rect.left) * scaleX;
+  const mouseScreenY = (e.clientY - rect.top) * scaleY;
+  
+  // Chuyển tọa độ màn hình sang tọa độ World
+  const cameraX = player.x - canvas.width / 2;
+  const cameraY = player.y - canvas.height / 2;
+  const targetWorldX = mouseScreenX + cameraX;
+  const targetWorldY = mouseScreenY + cameraY;
+
+  performInteract(targetWorldX, targetWorldY);
+});
+
+// ==============================================================================
+// 3. LOGIC TƯƠNG TÁC: CHẶT CÂY, ĐẬP ĐÁ, CHO ĂN
+// ==============================================================================
+function performInteract(targetX, targetY) {
+  if (isGameOver) return;
+
+  // 1. Tương tác với Nàng Sói (Wolf Mama)
+  if (Math.hypot(player.x - mama.x, player.y - mama.y) < 70) {
+    if (player.inventory.berries > 0 || player.inventory.meat > 0 || player.inventory.fish > 0) {
+      if (player.inventory.meat > 0) player.inventory.meat--;
+      else if (player.inventory.fish > 0) player.inventory.fish--;
+      else player.inventory.berries--;
+      
+      mama.affection = Math.min(100, mama.affection + 15);
+      mama.hunger = Math.min(100, mama.hunger + 25);
+      mama.dialogue = "Cảm ơn anh yêu! Em cảm thấy rất hạnh phúc và no bụng! 💕";
+      mama.dialogueTimer = 180;
+      playSound('feed');
+      updateHUD();
+      return;
+    } else {
+      mama.dialogue = "Anh cố lên nhé, chúng ta cần tích trữ đồ ăn cho đàn con!";
+      mama.dialogueTimer = 120;
+    }
+  }
+
+  // 2. Tương tác cho Đàn Con ăn trực tiếp
+  for (let pup of pups) {
+    if (Math.hypot(player.x - pup.x, player.y - pup.y) < 55) {
+      if (player.inventory.berries > 0 || player.inventory.meat > 0 || player.inventory.fish > 0) {
+        if (player.inventory.meat > 0) player.inventory.meat--;
+        else if (player.inventory.fish > 0) player.inventory.fish--;
+        else player.inventory.berries--;
+
+        pup.hunger = Math.min(pup.maxHunger, pup.hunger + 45);
+        playSound('feed');
+        showFloatingText(pup.x, pup.y - 20, "Ngon quá! 🍖", "#4ade80");
+        updateHUD();
+        return;
+      }
+    }
+  }
+
+  // 3. Tương tác Lửa trại (Thêm củi)
+  for (let b of buildings) {
+    if (b.type === 'fire' && Math.hypot(player.x - b.x, player.y - b.y) < 60) {
+      if (player.inventory.wood >= 1) {
+        player.inventory.wood--;
+        b.fuel = Math.min(100, b.fuel + 35);
+        playSound('chop');
+        showFloatingText(b.x, b.y - 20, "+Lửa ấm 🔥", "#fbbf24");
+        updateHUD();
+        return;
+      }
+    }
+  }
+
+  // 4. Khai thác tài nguyên gần nhất
+  let nearest = null;
+  let minDist = 75;
+
+  for (let r of resources) {
+    const d = Math.hypot(player.x - r.x, player.y - r.y);
+    if (d < minDist) {
+      minDist = d;
+      nearest = r;
+    }
+  }
+
+  if (nearest && player.stamina >= 5) {
+    player.stamina = Math.max(0, player.stamina - 6);
+
+    if (nearest.type === 'tree') {
+      nearest.hp--;
+      playSound('chop');
+      showFloatingText(nearest.x, nearest.y - 30, "Chặt! 🪓", "#facc15");
+      if (nearest.hp <= 0) {
+        player.inventory.wood += Math.floor(Math.random() * 3) + 3;
+        resources = resources.filter(x => x !== nearest);
+        playSound('pickup');
+      }
+    } else if (nearest.type === 'rock') {
+      nearest.hp--;
+      playSound('mine');
+      showFloatingText(nearest.x, nearest.y - 30, "Keng! ⛏️", "#94a3b8");
+      if (nearest.hp <= 0) {
+        player.inventory.stone += Math.floor(Math.random() * 3) + 2;
+        resources = resources.filter(x => x !== nearest);
+        playSound('pickup');
+      }
+    } else if (nearest.type === 'berry') {
+      player.inventory.berries += nearest.count;
+      resources = resources.filter(x => x !== nearest);
+      playSound('pickup');
+      showFloatingText(nearest.x, nearest.y - 30, `+${nearest.count} Quả 🍓`, "#f43f5e");
+    }
+    updateHUD();
+  }
+}
+
+// Text nổi hiệu ứng
+let floatingTexts = [];
+function showFloatingText(x, y, text, color = "#fff") {
+  floatingTexts.push({ x, y, text, color, life: 40 });
+}
+
+// ==============================================================================
+// 4. HỆ THỐNG XÂY DỰNG & CHẾ TẠO (CRAFTING)
+// ==============================================================================
+function toggleCraftMenu() {
+  const modal = document.getElementById("craftModal");
+  modal.classList.toggle("active");
+}
+function closeModals() {
+  document.getElementById("craftModal").classList.remove("active");
+}
+
+function craftBuilding(type) {
+  if (type === 'fire') {
+    if (player.inventory.wood >= 5 && player.inventory.stone >= 3) {
+      player.inventory.wood -= 5;
+      player.inventory.stone -= 3;
+      buildings.push({ type: 'fire', x: player.x, y: player.y, hp: 100, fuel: 100 });
+      playSound('pickup');
+      closeModals();
+    } else alert("Thiếu nguyên liệu: Cần 5 Gỗ và 3 Đá!");
+  } else if (type === 'basket') {
+    if (player.inventory.wood >= 8 && player.inventory.berries >= 2) {
+      player.inventory.wood -= 8;
+      player.inventory.berries -= 2;
+      buildings.push({ type: 'basket', x: player.x, y: player.y, foodStored: 5 });
+      playSound('pickup');
+      closeModals();
+    } else alert("Thiếu nguyên liệu: Cần 8 Gỗ và 2 Quả dại!");
+  } else if (type === 'crib') {
+    if (player.inventory.wood >= 15 && player.inventory.stone >= 5) {
+      player.inventory.wood -= 15;
+      player.inventory.stone -= 5;
+      buildings.push({ type: 'crib', x: player.x, y: player.y });
+      playSound('pickup');
+      closeModals();
+    } else alert("Thiếu nguyên liệu: Cần 15 Gỗ và 5 Đá!");
+  } else if (type === 'cabin') {
+    if (player.inventory.wood >= 30 && player.inventory.stone >= 15) {
+      player.inventory.wood -= 30;
+      player.inventory.stone -= 15;
+      buildings.push({ type: 'cabin', x: player.x, y: player.y });
+      playSound('birth');
+      closeModals();
+    } else alert("Thiếu nguyên liệu: Cần 30 Gỗ và 15 Đá!");
+  }
+  updateHUD();
+}
+
+// ==============================================================================
+// 5. VÒNG LẶP CHÍNH (GAME LOOP & CẬP NHẬT)
+// ==============================================================================
+function update() {
+  if (isGameOver) return;
+
+  // 1. Di chuyển nhân vật
+  let dx = 0; let dy = 0;
+  if (keys['w'] || keys['arrowup']) dy -= 1;
+  if (keys['s'] || keys['arrowdown']) dy += 1;
+  if (keys['a'] || keys['arrowleft']) dx -= 1;
+  if (keys['d'] || keys['arrowright']) dx += 1;
+
+  if (dx !== 0 && dy !== 0) {
+    dx *= 0.7071; dy *= 0.7071;
+  }
+
+  player.x = Math.max(60, Math.min(WORLD_WIDTH - 60, player.x + dx * player.speed));
+  player.y = Math.max(60, Math.min(WORLD_HEIGHT - 60, player.y + dy * player.speed));
+
+  // Hồi phục thể lực dần
+  if (dx === 0 && dy === 0 && player.stamina < 100) {
+    player.stamina = Math.min(100, player.stamina + 0.25);
+  }
+
+  // 2. Thời gian & Chu kỳ ngày đêm
+  gameTime += 0.35;
+  if (gameTime >= 24 * 60) {
+    gameTime = 0;
+    gameDay++;
+    // Tái sinh thêm tài nguyên qua ngày mới
+    if (resources.length < 50) spawnResources();
+  }
+
+  // 3. Đói của người chơi & Nàng Sói
+  player.hunger = Math.max(0, player.hunger - 0.015);
+  mama.hunger = Math.max(0, mama.hunger - 0.02);
+
+  if (player.hunger <= 0) player.hp = Math.max(0, player.hp - 0.05);
+
+  // 4. Sinh sản đàn con (Cơ chế đặc trưng của Family Time!)
+  mama.pregnancyProgress += 0.035;
+  const hasCabin = buildings.some(b => b.type === 'cabin');
+  if (hasCabin) mama.pregnancyProgress += 0.03; // Nhà gỗ giúp tăng tốc độ sinh con
+
+  if (mama.pregnancyProgress >= 100 && mama.affection >= 50) {
+    mama.pregnancyProgress = 0;
+    const newPupId = pups.length + 1;
+    pups.push({
+      id: newPupId,
+      x: mama.x + (Math.random() * 40 - 20),
+      y: mama.y + (Math.random() * 40 - 20),
+      hunger: 100,
+      maxHunger: 100,
+      age: 1,
+      targetX: mama.x,
+      targetY: mama.y,
+      timer: 0
+    });
+    playSound('birth');
+    mama.dialogue = `Chào mừng con sói thứ ${newPupId} chào đời! Hãy chăm sóc con cẩn thận nhé anh! 🍼`;
+    mama.dialogueTimer = 240;
+    showFloatingText(mama.x, mama.y - 40, "👶 Sói Con Chào Đời!", "#ff9ac2");
+  }
+
+  // 5. Đàn con: AI đi lại & Cơn đói
+  let starvingCount = 0;
+  for (let pup of pups) {
+    pup.hunger = Math.max(0, pup.hunger - 0.05);
+    if (pup.hunger < 25) starvingCount++;
+
+    // Đi lại ngẫu nhiên quanh nhà
+    pup.timer--;
+    if (pup.timer <= 0) {
+      pup.timer = Math.floor(Math.random() * 120) + 60;
+      pup.targetX = 1000 + (Math.random() * 200 - 100);
+      pup.targetY = 650 + (Math.random() * 150 - 75);
+    }
+    pup.x += (pup.targetX - pup.x) * 0.03;
+    pup.y += (pup.targetY - pup.y) * 0.03;
+  }
+
+  // Giỏ lương thực tự động cho đàn con ăn nếu có
+  const basket = buildings.find(b => b.type === 'basket' && b.foodStored > 0);
+  if (basket) {
+    for (let pup of pups) {
+      if (pup.hunger < 40 && basket.foodStored > 0) {
+        basket.foodStored--;
+        pup.hunger = 100;
+        showFloatingText(basket.x, basket.y - 20, "Ăn từ giỏ 🧺", "#4ade80");
+      }
+    }
+  }
+
+  // Nếu quá nhiều con đói -> Vợ buồn và Game Over
+  if (starvingCount >= Math.max(2, Math.floor(pups.length * 0.6))) {
+    mama.affection = Math.max(0, mama.affection - 0.1);
+    if (mama.affection <= 0) {
+      triggerGameOver("Đàn con bị bỏ đói quá lâu! Nàng Sói đau lòng đã ôm đàn con rời bỏ bạn đi tìm nơi trú ẩn mới...");
+    }
+  }
+
+  if (player.hp <= 0) {
+    triggerGameOver("Bạn đã kiệt sức giữa nơi hoang dã vì đói khát và thời tiết khắc nghiệt!");
+  }
+
+  // Cập nhật text nổi
+  for (let ft of floatingTexts) {
+    ft.y -= 0.6;
+    ft.life--;
+  }
+  floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+
+  updateHUD();
+}
+
+function updateHUD() {
+  document.getElementById("hpFill").style.width = `${player.hp}%`;
+  document.getElementById("staminaFill").style.width = `${player.stamina}%`;
+  document.getElementById("hungerFill").style.width = `${player.hunger}%`;
+
+  document.getElementById("countWood").innerText = player.inventory.wood;
+  document.getElementById("countStone").innerText = player.inventory.stone;
+  document.getElementById("countBerries").innerText = player.inventory.berries;
+  document.getElementById("countMeat").innerText = player.inventory.meat;
+  document.getElementById("countFish").innerText = player.inventory.fish;
+
+  document.getElementById("dayLabel").innerText = `Ngày ${gameDay}`;
+  const hrs = String(Math.floor(gameTime / 60)).padStart(2, '0');
+  const mins = String(Math.floor(gameTime % 60)).padStart(2, '0');
+  const isNight = (gameTime < 6 * 60 || gameTime > 19 * 60);
+  document.getElementById("timeLabel").innerText = `${hrs}:${mins} (${isNight ? '🌙 Đêm' : '☀️ Ngày'})`;
+
+  document.getElementById("pupsLabel").innerText = `Đàn con: ${pups.length}`;
+  document.getElementById("mamaAffection").innerText = `❤️ ${Math.round(mama.affection)}%`;
+
+  const starving = pups.filter(p => p.hunger < 30).length;
+  if (starving > 0) {
+    document.getElementById("pupsHungerStatus").innerText = `⚠️ Có ${starving} con đang đói!`;
+    document.getElementById("pupsHungerStatus").style.color = "#ef4444";
+  } else {
+    document.getElementById("pupsHungerStatus").innerText = `Bình yên 🍼`;
+    document.getElementById("pupsHungerStatus").style.color = "#4ade80";
+  }
+}
+
+// ==============================================================================
+// 6. RENDER ĐỒ HỌA THẾ GIỚI & NHÂN VẬT
+// ==============================================================================
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Camera di chuyển theo Player
+  const camX = player.x - canvas.width / 2;
+  const camY = player.y - canvas.height / 2;
+
+  ctx.save();
+  ctx.translate(-camX, -camY);
+
+  // 1. Mặt đất / Đảo
+  ctx.fillStyle = "#344e41";
+  ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+  // Bãi cỏ hoa văn nhẹ
+  ctx.fillStyle = "#3a5a40";
+  for (let x = 0; x < WORLD_WIDTH; x += 120) {
+    for (let y = 0; y < WORLD_HEIGHT; y += 120) {
+      ctx.beginPath();
+      ctx.arc(x + 40, y + 40, 18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Khu vực căn cứ (Đất nện / Gỗ quanh nhà)
+  ctx.fillStyle = "#582f0e";
+  ctx.beginPath();
+  ctx.ellipse(1000, 680, 160, 110, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Vẽ Công Trình
+  for (let b of buildings) {
+    if (b.type === 'fire') {
+      // Lửa trại
+      ctx.fillStyle = "#7f1d1d";
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, 22, 0, Math.PI * 2);
+      ctx.fill();
+      // Ngọn lửa bập bùng
+      const flicker = Math.sin(Date.now() * 0.015) * 4;
+      ctx.fillStyle = "#f97316";
+      ctx.beginPath();
+      ctx.arc(b.x, b.y - 4, 14 + flicker, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fef08a";
+      ctx.beginPath();
+      ctx.arc(b.x, b.y - 6, 8 + flicker * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (b.type === 'cabin') {
+      // Nhà gỗ
+      ctx.fillStyle = "#78350f";
+      ctx.fillRect(b.x - 60, b.y - 45, 120, 90);
+      ctx.fillStyle = "#451a03";
+      ctx.beginPath();
+      ctx.moveTo(b.x - 70, b.y - 45);
+      ctx.lineTo(b.x, b.y - 85);
+      ctx.lineTo(b.x + 70, b.y - 45);
+      ctx.closePath();
+      ctx.fill();
+      // Cửa
+      ctx.fillStyle = "#fcd34d";
+      ctx.fillRect(b.x - 14, b.y + 10, 28, 35);
+    } else if (b.type === 'basket') {
+      ctx.font = "28px sans-serif";
+      ctx.fillText("🧺", b.x - 14, b.y + 10);
+    } else if (b.type === 'crib') {
+      ctx.font = "28px sans-serif";
+      ctx.fillText("🪵", b.x - 14, b.y + 10);
+    }
+  }
+
+  // 3. Vẽ Tài Nguyên (Cây, Đá, Quả)
+  for (let r of resources) {
+    if (r.type === 'tree') {
+      // Thân cây
+      ctx.fillStyle = "#451a03";
+      ctx.fillRect(r.x - 6, r.y - 10, 12, 28);
+      // Tán lá
+      ctx.fillStyle = "#15803d";
+      ctx.beginPath();
+      ctx.arc(r.x, r.y - 25, 24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#16a34a";
+      ctx.beginPath();
+      ctx.arc(r.x, r.y - 32, 16, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (r.type === 'rock') {
+      ctx.fillStyle = "#64748b";
+      ctx.beginPath();
+      ctx.ellipse(r.x, r.y, 18, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#94a3b8";
+      ctx.beginPath();
+      ctx.arc(r.x - 4, r.y - 4, 7, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (r.type === 'berry') {
+      ctx.fillStyle = "#14532d";
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#f43f5e";
+      ctx.beginPath();
+      ctx.arc(r.x - 4, r.y - 3, 4, 0, Math.PI * 2);
+      ctx.arc(r.x + 4, r.y - 2, 4, 0, Math.PI * 2);
+      ctx.arc(r.x, r.y + 4, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 4. Vẽ Nàng Sói (Wolf Mama)
+  ctx.save();
+  ctx.translate(mama.x, mama.y);
+  // Tai sói & bóng
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.beginPath(); ctx.ellipse(0, 18, 16, 8, 0, 0, Math.PI * 2); ctx.fill();
+  // Cơ thể
+  ctx.fillStyle = "#e2e8f0";
+  ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
+  // Tai sói nhọn
+  ctx.fillStyle = "#94a3b8";
+  ctx.beginPath();
+  ctx.moveTo(-14, -14); ctx.lineTo(-8, -28); ctx.lineTo(-2, -14);
+  ctx.moveTo(14, -14); ctx.lineTo(8, -28); ctx.lineTo(2, -14);
+  ctx.fill();
+  // Váy / Áo đỏ
+  ctx.fillStyle = "#e11d48";
+  ctx.beginPath(); ctx.arc(0, 8, 14, 0, Math.PI); ctx.fill();
+  // Mắt & Miệng
+  ctx.fillStyle = "#0f172a";
+  ctx.beginPath(); ctx.arc(-5, -2, 2.5, 0, Math.PI*2); ctx.arc(5, -2, 2.5, 0, Math.PI*2); ctx.fill();
+  // Biểu tượng trái tim / Lời thoại
+  ctx.font = "14px sans-serif";
+  ctx.fillText("🐺❤️", -14, -32);
+  ctx.restore();
+
+  // 5. Vẽ Đàn Con (Wolf Pups)
+  for (let pup of pups) {
+    ctx.save();
+    ctx.translate(pup.x, pup.y);
+    // Bóng
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.beginPath(); ctx.ellipse(0, 10, 10, 5, 0, 0, Math.PI * 2); ctx.fill();
+    // Con nhỏ
+    ctx.fillStyle = "#cbd5e1";
+    ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.fill();
+    // Tai sói con
+    ctx.fillStyle = "#64748b";
+    ctx.beginPath();
+    ctx.moveTo(-9, -9); ctx.lineTo(-5, -18); ctx.lineTo(-1, -9);
+    ctx.moveTo(9, -9); ctx.lineTo(5, -18); ctx.lineTo(1, -9);
+    ctx.fill();
+    // Thanh đói trên đầu con
+    ctx.fillStyle = "#334155";
+    ctx.fillRect(-12, -22, 24, 4);
+    ctx.fillStyle = pup.hunger > 40 ? "#4ade80" : "#ef4444";
+    ctx.fillRect(-12, -22, (pup.hunger / pup.maxHunger) * 24, 4);
+
+    if (pup.hunger < 30) {
+      ctx.font = "12px sans-serif";
+      ctx.fillText("😭🍖", -12, -26);
+    }
+    ctx.restore();
+  }
+
+  // 6. Vẽ Nhân Vật Chính (Người cha)
+  ctx.save();
+  ctx.translate(player.x, player.y);
+  // Bóng
+  ctx.fillStyle = "rgba(0,0,0,0.3)";
+  ctx.beginPath(); ctx.ellipse(0, 16, 14, 7, 0, 0, Math.PI * 2); ctx.fill();
+  // Cơ thể
+  ctx.fillStyle = "#3b82f6";
+  ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+  // Đầu / Tóc
+  ctx.fillStyle = "#fcd34d";
+  ctx.beginPath(); ctx.arc(0, -6, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#78350f";
+  ctx.beginPath(); ctx.arc(0, -10, 12, Math.PI, Math.PI * 2); ctx.fill();
+  // Cầm Rìu
+  ctx.font = "16px sans-serif";
+  ctx.fillText("🪓", 8, 4);
+  ctx.restore();
+
+  // 7. Vẽ Text nổi (Floating Texts)
+  for (let ft of floatingTexts) {
+    ctx.fillStyle = ft.color;
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText(ft.text, ft.x - 15, ft.y);
+  }
+
+  // 8. Hiệu ứng ánh sáng & Bóng tối Ban Đêm
+  const isNight = (gameTime < 6 * 60 || gameTime > 19 * 60);
+  if (isNight) {
+    // Độ tối ban đêm
+    let nightAlpha = 0.72;
+    if (gameTime >= 5 * 60 && gameTime <= 6 * 60) nightAlpha = 0.4;
+    if (gameTime >= 19 * 60 && gameTime <= 20 * 60) nightAlpha = 0.5;
+
+    ctx.fillStyle = `rgba(10, 15, 30, ${nightAlpha})`;
+    ctx.fillRect(camX, camY, canvas.width, canvas.height);
+
+    // Vùng sáng của Lửa trại
+    for (let b of buildings) {
+      if (b.type === 'fire') {
+        const rad = ctx.createRadialGradient(b.x, b.y, 10, b.x, b.y, 180);
+        rad.addColorStop(0, "rgba(255, 180, 50, 0.45)");
+        rad.addColorStop(1, "rgba(255, 180, 50, 0)");
+        ctx.fillStyle = rad;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 180, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Đèn nhỏ quanh người chơi
+    const playerLight = ctx.createRadialGradient(player.x, player.y, 5, player.x, player.y, 75);
+    playerLight.addColorStop(0, "rgba(255, 255, 200, 0.35)");
+    playerLight.addColorStop(1, "rgba(255, 255, 200, 0)");
+    ctx.fillStyle = playerLight;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, 75, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function triggerGameOver(reason) {
+  isGameOver = true;
+  document.getElementById("gameOverTitle").innerText = "💀 Hồi Kết Của Gia Đình!";
+  document.getElementById("gameOverDesc").innerText = reason;
+  document.getElementById("resDays").innerText = `${gameDay} ngày`;
+  document.getElementById("resPups").innerText = `${pups.length} con`;
+  document.getElementById("gameOverModal").classList.add("active");
+}
+
+function restartGame() {
+  document.getElementById("gameOverModal").classList.remove("active");
+  isGameOver = false;
+  player.x = 1000;
+  player.y = 700;
+  player.hp = 100;
+  player.stamina = 100;
+  player.hunger = 100;
+  player.inventory = { wood: 10, stone: 5, berries: 8, meat: 0, fish: 0 };
+  mama.affection = 100;
+  mama.hunger = 100;
+  mama.pregnancyProgress = 0;
+  pups = [{ id: 1, x: 930, y: 680, hunger: 90, maxHunger: 100, age: 1, targetX: 930, targetY: 680, timer: 0 }];
+  buildings = [{ type: 'fire', x: 1000, y: 650, hp: 100, fuel: 100 }];
+  gameDay = 1;
+  gameTime = 8 * 60;
+  spawnResources();
+}
+
+// Game Loop
+function mainLoop() {
+  update();
+  render();
+  requestAnimationFrame(mainLoop);
+}
+requestAnimationFrame(mainLoop);
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⭕ Caro XO (3×3 & Siêu Lớn 15×15) — Sakura Game</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+<style>
+.xo-wrap{max-width:1100px;margin:0 auto;padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+.xo-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:16px 20px}
+.xo-score{display:flex;gap:10px;flex-wrap:wrap}
+.score-pill{padding:8px 14px;border-radius:10px;background:var(--bg-secondary);border:1px solid var(--border-subtle);font-weight:700;display:flex;align-items:center;gap:6px}
+
+/* Board 3x3 */
+.xo-board-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:380px;margin:0 auto;width:100%}
+.xo-cell-3{aspect-ratio:1;background:var(--bg-card);border:2px solid var(--border-glass);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:800;cursor:pointer;transition:.15s;user-select:none;box-shadow:var(--shadow-card)}
+.xo-cell-3:hover{border-color:var(--sakura-pink);transform:scale(1.03)}
+.xo-cell-3.x{color:#ff79c6; text-shadow:0 0 12px rgba(255,121,198,0.6)}
+.xo-cell-3.o{color:#8be9fd; text-shadow:0 0 12px rgba(139,233,253,0.6)}
+.xo-cell-3.win{background:var(--sakura-gradient);color:#fff!important;border-color:transparent;animation:winPop .4s}
+
+/* Board 15x15 Siêu Lớn (Caro Gomoku Nối 5) */
+.xo-board-scroll{width:100%;overflow:auto;padding:12px;display:flex;justify-content:center;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px}
+.xo-board-15{display:grid;grid-template-columns:repeat(15,36px);grid-template-rows:repeat(15,36px);gap:1px;background:#3b4252;padding:6px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+.xo-cell-15{width:36px;height:36px;background:#242933;display:flex;align-items:center;justify-content:center;font-size:1.35rem;font-weight:800;cursor:pointer;transition:.1s;user-select:none}
+.xo-cell-15:hover{background:#383f4f;box-shadow:inset 0 0 0 1.5px var(--sakura-pink)}
+.xo-cell-15.x{color:#ff79c6; text-shadow:0 0 8px rgba(255,121,198,0.7)}
+.xo-cell-15.o{color:#8be9fd; text-shadow:0 0 8px rgba(139,233,253,0.7)}
+.xo-cell-15.win{background:var(--sakura-pink);color:#fff!important;box-shadow:0 0 12px #ff79c6;animation:winPop .4s}
+
+@keyframes winPop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.modal-overlay.active{display:flex}
+.modal-box{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:18px;max-width:440px;width:100%;padding:22px;box-shadow:var(--shadow-card)}
+</style>
+</head>
+<body>
+<nav class="account-nav" style="position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+  <a href="/game" style="display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--text-main)"><span>←</span><span style="font-weight:800">Game</span><span style="color:var(--text-muted)">/ Caro XO</span></a>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <select id="xoBoardSize" class="form-control" style="width:auto;padding:6px 12px" onchange="changeBoardSize()">
+      <option value="3">🎯 Bản 3×3 (Nối 3 Thắng)</option>
+      <option value="15" selected>👑 Siêu Lớn 15×15 (Nối 5 Thắng)</option>
+    </select>
+    <select id="xoMode" class="form-control" style="width:auto;padding:6px 10px">
+      <option value="bot" selected>🤖 Vs Sakura Bot</option>
+      <option value="pvp">👥 2 Người (Local)</option>
+      <option value="online">🌐 Mời Bạn (Online Room)</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="openInviteModal()" style="background:var(--sakura-gradient);color:#fff">💌 Mời Bạn</button>
+    <button class="btn btn-secondary btn-sm" onclick="resetBoard()">↻ Chơi lại</button>
+  </div>
+</nav>
+
+<div class="xo-wrap">
+  <div class="xo-top">
+    <div>
+      <h2 style="font-weight:800;display:flex;align-items:center;gap:10px" id="xoTitle">
+        <span>⭕</span> Cờ Caro Siêu Lớn 15×15 (Nối 5 Thắng)
+      </h2>
+      <div style="color:var(--text-muted);font-size:.9rem;margin-top:4px">
+        Lượt đánh: <strong id="xoTurn" style="color:#ff79c6;font-size:1.1rem">X</strong> • Trạng thái: <span id="xoStatus" style="font-weight:700">Sẵn sàng</span>
+      </div>
+    </div>
+    <div class="xo-score">
+      <div class="score-pill"><span style="color:#ff79c6">X:</span> <span id="scoreX">0</span></div>
+      <div class="score-pill"><span style="color:#8be9fd">O:</span> <span id="scoreO">0</span></div>
+      <div class="score-pill"><span style="color:var(--text-dim)">Hòa:</span> <span id="scoreD">0</span></div>
+    </div>
+  </div>
+
+  <!-- Board Container -->
+  <div id="boardContainer">
+    <!-- Rendered by JS -->
+  </div>
+
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="resetBoard()">Ván mới</button>
+    <button class="btn btn-secondary" onclick="openInviteModal()">💌 Mời Bạn Tham Gia</button>
+    <a href="/game" class="btn btn-secondary">← Game Center</a>
+  </div>
+
+  <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-weight:800">🏆 Bảng Xếp Hạng Caro XO</h3>
+      <span style="font-size:.82rem;color:var(--text-dim)">Tự động lưu khi đăng nhập</span>
+    </div>
+    <div id="xoLb" style="color:var(--text-muted);font-size:.9rem">Đang tải...</div>
+  </div>
+</div>
+
+<!-- Modal Mời Bạn Chơi (Hỗ trợ người không cần đăng nhập) -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="font-weight:800;font-size:1.15rem">💌 Mời Bạn Chơi Caro</h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeInviteModal()">✕</button>
+    </div>
+    <p style="color:var(--text-muted);font-size:.9rem;line-height:1.5;margin-bottom:14px">
+      Chia sẻ đường link bên dưới. Bạn bè của bạn bấm vào là có thể tham gia trận đấu ngay <b>(không cần đăng nhập hoặc có thể đăng nhập)</b>:
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input type="text" id="inviteLinkInput" class="form-control" readonly style="font-size:.85rem;font-family:var(--font-mono)">
+      <button class="btn btn-primary" onclick="copyInviteLink()" style="flex-shrink:0">Sao chép</button>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-secondary btn-sm" onclick="closeInviteModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/static/js/sakura-fx.js"></script>
+<script>
+let boardSize = 15;
+let winCount = 5;
+let board = [];
+let turn = 'X';
+let over = false;
+let scores = { X: 0, O: 0, D: 0 };
+let currentRoomId = new URLSearchParams(location.search).get('room') || '';
+
+// Đọc tham số size từ url nếu có
+const urlSize = new URLSearchParams(location.search).get('size');
+if (urlSize === '3') {
+  boardSize = 3;
+  winCount = 3;
+  document.getElementById('xoBoardSize').value = '3';
+}
+
+function showToast(m, t='info'){
+  const c = document.getElementById('toastContainer');
+  const d = document.createElement('div');
+  d.className = 'toast-message';
+  let i = '🌸';
+  if (t === 'success') i = '✅';
+  if (t === 'error') i = '❌';
+  d.innerHTML = `<span>${i}</span><span>${m}</span>`;
+  c.appendChild(d);
+  setTimeout(()=>{
+    d.style.opacity = '0';
+    d.style.transform = 'translateY(10px)';
+    d.style.transition = 'all .3s';
+    setTimeout(()=> d.remove(), 300);
+  }, 2500);
+}
+
+function initBoardState(){
+  board = Array(boardSize * boardSize).fill('');
+  turn = 'X';
+  over = false;
+  document.getElementById('xoStatus').textContent = 'Sẵn sàng';
+  document.getElementById('xoTurn').textContent = turn;
+  document.getElementById('xoTurn').style.color = '#ff79c6';
+}
+
+function changeBoardSize(){
+  boardSize = parseInt(document.getElementById('xoBoardSize').value) || 3;
+  winCount = (boardSize === 3 ? 3 : 5);
+  document.getElementById('xoTitle').innerHTML = (boardSize === 3)
+    ? '<span>🎯</span> Cờ Caro Tiêu Chuẩn 3×3 (Nối 3 Thắng)'
+    : '<span>👑</span> Cờ Caro Siêu Lớn 15×15 (Nối 5 Thắng)';
+  resetBoard();
+}
+
+function render(){
+  const container = document.getElementById('boardContainer');
+  container.innerHTML = '';
+
+  if (boardSize === 3) {
+    const el = document.createElement('div');
+    el.className = 'xo-board-3';
+    el.id = 'activeXoBoard';
+    board.forEach((v, i) => {
+      const c = document.createElement('div');
+      c.className = 'xo-cell-3' + (v ? ' ' + v.toLowerCase() : '');
+      c.textContent = v;
+      c.onclick = () => play(i);
+      el.appendChild(c);
+    });
+    container.appendChild(el);
+  } else {
+    const scrollWrap = document.createElement('div');
+    scrollWrap.className = 'xo-board-scroll';
+    const el = document.createElement('div');
+    el.className = 'xo-board-15';
+    el.id = 'activeXoBoard';
+    board.forEach((v, i) => {
+      const c = document.createElement('div');
+      c.className = 'xo-cell-15' + (v ? ' ' + v.toLowerCase() : '');
+      c.textContent = v;
+      c.onclick = () => play(i);
+      el.appendChild(c);
+    });
+    scrollWrap.appendChild(el);
+    container.appendChild(scrollWrap);
+  }
+
+  document.getElementById('xoTurn').textContent = turn;
+  document.getElementById('xoTurn').style.color = (turn === 'X' ? '#ff79c6' : '#8be9fd');
+}
+
+function play(i){
+  if (over || board[i]) return;
+  board[i] = turn;
+  const res = checkWin();
+  render();
+
+  if (res) {
+    finish(res);
+    return;
+  }
+
+  turn = (turn === 'X' ? 'O' : 'X');
+  const mode = document.getElementById('xoMode').value;
+  if (!over && mode === 'bot' && turn === 'O') {
+    document.getElementById('xoStatus').textContent = 'Bot đang nghĩ...';
+    setTimeout(botMove, boardSize === 3 ? 300 : 200);
+  }
+}
+
+// Kiểm tra thắng thua hỗ trợ cả 3x3 (nối 3) và 15x15 (nối 5)
+function checkWin(){
+  const N = boardSize;
+  const W = winCount;
+
+  // Duyệt mọi ô (r, c)
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const p = board[r * N + c];
+      if (!p) continue;
+
+      // 1. Ngang (Horizontal)
+      if (c + W <= N) {
+        let win = true;
+        let line = [];
+        for (let k = 0; k < W; k++) {
+          const idx = r * N + (c + k);
+          line.push(idx);
+          if (board[idx] !== p) { win = false; break; }
+        }
+        if (win) return { winner: p, line };
+      }
+
+      // 2. Dọc (Vertical)
+      if (r + W <= N) {
+        let win = true;
+        let line = [];
+        for (let k = 0; k < W; k++) {
+          const idx = (r + k) * N + c;
+          line.push(idx);
+          if (board[idx] !== p) { win = false; break; }
+        }
+        if (win) return { winner: p, line };
+      }
+
+      // 3. Chéo xuống phải (Diagonal Down-Right)
+      if (r + W <= N && c + W <= N) {
+        let win = true;
+        let line = [];
+        for (let k = 0; k < W; k++) {
+          const idx = (r + k) * N + (c + k);
+          line.push(idx);
+          if (board[idx] !== p) { win = false; break; }
+        }
+        if (win) return { winner: p, line };
+      }
+
+      // 4. Chéo xuống trái (Diagonal Down-Left)
+      if (r + W <= N && c - W + 1 >= 0) {
+        let win = true;
+        let line = [];
+        for (let k = 0; k < W; k++) {
+          const idx = (r + k) * N + (c - k);
+          line.push(idx);
+          if (board[idx] !== p) { win = false; break; }
+        }
+        if (win) return { winner: p, line };
+      }
+    }
+  }
+
+  // Hòa (hết ô)
+  if (board.every(v => v !== '')) {
+    return { winner: 'draw' };
+  }
+  return null;
+}
+
+// AI Bot Caro thông minh (chặn chuỗi 4, chuỗi 3, tìm nước thắng)
+function botMove(){
+  if (over) return;
+  const N = boardSize;
+  const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
+  if (!empty.length) return;
+
+  // 1. Kiểm tra nếu Bot có nước thắng ngay
+  for (let idx of empty) {
+    board[idx] = 'O';
+    const cw = checkWin();
+    board[idx] = '';
+    if (cw && cw.winner === 'O') {
+      play(idx);
+      return;
+    }
+  }
+
+  // 2. Kiểm tra nếu Đối thủ (X) sắp thắng thì chặn ngay lập tức
+  for (let idx of empty) {
+    board[idx] = 'X';
+    const cw = checkWin();
+    board[idx] = '';
+    if (cw && cw.winner === 'X') {
+      play(idx);
+      return;
+    }
+  }
+
+  // 3. Với bàn 15x15: Ưu tiên đánh gần các quân đã có (trong bán kính 2 ô)
+  if (boardSize === 15) {
+    let candidates = [];
+    for (let idx of empty) {
+      let r = Math.floor(idx / N), c = idx % N;
+      let neighbors = 0;
+      for (let dr = -2; dr <= 2; dr++) {
+        for (let dc = -2; dc <= 2; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          let nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < N && nc >= 0 && nc < N) {
+            if (board[nr * N + nc]) neighbors++;
+          }
+        }
+      }
+      if (neighbors > 0) candidates.push({ idx, score: neighbors });
+    }
+    if (candidates.length) {
+      candidates.sort((a,b) => b.score - a.score);
+      // Lấy ngẫu nhiên trong top 3 nước tốt nhất
+      const topPick = candidates.slice(0, Math.min(3, candidates.length));
+      const chosen = topPick[Math.floor(Math.random() * topPick.length)].idx;
+      play(chosen);
+      return;
+    }
+  }
+
+  // Fallback random
+  const r = empty[Math.floor(Math.random() * empty.length)];
+  if (r !== undefined) play(r);
+}
+
+function finish(res){
+  over = true;
+  const statusEl = document.getElementById('xoStatus');
+  if (res.winner === 'draw') {
+    scores.D++;
+    document.getElementById('scoreD').textContent = scores.D;
+    statusEl.textContent = 'Hòa trận!';
+    statusEl.style.color = '#8be9fd';
+    showToast('Hai bên hòa nhau 🌸', 'info');
+    submitXo('draw');
+  } else {
+    scores[res.winner]++;
+    document.getElementById('score' + res.winner).textContent = scores[res.winner];
+    statusEl.textContent = `${res.winner} Thắng! 🎉`;
+    statusEl.style.color = (res.winner === 'X' ? '#ff79c6' : '#8be9fd');
+    showToast(`${res.winner} đã chiến thắng rực rỡ! 🎉`, 'success');
+
+    // Highlight các ô chiến thắng
+    if (res.line) {
+      const activeBoard = document.getElementById('activeXoBoard');
+      if (activeBoard) {
+        res.line.forEach(i => {
+          if (activeBoard.children[i]) {
+            activeBoard.children[i].classList.add('win');
+          }
+        });
+      }
+    }
+
+    const mode = document.getElementById('xoMode').value;
+    if (mode === 'bot') {
+      submitXo(res.winner === 'X' ? 'win' : 'loss');
+    } else {
+      submitXo('win');
+    }
+  }
+}
+
+async function submitXo(result){
+  try {
+    const t = localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/)||[])[1] || '';
+    const h = { 'Content-Type': 'application/json' };
+    if (t) h['Authorization'] = 'Bearer ' + t;
+    await fetch('/api/game/xo/score', { method: 'POST', headers: h, body: JSON.stringify({ result }) });
+    loadLb();
+  } catch {}
+}
+
+async function loadLb(){
+  try {
+    const t = localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/)||[])[1] || '';
+    const h = {};
+    if (t) h['Authorization'] = 'Bearer ' + t;
+    const r = await fetch('/api/game/xo/leaderboard', { headers: h });
+    const j = await r.json();
+    const el = document.getElementById('xoLb');
+    if (!j.ok) {
+      el.innerHTML = '<span style="color:var(--text-dim)">Đăng nhập để xem và lưu điểm trên Bảng Xếp Hạng</span>';
+      return;
+    }
+    if (!j.leaderboard.length) {
+      el.innerHTML = '<span style="color:var(--text-dim)">Chưa có dữ liệu — hãy thắng ván đầu tiên nhé!</span>';
+    } else {
+      el.innerHTML = j.leaderboard.slice(0, 10).map((u, i) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;margin-bottom:6px">
+          <span style="display:flex;gap:8px;align-items:center">
+            <span style="font-weight:800;color:${i===0?'#f1fa8c':i===1?'#8be9fd':i===2?'#ffb86c':'var(--text-muted)'}">#${i+1}</span>
+            <img src="${u.avatar||'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width:24px;height:24px;border-radius:50%" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+            <span>${u.username}</span>
+          </span>
+          <span style="font-size:.84rem;font-weight:700">${u.wins}W <span style="color:var(--accent-red)">${u.losses}L</span> ${u.draws}D</span>
+        </div>
+      `).join('');
+    }
+  } catch {
+    const el = document.getElementById('xoLb');
+    if (el) el.innerText = 'Lỗi tải BXH';
+  }
+}
+loadLb();
+
+function resetBoard(){
+  initBoardState();
+  render();
+  showToast('Đã bắt đầu ván mới!', 'info');
+}
+
+// Mời bạn chơi
+function openInviteModal(){
+  if (!currentRoomId) {
+    currentRoomId = 'xo_' + Math.random().toString(36).substring(2, 9);
+  }
+  const inviteUrl = `${location.origin}/game/xo?room=${currentRoomId}&size=${boardSize}`;
+  document.getElementById('inviteLinkInput').value = inviteUrl;
+  document.getElementById('inviteModal').classList.add('active');
+}
+
+function closeInviteModal(){
+  document.getElementById('inviteModal').classList.remove('active');
+}
+
+function copyInviteLink(){
+  const inp = document.getElementById('inviteLinkInput');
+  inp.select();
+  navigator.clipboard.writeText(inp.value).then(()=>{
+    showToast('Đã sao chép link mời phòng! Bạn bè bấm vào chơi được ngay 📋', 'success');
+  }).catch(()=>{
+    document.execCommand('copy');
+    showToast('Đã sao chép link mời phòng!', 'success');
+  });
+}
+
+document.getElementById('xoMode').addEventListener('change', (e)=>{
+  if (e.target.value === 'online') {
+    openInviteModal();
+  } else {
+    resetBoard();
+  }
+});
+
+initBoardState();
+render();
+</script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

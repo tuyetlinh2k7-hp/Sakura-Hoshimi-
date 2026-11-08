@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚙️ Sakura MC — Cấu Hình server.properties & MOTD</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/mc_hosting.css">
+  <link rel="icon" href="/images/avatar-bot.jpg">
+  <style>
+    .prop-group {
+      background: var(--mc-card-bg);
+      border: 1px solid var(--mc-card-border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .prop-group-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--mc-card-border);
+    }
+
+    .prop-row {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      align-items: center;
+      gap: 20px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .prop-row:last-child {
+      border-bottom: none;
+    }
+
+    .prop-label {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #e6edf3;
+      margin-bottom: 2px;
+    }
+
+    .prop-desc {
+      font-size: 0.78rem;
+      color: var(--mc-text-muted);
+      line-height: 1.4;
+    }
+
+    .prop-key {
+      font-family: var(--mc-font-mono);
+      font-size: 0.75rem;
+      color: #ff79c6;
+    }
+
+    .prop-input {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--mc-card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: var(--mc-font-mono);
+      font-size: 0.88rem;
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .prop-input:focus {
+      border-color: var(--mc-accent);
+      box-shadow: 0 0 10px rgba(255, 121, 198, 0.2);
+    }
+
+    .tab-nav-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--mc-text-muted);
+      transition: all 0.2s;
+    }
+
+    .tab-nav-btn.active {
+      background: rgba(255, 121, 198, 0.15);
+      border-color: rgba(255, 121, 198, 0.35);
+      color: var(--mc-accent);
+    }
+
+    /* Live Minecraft Multiplayer Preview Box */
+    .mc-server-preview-box {
+      background: #0f111a;
+      border: 2px solid #282a36;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .mc-server-icon-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 4px;
+      image-rendering: pixelated;
+      background: #181a24;
+      border: 2px solid #44475a;
+      flex-shrink: 0;
+    }
+
+    .mc-motd-render {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #aaaaaa;
+      min-height: 42px;
+    }
+
+    .mc-ping-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 14px;
+    }
+
+    .mc-ping-bar {
+      width: 3px;
+      background: #50fa7b;
+      border-radius: 1px;
+    }
+
+    /* Color Palette */
+    .color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      transition: transform 0.15s;
+    }
+
+    .color-btn:hover {
+      transform: scale(1.15);
+      border-color: #fff;
+      z-index: 2;
+    }
+
+    .format-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--mc-card-border);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .format-btn:hover {
+      background: var(--mc-accent);
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body class="mc-hosting-body">
+  <div class="mc-layout">
+    <!-- Sidebar -->
+    <aside class="mc-sidebar" id="mcSidebar">
+      <div class="mc-brand">
+        <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
+          alt="Sakura Logo" class="mc-brand-avatar" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+        <div>
+          <div class="mc-brand-title">Sakura Hosting</div>
+          <div class="mc-brand-sub">Minecraft Cloud Panel</div>
+        </div>
+      </div>
+
+      <nav class="mc-nav">
+        <div class="mc-nav-section-title">Máy Chủ</div>
+        <a href="/minecraft" class="mc-nav-link">
+          <span class="nav-icon">🌐</span> Tất Cả Máy Chủ
+        </a>
+        <a href="/minecraft/console" class="mc-nav-link" id="navConsoleLink">
+          <span class="nav-icon">🖥️</span> Bảng Console
+        </a>
+        <a href="/minecraft/file" class="mc-nav-link" id="navFilesLink">
+          <span class="nav-icon">📁</span> Quản Lý Tệp
+        </a>
+        <a href="/minecraft/properties" class="mc-nav-link active" id="navPropsLink">
+          <span class="nav-icon">⚙️</span> Cấu Hình Server
+        </a>
+        <a href="/minecraft/player" class="mc-nav-link" id="navPlayersLink">
+          <span class="nav-icon">👤</span> Người Chơi
+        </a>
+        <a href="/minecraft/manager" class="mc-nav-link" id="navManagerLink">
+          <span class="nav-icon">🛡️</span> Phân Quyền
+        </a>
+
+        <div class="mc-nav-section-title">Điều Hướng</div>
+        <a href="/dashboard" class="mc-nav-link">
+          <span class="nav-icon">📊</span> Bot Dashboard
+        </a>
+        <a href="/profile" class="mc-nav-link">
+          <span class="nav-icon">👥</span> Hồ Sơ Cộng Đồng
+        </a>
+        <a href="/" class="mc-nav-link">
+          <span class="nav-icon">🌸</span> Trang Chủ
+        </a>
+      </nav>
+
+      <div class="mc-sidebar-footer">
+        <span>⚙️ Properties Config</span>
+        <span id="activeServerName">server</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="mc-main">
+      <header class="mc-topbar">
+        <div class="mc-topbar-left">
+          <div style="display:flex;align-items:center;gap:10px">
+            <label style="font-size:0.85rem;font-weight:700;color:var(--mc-text-muted)">Máy chủ:</label>
+            <select id="serverSelect" onchange="changeServer(this.value)" class="form-control"
+              style="background:#161b22;color:#fff;border:1px solid var(--mc-card-border);padding:6px 12px;border-radius:8px;font-weight:700">
+              <option value="server">server</option>
+            </select>
+          </div>
+          <div
+            style="display:flex;gap:6px;background:rgba(255,255,255,0.03);padding:4px;border-radius:10px;border:1px solid var(--mc-card-border);margin-left:14px">
+            <button class="tab-nav-btn active" id="tabBtnGui" onclick="switchMode('gui')">Giao Diện Trực Quan</button>
+            <button class="tab-nav-btn" id="tabBtnRaw" onclick="switchMode('raw')">Tệp Thô (.properties)</button>
+          </div>
+        </div>
+
+        <div class="mc-topbar-right">
+          <button class="mc-btn mc-btn-primary" onclick="saveProperties()">
+            <span>💾</span> Lưu Cài Đặt
+          </button>
+        </div>
+      </header>
+
+      <div class="mc-content-body">
+        <!-- MODE: GUI FORM -->
+        <div id="guiModeContainer">
+          <!-- NHÓM ICON MÁY CHỦ & MOTD PREVIEW (Yêu cầu mới) -->
+          <div class="prop-group" style="border: 1px solid rgba(255, 121, 198, 0.3)">
+            <div class="prop-group-title">
+              <span>🖼️</span> Icon Máy Chủ & Lời Chào (MOTD Preview Trực Quan)
+            </div>
+
+            <!-- Bảng Xem Trước Như Trong Danh Sách Server Minecraft Thật -->
+            <div style="font-size:0.82rem;font-weight:700;color:var(--mc-text-muted);margin-bottom:8px">Xem Trước Danh
+              Sách Máy Chủ (Minecraft Server List Preview):</div>
+            <div class="mc-server-preview-box">
+              <img id="motdIconPreview" class="mc-server-icon-preview" src="/api/mc/hosting/server/server/icon"
+                alt="Server Icon">
+              <div style="flex:1;overflow:hidden">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                  <span style="font-weight:800;color:#fff;font-size:0.95rem" id="motdServerTitle">SakuraBot Minecraft
+                    Server</span>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="font-family:var(--mc-font-mono);font-size:0.8rem;color:#aaa" id="motdPlayersPreview">0
+                      / 20</span>
+                    <div class="mc-ping-bars" title="5 ms">
+                      <div class="mc-ping-bar" style="height:3px"></div>
+                      <div class="mc-ping-bar" style="height:6px"></div>
+                      <div class="mc-ping-bar" style="height:9px"></div>
+                      <div class="mc-ping-bar" style="height:12px"></div>
+                      <div class="mc-ping-bar" style="height:14px"></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Render MOTD với màu và font Minecraft -->
+                <div class="mc-motd-render" id="motdRenderOutput">A Minecraft Server</div>
+              </div>
+            </div>
+
+            <!-- Chỉnh Sửa Icon Máy Chủ -->
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Icon Máy Chủ (server-icon.png)</div>
+                <div class="prop-desc">Tự động cắt và chuyển đổi thành chuẩn 64x64 PNG của Minecraft.</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px">
+                <img id="iconPreviewThumb" src="/api/mc/hosting/server/server/icon"
+                  style="width:48px;height:48px;border-radius:6px;border:1px solid var(--mc-card-border);background:#111">
+                <label class="mc-btn mc-btn-secondary" style="cursor:pointer;margin:0">
+                  <span>📁</span> Chọn Ảnh Icon Mới
+                  <input type="file" id="iconFileInput" accept="image/*" onchange="previewAndUploadIcon(this)"
+                    style="display:none">
+                </label>
+                <span id="iconUploadStatus" style="font-size:0.8rem;color:#50fa7b;display:none">Đã cập nhật icon!</span>
+              </div>
+            </div>
+
+            <!-- Chỉnh Sửa MOTD & Bảng Mã Màu -->
+            <div class="prop-row" style="align-items:flex-start">
+              <div>
+                <div class="prop-label">Soạn Thảo MOTD</div>
+                <div class="prop-desc">Hỗ trợ 2 dòng và toàn bộ mã màu Minecraft (§0 - §f, §l, §o, v.v.). Nhấp vào ô màu
+                  bên dưới để chèn nhanh.</div>
+                <div class="prop-key">motd</div>
+              </div>
+              <div>
+                <textarea id="prop_motd" class="prop-input" rows="2"
+                  style="resize:vertical;font-family:var(--mc-font-mono)" oninput="updateMotdPreview()"
+                  placeholder="A Minecraft Server"></textarea>
+
+                <!-- Bảng Palette Màu Minecraft -->
+                <div style="margin-top:10px">
+                  <div style="font-size:0.75rem;font-weight:700;color:var(--mc-text-muted);margin-bottom:6px">Bảng Mã
+                    Màu Minecraft (Nhấp để chèn §):</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+                    <button type="button" class="color-btn" style="background:#000000"
+                      onclick="insertColorCode('prop_motd', '§0')" title="§0 Đen">§0</button>
+                    <button type="button" class="color-btn" style="background:#0000AA"
+                      onclick="insertColorCode('prop_motd', '§1')" title="§1 Lam đậm">§1</button>
+                    <button type="button" class="color-btn" style="background:#00AA00"
+                      onclick="insertColorCode('prop_motd', '§2')" title="§2 Lục đậm">§2</button>
+                    <button type="button" class="color-btn" style="background:#00AAAA"
+                      onclick="insertColorCode('prop_motd', '§3')" title="§3 Aqua đậm">§3</button>
+                    <button type="button" class="color-btn" style="background:#AA0000"
+                      onclick="insertColorCode('prop_motd', '§4')" title="§4 Đỏ đậm">§4</button>
+                    <button type="button" class="color-btn" style="background:#AA00AA"
+                      onclick="insertColorCode('prop_motd', '§5')" title="§5 Tím đậm">§5</button>
+                    <button type="button" class="color-btn" style="background:#FFAA00"
+                      onclick="insertColorCode('prop_motd', '§6')" title="§6 Vàng cam">§6</button>
+                    <button type="button" class="color-btn" style="background:#AAAAAA"
+                      onclick="insertColorCode('prop_motd', '§7')" title="§7 Xám">§7</button>
+                    <button type="button" class="color-btn" style="background:#555555"
+                      onclick="insertColorCode('prop_motd', '§8')" title="§8 Xám đậm">§8</button>
+                    <button type="button" class="color-btn" style="background:#5555FF"
+                      onclick="insertColorCode('prop_motd', '§9')" title="§9 Lam nhạt">§9</button>
+                    <button type="button" class="color-btn" style="background:#55FF55;color:#000"
+                      onclick="insertColorCode('prop_motd', '§a')" title="§a Lục nhạt">§a</button>
+                    <button type="button" class="color-btn" style="background:#55FFFF;color:#000"
+                      onclick="insertColorCode('prop_motd', '§b')" title="§b Aqua nhạt">§b</button>
+                    <button type="button" class="color-btn" style="background:#FF5555"
+                      onclick="insertColorCode('prop_motd', '§c')" title="§c Đỏ nhạt">§c</button>
+                    <button type="button" class="color-btn" style="background:#FF55FF"
+                      onclick="insertColorCode('prop_motd', '§d')" title="§d Hồng tím">§d</button>
+                    <button type="button" class="color-btn" style="background:#FFFF55;color:#000"
+                      onclick="insertColorCode('prop_motd', '§e')" title="§e Vàng">§e</button>
+                    <button type="button" class="color-btn" style="background:#FFFFFF;color:#000"
+                      onclick="insertColorCode('prop_motd', '§f')" title="§f Trắng">§f</button>
+                  </div>
+
+                  <!-- Bảng Định Dạng -->
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <button type="button" class="format-btn" onclick="insertColorCode('prop_motd', '§l')"><b>§l
+                        Đậm</b></button>
+                    <button type="button" class="format-btn" onclick="insertColorCode('prop_motd', '§o')"><i>§o
+                        Nghiêng</i></button>
+                    <button type="button" class="format-btn" onclick="insertColorCode('prop_motd', '§n')"><u>§n Gạch
+                        chân</u></button>
+                    <button type="button" class="format-btn" onclick="insertColorCode('prop_motd', '§m')"><s>§m Gạch
+                        ngang</s></button>
+                    <button type="button" class="format-btn" onclick="insertColorCode('prop_motd', '§k')">§k Nhảy
+                      chữ</button>
+                    <button type="button" class="format-btn" onclick="insertColorCode('prop_motd', '§r')">§r
+                      Reset</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- NHÓM GÓI TÀI NGUYÊN (RESOURCE PACK - Yêu cầu mới) -->
+          <div class="prop-group">
+            <div class="prop-group-title">
+              <span>📦</span> Gói Tài Nguyên Máy Chủ (Server Resource Pack)
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Đường Dẫn Gói Tài Nguyên (URL)</div>
+                <div class="prop-desc">Liên kết tải trực tiếp tệp .zip texture pack máy chủ.</div>
+                <div class="prop-key">resource-pack</div>
+              </div>
+              <div>
+                <input type="text" id="prop_resource-pack" class="prop-input"
+                  placeholder="https://example.com/texturepack.zip">
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Mã Băm SHA-1 (SHA-1 Hash)</div>
+                <div class="prop-desc">Mã kiểm tra tính toàn vẹn 40 ký tự hex để client không tải lại nếu đã có.</div>
+                <div class="prop-key">resource-pack-sha1</div>
+              </div>
+              <div>
+                <input type="text" id="prop_resource-pack-sha1" class="prop-input"
+                  placeholder="Ví dụ: 4e1243bd22c66e76c2ba9eddc1f91394e57f9f83">
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Bắt Buộc Tải (Require Resource Pack)</div>
+                <div class="prop-desc">Nếu bật, người chơi từ chối tải sẽ tự động bị ngắt kết nối khỏi máy chủ.</div>
+                <div class="prop-key">require-resource-pack</div>
+              </div>
+              <div>
+                <select id="prop_require-resource-pack" class="prop-input">
+                  <option value="false">Tắt (Không bắt buộc)</option>
+                  <option value="true">Bật (Bắt buộc phải tải để vào game)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="prop-row" style="align-items:flex-start">
+              <div>
+                <div class="prop-label">Lời Nhắc Tải Gói Tài Nguyên (Prompt)</div>
+                <div class="prop-desc">Thông điệp hiển thị tại màn hình xác nhận tải resource pack khi người chơi kết
+                  nối.</div>
+                <div class="prop-key">resource-pack-prompt</div>
+              </div>
+              <div>
+                <textarea id="prop_resource-pack-prompt" class="prop-input" rows="2"
+                  style="resize:vertical;font-family:var(--mc-font-mono)"
+                  placeholder="Vui lòng tải gói tài nguyên tùy chỉnh để có trải nghiệm tốt nhất!"></textarea>
+                <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+                  <button type="button" class="format-btn"
+                    onclick="insertColorCode('prop_resource-pack-prompt', '§e')">§e Vàng</button>
+                  <button type="button" class="format-btn"
+                    onclick="insertColorCode('prop_resource-pack-prompt', '§a')">§a Xanh</button>
+                  <button type="button" class="format-btn"
+                    onclick="insertColorCode('prop_resource-pack-prompt', '§b')">§b Aqua</button>
+                  <button type="button" class="format-btn"
+                    onclick="insertColorCode('prop_resource-pack-prompt', '§l')">§l Đậm</button>
+                  <button type="button" class="format-btn"
+                    onclick="insertColorCode('prop_resource-pack-prompt', '§r')">§r Reset</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nhóm 1: Mạng & Hiển thị -->
+          <div class="prop-group">
+            <div class="prop-group-title">
+              <span>🌐</span> Mạng & Kết Nối Máy Chủ
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Cổng Máy Chủ (Server Port)</div>
+                <div class="prop-desc">Cổng mạng để người chơi kết nối vào game (mặc định 25565).</div>
+                <div class="prop-key">server-port</div>
+              </div>
+              <div>
+                <input type="number" id="prop_server-port" class="prop-input" placeholder="25565">
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Địa chỉ IP Máy Chủ (Server IP)</div>
+                <div class="prop-desc">Để trống để lắng nghe trên tất cả địa chỉ mạng.</div>
+                <div class="prop-key">server-ip</div>
+              </div>
+              <div>
+                <input type="text" id="prop_server-ip" class="prop-input" placeholder="0.0.0.0 hoặc để trống">
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Số người chơi tối đa (Max Players)</div>
+                <div class="prop-desc">Giới hạn số lượng người chơi tham gia cùng lúc.</div>
+                <div class="prop-key">max-players</div>
+              </div>
+              <div>
+                <input type="number" id="prop_max-players" class="prop-input" oninput="updatePlayersPreview()"
+                  placeholder="20">
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Xác minh tài khoản bản quyền (Online Mode)</div>
+                <div class="prop-desc">Bật (True) để chỉ cho tài khoản bản quyền; Tắt (False) để cho phép cả bản Crack /
+                  Offline.</div>
+                <div class="prop-key">online-mode</div>
+              </div>
+              <div>
+                <select id="prop_online-mode" class="prop-input">
+                  <option value="true">Bật (Chỉ tài khoản bản quyền Minecraft)</option>
+                  <option value="false">Tắt (Cho phép cả Crack / Launcher lậu)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Danh sách cho phép (Whitelist)</div>
+                <div class="prop-desc">Chỉ những người chơi trong danh sách whitelist mới được vào.</div>
+                <div class="prop-key">white-list</div>
+              </div>
+              <div>
+                <select id="prop_white-list" class="prop-input">
+                  <option value="false">Tắt (Ai cũng có thể vào)</option>
+                  <option value="true">Bật (Chỉ người trong Whitelist)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nhóm 2: Lối chơi & Gameplay -->
+          <div class="prop-group">
+            <div class="prop-group-title">
+              <span>🎮</span> Lối Chơi & Thế Giới Gameplay
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Chế độ chơi mặc định (Gamemode)</div>
+                <div class="prop-desc">Chế độ chơi khởi đầu khi người chơi tham gia thế giới.</div>
+                <div class="prop-key">gamemode</div>
+              </div>
+              <div>
+                <select id="prop_gamemode" class="prop-input">
+                  <option value="survival">Sinh Tồn (Survival)</option>
+                  <option value="creative">Sáng Tạo (Creative)</option>
+                  <option value="adventure">Phiêu Lưu (Adventure)</option>
+                  <option value="spectator">Khán Giả (Spectator)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Độ khó máy chủ (Difficulty)</div>
+                <div class="prop-desc">Ảnh hưởng lượng sát thương và mức độ quái vật sinh ra.</div>
+                <div class="prop-key">difficulty</div>
+              </div>
+              <div>
+                <select id="prop_difficulty" class="prop-input">
+                  <option value="peaceful">Bình Yên (Peaceful)</option>
+                  <option value="easy">Dễ (Easy)</option>
+                  <option value="normal">Bình Thường (Normal)</option>
+                  <option value="hard">Khó (Hard)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Đánh nhau giữa người chơi (PVP)</div>
+                <div class="prop-desc">Cho phép hoặc cấm người chơi tấn công lẫn nhau.</div>
+                <div class="prop-key">pvp</div>
+              </div>
+              <div>
+                <select id="prop_pvp" class="prop-input">
+                  <option value="true">Bật (Cho phép đánh nhau)</option>
+                  <option value="false">Tắt (Hòa bình / Không gây sát thương)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Sinh quái vật (Spawn Monsters)</div>
+                <div class="prop-desc">Tự động sinh ra Zombie, Skeleton, Creeper, v.v.</div>
+                <div class="prop-key">spawn-monsters</div>
+              </div>
+              <div>
+                <select id="prop_spawn-monsters" class="prop-input">
+                  <option value="true">Bật (Có quái vật)</option>
+                  <option value="false">Tắt (Không sinh quái)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Sinh động vật (Spawn Animals)</div>
+                <div class="prop-desc">Tự động sinh ra Bò, Cừu, Lợn, Gà, v.v.</div>
+                <div class="prop-key">spawn-animals</div>
+              </div>
+              <div>
+                <select id="prop_spawn-animals" class="prop-input">
+                  <option value="true">Bật (Có động vật)</option>
+                  <option value="false">Tắt (Không sinh động vật)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Cho phép bay (Allow Flight)</div>
+                <div class="prop-desc">Tránh kick người chơi nếu server nghi ngờ họ bay lơ lửng.</div>
+                <div class="prop-key">allow-flight</div>
+              </div>
+              <div>
+                <select id="prop_allow-flight" class="prop-input">
+                  <option value="false">Tắt (Chặn bay ở Survival)</option>
+                  <option value="true">Bật (Cho phép bay)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nhóm 3: Hiệu năng & RCON -->
+          <div class="prop-group">
+            <div class="prop-group-title">
+              <span>⚡</span> Hiệu Năng & Kết Nối RCON
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Kích hoạt giao thức RCON (Enable RCON)</div>
+                <div class="prop-desc">Cần thiết để bot điều khiển server và chạy lệnh từ xa.</div>
+                <div class="prop-key">enable-rcon</div>
+              </div>
+              <div>
+                <select id="prop_enable-rcon" class="prop-input">
+                  <option value="true">Bật (Khuyến nghị)</option>
+                  <option value="false">Tắt</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Cổng kết nối RCON (RCON Port)</div>
+                <div class="prop-desc">Cổng kết nối dành riêng cho console RCON (mặc định 25575).</div>
+                <div class="prop-key">rcon.port</div>
+              </div>
+              <div>
+                <input type="number" id="prop_rcon.port" class="prop-input" placeholder="25575">
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Mật khẩu RCON (RCON Password)</div>
+                <div class="prop-desc">Mật khẩu xác thực cho kết nối điều khiển RCON từ xa.</div>
+                <div class="prop-key">rcon.password</div>
+              </div>
+              <div>
+                <input type="password" id="prop_rcon.password" class="prop-input" placeholder="Mật khẩu RCON bí mật">
+              </div>
+            </div>
+
+            <div class="prop-row">
+              <div>
+                <div class="prop-label">Giới hạn thời gian 1 tick (Max Tick Time)</div>
+                <div class="prop-desc">Thời gian ms tối đa cho 1 tick trước khi watchdog tự dừng server (-1 để vô hiệu
+                  hóa).</div>
+                <div class="prop-key">max-tick-time</div>
+              </div>
+              <div>
+                <input type="number" id="prop_max-tick-time" class="prop-input" placeholder="60000">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE: RAW TEXT -->
+        <div id="rawModeContainer" style="display:none">
+          <div class="prop-group" style="padding:0;overflow:hidden">
+            <textarea id="rawPropsTextarea" class="mc-code-textarea" style="height:650px;border:none;border-radius:14px"
+              spellcheck="false"></textarea>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    let currentServerId = new URLSearchParams(window.location.search).get('server') || 'server';
+    let currentMode = 'gui';
+    let loadedProps = {};
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast-message';
+      let icon = '🌸';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      if (type === 'warning') icon = '⚠️';
+      t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 4000);
+    }
+
+    function getToken() {
+      return localStorage.getItem('token') || '';
+    }
+
+    function updateNavLinks() {
+      document.getElementById('navConsoleLink').href = `/minecraft/console?server=${encodeURIComponent(currentServerId)}`;
+      document.getElementById('navFilesLink').href = `/minecraft/file?server=${encodeURIComponent(currentServerId)}`;
+      document.getElementById('navPropsLink').href = `/minecraft/properties?server=${encodeURIComponent(currentServerId)}`;
+      document.getElementById('navPlayersLink').href = `/minecraft/player?server=${encodeURIComponent(currentServerId)}`;
+      document.getElementById('activeServerName').innerText = currentServerId;
+      document.getElementById('motdIconPreview').src = `/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/icon?t=${Date.now()}`;
+      document.getElementById('iconPreviewThumb').src = `/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/icon?t=${Date.now()}`;
+    }
+
+    async function loadServerList() {
+      try {
+        const res = await fetch('/api/mc/hosting/servers', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        const select = document.getElementById('serverSelect');
+        select.innerHTML = '';
+        if (data.ok && data.servers && data.servers.length > 0) {
+          data.servers.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.innerText = `${s.name} (${s.id})`;
+            if (s.id === currentServerId) opt.selected = true;
+            select.appendChild(opt);
+          });
+        }
+      } catch (e) { }
+    }
+
+    function changeServer(newId) {
+      if (!newId) return;
+      currentServerId = newId;
+      window.history.replaceState({}, '', `/minecraft/properties?server=${encodeURIComponent(newId)}`);
+      updateNavLinks();
+      loadProperties();
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('tabBtnGui').classList.toggle('active', mode === 'gui');
+      document.getElementById('tabBtnRaw').classList.toggle('active', mode === 'raw');
+      document.getElementById('guiModeContainer').style.display = mode === 'gui' ? 'block' : 'none';
+      document.getElementById('rawModeContainer').style.display = mode === 'raw' ? 'block' : 'none';
+    }
+
+    // Minecraft Formatting parser (§0 - §f, §l, §o, §n, §m, §r)
+    const mcColorMap = {
+      '0': '#000000', '1': '#0000AA', '2': '#00AA00', '3': '#00AAAA',
+      '4': '#AA0000', '5': '#AA00AA', '6': '#FFAA00', '7': '#AAAAAA',
+      '8': '#555555', '9': '#5555FF', 'a': '#55FF55', 'b': '#55FFFF',
+      'c': '#FF5555', 'd': '#FF55FF', 'e': '#FFFF55', 'f': '#FFFFFF'
+    };
+
+    function renderMinecraftText(text) {
+      if (!text) return 'A Minecraft Server';
+      // Thay thế \n hoặc xuống dòng
+      let raw = text.replace(/\\n/g, '\n');
+      let html = '';
+      let curColor = '#AAAAAA';
+      let isBold = false;
+      let isItalic = false;
+      let isUnderline = false;
+      let isStrike = false;
+
+      let i = 0;
+      while (i < raw.length) {
+        if ((raw[i] === '§' || raw[i] === '&') && i + 1 < raw.length) {
+          const code = raw[i + 1].toLowerCase();
+          if (mcColorMap[code]) {
+            curColor = mcColorMap[code];
+            isBold = false; isItalic = false; isUnderline = false; isStrike = false;
+          } else if (code === 'l') {
+            isBold = true;
+          } else if (code === 'o') {
+            isItalic = true;
+          } else if (code === 'n') {
+            isUnderline = true;
+          } else if (code === 'm') {
+            isStrike = true;
+          } else if (code === 'r') {
+            curColor = '#AAAAAA';
+            isBold = false; isItalic = false; isUnderline = false; isStrike = false;
+          }
+          i += 2;
+          continue;
+        }
+
+        let char = raw[i];
+        if (char === '\n') {
+          html += '<br>';
+        } else {
+          let style = `color:${curColor};`;
+          if (isBold) style += 'font-weight:800;';
+          if (isItalic) style += 'font-style:italic;';
+          if (isUnderline) style += 'text-decoration:underline;';
+          if (isStrike) style += 'text-decoration:line-through;';
+          html += `<span style="${style}">${char === ' ' ? '&nbsp;' : escapeHtml(char)}</span>`;
+        }
+        i++;
+      }
+      return html;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function updateMotdPreview() {
+      const motd = document.getElementById('prop_motd').value;
+      document.getElementById('motdRenderOutput').innerHTML = renderMinecraftText(motd);
+    }
+
+    function updatePlayersPreview() {
+      const max = document.getElementById('prop_max-players').value || 20;
+      document.getElementById('motdPlayersPreview').innerText = `0 / ${max}`;
+    }
+
+    function insertColorCode(inputId, code) {
+      const textarea = document.getElementById(inputId);
+      if (!textarea) return;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const val = textarea.value;
+      textarea.value = val.substring(0, start) + code + val.substring(end);
+      textarea.selectionStart = textarea.selectionEnd = start + code.length;
+      textarea.focus();
+      if (inputId === 'prop_motd') {
+        updateMotdPreview();
+      }
+    }
+
+    async function previewAndUploadIcon(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/icon`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + getToken() },
+          body: formData
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message || 'Đã cập nhật icon máy chủ!', 'success');
+          const t = Date.now();
+          document.getElementById('motdIconPreview').src = `/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/icon?t=${t}`;
+          document.getElementById('iconPreviewThumb').src = `/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/icon?t=${t}`;
+          const st = document.getElementById('iconUploadStatus');
+          st.style.display = 'inline';
+          setTimeout(() => st.style.display = 'none', 3000);
+        } else {
+          showToast(data.error || 'Lỗi tải lên icon', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    async function loadProperties() {
+      try {
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/properties`, {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          showToast(data.error || 'Lỗi tải cấu hình properties', 'error');
+          return;
+        }
+
+        loadedProps = data.properties || {};
+        document.getElementById('rawPropsTextarea').value = data.raw || '';
+
+        // Fill GUI inputs
+        for (const [key, val] of Object.entries(loadedProps)) {
+          const el = document.getElementById(`prop_${key}`);
+          if (el) {
+            el.value = val;
+          }
+        }
+        updateMotdPreview();
+        updatePlayersPreview();
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    async function saveProperties() {
+      try {
+        let payload = {};
+        if (currentMode === 'raw') {
+          payload = { raw: document.getElementById('rawPropsTextarea').value };
+        } else {
+          const updates = {};
+          const inputs = document.querySelectorAll('[id^="prop_"]');
+          inputs.forEach(inp => {
+            const key = inp.id.replace('prop_', '');
+            updates[key] = inp.value;
+          });
+          payload = { updates };
+        }
+
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(currentServerId)}/properties`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message || 'Đã lưu cấu hình server.properties thành công!', 'success');
+          loadProperties();
+        } else {
+          showToast(data.error || 'Lỗi lưu cấu hình', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    // Init
+    updateNavLinks();
+    loadServerList();
+    loadProperties();
+  </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+
+</html>

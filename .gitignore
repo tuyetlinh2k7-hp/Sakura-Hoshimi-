@@ -1,0 +1,84 @@
+# ==============================================================================
+# SAKURABOT - GITIGNORE CONFIGURATION
+# Ngăn chặn việc tải lên file bảo mật, dữ liệu cá nhân, file tạm và database
+# ==============================================================================
+
+# --- Secrets & Environment Variables ---
+.env
+*.env
+.env.*
+!*.example
+cookies.txt
+vts_token.json
+
+# --- SQLite Databases & State Data ---
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+data/*.db
+data/backups/
+data/tts_cache/
+data/web_sessions.json
+data/web_users.json
+
+# --- Python Cache & Virtual Environments ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Audio / Media & Cache ---
+cache/
+downloads/
+*.mp3
+*.wav
+*.mp4
+*.webm
+
+# --- Logs & Debug files ---
+*.log
+*.log.*
+genshin_launcher.log
+.system_generated/
+scratch/
+
+# --- IDE & Operating System ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- External Submodules / Binaries ---
+server/
+FamilyTime/
+GenshinLauncher/
+Code_HoyoBuddy/
+AIVtuber_Llama3/
+*.jar
+*.exe
+*.dll

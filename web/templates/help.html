@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 Sakura Bot — Hướng dẫn sử dụng</title>
+<script>
+    (function(){
+        const t = localStorage.getItem('sakura_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+    })();
+</script>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/images/avatar-bot.jpg">
+<style>
+.help-nav{position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;transition:.3s}
+.help-hero{max-width:900px;margin:0 auto;padding:56px 32px;text-align:center}
+.guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:1100px;margin:0 auto;padding:0 32px}
+.guide-card{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:18px;padding:24px;box-shadow:var(--shadow-card);backdrop-filter:blur(14px);transition:all .25s ease}
+.guide-card:hover{transform:translateY(-4px);border-color:var(--border-glass-hover);box-shadow:var(--shadow-pop)}
+.guide-step{width:38px;height:38px;border-radius:50%;background:var(--sakura-gradient);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:14px;box-shadow:0 4px 12px rgba(255,121,198,0.35)}
+.commands-wrap{max-width:900px;margin:48px auto;padding:0 32px}
+.cmd-card{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:14px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;box-shadow:var(--shadow-card);transition:all .2s ease}
+.cmd-card:hover{border-color:var(--sakura-pink);transform:translateX(4px)}
+@media(max-width:900px){.guide-grid{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .help-nav{padding:10px 14px; flex-wrap:wrap; gap:10px}
+  .help-hero{padding:28px 16px}
+  .help-hero h1{font-size:1.8rem !important}
+  .guide-grid{padding:0 16px}
+  .commands-wrap{padding:0 16px}
+  .cmd-card{flex-direction:column; align-items:flex-start; gap:8px}
+  footer{flex-direction:column; gap:8px; text-align:center}
+}
+</style>
+</head>
+<body>
+<nav class="help-nav">
+  <div style="display:flex;gap:12px;align-items:center">
+    <div class="avatar-aura-wrapper">
+      <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" class="bot-avatar-animated" style="width:38px;height:38px;border-radius:10px;border:2px solid var(--sakura-pink)" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+    </div>
+    <span style="font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Sakura Bot</span>
+    <span style="color:var(--text-muted)">/ Hướng dẫn</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <button class="theme-toggle-btn" aria-label="Đổi giao diện">
+      <span class="theme-icon">🌙</span>
+    </button>
+            <div class="lang-switch-dropdown">
+                <button type="button" class="lang-switch-btn" aria-label="Đổi ngôn ngữ" title="Ngôn ngữ / Language">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VI</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div class="lang-menu">
+                    <button type="button" class="lang-option active" data-lang="vi"><span>🇻🇳 Tiếng Việt</span><span class="lang-check">✓</span></button>
+                    <button type="button" class="lang-option" data-lang="en"><span>🇬🇧 English</span><span class="lang-check"></span></button>
+                    <button type="button" class="lang-option" data-lang="ja"><span>🇯🇵 日本語</span><span class="lang-check"></span></button>
+                </div>
+            </div>
+    <a href="/" class="btn btn-secondary btn-sm">Trang chủ</a>
+    <a href="/dashboard" class="btn btn-primary btn-sm">Dashboard</a>
+  </div>
+</nav>
+
+<div class="help-hero">
+  <h1 style="font-size:2.6rem;font-weight:800">📖 Hướng dẫn sử dụng Sakura Bot</h1>
+  <p style="color:var(--text-muted);margin-top:12px;font-size:1.1rem">Từ mời bot đến cấu hình server — tất cả chỉ trong 3 bước</p>
+</div>
+
+<section style="padding:0 32px">
+  <div class="guide-grid">
+    <div class="guide-card">
+      <div class="guide-step">1</div>
+      <h3 style="font-size:1.2rem;margin-bottom:8px">🤖 Mời bot vào server</h3>
+      <p style="color:var(--text-muted);font-size:.94rem;line-height:1.5">Nhấn nút <b>Mời Sakura</b>, chọn server, cấp quyền <b>Quản trị viên</b>. Bot sẽ tự online và sẵn sàng nhận lệnh <code>s!help</code>.</p>
+      <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="doInvite()">Mời ngay</button>
+    </div>
+    <div class="guide-card">
+      <div class="guide-step">2</div>
+      <h3 style="font-size:1.2rem;margin-bottom:8px">🔐 Đăng nhập Dashboard</h3>
+      <p style="color:var(--text-muted);font-size:.94rem;line-height:1.5">Vào <a href="/login" style="color:var(--sakura-pink);font-weight:600">/login</a> → <b>Đăng nhập bằng Discord</b>. Hệ thống tự động lọc chỉ hiện server bạn có quyền <code>Quản lý Server</code>. User thường chỉ thấy server của mình, admin thấy toàn bộ.</p>
+      <a href="/login" class="btn btn-secondary btn-sm" style="margin-top:14px">Đăng nhập</a>
+    </div>
+    <div class="guide-card">
+      <div class="guide-step">3</div>
+      <h3 style="font-size:1.2rem;margin-bottom:8px">⚙️ Cấu hình server</h3>
+      <p style="color:var(--text-muted);font-size:.94rem;line-height:1.5">Vào <a href="/dashboard" style="color:var(--sakura-pink);font-weight:600">/dashboard</a> → chọn server → chỉnh <b>Prefix, Ngôn ngữ, Welcome, AutoMod, Logs</b>. Nhấn Lưu là áp dụng ngay lập tức.</p>
+      <a href="/dashboard" class="btn btn-secondary btn-sm" style="margin-top:14px">Mở Dashboard</a>
+    </div>
+  </div>
+</section>
+
+<div class="commands-wrap">
+  <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:8px">⌨️ Lệnh nổi bật</h2>
+  <p style="color:var(--text-muted);margin-bottom:18px">Dùng prefix <code>s!</code> hoặc Discord Slash Commands</p>
+  <div class="cmd-card"><div><strong>s!help</strong><div style="color:var(--text-muted);font-size:.85rem">Xem danh sách lệnh đầy đủ</div></div><span class="badge badge-sakura">Slash ✓</span></div>
+  <div class="cmd-card"><div><strong>s!setlang vi/en</strong><div style="color:var(--text-muted);font-size:.85rem">Đổi ngôn ngữ per-server</div></div><span class="badge">Per-guild</span></div>
+  <div class="cmd-card"><div><strong>/ticket panel</strong><div style="color:var(--text-muted);font-size:.85rem">Tạo panel ticket hỗ trợ</div></div><span class="badge badge-green">Mới</span></div>
+  <div class="cmd-card"><div><strong>s!play &lt;bài&gt;</strong><div style="color:var(--text-muted);font-size:.85rem">Phát nhạc YouTube/Spotify (Lavalink)</div></div><span class="badge">Music</span></div>
+  <div class="cmd-card"><div><strong>s!cauca / s!fish</strong><div style="color:var(--text-muted);font-size:.85rem">Câu cá đại dương & buôn bán hải sản RPG</div></div><span class="badge badge-sakura">RPG</span></div>
+
+  <h2 style="font-size:1.5rem;font-weight:800;margin:36px 0 14px">❓ Câu hỏi thường gặp (FAQ)</h2>
+  <div style="display:grid;gap:14px">
+    <div class="guide-card"><strong>Tại sao không thấy server của mình?</strong><p style="color:var(--text-muted);font-size:.92rem;margin-top:6px">Bạn cần có quyền <b>Quản lý Server</b> trong Discord và bot đã được mời vào server đó. Thử đăng xuất và đăng nhập lại bằng Discord.</p></div>
+    <div class="guide-card"><strong>Làm thế nào để xem toàn bộ danh sách lệnh?</strong><p style="color:var(--text-muted);font-size:.92rem;margin-top:6px">Bạn có thể gõ <code>s!help</code> trong kênh chat Discord hoặc truy cập mục <b>Lệnh Bot</b> trực tiếp trong <a href="/dashboard" style="color:var(--sakura-pink)">Bảng Điều Khiển</a>.</p></div>
+    <div class="guide-card"><strong>Phân quyền Quản trị & Owner hoạt động ra sao?</strong><p style="color:var(--text-muted);font-size:.92rem;margin-top:6px">Khi đăng nhập qua Discord, tài khoản Owner (@linhxinh_dev) sẽ tự động nhận toàn quyền quản trị cao nhất và quản lý mọi server mà bot tham gia.</p></div>
+  </div>
+</div>
+
+<footer style="max-width:1100px;margin:40px auto 0;padding:24px 32px;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;color:var(--text-dim);font-size:.85rem;flex-wrap:wrap;gap:12px">
+  <span>🌸 © 2026 Sakura Bot • Phát triển bởi Đồng Linh</span>
+  <span><a href="/" style="color:var(--text-muted);text-decoration:none">Trang chủ</a> • <a href="/discord/terms" style="color:var(--text-muted);text-decoration:none">Điều khoản</a> • <a href="/discord/privacy" style="color:var(--text-muted);text-decoration:none">Bảo mật</a> • <a href="/help" style="color:var(--sakura-pink);text-decoration:none">Hướng dẫn</a> • <a href="/login" style="color:var(--text-muted);text-decoration:none">Đăng nhập</a></span>
+</footer>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Sakura FX Engine (Petals + Swaying Branches + Theme) -->
+<script src="/static/js/sakura-fx.js"></script>
+    <script src="/static/js/i18n.js"></script>
+
+<script>
+function showToast(m,t='info'){const c=document.getElementById('toastContainer');if(!c)return;const d=document.createElement('div');d.className='toast-message';let i='🌸';if(t==='success')i='✅';if(t==='error')i='❌';if(t==='warning')i='⚠️';d.innerHTML=`<span>${i}</span><span>${m}</span>`;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transform='translateY(10px)';d.style.transition='all .3s';setTimeout(()=>d.remove(),300)},4000)}
+function doInvite(){ window.open('/bot', '_blank'); }
+</script>
+</body>
+</html>

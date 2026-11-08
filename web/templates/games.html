@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Game Center — Sakura Bot</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+<style>
+.games-wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px;align-items:stretch}
+.games-grid>a,.games-grid>.game-card{display:flex;min-width:0}
+.game-card{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:18px;display:flex;flex:1;flex-direction:column;gap:10px;transition:.2s;box-sizing:border-box;min-height:250px}
+.game-card:hover{border-color:var(--sakura-pink);transform:translateY(-3px);box-shadow:var(--shadow-pop)}
+.game-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:rgba(255,121,198,0.12);border:1px solid rgba(255,121,198,0.2)}
+.game-card .badge{margin-top:auto}
+.cipher-panel{margin-top:20px;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:18px}
+.cipher-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:14px 0}
+.cipher-field{display:flex;flex-direction:column;gap:6px;color:var(--text-muted);font-size:.85rem}
+.cipher-field select,.cipher-field input,.cipher-panel textarea{background:var(--bg-secondary);border:1px solid var(--border-glass);border-radius:8px;color:var(--text-main);padding:9px 10px;font:inherit}
+.cipher-field select{min-width:150px}
+.cipher-field input{width:90px}
+.cipher-text-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cipher-panel textarea{width:100%;min-height:120px;resize:vertical;box-sizing:border-box}
+.cipher-panel textarea:focus,.cipher-field select:focus,.cipher-field input:focus{outline:2px solid var(--sakura-pink);outline-offset:1px}
+@media (max-width:700px){.cipher-text-grid{grid-template-columns:1fr}.cipher-controls .btn{flex:1}}
+</style>
+</head>
+<body>
+<nav class="account-nav" style="position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+  <a href="/" style="display:flex;gap:10px;align-items:center;text-decoration:none">
+    <span style="font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Sakura Game</span>
+    <span style="color:var(--text-muted)">/ Center</span>
+  </a>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="theme-toggle-btn" aria-label="Đổi giao diện" title="Chuyển chế độ sáng/tối">
+      <span class="theme-icon">🌙</span>
+    </button>
+    <div class="lang-switch-dropdown">
+      <button type="button" class="lang-switch-btn" aria-label="Đổi ngôn ngữ" title="Ngôn ngữ / Language">
+        <span class="lang-flag">🇻🇳</span>
+        <span class="lang-code">VI</span>
+        <span class="lang-arrow">▾</span>
+      </button>
+      <div class="lang-menu">
+        <button type="button" class="lang-option active" data-lang="vi"><span>🇻🇳 Tiếng Việt</span><span class="lang-check">✓</span></button>
+        <button type="button" class="lang-option" data-lang="en"><span>🇬🇧 English</span><span class="lang-check"></span></button>
+        <button type="button" class="lang-option" data-lang="ja"><span>🇯🇵 日本語</span><span class="lang-check"></span></button>
+      </div>
+    </div>
+    <a href="/global-chat" class="btn btn-secondary btn-sm">Global Chat</a>
+    <a href="/dashboard" class="btn btn-secondary btn-sm">Dashboard</a>
+  </div>
+</nav>
+<div class="games-wrap">
+  <h2 style="font-weight:800">🎮 Game tích hợp trên web</h2>
+  <p style="color:var(--text-muted);font-size:.9rem">Chọn game để chơi ngay trên trình duyệt — không cần Discord</p>
+  <div class="games-grid">
+    <a href="/game/familytime" style="text-decoration:none;color:inherit">
+      <div class="game-card" style="border:1px solid rgba(255,154,194,0.3);background:linear-gradient(135deg,rgba(30,41,59,0.9),rgba(225,29,72,0.15))">
+        <div class="game-icon">🐺</div>
+        <div style="font-weight:800;color:#ff9ac2">Family Time: Sinh Tồn Nàng Sói</div>
+        <div style="color:var(--text-muted);font-size:.88rem">Khai thác tài nguyên, xây nhà, sống cùng Nàng Sói và chăm sóc đàn con sói ngày càng đông đúc!</div>
+        <span class="badge badge-sakura" style="width:fit-content;background:#e11d48">Chơi ngay 🔥 →</span>
+      </div>
+    </a>
+    <a href="/game/xo" style="text-decoration:none;color:inherit">
+      <div class="game-card">
+        <div class="game-icon">⭕</div>
+        <div style="font-weight:800">Caro XO 3×3</div>
+        <div style="color:var(--text-muted);font-size:.88rem">Tic-Tac-Toe 2 người hoặc vs Bot Sakura, tính điểm</div>
+        <span class="badge badge-sakura" style="width:fit-content">Chơi ngay →</span>
+      </div>
+    </a>
+    <a href="/game/chess" style="text-decoration:none;color:inherit">
+      <div class="game-card">
+        <div class="game-icon">♟️</div>
+        <div style="font-weight:800">Cờ Vua</div>
+        <div style="color:var(--text-muted);font-size:.88rem">Chess vs bạn hoặc vs Bot, đầy đủ luật FIDE</div>
+        <span class="badge badge-sakura" style="width:fit-content">Chơi ngay →</span>
+      </div>
+    </a>
+    <a href="/game/wordchain" style="text-decoration:none;color:inherit">
+      <div class="game-card">
+        <div class="game-icon">🔗</div>
+        <div style="font-weight:800">Nối Từ 2 chữ</div>
+        <div style="color:var(--text-muted);font-size:.88rem">Word Chain Việt Nam — nối chữ như Discord, vs Bot</div>
+        <span class="badge badge-sakura" style="width:fit-content">Chơi ngay →</span>
+      </div>
+    </a>
+    <a href="/game/scribble" style="text-decoration:none;color:inherit">
+      <div class="game-card">
+        <div class="game-icon">🎨</div>
+        <div style="font-weight:800">Vẽ Hình Đoán Chữ</div>
+        <div style="color:var(--text-muted);font-size:.88rem">Vẽ hình theo từ khóa &amp; thi tài đoán từ real-time, hỗ trợ Multiplayer &amp; Bot Sakura</div>
+        <span class="badge badge-sakura" style="width:fit-content">Chơi ngay →</span>
+      </div>
+    </a>
+    <a href="/tarot" style="text-decoration:none;color:inherit">
+      <div class="game-card">
+        <div class="game-icon">🔮</div>
+        <div style="font-weight:800">Bói Bài Tarot</div>
+        <div style="color:var(--text-muted);font-size:.88rem">Rút bài và nhận lời luận giải từ AI Sakura</div>
+        <span class="badge badge-sakura" style="width:fit-content">Xem bài →</span>
+      </div>
+    </a>
+  </div>
+  <section class="cipher-panel" aria-labelledby="cipherTitle">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+      <div>
+        <h3 id="cipherTitle" style="font-weight:800;margin:0">🔐 Mã hóa &amp; Giải mã</h3>
+        <p style="color:var(--text-muted);font-size:.88rem;margin:6px 0 0">Xử lý trực tiếp trên trình duyệt, dữ liệu không được gửi lên server.</p>
+      </div>
+      <span class="badge badge-green">Offline</span>
+    </div>
+    <div class="cipher-controls">
+      <label class="cipher-field">Thuật toán
+        <select id="cipherAlgorithm">
+          <option value="caesar">Caesar</option>
+          <option value="atbash">Atbash</option>
+          <option value="base64">Base64</option>
+        </select>
+      </label>
+      <label class="cipher-field" id="cipherShiftField">Khóa dịch chuyển
+        <input id="cipherShift" type="number" value="3" step="1">
+      </label>
+      <button type="button" class="btn btn-primary" onclick="processCipher('encrypt')">🔒 Mã hóa</button>
+      <button type="button" class="btn btn-secondary" onclick="processCipher('decrypt')">🔓 Giải mã</button>
+    </div>
+    <div class="cipher-text-grid">
+      <label class="cipher-field">Văn bản đầu vào
+        <textarea id="cipherInput" placeholder="Nhập văn bản cần xử lý..."></textarea>
+      </label>
+      <label class="cipher-field">Kết quả
+        <textarea id="cipherOutput" readonly placeholder="Kết quả sẽ xuất hiện ở đây..."></textarea>
+      </label>
+    </div>
+  </section>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+    <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:16px">
+      <div style="font-weight:800;margin-bottom:10px">🏆 BXH XO</div>
+      <div id="hubXoLb" style="font-size:.9rem;color:var(--text-muted)">Cần đăng nhập để xem — <a href="/login" style="color:var(--sakura-pink)">Đăng nhập</a></div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:16px">
+      <div style="font-weight:800;margin-bottom:10px">🏆 BXH Cờ Vua</div>
+      <div id="hubChessLb" style="font-size:.9rem;color:var(--text-muted)">Cần đăng nhập để xem — <a href="/login" style="color:var(--sakura-pink)">Đăng nhập</a></div>
+    </div>
+  </div>
+</div>
+<script>
+async function loadHubLb(){
+  const t=localStorage.getItem('sakura_auth_token')|| (document.cookie.match(/sakura_token=([^;]+)/)||[])[1]||'';
+  const h={}; if(t) h['Authorization']='Bearer '+t;
+  for(const game of ['xo','chess']){
+    try{ const r=await fetch(`/api/game/${game}/leaderboard`,{headers:h}); const j=await r.json(); const el=document.getElementById(game==='xo'?'hubXoLb':'hubChessLb'); if(!j.ok){ el.innerHTML='<span style="color:var(--text-dim)">Chưa có dữ liệu</span>'; continue; } if(!j.leaderboard.length) el.innerHTML='<span style="color:var(--text-dim)">Chưa có dữ liệu</span>'; else el.innerHTML=j.leaderboard.slice(0,5).map((u,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:8px;margin-bottom:6px"><span style="display:flex;gap:6px;align-items:center"><span style="font-weight:800">#${i+1}</span><img src="${u.avatar||'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width:20px;height:20px;border-radius:50%" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><span>${u.username}</span></span><span style="font-size:.82rem">${u.wins}W</span></div>`).join(''); }catch{}
+  }
+}
+loadHubLb();
+const cipherAlgorithm = document.getElementById('cipherAlgorithm');
+const cipherShiftField = document.getElementById('cipherShiftField');
+
+cipherAlgorithm.addEventListener('change', () => {
+  cipherShiftField.style.display = cipherAlgorithm.value === 'caesar' ? 'flex' : 'none';
+});
+
+function caesarCipher(text, shift) {
+  return Array.from(text).map(char => {
+    const code = char.charCodeAt(0);
+    const offset = code >= 65 && code <= 90 ? 65 : code >= 97 && code <= 122 ? 97 : null;
+    return offset === null ? char : String.fromCharCode((code - offset + shift + 26 * 1000) % 26 + offset);
+  }).join('');
+}
+
+function atbashCipher(text) {
+  return Array.from(text).map(char => {
+    const code = char.charCodeAt(0);
+    if (code >= 65 && code <= 90) return String.fromCharCode(90 - (code - 65));
+    if (code >= 97 && code <= 122) return String.fromCharCode(122 - (code - 97));
+    return char;
+  }).join('');
+}
+
+function processCipher(mode) {
+  const input = document.getElementById('cipherInput').value;
+  const output = document.getElementById('cipherOutput');
+  if (!input) { output.value = 'Vui lòng nhập văn bản cần xử lý.'; return; }
+  const algorithm = cipherAlgorithm.value;
+  try {
+    if (algorithm === 'base64') {
+      output.value = mode === 'encrypt' ? btoa(unescape(encodeURIComponent(input))) : decodeURIComponent(escape(atob(input)));
+    } else if (algorithm === 'atbash') {
+      output.value = atbashCipher(input);
+    } else {
+      const shift = Number.parseInt(document.getElementById('cipherShift').value, 10);
+      if (Number.isNaN(shift)) throw new Error('Khóa Caesar phải là số nguyên.');
+      output.value = caesarCipher(input, mode === 'encrypt' ? shift : -shift);
+    }
+  } catch (error) {
+    output.value = error.message || 'Dữ liệu đầu vào không hợp lệ.';
+  }
+}
+</script>
+<script src="/static/js/sakura-fx.js"></script>
+<script src="/static/js/i18n.js"></script>
+</body>
+</html>

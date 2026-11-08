@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakura Plugin Help | Hướng dẫn</title>
+    <link rel="icon" href="/images/avatar-bot.jpg">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        (function () {
+            const t = localStorage.getItem('sakura_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <style>
+        body {
+            background-image: radial-gradient(circle at 15% 20%, rgba(255,121,198,0.14), transparent 25%),
+                              radial-gradient(circle at 85% 15%, rgba(139,233,253,0.1), transparent 20%),
+                              linear-gradient(180deg, #080d17 0%, #0d1323 100%);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        [data-theme="light"] body {
+            background-image: radial-gradient(circle at 15% 20%, rgba(255,182,193,0.35), transparent 30%),
+                              radial-gradient(circle at 85% 15%, rgba(179,157,255,0.18), transparent 28%),
+                              linear-gradient(180deg, #fff7fb 0%, #f8f1ff 100%);
+        }
+
+        [data-theme="light"] .hero,
+        [data-theme="light"] .card,
+        [data-theme="light"] .command-item,
+        [data-theme="light"] .command-body .usage,
+        [data-theme="light"] .topbar {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(216, 27, 96, 0.18);
+            box-shadow: 0 12px 28px rgba(170, 110, 148, 0.12);
+        }
+
+        [data-theme="light"] .nav a {
+            color: var(--text-muted);
+        }
+
+        [data-theme="light"] .nav a:hover,
+        [data-theme="light"] .nav a.active {
+            background: rgba(255, 121, 198, 0.08);
+            color: var(--text-main);
+        }
+
+        .page-shell {
+            width: min(1200px, calc(100% - 28px));
+            margin: 28px auto 56px;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            backdrop-filter: blur(14px);
+            background: var(--bg-glass);
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .topbar-inner {
+            width: min(1200px, calc(100% - 28px));
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            padding: 14px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--sakura-pink);
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 18px rgba(255, 121, 198, 0.28);
+        }
+
+        .brand-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: var(--text-muted);
+            font-weight: 700;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+        }
+
+        .nav a:hover, .nav a.active {
+            background: rgba(255,121,198,0.08);
+            color: var(--text-main);
+            border-color: rgba(255,121,198,0.2);
+        }
+
+        .hero {
+            margin-top: 28px;
+            padding: 28px;
+            border-radius: 24px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            box-shadow: var(--shadow-card);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255,121,198,0.08);
+            border: 1px solid rgba(255,121,198,0.2);
+            color: var(--sakura-pink);
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 18px 0 12px;
+            font-size: clamp(2.1rem, 4vw, 3.4rem);
+            line-height: 1.05;
+            letter-spacing: -0.06em;
+        }
+
+        .lead {
+            max-width: 760px;
+            color: var(--text-muted);
+            font-size: 1.08rem;
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 12px;
+            padding: 13px 18px;
+            font-weight: 800;
+            border: 1px solid transparent;
+            transition: .2s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary {
+            background: var(--sakura-gradient);
+            color: white;
+            box-shadow: 0 18px 30px rgba(255,121,198,0.2);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.04);
+            color: var(--text-main);
+            border-color: var(--border-glass);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            margin-top: 26px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,121,198,0.12), rgba(139,233,253,0.06), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.22s ease;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(255,121,198,0.35);
+            box-shadow: 0 18px 40px rgba(255,121,198,0.12);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .step-badge {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            font-weight: 900;
+            background: var(--sakura-gradient);
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            margin: 0 0 10px;
+            font-size: 1.35rem;
+        }
+
+        .card p, .card li {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .checklist {
+            list-style: none;
+            margin: 14px 0 0;
+            padding: 0;
+            display: grid;
+            gap: 8px;
+        }
+
+        .checklist li::before {
+            content: '✓';
+            color: var(--accent-green);
+            font-weight: 900;
+            margin-right: 8px;
+        }
+
+        .command-section {
+            margin-top: 36px;
+        }
+
+        .command-list {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .command-item {
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.025);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .command-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,121,198,0.35);
+            box-shadow: 0 12px 28px rgba(255,121,198,0.08);
+        }
+
+        .command-trigger {
+            width: 100%;
+            padding: 18px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+        }
+
+        .command-trigger:hover {
+            background: rgba(255,121,198,0.04);
+        }
+
+        .command-name {
+            font-family: var(--font-mono);
+            color: var(--sakura-light);
+        }
+
+        .command-body {
+            display: none;
+            padding: 0 20px 18px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .command-body.open {
+            display: block;
+        }
+
+        .command-body p {
+            margin-top: 14px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .command-body .usage {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,121,198,0.2);
+            background: rgba(255,121,198,0.08);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            margin-top: 28px;
+            padding: 18px 0 40px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 840px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+            .topbar-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .nav {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <div class="brand-logo">
+                    <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot avatar" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+                </div>
+                <span>Sakura Plugin</span>
+            </div>
+
+            <nav class="nav">
+                <a href="/">Trang chủ</a>
+                <a href="/plugin">Plugin</a>
+                <a href="/plugin/help" class="active">Hướng dẫn</a>
+                <a href="/plugin/download">Tải về</a>
+                <a href="/support">Hỗ trợ</a>
+                <button class="theme-toggle-btn" aria-label="Đổi giao diện">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            <div class="lang-switch-dropdown">
+                <button type="button" class="lang-switch-btn" aria-label="Đổi ngôn ngữ" title="Ngôn ngữ / Language">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VI</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div class="lang-menu">
+                    <button type="button" class="lang-option active" data-lang="vi"><span>🇻🇳 Tiếng Việt</span><span class="lang-check">✓</span></button>
+                    <button type="button" class="lang-option" data-lang="en"><span>🇬🇧 English</span><span class="lang-check"></span></button>
+                    <button type="button" class="lang-option" data-lang="ja"><span>🇯🇵 日本語</span><span class="lang-check"></span></button>
+                </div>
+            </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="hero">
+            <span class="eyebrow">Sakura • Minecraft</span>
+            <h1>Hướng dẫn cài đặt và sử dụng Plugin Sakura</h1>
+            <p class="lead">Dưới đây là quy trình rõ ràng để bạn tải plugin, thêm vào server, kiểm tra cài đặt, và sử dụng các lệnh tiện ích ngay khi vào server.</p>
+            <div class="hero-actions">
+                <a href="/plugin/download" class="btn btn-primary">⬇️ Tải plugin ngay</a>
+                <a href="/plugin" class="btn btn-secondary">📦 Xem trang plugin</a>
+            </div>
+        </section>
+
+        <section class="steps-grid">
+            <article class="card">
+                <div class="step-badge">1</div>
+                <h3>1. Tải plugin về máy</h3>
+                <p>Bấm vào nút tải xuống trên trang plugin, chọn file <strong>LinhDevPlugin-Test-1.0.jar</strong> và lưu vào máy tính của bạn.</p>
+                <ul class="checklist">
+                    <li>Chọn đúng file .jar</li>
+                    <li>Không đổi tên file nếu không cần thiết</li>
+                    <li>Luôn backup trước khi cập nhật</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <div class="step-badge">2</div>
+                <h3>2. Thêm vào server Minecraft</h3>
+                <p>Đưa file .jar vào thư mục <strong>plugins</strong> của máy chủ Paper/Spigot/Bukkit bạn đang chạy.</p>
+                <ul class="checklist">
+                    <li>Mở thư mục máy chủ</li>
+                    <li>Vào thư mục plugins</li>
+                    <li>Chép file plugin vào đây</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <div class="step-badge">3</div>
+                <h3>3. Khi đã có plugin trên server, làm gì?</h3>
+                <p>Khởi động lại server hoặc vào console rồi kiểm tra xem plugin đã load thành công chưa. Đảm bảo Java và Vault đang hoạt động đúng.</p>
+                <ul class="checklist">
+                    <li>Khởi động lại máy chủ</li>
+                    <li>Giám sát log console</li>
+                    <li>Kiểm tra plugin đã bật mà không có lỗi nghiêm trọng</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <div class="step-badge">4</div>
+                <h3>4. Cài đặt trước khi vào game</h3>
+                <p>Trước khi người chơi bắt đầu dùng, nên xác nhận server có đủ chuẩn bị như Vault, Permission và cấu hình cơ bản khớp với plugin.</p>
+                <ul class="checklist">
+                    <li>Kiểm tra Vault đã cài</li>
+                    <li>Đảm bảo plugin phụ thuộc đang hoạt động</li>
+                    <li>Đọc log nếu có lỗi permission hoặc config</li>
+                </ul>
+            </article>
+        </section>
+
+        <section class="command-section">
+            <h2 style="margin: 32px 0 12px; font-size: clamp(1.7rem, 2vw, 2.4rem);">Danh sách lệnh chính</h2>
+            <p style="color: var(--text-muted); line-height: 1.7;">Nhấn vào từng mục bên dưới để xem mô tả và cú pháp cụ thể của lệnh.</p>
+
+            <div class="command-list">
+                <!-- ANTI-XRAY & BẢO VỆ -->
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/antixray</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>🛡️ Quản trị hệ thống Anti-XRay ẩn quặng và bảo vệ rương khỏi gian lận (Hỗ trợ 3 cấp độ bảo vệ chống X-Ray mod/pack).</p>
+                        <span class="usage">/antixray [on|off|level 1-3|chest on/off|status]</span>
+                    </div>
+                </div>
+
+                <!-- TƯƠNG TÁC & NGỒI -->
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/sit</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>🪑 Ngồi xuống mọi bề mặt block, bậc thang, ghế sofa hoặc chuyển đổi cho phép người chơi khác cõng/ngồi lên mình.</p>
+                        <span class="usage">/sit [toggle]</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/sitadmin</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>⚙️ Lệnh Admin cấu hình và nạp lại hệ thống ngồi in-game.</p>
+                        <span class="usage">/sitadmin &lt;reload|set&gt;</span>
+                    </div>
+                </div>
+
+                <!-- KINH TẾ & THƯƠNG HỘI -->
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/sellgui</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>📦 Mở hòm bán đồ nhanh tự động: Thả vật phẩm vào rương, hệ thống tự đối chiếu bảng giá Shop và cộng coin tức thì.</p>
+                        <span class="usage">/sellgui</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/choden</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>🏴‍☠️ Mở Chợ Đen bí mật bán các nguyên liệu thần thoại và trang bị quý hiếm với số lượng giới hạn theo chu kỳ.</p>
+                        <span class="usage">/choden</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/uythac</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>📜 Bảng nhiệm vụ ủy thác thương hội: Nhận và hoàn thành các đơn hàng thu mua nông sản, khoáng sản để nhận thưởng coin & danh vọng.</p>
+                        <span class="usage">/uythac</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/bounty</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>🎯 Hệ thống treo thưởng truy nã người chơi hoặc truy vết vị trí kẻ bị truy nã để nhận thưởng lớn.</p>
+                        <span class="usage">/bounty [create|add|top|check|cancel|track]</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/skills</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>✨ Mở cây kỹ năng & chỉ số nội tại RPG: Nâng cấp sức mạnh khai khoáng, chặt cây, chiến đấu, phòng thủ và hồi máu.</p>
+                        <span class="usage">/skills</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/vesoxoso</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>🎟️ Mua vé số may mắn hàng ngày, tra cứu giải thưởng và thời gian quay thưởng jackpot trong game.</p>
+                        <span class="usage">/vesoxoso [mua|buy|check|time]</span>
+                    </div>
+                </div>
+
+                <!-- LIÊN KẾT DISCORD -->
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/discord</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>🌸 Liên kết tài khoản Minecraft với Discord SakuraBot, kiểm tra trạng thái và chuyển đổi coins an toàn hai chiều.</p>
+                        <span class="usage">/discord [link &lt;mã_liên_kết&gt; | transfer &lt;số_coin&gt; | status]</span>
+                    </div>
+                </div>
+
+                <!-- ADMIN & VẬT PHẨM TÙY CHỈNH -->
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/customitem</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>👑 Quyền Admin: Tạo, cấp phát và quản lý các trang bị tùy chỉnh, vũ khí đặc biệt có gắn hiệu ứng thuộc tính riêng.</p>
+                        <span class="usage">/customitem &lt;create|give|list|delete&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/sakuragive</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>🎁 Quyền Admin: Cấp các trang bị thần thoại, vũ khí OP và các cuốn sách phù phép đặc biệt Sakura.</p>
+                        <span class="usage">/sakuragive &lt;player&gt; &lt;item_type&gt; [level]</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/vmusic</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>🎵 Phát nhạc trực tiếp qua Simple Voice Chat trong game cho toàn bộ người chơi xung quanh cùng nghe.</p>
+                        <span class="usage">/vmusic &lt;play|stop|skip|queue|volume&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/balance</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Xem số dư tài sản của bạn trong hệ thống tiền tệ.</p>
+                        <span class="usage">/balance</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/pay</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Chuyển tiền cho người chơi khác trên server.</p>
+                        <span class="usage">/pay &lt;người_nhận&gt; &lt;số_tiền&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/daily</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Nhận phần thưởng điểm danh hàng ngày.</p>
+                        <span class="usage">/daily</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/quest</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Xem nhiệm vụ và nộp nhiệm vụ hàng ngày.</p>
+                        <span class="usage">/quest [submit]</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/shop</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Mở hệ thống cửa hàng và mua vật phẩm hoặc quyền lợi trong server.</p>
+                        <span class="usage">/shop [danh_mục] [danh_mục_con] | /shop reload</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/sethome</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Đặt vị trí nhà của bạn để có thể quay lại dễ dàng.</p>
+                        <span class="usage">/sethome [tên_nhà]</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/home</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Dịch chuyển về nhà đã đặt trước đó.</p>
+                        <span class="usage">/home [tên_nhà]</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/setwarp</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Tạo điểm warp để người chơi khác có thể đi đến.</p>
+                        <span class="usage">/setwarp &lt;tên_warp&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/warp</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Đi đến một điểm warp đã tạo.</p>
+                        <span class="usage">/warp &lt;tên_warp&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/claim</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Mua hoặc bảo vệ khu đất hiện tại của bạn.</p>
+                        <span class="usage">/claim</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/claimlist</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Xem danh sách các khu vực đã claim và quản lý chúng.</p>
+                        <span class="usage">/claimlist</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/tpa</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Gửi yêu cầu dịch chuyển đến người chơi khác.</p>
+                        <span class="usage">/tpa &lt;player&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/tpaccept</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Chấp nhận yêu cầu dịch chuyển từ người khác.</p>
+                        <span class="usage">/tpaccept</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/leaderboard</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Xem bảng xếp hạng và các chỉ số quan trọng trong server.</p>
+                        <span class="usage">/leaderboard</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/menu</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Mở menu cá nhân chứa các chức năng nhanh.</p>
+                        <span class="usage">/menu</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/register</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Đăng ký tài khoản để sử dụng các tính năng của server.</p>
+                        <span class="usage">/register &lt;mật_khẩu&gt; &lt;nhập_lại_mật_khẩu&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/login</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Đăng nhập vào tài khoản đã đăng ký trước đó.</p>
+                        <span class="usage">/login &lt;mật_khẩu&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/changepassword</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Đổi mật khẩu tài khoản riêng của người chơi.</p>
+                        <span class="usage">/changepassword &lt;mật_khẩu_cũ&gt; &lt;mật_khẩu_mới&gt;</span>
+                    </div>
+                </div>
+
+                <div class="command-item">
+                    <button class="command-trigger" type="button"><span class="command-name">/trade</span><span>+</span></button>
+                    <div class="command-body">
+                        <p>Trao đổi vật phẩm an toàn với người chơi khác.</p>
+                        <span class="usage">/trade &lt;player&gt; | /trade &lt;accept/deny&gt; &lt;player&gt;</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span>© 2026 Sakura Bot • Plugin Minecraft</span>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <a href="/plugin" style="color:var(--text-dim); text-decoration:none;">Plugin</a>
+                <a href="/plugin/download" style="color:var(--text-dim); text-decoration:none;">Tải về</a>
+                <a href="/" style="color:var(--text-dim); text-decoration:none;">Trang chủ</a>
+            </div>
+        </footer>
+    </main>
+
+    <script src="/static/js/sakura-fx.js"></script>
+    <script src="/static/js/i18n.js"></script>
+    <script>
+        document.querySelectorAll('.command-trigger').forEach((button) => {
+            button.addEventListener('click', () => {
+                const item = button.closest('.command-item');
+                const body = item.querySelector('.command-body');
+                const label = button.querySelector('span:last-child');
+                const isOpen = body.classList.contains('open');
+
+                document.querySelectorAll('.command-body').forEach((panel) => panel.classList.remove('open'));
+                document.querySelectorAll('.command-trigger').forEach((btn) => {
+                    const last = btn.querySelector('span:last-child');
+                    if (last) last.textContent = '+';
+                });
+
+                if (!isOpen) {
+                    body.classList.add('open');
+                    if (label) label.textContent = '−';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

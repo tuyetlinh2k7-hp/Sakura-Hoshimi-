@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakura Plugin | Minecraft</title>
+    <link rel="icon" href="/images/avatar-bot.jpg">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        (function () {
+            const t = localStorage.getItem('sakura_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <style>
+        :root,
+        [data-theme="dark"] {
+            --bg: #0a0f1a;
+            --bg-soft: rgba(255, 255, 255, 0.04);
+            --bg-card: rgba(17, 24, 39, 0.72);
+            --bg-card-strong: rgba(20, 28, 40, 0.88);
+            --text-main: #f5f7ff;
+            --text-muted: #b9c3d6;
+            --text-dim: #8da0bd;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-glass: rgba(255, 255, 255, 0.12);
+            --sakura-pink: #ff79c6;
+            --sakura-pink-2: #ff9ad6;
+            --sakura-gradient: linear-gradient(135deg, #ff79c6, #c77dff, #7bdff2);
+            --accent-green: #50fa7b;
+            --accent-blue: #8be9fd;
+            --accent-gold: #f1c40f;
+            --shadow-soft: 0 24px 70px rgba(0, 0, 0, 0.35);
+            --radius: 22px;
+            --page-bg: radial-gradient(circle at top left, rgba(255, 121, 198, 0.16), transparent 28%), radial-gradient(circle at top right, rgba(123, 223, 242, 0.12), transparent 30%), linear-gradient(180deg, #0a0f1a 0%, #0e1321 100%);
+        }
+
+        [data-theme="light"] {
+            --bg: #fff7fb;
+            --bg-soft: rgba(255, 255, 255, 0.7);
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-card-strong: rgba(255, 250, 252, 0.96);
+            --text-main: #291d36;
+            --text-muted: #615271;
+            --text-dim: #867594;
+            --border-subtle: rgba(214, 135, 182, 0.24);
+            --border-glass: rgba(216, 27, 96, 0.2);
+            --sakura-pink: #d81b60;
+            --sakura-pink-2: #f06292;
+            --sakura-gradient: linear-gradient(135deg, #f06292, #b39ddb, #81d4fa);
+            --accent-green: #2e7d32;
+            --accent-blue: #0277bd;
+            --accent-gold: #f9a825;
+            --shadow-soft: 0 24px 70px rgba(170, 110, 148, 0.18);
+            --radius: 22px;
+            --page-bg: radial-gradient(circle at top left, rgba(255, 182, 193, 0.35), transparent 28%), radial-gradient(circle at top right, rgba(166, 196, 255, 0.18), transparent 30%), linear-gradient(180deg, #fff7fb 0%, #f6f1ff 100%);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: Inter, Segoe UI, Arial, sans-serif;
+            background: var(--page-bg);
+            color: var(--text-main);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        .container {
+            width: min(1200px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(14px);
+            background: var(--bg-glass);
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .topbar-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            padding: 14px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            border: 2px solid var(--sakura-pink);
+            box-shadow: 0 0 18px rgba(255, 121, 198, 0.25);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .nav {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 10px;
+            transition: .2s ease;
+        }
+
+        .nav a:hover, .nav a.active {
+            background: rgba(255, 121, 198, 0.08);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 121, 198, 0.25);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            font-weight: 800;
+            transition: .2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--sakura-gradient);
+            color: white;
+            box-shadow: 0 18px 32px rgba(255, 121, 198, 0.22);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-glass);
+            color: var(--text-main);
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+
+        .hero {
+            padding: 56px 0 24px;
+        }
+
+        .hero-card {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 28px;
+            padding: 30px;
+            border-radius: var(--radius);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--sakura-pink);
+            background: rgba(255, 121, 198, 0.08);
+            border: 1px solid rgba(255, 121, 198, 0.2);
+            border-radius: 999px;
+            padding: 7px 12px;
+        }
+
+        h1 {
+            margin: 18px 0 14px;
+            font-size: clamp(2.4rem, 5vw, 4.3rem);
+            line-height: 1.05;
+            letter-spacing: -0.06em;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: clamp(1.8rem, 2.2vw, 2.6rem);
+            letter-spacing: -0.04em;
+        }
+
+        p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 22px;
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.18);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 16px 14px;
+            text-align: center;
+        }
+
+        .stat-box strong {
+            display: block;
+            font-size: 1.4rem;
+            color: var(--text-main);
+        }
+
+        .plugin-showcase {
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(80, 250, 123, 0.28);
+            background: linear-gradient(135deg, rgba(80, 250, 123, 0.08), rgba(126, 214, 255, 0.04));
+        }
+
+        .showcase-box {
+            display: grid;
+            gap: 14px;
+        }
+
+        .mini-card {
+            background: rgba(9, 12, 20, 0.55);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 16px;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .mini-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(123,223,242,0.35);
+            box-shadow: 0 14px 28px rgba(123,223,242,0.12);
+        }
+
+        .mini-card .label {
+            color: var(--text-dim);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .mini-card strong {
+            font-size: 1.1rem;
+        }
+
+        .section {
+            padding: 28px 0 8px;
+        }
+
+        .section-head {
+            margin-bottom: 20px;
+        }
+
+        [data-theme="light"] .card,
+        [data-theme="light"] .mini-card,
+        [data-theme="light"] .download-box,
+        [data-theme="light"] .plugin-showcase,
+        [data-theme="light"] .stat-box {
+            background: rgba(255, 255, 255, 0.78);
+            border-color: rgba(216, 27, 96, 0.18);
+            box-shadow: 0 12px 30px rgba(170, 110, 148, 0.12);
+        }
+
+        [data-theme="light"] .nav a {
+            color: var(--text-muted);
+        }
+
+        [data-theme="light"] .nav a:hover,
+        [data-theme="light"] .nav a.active {
+            background: rgba(255, 121, 198, 0.08);
+            color: var(--text-main);
+        }
+
+        .feature-grid, .guide-grid, .download-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .feature-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .guide-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .download-grid {
+            grid-template-columns: 1.1fr 0.9fr;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 22px;
+            height: 100%;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,121,198,0.12), rgba(123,223,242,0.06), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.22s ease;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(255,121,198,0.35);
+            box-shadow: 0 18px 40px rgba(255,121,198,0.12);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 54px;
+            height: 54px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            background: rgba(255, 121, 198, 0.08);
+            border: 1px solid rgba(255, 121, 198, 0.2);
+        }
+
+        .step {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--sakura-gradient);
+            font-weight: 900;
+            margin-bottom: 14px;
+        }
+
+        .download-box {
+            padding: 24px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,121,198,0.08), rgba(123,223,242,0.06));
+            border: 1px solid rgba(255,121,198,0.25);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .download-box:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,121,198,0.4);
+            box-shadow: 0 18px 34px rgba(255,121,198,0.12);
+        }
+
+        .download-box .file-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        ul.checklist {
+            list-style: none;
+            padding: 0;
+            margin: 18px 0 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        ul.checklist li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+        }
+
+        ul.checklist li::before {
+            content: "✓";
+            color: var(--accent-green);
+            font-weight: 900;
+        }
+
+        .footer {
+            padding: 32px 0 48px;
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 860px) {
+            .hero-card, .download-grid, .feature-grid, .guide-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div class="brand">
+                <div class="logo">
+                    <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot avatar" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+                </div>
+                <span>Sakura Plugin</span>
+            </div>
+            <nav class="nav">
+                <a href="/">Trang chủ</a>
+                <a href="/plugin" class="active">Plugin</a>
+                <a href="/plugin/help">Hướng dẫn</a>
+                <a href="/plugin/download">Tải về</a>
+                <a href="/support">Hỗ trợ</a>
+                <button class="theme-toggle-btn" aria-label="Đổi giao diện">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            <div class="lang-switch-dropdown">
+                <button type="button" class="lang-switch-btn" aria-label="Đổi ngôn ngữ" title="Ngôn ngữ / Language">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VI</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div class="lang-menu">
+                    <button type="button" class="lang-option active" data-lang="vi"><span>🇻🇳 Tiếng Việt</span><span class="lang-check">✓</span></button>
+                    <button type="button" class="lang-option" data-lang="en"><span>🇬🇧 English</span><span class="lang-check"></span></button>
+                    <button type="button" class="lang-option" data-lang="ja"><span>🇯🇵 日本語</span><span class="lang-check"></span></button>
+                </div>
+            </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-card">
+                <div>
+                    <span class="eyebrow">Minecraft • Plugin • Sakura</span>
+                    <h1>Plugin giúp server của bạn mạnh hơn cùng Sakura.</h1>
+                    <p>Sakura Plugin là giải pháp mở rộng cho máy chủ Minecraft, hỗ trợ các tính năng quản lý, kiếm tiền, nhiệm vụ, bảo vệ và trải nghiệm chơi game tốt hơn cho cộng đồng của bạn.</p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="/plugin/download">⬇️ Tải plugin</a>
+                        <a class="btn btn-secondary" href="/plugin/help">📘 Hướng dẫn cài đặt</a>
+                    </div>
+                    <div class="stat-grid">
+                        <div class="stat-box">
+                            <strong>1-click</strong>
+                            <span>cài đặt nhanh</span>
+                        </div>
+                        <div class="stat-box">
+                            <strong>24/7</strong>
+                            <span>hỗ trợ vận hành</span>
+                        </div>
+                        <div class="stat-box">
+                            <strong>DIY</strong>
+                            <span>tùy biến dễ dàng</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="plugin-showcase">
+                    <div class="showcase-box">
+                        <div class="mini-card">
+                            <span class="label">Loại plugin</span>
+                            <strong>Paper / Spigot / Bukkit</strong>
+                        </div>
+                        <div class="mini-card">
+                            <span class="label">Phiên bản hỗ trợ</span>
+                            <strong>1.20.x trở lên</strong>
+                        </div>
+                        <div class="mini-card">
+                            <span class="label">File tải về</span>
+                            <strong>LinhDevPlugin-Test-1.0.jar</strong>
+                        </div>
+                        <div class="mini-card">
+                            <span class="label">Tính năng nổi bật</span>
+                            <strong>Quản lý, vật phẩm, nhiệm vụ, bảo vệ, kinh tế</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="features">
+            <div class="section-head">
+                <h2>Tính năng chính</h2>
+            </div>
+            <div class="feature-grid">
+                <article class="card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Anti-XRay & Bảo Vệ Rương</h3>
+                    <p>Bảo vệ quặng khỏi mod X-Ray với 3 cấp độ mã hóa khối, chống mở trộm rương và phá hoại đất claim.</p>
+                </article>
+                <article class="card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Kinh Tế, SellGUI & Chợ Đen</h3>
+                    <p>Bán đồ nhanh qua GUI, Chợ Đen buôn hàng quý hiếm, vé số may mắn và nhiệm vụ thương hội phong phú.</p>
+                </article>
+                <article class="card">
+                    <div class="feature-icon">🌸</div>
+                    <h3>Đồng Bộ Coins & Discord</h3>
+                    <p>Liên kết tài khoản in-game với Discord SakuraBot qua lệnh <code>/discord</code>, chuyển đổi coins hai chiều tức thì.</p>
+                </article>
+                <article class="card">
+                    <div class="feature-icon">✨</div>
+                    <h3>Kỹ Năng RPG & Tùy Biến</h3>
+                    <p>Hệ thống kỹ năng nội tại <code>/skills</code>, ngồi nghỉ ngơi <code>/sit</code>, sách phù phép và custom items độc quyền.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="help">
+            <div class="section-head">
+                <h2>Hướng dẫn nhanh</h2>
+            </div>
+            <div class="guide-grid">
+                <article class="card">
+                    <div class="step">1</div>
+                    <h3>Tải plugin</h3>
+                    <p>Vào mục <a href="/plugin/download" style="color: var(--sakura-pink); font-weight: 700;">Tải về</a> và lưu file .jar vào máy tính của bạn.</p>
+                </article>
+                <article class="card">
+                    <div class="step">2</div>
+                    <h3>Đặt vào thư mục plugins</h3>
+                    <p>Di chuyển file <strong>LinhDevPlugin-Test-1.0.jar</strong> vào thư mục <strong>plugins</strong> của máy chủ Minecraft.</p>
+                </article>
+                <article class="card">
+                    <div class="step">3</div>
+                    <h3>Khởi động lại server</h3>
+                    <p>Khởi động lại máy chủ và kiểm tra console xem plugin đã bắt đầu thành công hay chưa.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="download">
+            <div class="section-head">
+                <h2>Tải plugin</h2>
+            </div>
+            <div class="download-grid">
+                <div class="download-box">
+                    <h3 style="margin-bottom: 10px;">File chính thức</h3>
+                    <p>Plugin Sakura được đóng gói dưới dạng file .jar sẵn sàng dùng cho máy chủ Minecraft của bạn.</p>
+                    <div class="file-meta">
+                        <span>Tên file: LinhDevPlugin-Test-1.0.jar</span>
+                        <span>Định dạng: .jar</span>
+                    </div>
+                    <div class="hero-actions" style="margin-top:22px;">
+                        <a class="btn btn-primary" href="/plugin/download">⬇️ Tải ngay</a>
+                        <a class="btn btn-secondary" href="/plugin/help">📘 Xem hướng dẫn</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Yêu cầu hệ thống</h3>
+                    <ul class="checklist">
+                        <li>Java 17+ hoặc phiên bản phù hợp với máy chủ</li>
+                        <li>Server Paper / Spigot / Bukkit</li>
+                        <li>Thư mục plugins đã sẵn sàng</li>
+                        <li>Backup dữ liệu trước khi cài đặt</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;">
+            <span>© 2026 Sakura Bot • Minecraft Plugin</span>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;">
+                <a href="/">Trang chủ</a>
+                <a href="/plugin">Plugin</a>
+                <a href="/plugin/help">Hướng dẫn</a>
+                <a href="/plugin/download">Tải về</a>
+            </div>
+        </div>
+    </footer>
+    <script src="/static/js/sakura-fx.js"></script>
+    <script src="/static/js/i18n.js"></script>
+</body>
+</html>

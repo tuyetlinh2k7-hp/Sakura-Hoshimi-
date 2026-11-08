@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Sakura Bot — Discord Bot Đa Năng</title>
+    <script>
+        (function () {
+            const t = localStorage.getItem('sakura_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="/images/avatar-bot.jpg">
+    <style>
+        .landing-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: .3s
+        }
+
+        .landing-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .landing-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 2px solid var(--sakura-pink);
+            box-shadow: 0 0 12px rgba(255, 121, 198, 0.4)
+        }
+
+        .landing-brand {
+            font-weight: 800;
+            font-size: 1.15rem;
+            background: var(--sakura-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .landing-links {
+            display: flex;
+            gap: 20px;
+            align-items: center
+        }
+
+        .landing-links a,
+        .landing-links .nav-dropdown-toggle {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: .92rem;
+            transition: .2s
+        }
+
+        .landing-links .support-link {
+            color: var(--sakura-pink);
+            font-weight: 700;
+        }
+
+        .landing-links a:hover,
+        .landing-links .nav-dropdown-toggle:hover {
+            color: var(--text-main)
+        }
+
+        .nav-dropdown {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .nav-dropdown-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: -10px;
+            margin-top: 14px;
+            background: rgba(18, 20, 30, 0.96);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            padding: 8px;
+            min-width: 220px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 121, 198, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: none;
+            flex-direction: column;
+            gap: 3px;
+            z-index: 1000;
+        }
+
+        .nav-dropdown-menu::before {
+            content: "";
+            position: absolute;
+            top: -14px;
+            left: 0;
+            right: 0;
+            height: 14px;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-menu {
+            display: flex;
+        }
+
+        .nav-dropdown-item {
+            color: var(--text-muted) !important;
+            text-decoration: none;
+            font-size: 0.85rem !important;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-dropdown-item:hover {
+            background: rgba(255, 121, 198, 0.15);
+            color: #fff !important;
+            transform: translateX(3px);
+        }
+
+        #sakuraPetalsCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.85;
+        }
+
+        .landing-hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 64px 32px;
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 48px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .landing-hero::before,
+        .landing-hero::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(18px);
+            opacity: 0.55;
+            pointer-events: none;
+            animation: sakuraFloat 10s ease-in-out infinite alternate;
+        }
+
+        .landing-hero::before {
+            width: 280px;
+            height: 280px;
+            background: rgba(255, 121, 198, 0.2);
+            top: -50px;
+            right: 12%;
+        }
+
+        .landing-hero::after {
+            width: 220px;
+            height: 220px;
+            background: rgba(139, 233, 253, 0.18);
+            bottom: -40px;
+            left: 10%;
+            animation-delay: 1.2s;
+        }
+
+        @keyframes sakuraFloat {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate3d(22px, -16px, 0) scale(1.08);
+            }
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            gap: 8px;
+            background: rgba(255, 121, 198, 0.12);
+            border: 1px solid rgba(255, 121, 198, 0.28);
+            padding: 7px 16px;
+            border-radius: 999px;
+            font-size: .82rem;
+            color: var(--sakura-pink);
+            font-weight: 700;
+            margin-bottom: 18px
+        }
+
+        .hero-title {
+            font-size: 3.4rem;
+            line-height: 1.08;
+            font-weight: 800;
+            letter-spacing: -1px
+        }
+
+        .hero-title span {
+            background: var(--sakura-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.65;
+            margin: 18px 0 30px;
+            max-width: 560px
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap
+        }
+
+        .hero-actions .btn {
+            padding: 13px 24px;
+            font-size: .96rem
+        }
+
+        .hero-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 26px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+            animation: heroCardLift 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroCardLift {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            100% {
+                transform: translateY(-8px) rotate(-1.1deg);
+            }
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--sakura-gradient)
+        }
+
+        .section-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 32px
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 8px
+        }
+
+        .section-sub {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-size: 1rem
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            padding: 24px;
+            transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(14px);
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--sakura-pink);
+            box-shadow: 0 12px 30px rgba(255, 121, 198, 0.22);
+        }
+
+        .feature-card .feature-click-hint {
+            margin-top: auto;
+            padding-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--sakura-pink);
+            opacity: 0.85;
+            transition: .2s;
+        }
+
+        .feature-card:hover .feature-click-hint {
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        /* Feature Modal Styles */
+        .feature-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(7, 9, 14, 0.78);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn .2s ease;
+        }
+
+        .feature-modal-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            max-width: 680px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 121, 198, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: modalPop .25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            0% {
+                transform: scale(0.92);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .feature-modal-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--sakura-gradient);
+        }
+
+        .feature-modal-header {
+            padding: 22px 28px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .feature-modal-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .feature-modal-footer {
+            padding: 16px 28px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .cmd-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .cmd-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            transition: all .2s ease;
+        }
+
+        [data-theme="light"] .cmd-item {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .cmd-item:hover {
+            border-color: var(--sakura-pink);
+            transform: translateX(4px);
+            background: rgba(255, 121, 198, 0.06);
+        }
+
+        .cmd-pill {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 121, 198, 0.3);
+            color: var(--sakura-pink);
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        [data-theme="light"] .cmd-pill {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 14px
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px
+        }
+
+        .guide-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 22px
+        }
+
+        .guide-step {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--sakura-gradient);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            margin-bottom: 12px
+        }
+
+        @media(max-width:900px) {
+            .landing-hero {
+                grid-template-columns: 1fr;
+                padding: 28px 16px;
+                gap: 32px
+            }
+
+            .features-grid,
+            .guide-grid {
+                grid-template-columns: 1fr
+            }
+
+            .landing-links {
+                gap: 12px;
+                font-size: .85rem;
+                flex-wrap: wrap
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* Rich Footer Styles */
+        .landing-footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-glass);
+            padding: 56px 32px 32px;
+            margin-top: 48px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        .landing-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--sakura-gradient);
+            opacity: 0.6;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.1fr 1.1fr 1.6fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h4 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            margin-bottom: 18px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-col ul a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all .2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-col ul a:hover {
+            color: var(--sakura-pink);
+            transform: translateX(4px);
+        }
+
+        .social-links-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .social-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 600;
+            transition: all .2s ease;
+        }
+
+        [data-theme="light"] .social-pill {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .social-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .social-pill.discord:hover {
+            background: rgba(88, 101, 242, 0.15);
+            border-color: #5865F2;
+            color: #7289da;
+        }
+
+        .social-pill.youtube:hover {
+            background: rgba(255, 0, 0, 0.15);
+            border-color: #FF0000;
+            color: #FF4444;
+        }
+
+        .social-pill.facebook:hover {
+            background: rgba(24, 119, 242, 0.15);
+            border-color: #1877F2;
+            color: #1877F2;
+        }
+
+        .social-pill.tiktok:hover {
+            background: rgba(254, 44, 85, 0.15);
+            border-color: #FE2C55;
+            color: #FE2C55;
+        }
+
+        .social-pill.github:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--text-main);
+            color: var(--sakura-pink);
+        }
+
+        .footer-bottom {
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        @media(max-width:900px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="sakuraPetalsCanvas" aria-hidden="true"></canvas>
+    <nav class="landing-nav">
+        <div class="landing-nav-left">
+            <div class="avatar-aura-wrapper">
+                <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
+                    class="landing-logo bot-avatar-animated" alt="Sakura Bot" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+            </div>
+            <span class="landing-brand">Sakura Bot</span>
+            <span
+                style="background:rgba(255,121,198,0.15);color:var(--sakura-pink);padding:3px 8px;border-radius:6px;font-size:.7rem;font-weight:700;border:1px solid rgba(255,121,198,0.3)">Bản
+                Chính Thức</span>
+        </div>
+        <div class="landing-links">
+            <a href="#features">Tính năng</a>
+            <a href="/bot" target="_blank" style="color:var(--sakura-pink);font-weight:700">Mời Bot</a>
+
+            <!-- Dropdown Minecraft Chung (Hosting + Console + File + Properties + Player + Manager + Plugin) -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle">
+                    <span>⛏️ Minecraft</span>
+                    <span style="font-size:0.7rem;opacity:0.7">▾</span>
+                </button>
+                <div class="nav-dropdown-menu">
+                    <a href="/minecraft" class="nav-dropdown-item"><span>🌐</span> Tất Cả Máy Chủ</a>
+                    <a href="/minecraft/console" class="nav-dropdown-item"><span>🖥️</span> Bảng Console</a>
+                    <a href="/minecraft/file" class="nav-dropdown-item"><span>📁</span> Quản Lý Tệp</a>
+                    <a href="/minecraft/properties" class="nav-dropdown-item"><span>⚙️</span> Cấu Hình Server</a>
+                    <a href="/minecraft/player" class="nav-dropdown-item"><span>👤</span> Soi Kho Đồ Player</a>
+                    <a href="/minecraft/manager" class="nav-dropdown-item"><span>🛡️</span> Phân Quyền Hosting</a>
+                    <a href="/plugin" class="nav-dropdown-item"><span>🧩</span> Kho Plugin Server</a>
+                </div>
+            </div>
+
+            <!-- Dropdown Tiện Ích Đa Năng -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle">
+                    <span>✨ Tiện Ích</span>
+                    <span style="font-size:0.7rem;opacity:0.7">▾</span>
+                </button>
+                <div class="nav-dropdown-menu">
+                    <a href="/tools" class="nav-dropdown-item" style="color:var(--sakura-pink) !important;font-weight:700;"><span>🌸</span> Tất Cả Tiện Ích (Hub)</a>
+                    <a href="/translate" class="nav-dropdown-item"><span>🌐</span> Dịch Thuật Đa Ngôn Ngữ</a>
+                    <a href="/qrcode" class="nav-dropdown-item"><span>📱</span> Tạo & Quét Mã QR</a>
+                    <a href="/tts" class="nav-dropdown-item"><span>🎙️</span> Giọng Nói AI (TTS)</a>
+                    <a href="/shortener" class="nav-dropdown-item"><span>🔗</span> Rút Gọn Link Siêu Tốc</a>
+                    <a href="/tiktok" class="nav-dropdown-item"><span>🎬</span> Tải Video TikTok</a>
+                    <a href="/tarot" class="nav-dropdown-item"><span>🔮</span> Bói Bài Tarot 3D</a>
+                    <a href="/image" class="nav-dropdown-item"><span>🖼️</span> Thư Viện Ảnh</a>
+                    <a href="/games" class="nav-dropdown-item"><span>🎮</span> Minigames & Giải Trí</a>
+                    <a href="/profile" class="nav-dropdown-item"><span>👤</span> Hồ Sơ Sakura Bio</a>
+                </div>
+            </div>
+
+            <a href="/help" data-i18n="nav_guide">Hướng dẫn</a>
+            <a href="/support" class="support-link" data-i18n="nav_support">Hỗ trợ</a>
+            <button class="theme-toggle-btn" aria-label="Đổi giao diện" title="Chuyển chế độ sáng/tối">
+                <span class="theme-icon">🌙</span>
+            </button>
+            <div class="lang-switch-dropdown" id="landingLangSwitch">
+                <button type="button" class="lang-switch-btn" aria-label="Đổi ngôn ngữ" title="Ngôn ngữ / Language">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VI</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div class="lang-menu">
+                    <button type="button" class="lang-option active" data-lang="vi">
+                        <span>🇻🇳 Tiếng Việt</span>
+                        <span class="lang-check">✓</span>
+                    </button>
+                    <button type="button" class="lang-option" data-lang="en">
+                        <span>🇬🇧 English</span>
+                        <span class="lang-check"></span>
+                    </button>
+                    <button type="button" class="lang-option" data-lang="ja">
+                        <span>🇯🇵 日本語</span>
+                        <span class="lang-check"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="landingAuth" style="display:flex;gap:10px;align-items:center">
+            <a href="/login" id="landingLoginBtn" class="btn btn-secondary btn-sm">Đăng nhập</a>
+            <a href="/dashboard" class="btn btn-primary btn-sm">Dashboard</a>
+        </div>
+        <div class="landing-mobile-nav-actions">
+            <button class="theme-toggle-btn mobile-theme-toggle" aria-label="Đổi giao diện" title="Chuyển chế độ sáng/tối">
+                <span class="theme-icon">🌙</span>
+            </button>
+            <div class="lang-switch-dropdown mobile-lang-switch">
+                <button type="button" class="lang-switch-btn" aria-label="Language">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VI</span>
+                </button>
+                <div class="lang-menu">
+                    <button type="button" class="lang-option active" data-lang="vi"><span>🇻🇳 Tiếng Việt</span><span class="lang-check">✓</span></button>
+                    <button type="button" class="lang-option" data-lang="en"><span>🇬🇧 English</span><span class="lang-check"></span></button>
+                    <button type="button" class="lang-option" data-lang="ja"><span>🇯🇵 日本語</span><span class="lang-check"></span></button>
+                </div>
+            </div>
+            <button class="landing-mobile-menu-btn" onclick="toggleLandingMenu()" aria-label="Menu">☰</button>
+        </div>
+    </nav>
+
+    <!-- Mobile Drawer for Landing -->
+    <div class="landing-mobile-overlay" id="landingMobileOverlay" onclick="toggleLandingMenu(false)"></div>
+    <div class="landing-mobile-drawer" id="landingMobileDrawer">
+        <div class="landing-drawer-header">
+            <div style="display:flex;align-items:center;gap:10px">
+                <div class="avatar-aura-wrapper" style="width:34px;height:34px">
+                    <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
+                        style="width:34px;height:34px;border-radius:10px;border:1.5px solid var(--sakura-pink)" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+                </div>
+                <span class="landing-brand" style="font-size:1.15rem">Sakura Bot</span>
+            </div>
+            <button class="mobile-close-btn" onclick="toggleLandingMenu(false)" aria-label="Đóng"
+                style="display:flex">✕</button>
+        </div>
+        <div class="landing-drawer-links">
+            <a href="#features" onclick="toggleLandingMenu(false)"><i>✨</i><span>Tính Năng Nổi Bật</span></a>
+            <a href="/bot" target="_blank" onclick="toggleLandingMenu(false)"
+                style="color:var(--sakura-pink);font-weight:700"><i>🤖</i><span>Mời Bot Vào Server</span></a>
+            <div
+                style="font-size:0.75rem;font-weight:800;color:var(--sakura-pink);padding:6px 12px 2px;text-transform:uppercase">
+                ⛏️ Minecraft Cloud</div>
+            <a href="/minecraft" onclick="toggleLandingMenu(false)"><i>🌐</i><span>Danh Sách Máy Chủ</span></a>
+            <a href="/minecraft/console" onclick="toggleLandingMenu(false)"><i>🖥️</i><span>Bảng Console</span></a>
+            <a href="/minecraft/file" onclick="toggleLandingMenu(false)"><i>📁</i><span>Quản Lý Tệp</span></a>
+            <a href="/minecraft/properties" onclick="toggleLandingMenu(false)"><i>⚙️</i><span>Cấu Hình
+                    Properties</span></a>
+            <a href="/minecraft/player" onclick="toggleLandingMenu(false)"><i>👤</i><span>Soi Kho Đồ Player</span></a>
+            <a href="/minecraft/manager" onclick="toggleLandingMenu(false)"><i>🛡️</i><span>Phân Quyền
+                    Hosting</span></a>
+            <a href="/plugin" onclick="toggleLandingMenu(false)"><i>🧩</i><span>Kho Plugin Server</span></a>
+            <div style="font-size:0.75rem;font-weight:800;color:#8be9fd;padding:6px 12px 2px;text-transform:uppercase">✨
+                Tiện Ích Trực Tuyến</div>
+            <a href="/tools" onclick="toggleLandingMenu(false)" style="color:var(--sakura-pink);font-weight:700"><i>🌸</i><span>Trung Tâm Tiện Ích</span></a>
+            <a href="/translate" onclick="toggleLandingMenu(false)"><i>🌐</i><span>Dịch Thuật Đa Ngôn Ngữ</span></a>
+            <a href="/qrcode" onclick="toggleLandingMenu(false)"><i>📱</i><span>Tạo & Quét Mã QR</span></a>
+            <a href="/tts" onclick="toggleLandingMenu(false)"><i>🎙️</i><span>Chuyển Giọng Nói (TTS)</span></a>
+            <a href="/shortener" onclick="toggleLandingMenu(false)"><i>🔗</i><span>Rút Gọn Link</span></a>
+            <a href="/tiktok" onclick="toggleLandingMenu(false)"><i>🎬</i><span>Tải Video TikTok</span></a>
+            <a href="/tarot" onclick="toggleLandingMenu(false)"><i>🔮</i><span>Bói Bài Tarot 3D</span></a>
+            <a href="/image" onclick="toggleLandingMenu(false)"><i>🖼️</i><span>Thư Viện Ảnh Anime</span></a>
+            <a href="/games" onclick="toggleLandingMenu(false)"><i>🎮</i><span>Minigames & Giải Trí</span></a>
+            <a href="/profile" onclick="toggleLandingMenu(false)"><i>👤</i><span>Hồ Sơ Sakura Bio</span></a>
+            <a href="/help" onclick="toggleLandingMenu(false)"><i>📖</i><span>Hướng Dẫn Sử Dụng</span></a>
+            <a href="/support" class="support-link" onclick="toggleLandingMenu(false)"><i>💖</i><span>Hỗ Trợ</span></a>
+        </div>
+        <div class="landing-drawer-footer">
+            <a href="/dashboard" class="btn btn-primary" style="width:100%;justify-content:center">📊 Bảng Điều
+                Khiển</a>
+            <a href="/login" class="btn btn-secondary" style="width:100%;justify-content:center">🔐 Đăng Nhập
+                Discord</a>
+        </div>
+    </div>
+
+    <section class="landing-hero">
+        <div>
+            <div class="hero-badge">✨ Discord Bot Đa Năng • Online 24/7 • Tiếng Việt 🌸</div>
+            <h1 class="hero-title">Quản lý Discord <span>dễ dàng</span> với Sakura</h1>
+            <p class="hero-desc">Sakura Bot giúp bạn quản lý server trong 30 giây: AutoMod chống raid/nuke/spam,
+                Welcome, Level & Kinh tế, Ticket, Music 24/7. Tùy chỉnh trực quan qua web dashboard hiện đại.</p>
+            <div class="hero-actions">
+                <button class="btn btn-primary" onclick="doInvite()">🤖 Mời Sakura vào Server</button>
+                <a href="/dashboard" class="btn btn-secondary">⚙️ Mở Dashboard</a>
+            </div>
+            <div
+                style="margin-top:22px;display:flex;gap:14px;align-items:center;color:var(--text-muted);font-size:.88rem">
+                <span>🌸 Miễn phí 100%</span><span>•</span><span>⚡ Setup 30s</span><span>•</span><span>🛡️ An toàn & Bảo
+                    mật</span>
+            </div>
+        </div>
+        <div class="hero-card">
+            <div style="display:flex;gap:16px;align-items:center">
+                <div class="avatar-aura-wrapper" style="width:64px;height:64px">
+                    <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
+                        class="bot-avatar-animated"
+                        style="width:64px;height:64px;border-radius:18px;border:2.5px solid var(--sakura-pink)" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+                </div>
+                <div>
+                    <div style="font-weight:800;font-size:1.2rem">Sakura Hoshimi <span
+                            style="background:var(--sakura-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Chính
+                            Thức</span>
+                    </div>
+                    <div style="color:var(--text-muted);font-size:.88rem">Bot Discord • Âm nhạc • Quản lý</div>
+                </div>
+                <span class="badge badge-green" style="margin-left:auto;padding:5px 10px;font-size:.78rem">●
+                    Online</span>
+            </div>
+            <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
+                <span class="badge badge-sakura">🛡️ AutoMod</span>
+                <span class="badge">🎫 Ticket</span>
+                <span class="badge">🏆 Level & EXP</span>
+                <span class="badge">🎵 Music 24/7</span>
+                <span class="badge">🎣 Câu Cá RPG</span>
+            </div>
+            <div style="margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                <div
+                    style="background:rgba(255,255,255,0.05);border-radius:14px;padding:14px;text-align:center;border:1px solid var(--border-subtle)">
+                    <strong id="heroGuilds" style="font-size:1.3rem;font-family:var(--font-mono)">—</strong>
+                    <div style="font-size:.78rem;color:var(--text-muted);margin-top:2px">Servers</div>
+                </div>
+                <div
+                    style="background:rgba(255,255,255,0.05);border-radius:14px;padding:14px;text-align:center;border:1px solid var(--border-subtle)">
+                    <strong id="heroUsers" style="font-size:1.3rem;font-family:var(--font-mono)">—</strong>
+                    <div style="font-size:.78rem;color:var(--text-muted);margin-top:2px">Users</div>
+                </div>
+                <div
+                    style="background:rgba(255,255,255,0.05);border-radius:14px;padding:14px;text-align:center;border:1px solid var(--border-subtle)">
+                    <strong id="heroUptime" style="font-size:1.3rem;font-family:var(--font-mono)">—</strong>
+                    <div style="font-size:.78rem;color:var(--text-muted);margin-top:2px">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="section-wrap">
+        <h2 class="section-title">✨ Tính năng nổi bật</h2>
+        <p class="section-sub">Bấm vào từng tính năng để xem danh sách lệnh và hướng dẫn chi tiết từ Sakura Bot.</p>
+        <div class="features-grid">
+            <div class="feature-card" onclick="openFeatureModal('security')">
+                <div class="feature-icon"
+                    style="background:rgba(255,121,198,0.15);border:1px solid rgba(255,121,198,0.3)">🛡️</div>
+                <h3 style="font-size:1.15rem;margin-bottom:6px">Bảo mật & AutoMod</h3>
+                <p style="color:var(--text-muted);font-size:.92rem;line-height:1.5">Anti-raid, anti-nuke, chống spam tin
+                    nhắn, lọc link mời và từ cấm tự động.</p>
+                <div class="feature-click-hint">⚡ Xem menu lệnh quản trị & AutoMod →</div>
+            </div>
+            <div class="feature-card" onclick="openFeatureModal('welcome')">
+                <div class="feature-icon"
+                    style="background:rgba(80,250,123,0.15);border:1px solid rgba(80,250,123,0.3)">👋</div>
+                <h3 style="font-size:1.15rem;margin-bottom:6px">Welcome & Role</h3>
+                <p style="color:var(--text-muted);font-size:.92rem;line-height:1.5">Gửi tin nhắn chào mừng kèm ảnh
+                    avatar xịn xò, tự động gán vai trò khi thành viên mới vào.</p>
+                <div class="feature-click-hint">⚡ Xem menu lệnh Welcome & Role →</div>
+            </div>
+            <div class="feature-card" onclick="openFeatureModal('level')">
+                <div class="feature-icon"
+                    style="background:rgba(139,233,253,0.15);border:1px solid rgba(139,233,253,0.3)">🏆</div>
+                <h3 style="font-size:1.15rem;margin-bottom:6px">Level & Kinh tế</h3>
+                <p style="color:var(--text-muted);font-size:.92rem;line-height:1.5">Tích lũy kinh nghiệm khi chat &
+                    voice, bảng xếp hạng Top server, shop vai trò và coin.</p>
+                <div class="feature-click-hint">⚡ Xem menu lệnh Level & Kinh tế →</div>
+            </div>
+            <div class="feature-card" onclick="openFeatureModal('ticket')">
+                <div class="feature-icon"
+                    style="background:rgba(189,147,249,0.15);border:1px solid rgba(189,147,249,0.3)">🎫</div>
+                <h3 style="font-size:1.15rem;margin-bottom:6px">Ticket Hỗ trợ</h3>
+                <p style="color:var(--text-muted);font-size:.92rem;line-height:1.5">Tạo phòng hỗ trợ riêng tư 1 chạm cho
+                    thành viên, lưu transcript và lịch sử tin cậy.</p>
+                <div class="feature-click-hint">⚡ Xem menu lệnh Ticket hỗ trợ →</div>
+            </div>
+            <div class="feature-card" onclick="openFeatureModal('music')">
+                <div class="feature-icon"
+                    style="background:rgba(255,184,108,0.15);border:1px solid rgba(255,184,108,0.3)">🎵</div>
+                <h3 style="font-size:1.15rem;margin-bottom:6px">Âm nhạc Lavalink 24/7</h3>
+                <p style="color:var(--text-muted);font-size:.92rem;line-height:1.5">Phát nhạc chất lượng cao từ YouTube,
+                    SoundCloud, Spotify qua node Lavalink ổn định.</p>
+                <div class="feature-click-hint">⚡ Xem menu lệnh Âm nhạc →</div>
+            </div>
+            <div class="feature-card" onclick="openFeatureModal('fishing')">
+                <div class="feature-icon"
+                    style="background:rgba(80,250,123,0.15);border:1px solid rgba(80,250,123,0.3)">
+                    🎣</div>
+                <h3 style="font-size:1.15rem;margin-bottom:6px">Câu Cá & Chợ Cá RPG</h3>
+                <p style="color:var(--text-muted);font-size:.92rem;line-height:1.5">Săn bắt cá đại dương, nâng cấp cần
+                    câu,
+                    buôn bán hải sản và cạnh tranh top cần thủ toàn máy chủ.</p>
+                <div class="feature-click-hint" style="color:var(--accent-green)">🎣 Xem menu câu cá & chợ →</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-wrap" style="text-align:center;padding:36px 32px">
+        <p style="color:var(--text-muted);font-size:1.05rem">Bạn mới bắt đầu? <a href="/help"
+                style="color:var(--sakura-pink);font-weight:700">Xem hướng dẫn chi tiết 3 bước →</a></p>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="landing-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <!-- Col 1: Brand Info -->
+                <div class="footer-col">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+                        <div class="avatar-aura-wrapper">
+                            <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
+                                class="landing-logo bot-avatar-animated" alt="Sakura Bot"
+                                style="width:36px;height:36px;border-radius:10px;border:2px solid var(--sakura-pink)" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+                        </div>
+                        <span class="landing-brand" style="font-size:1.3rem">Sakura Bot</span>
+                        <span class="badge badge-sakura" style="font-size:0.7rem">Chính Thức</span>
+                    </div>
+                    <p
+                        style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin-bottom:18px;max-width:380px">
+                        Bot Discord đa năng với phong cách hoa anh đào anime. Tích hợp bảo mật AutoMod toàn diện, hệ
+                        thống âm nhạc chất lượng cao, cấp độ tương tác và tính năng câu cá RPG sống động.
+                    </p>
+                    <div style="display:flex;gap:10px;align-items:center">
+                        <span class="badge badge-green" style="padding:4px 10px;font-size:0.78rem">● Hệ thống Online
+                            24/7</span>
+                        <span style="font-size:0.82rem;color:var(--text-dim)">Prefix: <code>s!</code> hoặc
+                            <code>/</code></span>
+                    </div>
+                </div>
+
+                <!-- Col 2: Quick Links & Tools -->
+                <div class="footer-col">
+                    <h4><span>⚡</span> Tiện Ích & Điều Hướng</h4>
+                    <ul>
+                        <li><a href="/tools">🌸 Trung tâm tiện ích (Hub)</a></li>
+                        <li><a href="/translate">🌐 Dịch thuật đa ngôn ngữ</a></li>
+                        <li><a href="/qrcode">📱 Tạo & Quét mã QR</a></li>
+                        <li><a href="/tts">🎙️ Giọng nói AI (TTS)</a></li>
+                        <li><a href="/shortener">🔗 Rút gọn link siêu tốc</a></li>
+                        <li><a href="/dashboard">📊 Bảng điều khiển bot</a></li>
+                        <li><a href="/account">👤 Hồ sơ Sakura Bio</a></li>
+                        <li><a href="/help">📖 Hướng dẫn sử dụng</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Features & Server -->
+                <div class="footer-col">
+                    <h4><span>🎮</span> Máy Chủ & Bot</h4>
+                    <ul>
+                        <li><a href="javascript:void(0)" onclick="openFeatureModal('fishing')">🎣 Câu cá RPG Đại
+                                Dương</a></li>
+                        <li><a href="javascript:void(0)" onclick="openFeatureModal('security')">🛡️ AutoMod & Bảo
+                                mật</a></li>
+                        <li><a href="javascript:void(0)" onclick="openFeatureModal('music')">🎵 Lavalink Music 24/7</a>
+                        </li>
+                        <li><a href="javascript:void(0)" onclick="openFeatureModal('level')">🏆 Bảng xếp hạng Level</a>
+                        </li>
+                        <li><a href="javascript:void(0)" onclick="openFeatureModal('ticket')">🎫 Kênh hỗ trợ Ticket</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Social Media & Community -->
+                <div class="footer-col">
+                    <h4><span>🌐</span> Mạng Xã Hội & Liên Kết</h4>
+                    <div class="social-links-grid">
+                        <a href="https://discord.gg/jXvKRJkJgh" target="_blank" class="social-pill discord"
+                            title="Tham gia Discord Server">
+                            <span style="font-size:1.15rem">💬</span>
+                            <span>Discord</span>
+                        </a>
+                        <a href="https://youtube.com/@linhvotree.2008" target="_blank" class="social-pill youtube"
+                            title="Kênh YouTube Sakura Bot">
+                            <span style="font-size:1.15rem">📺</span>
+                            <span>YouTube</span>
+                        </a>
+                        <a href="https://facebook.com/bobell.cute2k7" target="_blank" class="social-pill facebook"
+                            title="Trang Facebook Cộng đồng">
+                            <span style="font-size:1.15rem">👥</span>
+                            <span>Facebook</span>
+                        </a>
+                        <a href="https://tiktok.com/@cuoc.doi.dem.dong" target="_blank" class="social-pill tiktok"
+                            title="Kênh TikTok Video">
+                            <span style="font-size:1.15rem">🎵</span>
+                            <span>TikTok</span>
+                        </a>
+                        <a href="https://github.com/tuyetlinh2k7-hp" target="_blank" class="social-pill github"
+                            style="grid-column: span 2;" title="Xem toàn bộ mã nguồn trên GitHub">
+                            <span style="font-size:1.15rem">💻</span>
+                            <span>Mã Nguồn (GitHub)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div>
+                    <span>🌸 © 2026 <b>Sakura Bot</b> • Phát triển bởi <b>Đồng Linh</b>. All rights reserved.</span>
+                </div>
+                <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+                    <a href="https://github.com/tuyetlinh2k7-hp" target="_blank"
+                        style="color:var(--text-muted);text-decoration:none">💻 Mã nguồn</a>
+                    <span>•</span>
+                    <a href="/discord/terms" style="color:var(--text-muted);text-decoration:none">📜 Điều khoản</a>
+                    <span>•</span>
+                    <a href="/discord/privacy" style="color:var(--text-muted);text-decoration:none">🛡️ Bảo mật</a>
+                    <span>•</span>
+                    <a href="https://discord.gg/jXvKRJkJgh" target="_blank"
+                        style="color:var(--sakura-pink);text-decoration:none;font-weight:700">💬 Hỗ trợ 24/7</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= FEATURE DETAIL MODAL ================= -->
+    <div class="feature-modal-overlay" id="featureModalOverlay" onclick="if(event.target===this) closeFeatureModal()">
+        <div class="feature-modal-box">
+            <div class="feature-modal-header">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div id="modalFeatureIcon" style="font-size:1.8rem">🌸</div>
+                    <div>
+                        <h3 id="modalFeatureTitle" style="font-size:1.25rem;font-weight:800;margin-bottom:2px">Menu Lệnh
+                            Bot</h3>
+                        <span id="modalFeatureBadge" class="badge badge-sakura">Tính năng</span>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="closeFeatureModal()"
+                    style="border-radius:50%;width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+            <div class="feature-modal-body" id="modalFeatureBody">
+                <!-- Injected via JavaScript -->
+            </div>
+            <div class="feature-modal-footer">
+                <span style="font-size:0.82rem;color:var(--text-muted)">🌸 Sakura Bot • Prefix: <code>s!</code> hoặc
+                    <code>/</code></span>
+                <div style="display:flex;gap:10px">
+                    <button class="btn btn-primary btn-sm" onclick="doInvite()">🤖 Mời Bot</button>
+                    <button class="btn btn-secondary btn-sm" onclick="closeFeatureModal()">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Sakura FX Engine (Petals + Swaying Branches + Theme) -->
+    <script src="/static/js/sakura-fx.js"></script>
+    <script src="/static/js/i18n.js"></script>
+
+    <script>
+        (function () {
+            const canvas = document.getElementById('sakuraPetalsCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const petals = [];
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function createPetal() {
+                return {
+                    x: Math.random() * canvas.width,
+                    y: -20 - Math.random() * canvas.height,
+                    r: 6 + Math.random() * 8,
+                    s: 0.4 + Math.random() * 1.2,
+                    drift: (Math.random() - 0.5) * 0.8,
+                    rot: Math.random() * Math.PI * 2,
+                    speed: 0.8 + Math.random() * 1.8,
+                    alpha: 0.45 + Math.random() * 0.5,
+                };
+            }
+
+            function initPetals() {
+                petals.length = 0;
+                const count = window.innerWidth < 700 ? 28 : 58;
+                for (let i = 0; i < count; i++) petals.push(createPetal());
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (const p of petals) {
+                    p.y += p.speed;
+                    p.x += p.drift;
+                    p.rot += 0.03;
+
+                    if (p.y > canvas.height + 20) {
+                        Object.assign(p, createPetal());
+                        p.y = -20;
+                    }
+                    if (p.x < -20) p.x = canvas.width + 20;
+                    if (p.x > canvas.width + 20) p.x = -20;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-p.r * 0.4, -p.r * 0.9, -p.r * 1.2, -p.r * 0.5, 0, -p.r * 1.7);
+                    ctx.bezierCurveTo(p.r * 1.2, -p.r * 0.5, p.r * 0.4, -p.r * 0.9, 0, 0);
+                    ctx.fillStyle = 'rgba(255, 182, 218, ' + p.alpha + ')';
+                    ctx.fill();
+                    ctx.restore();
+                }
+                requestAnimationFrame(draw);
+            }
+
+            resizeCanvas();
+            initPetals();
+            draw();
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                initPetals();
+            });
+        })();
+
+        const FEATURE_DATA = {
+            security: {
+                icon: "🛡️",
+                title: "Bảo Mật & AutoMod",
+                badge: "Moderation & Protection",
+                desc: "Hệ thống bảo vệ máy chủ toàn diện chống raid, nuke, spam và các lệnh xử lý trừng phạt tự động.",
+                commands: [
+                    { cmd: "s!ban @user [lý do]", slash: "/ban", desc: "Cấm thành viên vi phạm khỏi server" },
+                    { cmd: "s!kick @user [lý do]", slash: "/kick", desc: "Trục xuất thành viên khỏi máy chủ" },
+                    { cmd: "s!mute @user <phút>", slash: "/timeout", desc: "Cấm chat (Timeout) thành viên vi phạm quy tắc" },
+                    { cmd: "s!unmute @user", slash: "—", desc: "Gỡ cấm chat cho thành viên" },
+                    { cmd: "s!clear <số lượng>", slash: "/clear", desc: "Xóa hàng loạt tin nhắn trong kênh chat (tối đa 100)" },
+                    { cmd: "s!lock / s!unlock", slash: "—", desc: "Khóa hoặc mở khóa quyền gửi tin nhắn trong kênh" },
+                    { cmd: "s!antispam", slash: "/antispam", desc: "Cấu hình bộ lọc tin nhắn rác tự động" },
+                    { cmd: "/automod_test <nội dung>", slash: "/automod_test", desc: "Kiểm tra trước xem tin nhắn có bị hệ thống chặn hay không" }
+                ],
+                autoFeatures: ["Anti-Raid: Chống người dùng hoặc bot tràn vào ồ ạt", "Anti-Nuke: Ngăn chặn xóa kênh và vai trò hàng loạt", "Anti-Spam & Link Filter: Tự động lọc link mời Discord và từ cấm"]
+            },
+            welcome: {
+                icon: "👋",
+                title: "Welcome & Phân Vai Trò",
+                badge: "Member & Roles",
+                desc: "Tự động chào đón thành viên mới với banner đẹp mắt và hệ thống tự chọn vai trò thông minh.",
+                commands: [
+                    { cmd: "s!welcome", slash: "—", desc: "Cấu hình kênh chào mừng và thông điệp đón thành viên mới" },
+                    { cmd: "s!autorole @role", slash: "/autorole", desc: "Tự động cấp vai trò khi thành viên vừa vào server" },
+                    { cmd: "s!reactionrole", slash: "/role panel", desc: "Tạo bảng bấm nút để thành viên tự nhận vai trò" },
+                    { cmd: "s!userinfo [@user]", slash: "/userinfo", desc: "Xem thẻ thông tin chi tiết của người dùng & vai trò" },
+                    { cmd: "s!serverinfo", slash: "/serverinfo", desc: "Xem tổng quan thông số và số lượng thành viên server" }
+                ],
+                autoFeatures: ["Tạo ảnh avatar chào mừng động với hiệu ứng hoa anh đào", "Thông báo rời server & boost server"]
+            },
+            level: {
+                icon: "🏆",
+                title: "Level & Hệ Thống Kinh Tế",
+                badge: "XP, Bank & Economy",
+                desc: "Thúc đẩy tương tác cộng đồng thông qua cày cấp độ khi chat/voice, ngân hàng gửi tiết kiệm và Sakura Coins/Xu.",
+                commands: [
+                    { cmd: "s!rank [@user]", slash: "/rank", desc: "Xem thẻ Rank đồ họa, cấp độ hiện tại và thanh tiến trình EXP" },
+                    { cmd: "s!leaderboard / s!top", slash: "/leaderboard", desc: "Xem Bảng xếp hạng Top Level & EXP của server" },
+                    { cmd: "s!bank", slash: "/bank", desc: "Mở Ngân Hàng Sakura: gửi tiết kiệm kỳ hạn 7, 14, 30 ngày, vay vốn và xem lịch sử" },
+                    { cmd: "s!daily", slash: "/daily", desc: "Điểm danh hàng ngày nhận phần thưởng Coins ngẫu nhiên" },
+                    { cmd: "s!work", slash: "/work", desc: "Làm việc chăm chỉ để nhận tiền lương Coins" },
+                    { cmd: "s!streaks", slash: "/streaks", desc: "Chuỗi tương tác liên tục nhận quà đặc biệt" },
+                    { cmd: "s!casino", slash: "—", desc: "Minigame giải trí thử vận may với Coins" }
+                ],
+                autoFeatures: ["Tự động tăng EXP khi nhắn tin và tham gia phòng thoại Voice", "Ngân hàng tính lãi suất tự động theo kỳ hạn"]
+            },
+            ticket: {
+                icon: "🎫",
+                title: "Ticket Hỗ Trợ Kỹ Thuật",
+                badge: "Support System",
+                desc: "Tạo kênh hỗ trợ riêng tư 1-1 giữa người chơi và đội ngũ Quản trị viên chỉ với một nút bấm.",
+                commands: [
+                    { cmd: "/ticket panel", slash: "/ticket panel", desc: "Tạo Panel mở Ticket chuyên nghiệp đính kèm nút bấm" },
+                    { cmd: "s!ticket add @user", slash: "—", desc: "Thêm một người dùng hoặc Admin vào phòng ticket" },
+                    { cmd: "s!ticket remove @user", slash: "—", desc: "Xóa người dùng khỏi phòng hỗ trợ" },
+                    { cmd: "s!ticket close", slash: "/ticket close", desc: "Đóng ticket và xuất file Transcript lịch sử trò chuyện" }
+                ],
+                autoFeatures: ["Tự động phân quyền riêng tư chỉ người tạo & Ban quản trị nhìn thấy", "Tự động lưu lịch sử hội thoại"]
+            },
+            music: {
+                icon: "🎵",
+                title: "Âm Nhạc Lavalink 24/7",
+                badge: "High Quality Audio",
+                desc: "Phát nhạc chất lượng phòng thu từ YouTube, Spotify, SoundCloud qua máy chủ Lavalink siêu mượt.",
+                commands: [
+                    { cmd: "s!play <tên bài / link>", slash: "/play", desc: "Tìm kiếm và phát nhạc hoặc thêm playlist vào hàng đợi" },
+                    { cmd: "s!skip", slash: "/skip", desc: "Bỏ qua bài hát đang phát sang bài kế tiếp" },
+                    { cmd: "s!pause / s!resume", slash: "/pause", desc: "Tạm dừng hoặc tiếp tục phát nhạc" },
+                    { cmd: "s!queue", slash: "/queue", desc: "Xem danh sách hàng đợi phát các bài kế tiếp" },
+                    { cmd: "s!nowplaying", slash: "/nowplaying", desc: "Xem thông tin bài hát và tiến trình đang phát" },
+                    { cmd: "s!volume <1-100>", slash: "/volume", desc: "Điều chỉnh mức âm lượng phát nhạc của Bot" },
+                    { cmd: "s!stop", slash: "/stop", desc: "Dừng phát nhạc và ngắt kết nối khỏi kênh thoại Voice" }
+                ],
+                autoFeatures: ["Âm thanh chất lượng cao 320kbps không giật lag", "Bộ lọc âm thanh Bassboost, 8D, Nightcore"]
+            },
+            fishing: {
+                icon: "🎣",
+                title: "Hệ Thống Câu Cá RPG & Đột Biến",
+                badge: "Sakura Fishing • Minigame RPG",
+                desc: "Tính năng câu cá giải trí đỉnh cao độc quyền: 23+ chủng loại đột biến cá hiếm, các vùng nước đại dương phong phú, rương báu, thú cưng và chợ hải sản.",
+                commands: [
+                    { cmd: "s!fishing cast [vùng] (hoặc s!f)", slash: "/fishing action:cast", desc: "Thả câu tại bờ biển, rạn san hô, biển sâu... để bắt cá" },
+                    { cmd: "s!f shop (hoặc s!fshop)", slash: "/fishing action:shop", desc: "Cửa hàng cần câu, mồi câu, rương báu và thú cưng (Pet)" },
+                    { cmd: "s!f inv (hoặc s!inv)", slash: "/fishing action:inv", desc: "Mở giỏ cá, túi đồ, trang bị cần câu, dùng mồi và mở rương" },
+                    { cmd: "s!f sell [loại]", slash: "/fishing action:sell", desc: "Bán cá thường hoặc bán cá đột biến kiếm bộn tiền" },
+                    { cmd: "s!f aquarium", slash: "/fishing action:aquarium", desc: "Thủy cung trưng bày cá quý hiếm sinh lời tự động" },
+                    { cmd: "s!f license", slash: "/fishing action:license", desc: "Thẻ căn cước cần thủ đồ họa sắc nét" },
+                    { cmd: "s!f top", slash: "/fishing action:top", desc: "Bảng vinh danh cần thủ xuất sắc nhất máy chủ" }
+                ],
+                autoFeatures: [
+                    "23+ đột biến cá: Lửa, Băng, Lôi điện, Cầu vồng, Hắc động, Thần vương...",
+                    "Thời tiết biển biến chuyển theo chu kỳ thực (Nắng ấm, Mưa bão, Đêm trăng)",
+                    "Thủy cung trưng bày cá quý sinh lợi tức xu tự động"
+                ]
+            }
+        };
+
+        function openFeatureModal(key) {
+            const data = FEATURE_DATA[key];
+            if (!data) return;
+
+            document.getElementById('modalFeatureIcon').innerText = data.icon;
+            document.getElementById('modalFeatureTitle').innerText = data.title;
+            document.getElementById('modalFeatureBadge').innerText = data.badge;
+
+            const body = document.getElementById('modalFeatureBody');
+
+            body.innerHTML = `
+                <p style="color:var(--text-muted);font-size:0.92rem;line-height:1.6;margin-bottom:20px">${data.desc}</p>
+                
+                <h4 style="font-size:1rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+                    <span>⌨️</span> Danh Sách Lệnh Khả Dụng:
+                </h4>
+                <div class="cmd-grid">
+                    ${data.commands.map(c => `
+                        <div class="cmd-item">
+                            <div>
+                                <span class="cmd-pill">${c.cmd}</span>
+                                ${c.slash && c.slash !== '—' ? `<span class="badge badge-sakura" style="margin-left:6px;font-size:0.75rem">${c.slash}</span>` : ''}
+                                <div style="color:var(--text-muted);font-size:0.84rem;margin-top:4px">${c.desc}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${data.autoFeatures ? `
+                    <h4 style="font-size:1rem;font-weight:800;margin:20px 0 10px;display:flex;align-items:center;gap:8px">
+                        <span>⚙️</span> Tính Năng Tự Động:
+                    </h4>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        ${data.autoFeatures.map(f => `
+                            <div style="display:flex;align-items:center;gap:10px;font-size:0.86rem;color:var(--text-muted);background:rgba(255,255,255,0.03);padding:8px 14px;border-radius:10px;border:1px solid var(--border-subtle)">
+                                <span style="color:var(--accent-green)">✓</span>
+                                <span>${f}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('featureModalOverlay').style.display = 'flex';
+        }
+
+        function closeFeatureModal() {
+            document.getElementById('featureModalOverlay').style.display = 'none';
+        }
+
+        function toggleLandingMenu(force) {
+            const dr = document.getElementById('landingMobileDrawer');
+            const ov = document.getElementById('landingMobileOverlay');
+            if (!dr) return;
+            const open = force !== undefined ? force : !dr.classList.contains('active');
+            dr.classList.toggle('active', open);
+            if (ov) ov.classList.toggle('active', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+        }
+
+        function showToast(m, t = 'info') { const c = document.getElementById('toastContainer'); if (!c) return; const d = document.createElement('div'); d.className = 'toast-message'; let i = '🌸'; if (t === 'success') i = '✅'; if (t === 'error') i = '❌'; if (t === 'warning') i = '⚠️'; d.innerHTML = `<span>${i}</span><span>${m}</span>`; c.appendChild(d); setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateY(10px)'; d.style.transition = 'all .3s'; setTimeout(() => d.remove(), 300) }, 4000) }
+        function getToken() { return localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/) || [])[1] || ''; }
+        function doInvite() {
+            window.open('/bot', '_blank');
+        }
+        function doLogout() { const t = getToken(); fetch('/api/auth/logout', { method: 'POST', headers: t ? { 'Authorization': 'Bearer ' + t } : {} }).finally(() => { localStorage.removeItem('sakura_auth_token'); document.cookie = 'sakura_token=; path=/; max-age=0'; location.reload(); }); }
+        (async () => {
+            // update auth UI
+            const t = getToken();
+            if (t) {
+                try {
+                    const r = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + t } });
+                    const j = await r.json();
+                    if (j.ok) {
+                        const box = document.getElementById('landingAuth');
+                        const isAdmin = j.user.is_admin;
+                        const av = j.user.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
+                        box.innerHTML = `<a href="/account" style="display:flex;gap:8px;align-items:center;text-decoration:none"><img src="${av}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border-glass)" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><span style="color:var(--text-main);font-weight:700;font-size:.9rem">${j.user.username}</span>${isAdmin ? '<span class="badge badge-sakura">ADMIN</span>' : ''}</a><a href="/dashboard" class="btn btn-primary btn-sm">Dashboard</a><button onclick="doLogout()" class="btn btn-secondary btn-sm">Đăng xuất</button>`;
+                    }
+                } catch (e) { }
+            }
+            try { const r = await fetch('/api/status', { headers: t ? { 'Authorization': 'Bearer ' + t } : {} }); if (r.status === 401) return; const j = await r.json(); if (j.ok) { document.getElementById('heroGuilds').innerText = j.bot.guilds_count; document.getElementById('heroUsers').innerText = (j.bot.users_count || 0).toLocaleString(); document.getElementById('heroUptime').innerText = Math.floor(j.bot.uptime / 3600) + 'h' } } catch (e) { }
+        })();
+    </script>
+</body>
+
+</html>

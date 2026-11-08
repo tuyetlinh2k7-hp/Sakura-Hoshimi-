@@ -1,0 +1,1307 @@
+[
+    {
+        "question": "Thủ đô của Việt Nam là gì?",
+        "answers": [
+            "Hà Nội",
+            "TP. Hồ Chí Minh", 
+            "Đà Nẵng", 
+            "Huế"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Nước nào có diện tích lớn nhất thế giới?",
+        "answers": ["Mỹ", "Nga", "Trung Quốc", "Canada"],
+        "correct": 1
+    },
+    {
+        "question": "Kim loại nào dẫn điện tốt nhất?",
+        "answers": ["Vàng", "Bạc", "Đồng", "Nhôm"],
+        "correct": 1
+    },
+    {
+        "question": "Hành tinh gần Mặt Trời nhất là gì?",
+        "answers": ["Sao Kim", "Sao Hỏa", "Sao Thủy", "Trái Đất"],
+        "correct": 2
+    },
+    {
+        "question": "Ai là người phát minh ra bóng đèn điện?",
+        "answers": ["Thomas Edison", "Newton", "Tesla", "Einstein"],
+        "correct": 0
+    },
+    {
+        "question": "Sông nào dài nhất thế giới?",
+        "answers": ["Amazon", "Nile", "Mekong", "Mississippi"],
+        "correct": 1
+    },
+    {
+        "question": "Việt Nam thuộc châu lục nào?",
+        "answers": ["Châu Âu", "Châu Á", "Châu Phi", "Châu Mỹ"],
+        "correct": 1
+    },
+    {
+        "question": "H2O là công thức của chất gì?",
+        "answers": ["Oxy", "Hydro", "Nước", "Muối"],
+        "correct": 2
+    },
+    {
+        "question": "Quốc gia nào có dân số đông nhất thế giới?",
+        "answers": ["Ấn Độ", "Mỹ", "Trung Quốc", "Indonesia"],
+        "correct": 0
+    },
+    {
+        "question": "1 năm có bao nhiêu ngày (không nhuận)?",
+        "answers": ["364", "365", "366", "360"],
+        "correct": 1
+    },
+    {
+        "question": "Biểu tượng hóa học của vàng là gì?",
+        "answers": ["Au", "Ag", "Fe", "Pb"],
+        "correct": 0
+    },
+    {
+        "question": "Động vật nào chạy nhanh nhất thế giới?",
+        "answers": ["Báo gêpa", "Sư tử", "Ngựa", "Hươu cao cổ"],
+        "correct": 0
+    },
+    {
+        "question": "Ai là người đầu tiên đặt chân lên Mặt Trăng?",
+        "answers": ["Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "Michael Collins"],
+        "correct": 0
+    },
+    {
+        "question": "Ngôn ngữ lập trình nào phổ biến cho AI hiện nay?",
+        "answers": ["Python", "C++", "Java", "PHP"],
+        "correct": 0
+    },
+    {
+        "question": "Thành phần chính của không khí là gì?",
+        "answers": ["Oxy", "Nitơ", "CO2", "Hydro"],
+        "correct": 1
+    },
+    {
+        "question": "Biển lớn nhất thế giới là?",
+        "answers": ["Biển Đông", "Biển Đỏ", "Biển Caribe", "Biển Ả Rập"],
+        "correct": 3
+    },
+    {
+        "question": "Tam giác có mấy cạnh?",
+        "answers": ["2", "3", "4", "5"],
+        "correct": 1
+    },
+    {
+        "question": "Công nghệ 5G là gì?",
+        "answers": ["Mạng internet thế hệ 5", "Điện thoại", "Máy tính", "Robot"],
+        "correct": 0
+    },
+    {
+        "question": "Núi cao nhất thế giới là?",
+        "answers": ["K2", "Everest", "Phanxipang", "Kilimanjaro"],
+        "correct": 1
+    },
+    {
+        "question": "Màu sắc của máu người là gì?",
+        "answers": ["Xanh", "Đỏ", "Vàng", "Tím"],
+        "correct": 1
+    },
+    {
+        "question": "Việt Nam nằm ở khu vực nào của châu Á?",
+        "answers": [
+            "Đông Nam Á",
+            "Đông Á",
+            "Nam Á",
+            "Tây Á"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Python là gì?",
+        "answers": [
+            "Ngôn ngữ lập trình",
+            "Hệ điều hành",
+            "Trình duyệt",
+            "Cơ sở dữ liệu"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mob nào nổ khi đến gần người chơi?",
+        "answers": [
+            "Zombie",
+            "Skeleton",
+            "Creeper",
+            "Spider"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Công thức hóa học của nước là gì?",
+        "answers": [
+            "CO2",
+            "H2O",
+            "NaCl",
+            "O2"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ngôn ngữ lập trình nào thường dùng để phát triển AI?",
+        "answers": ["Python", "HTML", "CSS", "SQL"],
+        "correct": 0
+    },
+    {
+        "question": "Trong Python, hàm nào dùng để in ra màn hình?",
+        "answers": ["print()", "echo()", "console.log()", "write()"],
+        "correct": 0
+    },
+    {
+        "question": "Cấu trúc lặp nào trong Python?",
+        "answers": ["for", "repeat", "loop", "goto"],
+        "correct": 0
+    },
+    {
+        "question": "Ký hiệu nào dùng để comment trong Python?",
+        "answers": ["//", "#", "/* */", "<!-- -->"],
+        "correct": 1
+    },
+    {
+        "question": "Trong lập trình, biến (variable) dùng để làm gì?",
+        "answers": [
+            "Lưu trữ dữ liệu",
+            "Xóa dữ liệu",
+            "Chạy chương trình",
+            "Cài đặt hệ điều hành"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ngôn ngữ nào chạy trên trình duyệt web?",
+        "answers": ["JavaScript", "C++", "Python", "Java"],
+        "correct": 0
+    },
+    {
+        "question": "HTML dùng để làm gì?",
+        "answers": [
+            "Tạo cấu trúc trang web",
+            "Xử lý dữ liệu",
+            "Viết backend",
+            "Quản lý database"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Câu lệnh if dùng để làm gì?",
+        "answers": [
+            "Lặp lại code",
+            "Kiểm tra điều kiện",
+            "Kết nối database",
+            "Tạo hàm"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong Python, kiểu dữ liệu số nguyên là gì?",
+        "answers": ["int", "str", "float", "bool"],
+        "correct": 0
+    },
+    {
+        "question": "Git dùng để làm gì?",
+        "answers": [
+            "Quản lý mã nguồn",
+            "Thiết kế web",
+            "Chạy server",
+            "Tạo database"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "H2O là công thức hóa học của chất nào?",
+        "answers": ["Axit", "Nước", "Muối", "Oxy"],
+        "correct": 1
+    },
+    {
+        "question": "Ký hiệu hóa học của Natri là gì?",
+        "answers": ["Na", "N", "Ni", "Ne"],
+        "correct": 0
+    },
+    {
+        "question": "Oxy có ký hiệu hóa học là gì?",
+        "answers": ["Ox", "O", "Oy", "Om"],
+        "correct": 1
+    },
+    {
+        "question": "CO2 là gì?",
+        "answers": ["Khí oxy", "Khí carbon dioxide", "Nước", "Muối"],
+        "correct": 1
+    },
+    {
+        "question": "Nguyên tố nào có ký hiệu Fe?",
+        "answers": ["Sắt", "Đồng", "Kẽm", "Chì"],
+        "correct": 0
+    },
+    { 
+        "question": "Muối ăn có công thức hóa học là gì?",
+        "answers": ["NaCl", "KCl", "HCl", "NaOH"],
+        "correct": 0
+    },
+    {
+        "question": "Axit HCl còn gọi là gì?",
+        "answers": ["Axit nitric", "Axit clohidric", "Axit sulfuric", "Axit axetic"],
+        "correct": 1
+    },
+    {
+        "question": "Nguyên tố nào nhẹ nhất trong bảng tuần hoàn?",
+        "answers": ["Oxy", "Heli", "Hydro", "Carbon"],
+        "correct": 2
+    },
+    {
+        "question": "pH = 7 là môi trường gì?",
+        "answers": ["Axit", "Bazơ", "Trung tính", "Mặn"],
+        "correct": 2
+    },
+    {
+        "question": "CaCO3 là công thức của chất nào?",
+        "answers": ["Đá vôi", "Muối ăn", "Đường", "Nước"],
+        "correct": 0
+    },
+    {
+        "question": "2 + 2 bằng bao nhiêu?",
+        "answers": ["3", "4", "5", "6"],
+        "correct": 1
+    },
+    {
+        "question": "10 x 5 bằng bao nhiêu?",
+        "answers": ["50", "15", "25", "100"],
+        "correct": 0
+    },
+    { 
+        "question": "Căn bậc hai của 16 là bao nhiêu?",
+        "answers": ["2", "3", "4", "5"],
+        "correct": 2
+    },
+    {
+        "question": "Số Pi xấp xỉ bằng?",
+        "answers": ["2.14", "3.14", "4.13", "3.41"],
+        "correct": 1
+    },
+    {
+        "question": "5! (giai thừa của 5) bằng bao nhiêu?",
+        "answers": ["120", "60", "24", "720"],
+        "correct": 0
+    },
+    {
+        "question": "12 ÷ 4 bằng bao nhiêu?",
+        "answers": ["2", "3", "4", "6"],
+        "correct": 1
+    },
+    {
+        "question": "Diện tích hình vuông có cạnh 4 là bao nhiêu?",
+        "answers": ["12", "16", "8", "20"],
+        "correct": 1
+    },
+    {
+        "question": "Số chẵn nhỏ nhất là số nào?",
+        "answers": ["0", "1", "2", "-2"],
+        "correct": 0
+    },
+    {
+        "question": "3^3 bằng bao nhiêu?",
+        "answers": ["6", "9", "27", "81"],
+        "correct": 2
+    },
+    {
+        "question": "100 - 45 bằng bao nhiêu?",
+        "answers": ["55", "65", "45", "50"],
+        "correct": 0
+    },
+    {
+        "question": "Cơ quan nào trong cơ thể người có chức năng bơm máu?",
+        "answers": ["Tim", "Phổi", "Gan", "Thận"],
+        "correct": 0
+    },
+    {
+        "question": "Đơn vị cơ bản của sự sống là gì?",
+        "answers": ["Mô", "Cơ quan", "Tế bào", "Hệ cơ quan"],
+        "correct": 2
+    },
+    {
+        "question": "Quá trình cây xanh tạo ra chất dinh dưỡng gọi là gì?",
+        "answers": ["Hô hấp", "Quang hợp", "Tiêu hóa", "Bài tiết"],
+        "correct": 1
+    },
+    {
+        "question": "Phổi có chức năng gì?",
+        "answers": ["Tiêu hóa thức ăn", "Trao đổi khí", "Bơm máu", "Lọc máu"],
+        "correct": 1
+    },
+    {
+        "question": "DNA là gì?",
+        "answers": [
+        "Chất di truyền",
+        "Protein",
+        "Vitamin",
+        "Enzyme tiêu hóa"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Con người có bao nhiêu giác quan chính?",
+        "answers": ["4", "5", "6", "7"],
+        "correct": 1
+    },
+    {
+        "question": "Cơ quan nào lọc máu trong cơ thể?",
+        "answers": ["Gan", "Thận", "Tim", "Phổi"],
+        "correct": 1
+    },
+    {
+        "question": "Thực vật hấp thụ khí gì để quang hợp?",
+        "answers": ["Oxy", "Nitơ", "CO2", "Hidro"],
+        "correct": 2
+    },
+    {
+        "question": "Hệ thần kinh trung ương gồm những gì?",
+        "answers": ["Não và tủy sống", "Tim và phổi", "Gan và thận", "Da và cơ"],
+        "correct": 0
+    },
+    {
+        "question": "Xương có chức năng gì?",
+        "answers": [
+        "Bảo vệ cơ thể và nâng đỡ",
+        "Tiêu hóa",
+        "Hô hấp",
+        "Tạo máu chỉ"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Đơn vị của lực là gì?",
+        "answers": ["Joule", "Newton", "Watt", "Pascal"],
+        "correct": 1
+    },
+    {
+        "question": "Vận tốc được tính bằng công thức nào?",
+        "answers": ["s = v × t", "v = s / t", "a = v / t", "F = m × a"],
+        "correct": 1
+    },
+    {
+        "question": "Trọng lực trên Trái Đất xấp xỉ bằng bao nhiêu?",
+        "answers": ["9.8 m/s²", "10 m/s²", "8.9 m/s²", "12 m/s²"],
+        "correct": 0
+    },
+    {
+        "question": "Ánh sáng truyền nhanh nhất trong môi trường nào?",
+        "answers": ["Nước", "Không khí", "Chân không", "Thủy tinh"],
+        "correct": 2
+    },
+    {
+        "question": "Dòng điện được đo bằng đơn vị gì?",
+        "answers": ["Volt", "Ohm", "Ampere", "Watt"],
+        "correct": 2
+    },
+    {
+        "question": "Thiết bị nào dùng để đo nhiệt độ?",
+        "answers": ["Ampe kế", "Nhiệt kế", "Vôn kế", "Đồng hồ đo"],
+        "correct": 1
+    },
+    {
+        "question": "Lực nào hút mọi vật về phía Trái Đất?",
+        "answers": ["Lực điện", "Lực từ", "Trọng lực", "Lực ma sát"],
+        "correct": 2
+    },
+    {
+        "question": "Âm thanh truyền tốt nhất trong môi trường nào?",
+        "answers": ["Chân không", "Không khí", "Kim loại", "Nước"],
+        "correct": 2
+    },
+    {
+        "question": "Công suất được ký hiệu là gì?",
+        "answers": ["P", "F", "V", "I"],
+        "correct": 0
+    },
+    {
+        "question": "Năng lượng được đo bằng đơn vị gì?",
+        "answers": ["Newton", "Joule", "Watt", "Volt"],
+        "correct": 1
+    },
+    {
+        "question": "What is the correct translation of 'Xin chào' in English?",
+        "answers": ["Goodbye", "Hello", "Thanks", "Sorry"],
+        "correct": 1
+    },
+    {
+        "question": "Choose the correct verb: She ___ to school every day.",
+        "answers": ["go", "goes", "going", "gone"],
+        "correct": 1
+    },
+    {
+        "question": "What is the past tense of 'eat'?",
+        "answers": ["eated", "ate", "eaten", "eating"],
+        "correct": 1
+    },
+    {
+        "question": "Which word is a noun?",
+        "answers": ["Run", "Beautiful", "Happiness", "Quickly"],
+        "correct": 2
+    },
+    {
+        "question": "Translate 'Thank you' into Vietnamese.",
+        "answers": ["Xin lỗi", "Cảm ơn", "Tạm biệt", "Không có gì"],
+        "correct": 1
+    },
+    {
+        "question": "Which sentence is correct?",
+        "answers": [
+        "He don't like it",
+        "He doesn't likes it",
+        "He doesn't like it",
+        "He not like it"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "What is the opposite of 'hot'?",
+        "answers": ["Warm", "Cold", "Heat", "Boil"],
+        "correct": 1
+    },
+    {
+        "question": "Choose the correct preposition: She is good ___ math.",
+        "answers": ["in", "at", "on", "for"],
+        "correct": 1
+    },
+    {
+        "question": "What is the plural form of 'child'?",
+        "answers": ["childs", "childes", "children", "child"],
+        "correct": 2
+    },
+    {
+        "question": "Which word is a pronoun?",
+        "answers": ["She", "Run", "Happy", "Table"],
+        "correct": 0
+    },
+    {
+        "question": "Thủ đô của Việt Nam là gì?",
+        "answers": ["Hà Nội", "Huế", "Đà Nẵng", "TP. Hồ Chí Minh"],
+        "correct": 0
+    },
+    {
+        "question": "Châu lục nào lớn nhất thế giới?",
+        "answers": ["Châu Âu", "Châu Á", "Châu Phi", "Châu Mỹ"],
+        "correct": 1
+    },
+    {
+        "question": "Biển nào thuộc Việt Nam?",
+        "answers": ["Biển Đỏ", "Biển Đông", "Biển Đen", "Biển Caribe"],
+        "correct": 1
+    },
+    {
+        "question": "Dãy núi cao nhất thế giới là gì?",
+        "answers": ["Andes", "Alps", "Himalaya", "Rocky"],
+        "correct": 2
+    },
+    {
+        "question": "Sông nào dài nhất thế giới?",
+        "answers": ["Amazon", "Nile", "Mekong", "Danube"],
+        "correct": 1
+    },
+    {
+        "question": "Quốc gia nào có diện tích lớn nhất thế giới?",
+        "answers": ["Canada", "Trung Quốc", "Nga", "Mỹ"],
+        "correct": 2
+    },
+    {
+        "question": "Việt Nam thuộc khu vực nào của châu Á?",
+        "answers": ["Đông Á", "Tây Á", "Nam Á", "Đông Nam Á"],
+        "correct": 3
+    },
+    {
+        "question": "Đường xích đạo đi qua lục địa nào?",
+        "answers": ["Châu Âu", "Châu Nam Cực", "Châu Phi", "Châu Á"],
+        "correct": 2
+    },
+    {
+        "question": "Thành phố nào là trung tâm kinh tế của Việt Nam?",
+        "answers": ["Hà Nội", "Huế", "TP. Hồ Chí Minh", "Nha Trang"],
+        "correct": 2
+    },
+    {
+        "question": "Sa mạc lớn nhất thế giới là gì?",
+        "answers": ["Sahara", "Gobi", "Kalahari", "Atacama"],
+        "correct": 0
+    },
+    {
+        "question": "Triết học nghiên cứu về gì?",
+        "answers": [
+        "Thiết kế máy tính",
+        "Bản chất của thế giới và tư duy",
+        "Toán học cao cấp",
+        "Lập trình máy tính"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ai là một trong những nhà triết học Hy Lạp cổ đại nổi tiếng?",
+        "answers": ["Newton", "Plato", "Einstein", "Darwin"],
+        "correct": 1
+    },
+    {
+        "question": "Chủ nghĩa duy vật cho rằng gì là cơ bản nhất?",
+        "answers": ["Tinh thần", "Vật chất", "Ý thức", "Tưởng tượng"],
+        "correct": 1
+    },
+    {
+        "question": "Chủ nghĩa duy tâm nhấn mạnh điều gì?",
+        "answers": ["Vật chất quyết định ý thức", "Ý thức quyết định vật chất", "Khoa học kỹ thuật", "Kinh tế"],
+        "correct": 1
+    },
+    {
+        "question": "Karl Marx nổi tiếng với học thuyết nào?",
+        "answers": [
+        "Thuyết tương đối",
+        "Chủ nghĩa Marx",
+        "Thuyết tiến hóa",
+        "Cơ học lượng tử"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Triết học có vai trò gì?",
+        "answers": [
+        "Chỉ để tranh luận",
+        "Giúp hiểu thế giới và con người",
+        "Chỉ dùng trong kinh doanh",
+        "Không có ứng dụng"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Logic học trong triết học dùng để làm gì?",
+        "answers": [
+        "Trang trí câu chữ",
+        "Phân tích và suy luận đúng sai",
+        "Viết văn",
+        "Học ngoại ngữ"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Triết học phương Đông thường gắn liền với ai?",
+        "answers": ["Plato", "Khổng Tử", "Socrates", "Aristotle"],
+        "correct": 1
+    },
+    {
+        "question": "Câu hỏi 'Tôi là ai?' thuộc lĩnh vực nào?",
+        "answers": ["Toán học", "Triết học", "Vật lý", "Hóa học"],
+        "correct": 1
+    },
+    {
+        "question": "Đối tượng nghiên cứu của triết học là gì?",
+        "answers": [
+        "Thế giới tự nhiên và tư duy con người",
+        "Chỉ máy tính",
+        "Chỉ kinh tế",
+        "Chỉ sinh học"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Khi tung một đồng xu cân bằng, xác suất ra mặt ngửa là bao nhiêu?",
+        "answers": ["1/3", "1/2", "1/4", "1"],
+        "correct": 1
+    },
+    {
+        "question": "Khi tung một con xúc xắc, xác suất ra số 6 là bao nhiêu?",
+        "answers": ["1/2", "1/3", "1/6", "1/12"],
+        "correct": 2
+    },
+    {
+        "question": "Một hộp có 3 bi đỏ và 2 bi xanh. Chọn ngẫu nhiên 1 bi, xác suất chọn bi đỏ là bao nhiêu?",
+        "answers": ["2/5", "3/5", "1/2", "3/2"],
+        "correct": 1
+    },
+    {
+        "question": "Xác suất của một biến cố chắc chắn là bao nhiêu?",
+        "answers": ["0", "1", "1/2", "10"],
+        "correct": 1
+    },
+    {
+        "question": "Xác suất của một biến cố không thể xảy ra là bao nhiêu?",
+        "answers": ["0", "1", "1/2", "-1"],
+        "correct": 0
+    },
+    {
+        "question": "Tung 1 con xúc xắc, xác suất ra số chẵn là bao nhiêu?",
+        "answers": ["1/2", "1/3", "2/3", "1/6"],
+        "correct": 0
+    },
+    {
+        "question": "Có 4 quả bóng đỏ và 6 quả bóng xanh. Xác suất chọn bóng xanh là bao nhiêu?",
+        "answers": ["2/5", "3/5", "1/2", "4/10"],
+        "correct": 1
+    },
+    {
+        "question": "Tung 2 đồng xu, xác suất ra 2 mặt ngửa là bao nhiêu?",
+        "answers": ["1/2", "1/4", "1/3", "1/8"],
+        "correct": 1
+    },
+    {
+        "question": "Trong một túi có 5 thẻ đánh số 1 đến 5. Xác suất rút được số chẵn là bao nhiêu?",
+        "answers": ["1/5", "2/5", "3/5", "1/2"],
+        "correct": 1
+    },
+    {
+        "question": "Xác suất luôn nằm trong khoảng nào?",
+        "answers": ["(-∞, +∞)", "[0, 1]", "[1, 10]", "[0, 100]"],
+        "correct": 1
+    },
+    {
+        "question": "Tư tưởng Hồ Chí Minh được hình thành trên nền tảng nào?",
+        "answers": [
+        "Chủ nghĩa Marx-Lenin",
+        "Chủ nghĩa tư bản",
+        "Chủ nghĩa tự do",
+        "Chủ nghĩa cá nhân"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mục tiêu cao nhất trong tư tưởng Hồ Chí Minh là gì?",
+        "answers": [
+        "Phát triển công nghệ",
+        "Độc lập dân tộc và hạnh phúc nhân dân",
+        "Mở rộng lãnh thổ",
+        "Phát triển quân sự"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Theo Hồ Chí Minh, yếu tố nào là gốc của cách mạng?",
+        "answers": ["Vũ khí", "Nhân dân", "Kinh tế", "Quân đội nước ngoài"],
+        "correct": 1
+    },
+    {
+        "question": "Tư tưởng Hồ Chí Minh nhấn mạnh điều gì về đạo đức?",
+        "answers": [
+        "Cá nhân quan trọng hơn tập thể",
+        "Cần, kiệm, liêm, chính, chí công vô tư",
+        "Giàu có là quan trọng nhất",
+        "Không cần đạo đức"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Hồ Chí Minh sinh năm nào?",
+        "answers": ["1890", "1895", "1900", "1885"],
+        "correct": 0
+    },
+    {
+        "question": "Hồ Chí Minh tìm thấy con đường cứu nước dựa trên học thuyết nào?",
+        "answers": [
+        "Chủ nghĩa Marx-Lenin",
+        "Chủ nghĩa tư bản",
+        "Chủ nghĩa phong kiến",
+        "Chủ nghĩa dân tộc hẹp hòi"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Theo tư tưởng Hồ Chí Minh, nhà nước của dân là gì?",
+        "answers": [
+        "Do một nhóm người điều hành",
+        "Do nhân dân làm chủ",
+        "Do quân đội quản lý",
+        "Do vua cai trị"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Hồ Chí Minh nhấn mạnh vai trò của ai trong cách mạng?",
+        "answers": ["Nhân dân", "Tư sản", "Địa chủ", "Ngoại quốc"],
+        "correct": 0
+    },
+    {
+        "question": "Tư tưởng Hồ Chí Minh về độc lập dân tộc gắn liền với gì?",
+        "answers": [
+        "Chiến tranh",
+        "Chủ nghĩa xã hội",
+        "Chủ nghĩa tư bản",
+        "Phong kiến"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Một trong những phẩm chất đạo đức Hồ Chí Minh đề cao là gì?",
+        "answers": ["Trung thực", "Tham lam", "Ích kỷ", "Xa hoa"],
+        "correct": 0
+    },
+    {
+        "question": "Đạo hàm của hàm f(x) = x² là gì?",
+        "answers": ["x", "2x", "x²", "2"],
+        "correct": 1
+    },
+    {
+        "question": "Giới hạn lim (x → 0) sin(x)/x bằng bao nhiêu?",
+        "answers": ["0", "1", "∞", "-1"],
+        "correct": 1
+    },
+    {
+        "question": "Tích phân của hàm f(x) = 2x là gì?",
+        "answers": ["x² + C", "2x² + C", "x + C", "x²/2 + C"],
+        "correct": 0
+    },
+    {
+        "question": "Ma trận đơn vị là ma trận như thế nào?",
+        "answers": [
+        "Tất cả phần tử bằng 1",
+        "Đường chéo chính bằng 1, còn lại bằng 0",
+        "Tất cả phần tử bằng 0",
+        "Ma trận vuông bất kỳ"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Đạo hàm của hàm f(x) = sin(x) là gì?",
+        "answers": ["cos(x)", "-cos(x)", "-sin(x)", "tan(x)"],
+        "correct": 0
+    },
+    {
+        "question": "Điều kiện để ma trận khả nghịch là gì?",
+        "answers": [
+        "Định thức bằng 0",
+        "Định thức khác 0",
+        "Ma trận vuông bất kỳ",
+        "Có số âm"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Giới hạn lim (x → ∞) 1/x bằng bao nhiêu?",
+        "answers": ["1", "∞", "0", "-1"],
+        "correct": 2
+    },
+    {
+        "question": "Đạo hàm của hàm f(x) = e^x là gì?",
+        "answers": ["x·e^(x-1)", "e^x", "ln(x)", "1/e^x"],
+        "correct": 1
+    },
+    {
+        "question": "Tổng của cấp số cộng được tính theo công thức nào?",
+        "answers": [
+        "Sn = n(a1 + an)/2",
+        "Sn = a1 × r^n",
+        "Sn = a1 + n",
+        "Sn = n²"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Đạo hàm của hằng số bằng bao nhiêu?",
+        "answers": ["1", "0", "hằng số đó", "x"],
+        "correct": 1
+    },
+    {
+        "question": "Chiến thắng Điện Biên Phủ diễn ra vào năm nào?",
+        "answers": ["1954", "1945", "1968", "1975"],
+        "correct": 0
+    },
+    {
+        "question": "Ai là người đọc Tuyên ngôn Độc lập khai sinh nước Việt Nam Dân chủ Cộng hòa?",
+        "answers": ["Trần Hưng Đạo", "Hồ Chí Minh", "Võ Nguyên Giáp", "Ngô Quyền"],
+        "correct": 1
+    },
+    {
+        "question": "Cách mạng Tháng Tám diễn ra vào năm nào?",
+        "answers": ["1940", "1945", "1954", "1930"],
+        "correct": 1
+    },
+    {
+        "question": "Nhà nước đầu tiên của Việt Nam là gì?",
+        "answers": ["Văn Lang", "Âu Lạc", "Đại Việt", "Đại Nam"],
+        "correct": 0
+    },
+    {
+        "question": "Ai là người lãnh đạo khởi nghĩa Lam Sơn?",
+        "answers": ["Nguyễn Huệ", "Lê Lợi", "Trần Nhân Tông", "Ngô Quyền"],
+        "correct": 1
+    },
+    {
+        "question": "Chiến tranh thế giới thứ hai kết thúc vào năm nào?",
+        "answers": ["1940", "1942", "1945", "1950"],
+        "correct": 2
+    },
+    {
+        "question": "Vua nào đánh tan quân Nam Hán trên sông Bạch Đằng năm 938?",
+        "answers": ["Trần Hưng Đạo", "Ngô Quyền", "Lý Thường Kiệt", "Quang Trung"],
+        "correct": 1
+    },
+    {
+        "question": "Hiệp định Giơ-ne-vơ được ký vào năm nào?",
+        "answers": ["1954", "1945", "1968", "1973"],
+        "correct": 0
+    },
+    {
+        "question": "Ai là người thống nhất đất nước sau năm 1975?",
+        "answers": ["Nguyễn Huệ", "Hồ Chí Minh", "Quân Giải phóng miền Nam", "Vua Bảo Đại"],
+        "correct": 2
+    },
+    {
+        "question": "Nhà Nguyễn được thành lập vào năm nào?",
+        "answers": ["1802", "1858", "1945", "1789"],
+        "correct": 0
+    },
+    {
+        "question": "Điểm khác biệt quan trọng nhất giữa Cách mạng Tháng Tám 1945 ở Việt Nam và các cuộc cách mạng tư sản cổ điển ở châu Âu là gì?",
+        "answers": [
+        "Lãnh đạo bởi giai cấp tư sản",
+        "Không có sự tham gia của quần chúng",
+        "Mang tính dân tộc và giải phóng thuộc địa",
+        "Chỉ diễn ra trong một thành phố"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Nguyên nhân trực tiếp dẫn đến thắng lợi của Cách mạng Tháng Tám 1945 là gì?",
+        "answers": [
+        "Nhật đầu hàng Đồng minh",
+        "Pháp quay lại Đông Dương",
+        "Mỹ ném bom nguyên tử",
+        "Liên Xô tuyên chiến với Pháp"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hiệp định Giơ-ne-vơ 1954 có ý nghĩa lịch sử nào quan trọng nhất?",
+        "answers": [
+        "Chấm dứt chiến tranh Việt Nam hoàn toàn",
+        "Công nhận độc lập, chủ quyền và chia cắt tạm thời Việt Nam",
+        "Thống nhất đất nước ngay lập tức",
+        "Việt Nam gia nhập Liên Hợp Quốc"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Chiến thắng Điện Biên Phủ có ý nghĩa quốc tế như thế nào?",
+        "answers": [
+        "Kết thúc Chiến tranh thế giới thứ hai",
+        "Cổ vũ phong trào giải phóng thuộc địa trên thế giới",
+        "Làm tan rã Liên Xô",
+        "Thành lập ASEAN"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong đường lối kháng chiến chống Pháp, yếu tố nào được xem là cơ bản nhất?",
+        "answers": [
+        "Chiến tranh tổng lực nhanh chóng",
+        "Trường kỳ kháng chiến, tự lực cánh sinh",
+        "Dựa hoàn toàn vào viện trợ nước ngoài",
+        "Đánh nhanh thắng nhanh"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Yếu tố nào phản ánh đúng nhất bản chất của Nhà nước Việt Nam Dân chủ Cộng hòa (1945)?",
+        "answers": [
+        "Nhà nước phong kiến",
+        "Nhà nước thuộc địa",
+        "Nhà nước của dân, do dân, vì dân",
+        "Nhà nước quân sự"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Nguyên nhân sâu xa dẫn đến thắng lợi của cuộc kháng chiến chống Mỹ cứu nước là gì?",
+        "answers": [
+        "Sự ủng hộ của Liên Xô và Trung Quốc",
+        "Sự lãnh đạo đúng đắn của Đảng và sức mạnh nhân dân",
+        "Mỹ tự rút quân hoàn toàn không lý do",
+        "Chiến tranh kéo dài do thời tiết"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Chiến dịch Hồ Chí Minh năm 1975 nhằm mục tiêu gì?",
+        "answers": [
+        "Giải phóng miền Bắc",
+        "Giải phóng hoàn toàn miền Nam, thống nhất đất nước",
+        "Đàm phán hòa bình với Mỹ",
+        "Thiết lập liên bang Đông Dương"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Đặc điểm nổi bật của phong trào Cần Vương cuối thế kỷ XIX là gì?",
+        "answers": [
+        "Do giai cấp công nhân lãnh đạo",
+        "Do sĩ phu phong kiến lãnh đạo, chống Pháp",
+        "Do tư sản lãnh đạo",
+        "Do nông dân lãnh đạo hoàn toàn hiện đại"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ý nghĩa lớn nhất của việc thành lập Đảng Cộng sản Việt Nam (1930) là gì?",
+        "answers": [
+        "Chấm dứt chiến tranh thế giới",
+        "Chấm dứt chế độ phong kiến",
+        "Tạo ra đường lối cách mạng đúng đắn, thống nhất lực lượng cách mạng",
+        "Giúp Việt Nam trở thành cường quốc"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Giới hạn lim (x → 0) (1 - cos x) / x² bằng bao nhiêu?",
+        "answers": ["0", "1/2", "1", "∞"],
+        "correct": 1
+    },
+    {
+        "question": "Đạo hàm của hàm f(x) = x·e^x là gì?",
+        "answers": ["e^x", "x·e^x", "e^x(x+1)", "x·e^(x-1)"],
+        "correct": 2
+    },
+    {
+        "question": "Nghiệm của phương trình x² - 5x + 6 = 0 là gì?",
+        "answers": ["x = 1, 6", "x = 2, 3", "x = -2, -3", "x = 0, 5"],
+        "correct": 1
+    },
+    {
+        "question": "Giá trị của ∫₀¹ x² dx là bao nhiêu?",
+        "answers": ["1/2", "1/3", "2/3", "1"],
+        "correct": 1
+    },
+    {
+        "question": "Ma trận nào sau đây có định thức bằng 0?",
+        "answers": [
+        "Ma trận khả nghịch",
+        "Ma trận đơn vị",
+        "Ma trận suy biến",
+        "Ma trận đường chéo khác 0"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Cấp số nhân có a1 = 2, r = 3. Số hạng thứ 4 là bao nhiêu?",
+        "answers": ["18", "54", "162", "24"],
+        "correct": 1
+    },
+    {
+        "question": "Nghiệm của phương trình log₂(x) = 3 là gì?",
+        "answers": ["6", "8", "9", "3"],
+        "correct": 1
+    },
+    {
+        "question": "Đạo hàm của f(x) = ln(x) là gì?",
+        "answers": ["1/x", "x", "ln(x)", "e^x"],
+        "correct": 0
+    },
+    {
+        "question": "Tích vô hướng của hai vector vuông góc bằng bao nhiêu?",
+        "answers": ["1", "0", "-1", "∞"],
+        "correct": 1
+    },
+    {
+        "question": "Giới hạn lim (x → ∞) (2x² + 1) / (x² + 3) bằng bao nhiêu?",
+        "answers": ["0", "1", "2", "∞"],
+        "correct": 2
+    },
+    {
+        "question": "Phong cách nghệ thuật của Nguyễn Tuân được đặc trưng bởi yếu tố nào?",
+        "answers": [
+        "Giản dị, mộc mạc",
+        "Uyên bác, tài hoa và giàu tính thẩm mỹ",
+        "Trữ tình, lãng mạn đơn thuần",
+        "Hiện thực khắc nghiệt"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Tác phẩm 'Vợ nhặt' của Kim Lân phản ánh rõ nhất vấn đề gì?",
+        "answers": [
+        "Chiến tranh thế giới",
+        "Nạn đói 1945 và khát vọng sống của con người",
+        "Tình yêu tuổi trẻ",
+        "Xây dựng xã hội công nghiệp"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Thành phần nào thể hiện rõ nhất tính biểu cảm trong văn bản?",
+        "answers": [
+        "Miêu tả",
+        "Biểu cảm",
+        "Nghị luận",
+        "Tự sự"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Hình tượng người lái đò trong tùy bút 'Người lái đò sông Đà' đại diện cho điều gì?",
+        "answers": [
+        "Con người lao động trí thức",
+        "Vẻ đẹp của con người lao động bình dị nhưng tài hoa",
+        "Người chiến sĩ cách mạng",
+        "Nhà thơ lãng mạn"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Biện pháp tu từ 'ẩn dụ' là gì?",
+        "answers": [
+        "So sánh trực tiếp",
+        "Gọi tên sự vật bằng tên sự vật khác có nét tương đồng",
+        "Nhân hóa sự vật",
+        "Phóng đại sự vật"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ý nghĩa chính của tác phẩm 'Chiếc thuyền ngoài xa' là gì?",
+        "answers": [
+        "Ca ngợi chiến tranh",
+        "Phản ánh vẻ đẹp nghệ thuật và hiện thực cuộc sống",
+        "Kể chuyện phiêu lưu",
+        "Miêu tả thiên nhiên đơn thuần"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Quan điểm nghệ thuật của Nam Cao tập trung vào điều gì?",
+        "answers": [
+        "Cái đẹp lý tưởng hóa",
+        "Số phận con người và hiện thực xã hội",
+        "Tình yêu lãng mạn",
+        "Khoa học và kỹ thuật"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Thể loại của 'Truyện Kiều' là gì?",
+        "answers": [
+        "Truyện ngắn",
+        "Tiểu thuyết hiện đại",
+        "Truyện thơ Nôm",
+        "Tùy bút"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Giá trị nhân đạo trong văn học là gì?",
+        "answers": [
+        "Ca ngợi chiến tranh",
+        "Thể hiện sự đồng cảm và yêu thương con người",
+        "Chỉ miêu tả thiên nhiên",
+        "Chỉ kể lại lịch sử"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Hình tượng 'ánh trăng' trong thơ Nguyễn Duy mang ý nghĩa gì?",
+        "answers": [
+        "Thiên nhiên đơn thuần",
+        "Sự gợi nhớ quá khứ và tình nghĩa thủy chung",
+        "Biểu tượng chiến tranh",
+        "Biểu tượng đô thị"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong văn học hiện đại Việt Nam, 'tính hiện thực' được hiểu đúng nhất là gì?",
+        "answers": [
+        "Sao chép nguyên xi đời sống",
+        "Phản ánh đời sống qua lăng kính nghệ thuật, có chọn lọc và khái quát hóa",
+        "Chỉ miêu tả chiến tranh",
+        "Chỉ kể lại sự kiện lịch sử"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Điểm đặc trưng nổi bật trong phong cách nghệ thuật của Nam Cao là gì?",
+        "answers": [
+        "Lãng mạn bay bổng",
+        "Phân tích tâm lý nhân vật sắc sảo và hiện thực sâu sắc",
+        "Miêu tả thiên nhiên trữ tình",
+        "Ngôn ngữ giản đơn, ít biểu cảm"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong truyện ngắn 'Chí Phèo', bi kịch lớn nhất của nhân vật Chí Phèo là gì?",
+        "answers": [
+        "Nghèo đói vật chất",
+        "Bị tước đoạt quyền làm người lương thiện",
+        "Mất gia đình",
+        "Không có việc làm"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Giá trị hiện thực sâu sắc nhất của 'Vợ nhặt' là gì?",
+        "answers": [
+        "Miêu tả chiến tranh",
+        "Phản ánh nạn đói và số phận con người trong hoàn cảnh khắc nghiệt",
+        "Ca ngợi tình yêu đôi lứa",
+        "Miêu tả làng quê yên bình"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong thơ ca kháng chiến, hình tượng 'đất nước' thường mang ý nghĩa gì?",
+        "answers": [
+        "Không gian địa lý đơn thuần",
+        "Sự hòa quyện giữa lịch sử, nhân dân và khát vọng độc lập",
+        "Chỉ là biểu tượng thiên nhiên",
+        "Chỉ là khái niệm trừu tượng"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Điểm khác biệt quan trọng giữa văn học trung đại và hiện đại Việt Nam là gì?",
+        "answers": [
+        "Không có chữ viết",
+        "Chuyển từ tư duy trung tâm sang tư duy cá nhân, cái tôi được đề cao",
+        "Không có thơ",
+        "Chỉ viết bằng chữ Hán"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong 'Người lái đò sông Đà', hình tượng con sông Đà mang ý nghĩa gì?",
+        "answers": [
+        "Thiên nhiên hiền hòa",
+        "Vẻ đẹp vừa hung bạo vừa trữ tình của thiên nhiên Tây Bắc",
+        "Biểu tượng chiến tranh",
+        "Hình ảnh đô thị hiện đại"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Chất 'vàng mười' mà Nguyễn Tuân nhắc đến trong tùy bút của mình là gì?",
+        "answers": [
+        "Vàng thật trong thiên nhiên",
+        "Vẻ đẹp thuần khiết của con người lao động trong thử thách",
+        "Kim loại quý",
+        "Biểu tượng tiền bạc"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ý nghĩa nghệ thuật của hình tượng 'ánh trăng' trong thơ Nguyễn Duy là gì?",
+        "answers": [
+        "Thiên nhiên thuần túy",
+        "Sự thức tỉnh lương tri và nhắc nhở về quá khứ nghĩa tình",
+        "Biểu tượng đô thị",
+        "Hình ảnh chiến tranh"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Giá trị nhân đạo trong văn học được thể hiện rõ nhất qua yếu tố nào?",
+        "answers": [
+        "Ca ngợi quyền lực",
+        "Thể hiện sự đồng cảm, xót thương và khẳng định giá trị con người",
+        "Miêu tả kỹ thuật viết",
+        "Chỉ kể lại lịch sử"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong quá trình hô hấp tế bào, ATP chủ yếu được tạo ra ở giai đoạn nào?",
+        "answers": [
+        "Đường phân",
+        "Chu trình Krebs",
+        "Chuỗi chuyền electron",
+        "Phân giải glucose"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "DNA polymerase có vai trò gì trong quá trình nhân đôi DNA?",
+        "answers": [
+        "Tháo xoắn DNA",
+        "Tổng hợp mạch DNA mới",
+        "Phân hủy DNA",
+        "Vận chuyển amino acid"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong di truyền Mendel, hiện tượng phân li độc lập xảy ra ở giai đoạn nào?",
+        "answers": [
+        "Nguyên phân",
+        "Giảm phân I",
+        "Giảm phân II",
+        "Thụ tinh"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Enzyme có bản chất là gì?",
+        "answers": [
+        "Lipid",
+        "Carbohydrate",
+        "Protein",
+        "DNA"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ở thực vật C4, ưu điểm chính so với C3 là gì?",
+        "answers": [
+        "Không cần ánh sáng",
+        "Hiệu suất quang hợp cao hơn trong điều kiện nóng khô",
+        "Không cần CO2",
+        "Không có hô hấp"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Đột biến gen là gì?",
+        "answers": [
+        "Sự thay đổi số lượng nhiễm sắc thể",
+        "Sự thay đổi trình tự nucleotide trong DNA",
+        "Sự nhân đôi tế bào",
+        "Sự tạo protein"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Quá trình nào tạo ra sự đa dạng di truyền trong giảm phân?",
+        "answers": [
+        "Nhân đôi DNA",
+        "Trao đổi chéo và phân li độc lập",
+        "Phiên mã",
+        "Dịch mã"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Kháng thể được tạo ra bởi tế bào nào?",
+        "answers": [
+        "Tế bào hồng cầu",
+        "Tế bào lympho B",
+        "Tế bào thần kinh",
+        "Tế bào cơ"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Trong quang hợp, pha sáng diễn ra ở đâu?",
+        "answers": [
+        "Chất nền lục lạp",
+        "Màng tilacoit",
+        "Nhân tế bào",
+        "Tế bào chất"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Chọn lọc tự nhiên tác động trực tiếp lên cấp độ nào?",
+        "answers": [
+        "Gen",
+        "Cá thể",
+        "Quần thể",
+        "Hệ sinh thái"
+        ],
+        "correct": 1
+    }
+]

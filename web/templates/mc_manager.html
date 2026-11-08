@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛡️ Sakura MC — Phân Quyền & Quản Lý Truy Cập</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/mc_hosting.css">
+  <link rel="icon" href="/images/avatar-bot.jpg">
+  <style>
+    .manager-card {
+      background: var(--mc-card-bg);
+      border: 1px solid var(--mc-card-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(12px);
+    }
+    .perm-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin: 2px;
+    }
+    .perm-active {
+      background: rgba(80, 250, 123, 0.15);
+      color: #50fa7b;
+      border: 1px solid rgba(80, 250, 123, 0.3);
+    }
+    .perm-inactive {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--mc-text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      opacity: 0.5;
+    }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-box {
+      background: #141722;
+      border: 1px solid var(--mc-card-border);
+      border-radius: 18px;
+      max-width: 580px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(255, 121, 198, 0.2);
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #e6edf3;
+      margin-bottom: 6px;
+    }
+    .perm-checkbox-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--mc-card-border);
+      padding: 14px;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
+    .perm-check-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: #e6edf3;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="mc-hosting-body">
+  <div class="mc-layout">
+    <!-- Sidebar -->
+    <aside class="mc-sidebar" id="mcSidebar">
+      <div class="mc-brand">
+        <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Logo" class="mc-brand-avatar" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+        <div>
+          <div class="mc-brand-title">Sakura Hosting</div>
+          <div class="mc-brand-sub">Minecraft Cloud Panel</div>
+        </div>
+      </div>
+
+      <nav class="mc-nav">
+        <div class="mc-nav-section-title">Máy Chủ</div>
+        <a href="/minecraft" class="mc-nav-link">
+          <span class="nav-icon">🌐</span> Tất Cả Máy Chủ
+        </a>
+        <a href="/minecraft/console" class="mc-nav-link" id="navConsoleLink">
+          <span class="nav-icon">🖥️</span> Bảng Console
+        </a>
+        <a href="/minecraft/file" class="mc-nav-link" id="navFilesLink">
+          <span class="nav-icon">📁</span> Quản Lý Tệp
+        </a>
+        <a href="/minecraft/properties" class="mc-nav-link" id="navPropsLink">
+          <span class="nav-icon">⚙️</span> Cấu Hình Server
+        </a>
+        <a href="/minecraft/player" class="mc-nav-link" id="navPlayersLink">
+          <span class="nav-icon">👤</span> Người Chơi
+        </a>
+        <a href="/minecraft/manager" class="mc-nav-link active" id="navManagerLink">
+          <span class="nav-icon">🛡️</span> Phân Quyền
+        </a>
+
+        <div class="mc-nav-section-title">Điều Hướng</div>
+        <a href="/dashboard" class="mc-nav-link">
+          <span class="nav-icon">📊</span> Bot Dashboard
+        </a>
+        <a href="/profile" class="mc-nav-link">
+          <span class="nav-icon">👥</span> Hồ Sơ Cộng Đồng
+        </a>
+        <a href="/" class="mc-nav-link">
+          <span class="nav-icon">🌸</span> Trang Chủ
+        </a>
+      </nav>
+
+      <div class="mc-sidebar-footer">
+        <span>🛡️ Access Control</span>
+        <span id="activeServerName">Tất Cả Server</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="mc-main">
+      <header class="mc-topbar">
+        <div class="mc-topbar-left">
+          <h2 style="margin:0;font-size:1.15rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:10px">
+            <span>🛡️</span> Quản Lý Phân Quyền Người Dùng Web Hosting
+          </h2>
+        </div>
+
+        <div class="mc-topbar-right">
+          <button class="mc-btn mc-btn-primary" onclick="openAddUserModal()">
+            <span>➕</span> Cấp Quyền Người Dùng Mới
+          </button>
+        </div>
+      </header>
+
+      <div class="mc-content-body">
+        <!-- Banner giải thích -->
+        <div class="manager-card" style="border-left:4px solid var(--mc-accent);display:flex;align-items:center;gap:18px">
+          <div style="font-size:2.4rem">🔐</div>
+          <div>
+            <div style="font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:4px">Hệ Thống Phân Quyền Minecraft Cloud Hosting</div>
+            <div style="font-size:0.85rem;color:var(--mc-text-muted);line-height:1.5">
+              Chủ sở hữu Bot (Owner) và Quản trị viên Web luôn có toàn quyền tự động. Tại đây bạn có thể cấp quyền cho các thành viên Discord khác vào xem Console, gửi lệnh RCON, điều khiển nguồn máy chủ, quản lý tệp tin hoặc soi túi đồ người chơi.
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng danh sách người dùng được cấp quyền -->
+        <div class="manager-card" style="padding:0;overflow:hidden">
+          <div style="padding:18px 24px;border-bottom:1px solid var(--mc-card-border);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:800;font-size:1rem;color:#fff">Danh Sách Người Dùng Được Cấp Quyền</span>
+            <button class="mc-btn mc-btn-secondary" onclick="loadUsers()" style="padding:4px 12px;font-size:0.8rem">🔄 Làm Mới</button>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table class="mc-file-table">
+              <thead>
+                <tr>
+                  <th style="padding-left:24px">Người Dùng</th>
+                  <th>Discord ID</th>
+                  <th>Vai Trò</th>
+                  <th>Quyền Hạn Được Cấp</th>
+                  <th style="text-align:right;padding-right:24px">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr>
+                  <td colspan="5" style="text-align:center;padding:40px;color:var(--mc-text-muted)">Đang tải danh sách phân quyền...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Thêm / Chỉnh Sửa Phân Quyền -->
+  <div class="modal-overlay" id="userModalOverlay" onclick="if(event.target===this) closeUserModal()">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid var(--mc-card-border);padding-bottom:12px">
+        <h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#fff" id="modalTitle">➕ Cấp Quyền Cho Người Dùng Mới</h3>
+        <button class="mc-btn mc-btn-secondary" onclick="closeUserModal()" style="padding:4px 10px">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Discord User ID (Bắt buộc):</label>
+        <input type="text" id="modalUserId" placeholder="Ví dụ: 1144785664458637394" class="form-control" style="width:100%;background:#161b22;border:1px solid var(--mc-card-border);color:#fff;padding:10px 14px;border-radius:8px;font-family:var(--mc-font-mono)">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tên hiển thị / Ghi chú:</label>
+        <input type="text" id="modalUsername" placeholder="Ví dụ: Tuyết Linh (Moderator)" class="form-control" style="width:100%;background:#161b22;border:1px solid var(--mc-card-border);color:#fff;padding:10px 14px;border-radius:8px">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Vai Trò (Role):</label>
+        <select id="modalRole" class="form-control" style="width:100%;background:#161b22;border:1px solid var(--mc-card-border);color:#fff;padding:10px 14px;border-radius:8px">
+          <option value="viewer">Người Xem (Viewer)</option>
+          <option value="operator">Điều Hành Viên (Operator)</option>
+          <option value="admin">Quản Trị Viên (Admin)</option>
+        </select>
+      </div>
+
+      <!-- Nút chọn mẫu nhanh -->
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button type="button" class="mc-btn mc-btn-secondary" style="font-size:0.75rem;padding:4px 10px" onclick="applyPreset('full')">⚡ Toàn Quyền</button>
+        <button type="button" class="mc-btn mc-btn-secondary" style="font-size:0.75rem;padding:4px 10px" onclick="applyPreset('mod')">🛡️ Quản Lý Cơ Bản</button>
+        <button type="button" class="mc-btn mc-btn-secondary" style="font-size:0.75rem;padding:4px 10px" onclick="applyPreset('view')">👁️ Chỉ Xem</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Chi Tiết Quyền Hạn:</label>
+        <div class="perm-checkbox-group">
+          <label class="perm-check-item">
+            <input type="checkbox" id="perm_console" checked>
+            <span>🖥️ Xem Console</span>
+          </label>
+          <label class="perm-check-item">
+            <input type="checkbox" id="perm_command">
+            <span>⚡ Gửi Lệnh Console</span>
+          </label>
+          <label class="perm-check-item">
+            <input type="checkbox" id="perm_power">
+            <span>🔌 Bật / Tắt Máy Chủ</span>
+          </label>
+          <label class="perm-check-item">
+            <input type="checkbox" id="perm_files">
+            <span>📁 Quản Lý Tệp Tin</span>
+          </label>
+          <label class="perm-check-item">
+            <input type="checkbox" id="perm_props">
+            <span>⚙️ Cấu Hình Server</span>
+          </label>
+          <label class="perm-check-item">
+            <input type="checkbox" id="perm_players" checked>
+            <span>👤 Xem Người Chơi</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="mc-btn mc-btn-secondary" onclick="closeUserModal()">Hủy</button>
+        <button class="mc-btn mc-btn-primary" onclick="saveUserPermission()">💾 Lưu Phân Quyền</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    let rawUsers = [];
+
+    function getToken() {
+      return localStorage.getItem('token') || '';
+    }
+
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      if (!c) return;
+      const t = document.createElement('div');
+      t.className = 'toast-message';
+      let icon = '🌸';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all .3s';
+        setTimeout(() => t.remove(), 300);
+      }, 3000);
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--mc-text-muted)">Đang tải danh sách phân quyền...</td></tr>`;
+
+      try {
+        const res = await fetch('/api/mc/hosting/manager/users', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#ff5555">${data.error || 'Lỗi tải phân quyền'}</td></tr>`;
+          return;
+        }
+        rawUsers = data.users || [];
+        renderUsers(rawUsers);
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#ff5555">Lỗi kết nối: ${e.message}</td></tr>`;
+      }
+    }
+
+    function renderUsers(users) {
+      const tbody = document.getElementById('usersTableBody');
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--mc-text-muted)">Chưa có người dùng nào được phân quyền riêng. (Owner & Admin Web luôn có quyền)</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      users.forEach(u => {
+        const p = u.permissions || {};
+        const roleLabels = { 'admin': 'Quản Trị Viên', 'operator': 'Điều Hành Viên', 'viewer': 'Người Xem' };
+        const roleColors = { 'admin': '#ff79c6', 'operator': '#8be9fd', 'viewer': '#bd93f9' };
+
+        html += `
+          <tr>
+            <td style="padding-left:24px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <img src="${u.avatar}" style="width:36px;height:36px;border-radius:50%" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                <div>
+                  <div style="font-weight:700;color:#fff">${u.username}</div>
+                  <div style="font-size:0.75rem;color:var(--mc-text-muted)">Cập nhật: ${new Date((u.updated_at || Date.now() / 1000) * 1000).toLocaleDateString('vi-VN')}</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-family:var(--mc-font-mono);font-size:0.82rem;color:var(--mc-text-muted)">${u.user_id}</td>
+            <td>
+              <span style="font-weight:700;font-size:0.82rem;color:${roleColors[u.role] || '#fff'}">
+                ${roleLabels[u.role] || u.role}
+              </span>
+            </td>
+            <td>
+              <div style="display:flex;flex-wrap:wrap;max-width:320px">
+                <span class="perm-badge ${p.can_view_console ? 'perm-active' : 'perm-inactive'}">🖥️ Xem Console</span>
+                <span class="perm-badge ${p.can_send_command ? 'perm-active' : 'perm-inactive'}">⚡ Gửi Lệnh</span>
+                <span class="perm-badge ${p.can_manage_power ? 'perm-active' : 'perm-inactive'}">🔌 Nguồn</span>
+                <span class="perm-badge ${p.can_manage_files ? 'perm-active' : 'perm-inactive'}">📁 Quản Lý Tệp</span>
+                <span class="perm-badge ${p.can_manage_properties ? 'perm-active' : 'perm-inactive'}">⚙️ Cấu Hình</span>
+                <span class="perm-badge ${p.can_view_players ? 'perm-active' : 'perm-inactive'}">👤 Xem Player</span>
+              </div>
+            </td>
+            <td style="text-align:right;padding-right:24px">
+              <div style="display:inline-flex;gap:6px">
+                <button class="mc-btn mc-btn-secondary" style="padding:4px 8px;font-size:0.75rem" onclick="editUser('${u.user_id}')">✏️ Sửa</button>
+                <button class="mc-btn mc-btn-danger" style="padding:4px 8px;font-size:0.75rem" onclick="deleteUser('${u.user_id}', '${u.username}')">🗑️ Xóa</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function openAddUserModal() {
+      document.getElementById('modalTitle').innerText = '➕ Cấp Quyền Cho Người Dùng Mới';
+      document.getElementById('modalUserId').value = '';
+      document.getElementById('modalUserId').readOnly = false;
+      document.getElementById('modalUsername').value = '';
+      document.getElementById('modalRole').value = 'viewer';
+      applyPreset('view');
+      document.getElementById('userModalOverlay').classList.add('active');
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModalOverlay').classList.remove('active');
+    }
+
+    function applyPreset(preset) {
+      if (preset === 'full') {
+        document.getElementById('perm_console').checked = true;
+        document.getElementById('perm_command').checked = true;
+        document.getElementById('perm_power').checked = true;
+        document.getElementById('perm_files').checked = true;
+        document.getElementById('perm_props').checked = true;
+        document.getElementById('perm_players').checked = true;
+        document.getElementById('modalRole').value = 'admin';
+      } else if (preset === 'mod') {
+        document.getElementById('perm_console').checked = true;
+        document.getElementById('perm_command').checked = true;
+        document.getElementById('perm_power').checked = false;
+        document.getElementById('perm_files').checked = false;
+        document.getElementById('perm_props').checked = false;
+        document.getElementById('perm_players').checked = true;
+        document.getElementById('modalRole').value = 'operator';
+      } else {
+        document.getElementById('perm_console').checked = true;
+        document.getElementById('perm_command').checked = false;
+        document.getElementById('perm_power').checked = false;
+        document.getElementById('perm_files').checked = false;
+        document.getElementById('perm_props').checked = false;
+        document.getElementById('perm_players').checked = true;
+        document.getElementById('modalRole').value = 'viewer';
+      }
+    }
+
+    function editUser(userId) {
+      const u = rawUsers.find(x => x.user_id === userId);
+      if (!u) return;
+      document.getElementById('modalTitle').innerText = `✏️ Chỉnh Sửa Quyền: ${u.username}`;
+      document.getElementById('modalUserId').value = u.user_id;
+      document.getElementById('modalUserId').readOnly = true;
+      document.getElementById('modalUsername').value = u.username;
+      document.getElementById('modalRole').value = u.role || 'viewer';
+
+      const p = u.permissions || {};
+      document.getElementById('perm_console').checked = !!p.can_view_console;
+      document.getElementById('perm_command').checked = !!p.can_send_command;
+      document.getElementById('perm_power').checked = !!p.can_manage_power;
+      document.getElementById('perm_files').checked = !!p.can_manage_files;
+      document.getElementById('perm_props').checked = !!p.can_manage_properties;
+      document.getElementById('perm_players').checked = !!p.can_view_players;
+
+      document.getElementById('userModalOverlay').classList.add('active');
+    }
+
+    async function saveUserPermission() {
+      const uid = document.getElementById('modalUserId').value.trim();
+      const uname = document.getElementById('modalUsername').value.trim();
+      const role = document.getElementById('modalRole').value;
+
+      if (!uid) {
+        showToast('Vui lòng nhập Discord User ID', 'error');
+        return;
+      }
+
+      const payload = {
+        user_id: uid,
+        username: uname || `User_${uid.slice(-4)}`,
+        role: role,
+        permissions: {
+          can_view_console: document.getElementById('perm_console').checked,
+          can_send_command: document.getElementById('perm_command').checked,
+          can_manage_power: document.getElementById('perm_power').checked,
+          can_manage_files: document.getElementById('perm_files').checked,
+          can_manage_properties: document.getElementById('perm_props').checked,
+          can_view_players: document.getElementById('perm_players').checked
+        }
+      };
+
+      try {
+        const res = await fetch('/api/mc/hosting/manager/users/save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message || 'Đã lưu phân quyền thành công!', 'success');
+          closeUserModal();
+          loadUsers();
+        } else {
+          showToast(data.error || 'Lỗi lưu phân quyền', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi kết nối: ' + e.message, 'error');
+      }
+    }
+
+    async function deleteUser(userId, userName) {
+      if (!confirm(`Bạn có chắc chắn muốn thu hồi toàn bộ quyền hạn của "${userName}" (${userId})?`)) return;
+      try {
+        const res = await fetch('/api/mc/hosting/manager/users/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ user_id: userId })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message || 'Đã thu hồi phân quyền thành công!', 'success');
+          loadUsers();
+        } else {
+          showToast(data.error || 'Lỗi thu hồi', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    loadUsers();
+  </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Đăng Nhập & Liên Kết HoYoLAB | SakuraBot</title>
+    <link rel="icon" href="/images/sakura.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://static.geetest.com/static/js/gt.0.5.0.js"></script>
+    <script src="https://static.geetest.com/v4/gt4.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(244, 63, 94, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.5) 0px, transparent 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(19, 27, 46, 0.88);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(244, 63, 94, 0.1);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.25), rgba(168, 85, 247, 0.25));
+            border-color: rgba(244, 63, 94, 0.5);
+            color: #fff;
+            font-weight: 700;
+        }
+        .geetest_holder.geetest_wind {
+            margin: 0 auto !important;
+        }
+        .spinner {
+            border: 3px solid rgba(244, 63, 94, 0.2);
+            border-top: 3px solid #f43f5e;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-slate-100 flex items-center justify-center p-4">
+
+    <div class="max-w-lg w-full glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
+        <!-- Glow accents -->
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-pink-500/20 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Header -->
+        <div class="text-center mb-6 relative z-10">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-pink-500/20 to-purple-500/20 border border-pink-500/30 text-2xl shadow-inner mb-3">
+                🌸
+            </div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-pink-400 via-rose-300 to-purple-400 bg-clip-text text-transparent">
+                HoYoLAB Auto Check-in & Tools
+            </h1>
+            <p id="header-desc" class="text-xs sm:text-sm text-slate-400 mt-1.5">
+                Điểm danh tự động mỗi ngày (Genshin, Star Rail, ZZZ, Honkai 3rd) không lo bị lỡ quà!
+            </p>
+        </div>
+
+        <!-- Notification Banner -->
+        <div id="notice-box" class="hidden mb-5 p-3.5 rounded-xl text-sm border flex items-start gap-2.5">
+            <span id="notice-icon" class="text-base flex-shrink-0">ℹ️</span>
+            <div id="notice-msg" class="leading-relaxed"></div>
+        </div>
+
+        <!-- Mode Tabs -->
+        <div id="tabs-container" class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/80 border border-slate-800 rounded-xl mb-6">
+            <button id="tab-cookie-btn" onclick="switchTab('cookie')" class="tab-btn active py-2.5 px-3 rounded-lg text-xs sm:text-sm text-slate-300 font-medium transition-all text-center flex items-center justify-center gap-1.5 border border-transparent">
+                <span>📋</span>
+                <span>Dán Cookie (100% OK)</span>
+            </button>
+            <button id="tab-login-btn" onclick="switchTab('login')" class="tab-btn py-2.5 px-3 rounded-lg text-xs sm:text-sm text-slate-400 font-medium transition-all text-center flex items-center justify-center gap-1.5 border border-transparent">
+                <span>🔐</span>
+                <span>Đăng Nhập HoYoverse</span>
+            </button>
+        </div>
+
+        <!-- ================= TAB 1: DÁN TRỰC TIẾP COOKIE ================= -->
+        <div id="tab-cookie-content" class="space-y-4">
+            <div class="p-3 bg-pink-500/10 border border-pink-500/25 rounded-xl text-xs text-pink-200 leading-relaxed">
+                💡 <strong>Khuyên dùng:</strong> Dán chuỗi Cookie từ trình duyệt cá nhân giúp <strong>vượt qua 100% Captcha</strong>, không bao giờ bị HoYoverse từ chối hay khóa IP bot!
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Discord User ID của bạn:</label>
+                    <input type="text" id="cookie-discord-id" placeholder="VD: 987654321098765432"
+                           class="w-full bg-slate-950/70 border border-slate-700 focus:border-pink-500 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none font-mono">
+                    <p class="text-[11px] text-slate-500 mt-1">Chuột phải vào Avatar trên Discord ➔ Copy User ID.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Tên gợi nhớ tài khoản (Tùy chọn):</label>
+                    <input type="text" id="cookie-acc-name" placeholder="Ví dụ: Acc chính, Acc phụ AR60..."
+                           class="w-full bg-slate-950/70 border border-slate-700 focus:border-pink-500 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Chuỗi Cookie HoYoLAB:</label>
+                    <textarea id="cookie-raw-input" rows="4" placeholder="Dán toàn bộ Cookie (chứa ltuid_v2 và ltoken_v2)..."
+                              class="w-full bg-slate-950/70 border border-slate-700 focus:border-pink-500 rounded-lg px-3 py-2 text-xs font-mono text-slate-100 placeholder-slate-500 outline-none leading-relaxed"></textarea>
+                </div>
+
+                <div class="p-3 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2">
+                    <div class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                        <span>⚡ Cách lấy Cookie trong 1 giây (Bookmarklet):</span>
+                        <button onclick="copyBookmarkletCode()" class="text-pink-400 hover:text-pink-300 text-[11px] underline">Sao chép mã JS</button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        1. Mở trang <a href="https://www.hoyolab.com" target="_blank" class="text-pink-400 underline">hoyolab.com</a> và đăng nhập.<br>
+                        2. Nhấn <code>F12</code> ➔ Chọn tab <strong>Console</strong> (hoặc Bookmarklet) ➔ Dán mã để tự động copy chuỗi Cookie.
+                    </p>
+                </div>
+
+                <button id="btn-save-cookie" onclick="submitDirectCookie()"
+                        class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-pink-500/20 transition-all flex items-center justify-center gap-2">
+                    <span>🚀</span>
+                    <span>Xác Thực & Lưu Vào Database</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: ĐĂNG NHẬP MẬT KHẨU & CAPTCHA ================= -->
+        <div id="tab-login-content" class="hidden space-y-4">
+            <!-- Form Đăng Nhập Web -->
+            <div id="login-form-area" class="space-y-3">
+                <div class="p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl text-xs text-amber-200 leading-relaxed">
+                    ⚠️ <strong>Lưu ý:</strong> Một số hosting VPS có thể bị máy chủ HoYoverse chặn kéo Captcha (-3102). Nếu gặp lỗi này, bạn chỉ cần chuyển sang <strong>Tab 1 (Dán Cookie)</strong> để dùng bình thường!
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Discord User ID của bạn:</label>
+                    <input type="text" id="login-discord-id" placeholder="VD: 987654321098765432"
+                           class="w-full bg-slate-950/70 border border-slate-700 focus:border-pink-500 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none font-mono">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email / Tài khoản HoYoverse:</label>
+                    <input type="text" id="login-account" placeholder="Email đăng nhập game của bạn..."
+                           class="w-full bg-slate-950/70 border border-slate-700 focus:border-pink-500 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Mật khẩu HoYoverse:</label>
+                    <input type="password" id="login-password" placeholder="••••••••••••"
+                           class="w-full bg-slate-950/70 border border-slate-700 focus:border-pink-500 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Tên tài khoản lưu trữ (Tùy chọn):</label>
+                    <input type="text" id="login-acc-name" placeholder="Mặc định"
+                           class="w-full bg-slate-950/70 border border-slate-700 focus:border-pink-500 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none">
+                </div>
+
+                <button id="btn-do-login" onclick="startWebLogin()"
+                        class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-sm shadow-lg shadow-pink-500/20 transition-all flex items-center justify-center gap-2">
+                    <span>🔐</span>
+                    <span>Tiến Hành Đăng Nhập</span>
+                </button>
+            </div>
+
+            <!-- Loading Spinner State -->
+            <div id="loading-indicator" class="hidden flex flex-col items-center justify-center py-8 space-y-3">
+                <div class="spinner"></div>
+                <p id="loading-text" class="text-sm text-slate-400 font-medium">Đang kết nối cổng bảo mật HoYoverse...</p>
+            </div>
+
+            <!-- Geetest Captcha Box -->
+            <div id="captcha-area" class="hidden space-y-3">
+                <div class="text-center">
+                    <h3 class="text-sm font-bold text-pink-300">🧩 Giải Mảnh Ghép Xác Minh</h3>
+                    <p class="text-xs text-slate-400 mt-1">Kéo mảnh ghép vào đúng ô trống trên hình ảnh.</p>
+                </div>
+                <div id="captcha-container" class="min-h-[220px] flex items-center justify-center bg-slate-900/80 rounded-xl p-3 border border-slate-800"></div>
+                <p class="text-[11px] text-slate-500 text-center">
+                    🔒 Xác thực bảo mật được thực hiện trực tiếp với Geetest.
+                </p>
+            </div>
+
+            <!-- OTP Input Section (Khi HoYoverse gửi mã Email 6 số) -->
+            <div id="otp-card" class="hidden bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-left space-y-3">
+                <div class="flex items-center gap-2 text-rose-400 font-semibold text-sm">
+                    <span>📩</span>
+                    <span>Nhập Mã Xác Nhận Email (OTP 6 số)</span>
+                </div>
+                <p class="text-xs text-slate-400">
+                    HoYoverse đã gửi mã xác nhận 6 chữ số về Email của tài khoản này. Vui lòng kiểm tra Hộp thư đến (hoặc Spam):
+                </p>
+                <div class="flex gap-2">
+                    <input type="text" id="otp-code" maxlength="8" placeholder="Nhập mã 6 số..."
+                           class="flex-1 bg-slate-950/80 border border-slate-700 focus:border-pink-500 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none tracking-widest text-center font-mono font-bold">
+                    <button id="btn-submit-otp" onclick="submitOtp()"
+                            class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium text-sm px-4 py-2 rounded-lg transition-all shadow-md shadow-pink-500/20 disabled:opacity-50">
+                        Xác Nhận
+                    </button>
+                </div>
+                <div id="otp-feedback" class="text-xs hidden mt-1"></div>
+            </div>
+
+            <!-- Success State -->
+            <div id="success-area" class="hidden text-center py-6 space-y-4">
+                <div class="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-3xl flex items-center justify-center mx-auto">
+                    ✓
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-emerald-400">Đăng Nhập HoYoverse Thành Công!</h3>
+                    <p id="success-msg" class="text-xs sm:text-sm text-slate-300 mt-1">
+                        Tài khoản và Cookie đã được lưu an toàn vào Database. SakuraBot sẽ tự động điểm danh hàng ngày cho bạn!
+                    </p>
+                </div>
+                <div id="accounts-badge-list" class="space-y-1.5 text-xs text-left bg-slate-900/60 p-3 rounded-xl border border-slate-800"></div>
+                <a href="/dashboard" class="inline-block mt-3 px-6 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-semibold text-xs transition-all shadow">
+                    Quay Lại Web Dashboard ➔
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+            <span>🌸 SakuraBot System</span>
+            <div class="flex gap-3">
+                <a href="/dashboard" class="hover:text-pink-400 transition-colors">Dashboard</a>
+                <a href="https://sakurabot.wispbyte.org" target="_blank" class="hover:text-pink-400 transition-colors">Trang chủ</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        let activeSessionId = urlParams.get('session') || '';
+        let pollTimer = null;
+
+        const BOOKMARKLET_CODE = `javascript:(function(){try{var c=document.cookie;var u=(c.match(/(?:ltuid_v2|ltuid|account_id_v2|account_id)\\s*=\\s*([^;]+)/)||[])[1];var t=(c.match(/(?:ltoken_v2|ltoken)\\s*=\\s*([^;]+)/)||[])[1];var ct=(c.match(/(?:cookie_token_v2|cookie_token)\\s*=\\s*([^;]+)/)||[])[1];if(u&&t){var res='ltuid_v2='+u+'; ltoken_v2='+t+';';if(ct){res+=' cookie_token_v2='+ct+';';}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(res).then(function(){alert('✅ ĐÃ SAO CHÉP COOKIE HOYOLAB THÀNH CÔNG!\\n\\n'+res+'\\n\\n👉 Dán vào web SakuraBot nhé!');}).catch(function(){prompt('Vui lòng copy đoạn mã sau:',res);});}else{prompt('Vui lòng copy đoạn mã sau:',res);}}else{alert('❌ Không tìm thấy Cookie! Hãy đăng nhập tại https://www.hoyolab.com trước.');}}catch(e){alert('Lỗi: '+e);}})();`;
+
+        function copyBookmarkletCode() {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(BOOKMARKLET_CODE).then(() => {
+                    showNotice('✅ Đã sao chép mã Bookmarklet! Dán vào thanh dấu trang trình duyệt hoặc F12 Console của trang hoyolab.com.', 'success');
+                });
+            } else {
+                prompt('Mã Bookmarklet:', BOOKMARKLET_CODE);
+            }
+        }
+
+        function showNotice(msg, type = 'info') {
+            const box = document.getElementById('notice-box');
+            const txt = document.getElementById('notice-msg');
+            const icon = document.getElementById('notice-icon');
+            box.className = 'mb-5 p-3.5 rounded-xl text-sm border flex items-start gap-2.5 ';
+            if (type === 'error') {
+                box.className += 'bg-red-500/10 border-red-500/30 text-red-300';
+                icon.innerText = '❌';
+            } else if (type === 'success') {
+                box.className += 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300';
+                icon.innerText = '✅';
+            } else {
+                box.className += 'bg-blue-500/10 border-blue-500/30 text-blue-300';
+                icon.innerText = 'ℹ️';
+            }
+            txt.innerHTML = msg;
+            box.classList.remove('hidden');
+        }
+
+        function switchTab(tab) {
+            const btnCookie = document.getElementById('tab-cookie-btn');
+            const btnLogin = document.getElementById('tab-login-btn');
+            const contentCookie = document.getElementById('tab-cookie-content');
+            const contentLogin = document.getElementById('tab-login-content');
+
+            if (tab === 'cookie') {
+                btnCookie.classList.add('active');
+                btnLogin.classList.remove('active');
+                contentCookie.classList.remove('hidden');
+                contentLogin.classList.add('hidden');
+            } else {
+                btnLogin.classList.add('active');
+                btnCookie.classList.remove('active');
+                contentLogin.classList.remove('hidden');
+                contentCookie.classList.add('hidden');
+            }
+        }
+
+        // Tự động lấy Discord ID từ Web Session nếu đã đăng nhập
+        async function prefillUserId() {
+            try {
+                const res = await fetch('/api/account');
+                const data = await res.json();
+                if (data.ok && data.user && data.user.id) {
+                    const uid = String(data.user.id);
+                    document.getElementById('cookie-discord-id').value = uid;
+                    document.getElementById('login-discord-id').value = uid;
+                }
+            } catch (e) {}
+        }
+
+        // ================= XỬ LÝ TAB 1: DÁN TRỰC TIẾP COOKIE =================
+        async function submitDirectCookie() {
+            const userId = document.getElementById('cookie-discord-id').value.trim();
+            const accName = document.getElementById('cookie-acc-name').value.trim() || 'Mặc định';
+            const cookieRaw = document.getElementById('cookie-raw-input').value.trim();
+            const btn = document.getElementById('btn-save-cookie');
+
+            if (!userId) {
+                return showNotice('Vui lòng nhập Discord User ID của bạn!', 'error');
+            }
+            if (!cookieRaw) {
+                return showNotice('Vui lòng dán chuỗi Cookie từ HoYoLAB!', 'error');
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<div class="spinner !w-4 !h-4 border-2"></div> Đang kiểm tra & lưu vào Database...`;
+
+            try {
+                const res = await fetch('/api/hoyo/direct-cookie', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        account_name: accName,
+                        cookie: cookieRaw
+                    })
+                });
+                const data = await res.json();
+
+                btn.disabled = false;
+                btn.innerHTML = `<span>🚀</span><span>Xác Thực & Lưu Vào Database</span>`;
+
+                if (data.success) {
+                    let charsList = '';
+                    if (data.accounts && data.accounts.length) {
+                        charsList = '<br><br>🎮 <strong>Nhân vật game tìm thấy:</strong><br>' + 
+                            data.accounts.map(a => `• <strong>${a.nickname || 'Traveler'}</strong> (UID: <code>${a.uid}</code> - ${a.game} - Lv.${a.level})`).join('<br>');
+                    }
+                    showNotice(`🎉 ${data.message}${charsList}`, 'success');
+                } else {
+                    showNotice(data.error || 'Không thể lưu Cookie.', 'error');
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = `<span>🚀</span><span>Xác Thực & Lưu Vào Database</span>`;
+                showNotice('Lỗi truyền dữ liệu: ' + err.message, 'error');
+            }
+        }
+
+        // ================= XỬ LÝ TAB 2: ĐĂNG NHẬP HOYOVERSE & CAPTCHA =================
+        async function startWebLogin() {
+            const userId = document.getElementById('login-discord-id').value.trim();
+            const account = document.getElementById('login-account').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const accName = document.getElementById('login-acc-name').value.trim() || 'Mặc định';
+            const btn = document.getElementById('btn-do-login');
+
+            if (!userId) return showNotice('Vui lòng nhập Discord User ID!', 'error');
+            if (!account || !password) return showNotice('Vui lòng nhập tài khoản và mật khẩu HoYoverse!', 'error');
+
+            btn.disabled = true;
+            btn.innerHTML = `<div class="spinner !w-4 !h-4 border-2"></div> Đang gửi yêu cầu...`;
+
+            try {
+                const res = await fetch('/api/hoyo/web-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        account: account,
+                        password: password,
+                        account_name: accName
+                    })
+                });
+                const data = await res.json();
+                btn.disabled = false;
+                btn.innerHTML = `<span>🔐</span><span>Tiến Hành Đăng Nhập</span>`;
+
+                if (!data.success) {
+                    return showNotice(data.error || 'Lỗi đăng nhập HoYoverse.', 'error');
+                }
+
+                if (data.need_captcha) {
+                    activeSessionId = data.session;
+                    document.getElementById('login-form-area').classList.add('hidden');
+                    loadCaptcha(activeSessionId);
+                } else if (data.need_otp) {
+                    activeSessionId = data.session;
+                    document.getElementById('login-form-area').classList.add('hidden');
+                    showOtpSection();
+                } else {
+                    document.getElementById('login-form-area').classList.add('hidden');
+                    showSuccessSection(data.message, data.accounts);
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = `<span>🔐</span><span>Tiến Hành Đăng Nhập</span>`;
+                showNotice('Lỗi kết nối máy chủ: ' + err.message, 'error');
+            }
+        }
+
+        async function loadCaptcha(sessionId) {
+            const loader = document.getElementById('loading-indicator');
+            const captchaArea = document.getElementById('captcha-area');
+            const container = document.getElementById('captcha-container');
+
+            loader.classList.remove('hidden');
+            captchaArea.classList.add('hidden');
+            container.innerHTML = '';
+
+            try {
+                const res = await fetch(`/api/hoyo/captcha/info?session=${encodeURIComponent(sessionId)}`);
+                const data = await res.json();
+                loader.classList.add('hidden');
+
+                if (!data.success) {
+                    return showNotice(data.error || 'Phiên xác thực không tồn tại hoặc đã hết hạn.', 'error');
+                }
+
+                if (data.stage === 'otp_pending') {
+                    return showOtpSection();
+                }
+
+                captchaArea.classList.remove('hidden');
+
+                if (data.is_v4) {
+                    initGeetest4({
+                        captchaId: data.data.captcha_id || data.data.gt,
+                        product: 'float',
+                        riskType: data.data.risk_type || 'slide',
+                        language: 'vi',
+                        protocol: 'https://',
+                        https: true,
+                        onError: function(err) {
+                            showNotice('Lỗi Geetest v4: ' + (err.msg || 'Không thể tải thử thách.'), 'error');
+                        }
+                    }, function (captchaObj) {
+                        captchaObj.appendTo('#captcha-container');
+                        captchaObj.onSuccess(function () {
+                            const result = captchaObj.getValidate();
+                            if (!result) return;
+                            handleVerifySuccess({
+                                session: sessionId,
+                                is_v4: true,
+                                captcha_id: result.captcha_id || data.data.captcha_id || data.data.gt,
+                                lot_number: result.lot_number,
+                                pass_token: result.pass_token,
+                                gen_time: String(result.gen_time || ''),
+                                captcha_output: result.captcha_output
+                            });
+                        });
+                    });
+                } else {
+                    initGeetest({
+                        gt: data.data.gt || data.data.captcha_id,
+                        challenge: data.data.challenge,
+                        offline: !data.data.success,
+                        new_captcha: data.data.new_captcha,
+                        product: 'embed',
+                        width: '100%',
+                        https: true
+                    }, function (captchaObj) {
+                        captchaObj.appendTo('#captcha-container');
+                        captchaObj.onSuccess(function () {
+                            const result = captchaObj.getValidate();
+                            if (!result) return;
+                            handleVerifySuccess({
+                                session: sessionId,
+                                is_v4: false,
+                                geetest_challenge: result.geetest_challenge || data.data.challenge,
+                                geetest_validate: result.geetest_validate,
+                                geetest_seccode: result.geetest_seccode || (result.geetest_validate ? (result.geetest_validate + '|jordan') : '')
+                            });
+                        });
+                    });
+                }
+            } catch (err) {
+                loader.classList.add('hidden');
+                showNotice('Lỗi nạp Captcha: ' + err.message, 'error');
+            }
+        }
+
+        async function handleVerifySuccess(payload) {
+            document.getElementById('captcha-area').classList.add('hidden');
+            const loader = document.getElementById('loading-indicator');
+            loader.classList.remove('hidden');
+            document.getElementById('loading-text').innerText = 'Đã giải mảnh ghép! Đang gửi kết quả tới HoYoverse...';
+
+            try {
+                const res = await fetch('/api/hoyo/captcha/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showNotice('✅ Đã nộp mảnh ghép! Đang xác thực với máy chủ HoYoverse...', 'info');
+                    startStatusPolling();
+                } else {
+                    loader.classList.add('hidden');
+                    document.getElementById('captcha-area').classList.remove('hidden');
+                    showNotice(data.error || 'Không thể xác minh Captcha.', 'error');
+                }
+            } catch (err) {
+                loader.classList.add('hidden');
+                showNotice('Lỗi truyền dữ liệu: ' + err.message, 'error');
+            }
+        }
+
+        function showOtpSection() {
+            document.getElementById('loading-indicator').classList.add('hidden');
+            document.getElementById('captcha-area').classList.add('hidden');
+            document.getElementById('otp-card').classList.remove('hidden');
+            showNotice('📩 HoYoverse đã gửi mã OTP 6 số về Email! Nhập mã bên dưới để hoàn tất.', 'info');
+            setTimeout(() => {
+                const inp = document.getElementById('otp-code');
+                if (inp) inp.focus();
+            }, 300);
+        }
+
+        function showSuccessSection(msg, accounts) {
+            document.getElementById('loading-indicator').classList.add('hidden');
+            document.getElementById('captcha-area').classList.add('hidden');
+            document.getElementById('otp-card').classList.add('hidden');
+            document.getElementById('success-area').classList.remove('hidden');
+            if (msg) document.getElementById('success-msg').innerText = msg;
+
+            const listEl = document.getElementById('accounts-badge-list');
+            if (accounts && accounts.length) {
+                listEl.innerHTML = '<span class="text-pink-300 font-semibold block mb-1">🎮 Danh Sách Nhân Vật:</span>' + 
+                    accounts.map(a => `<div>• <strong>${a.nickname || 'Traveler'}</strong> (UID: <code>${a.uid}</code> - ${a.game} - Lv.${a.level})</div>`).join('');
+                listEl.classList.remove('hidden');
+            } else {
+                listEl.classList.add('hidden');
+            }
+        }
+
+        async function submitOtp() {
+            const input = document.getElementById('otp-code');
+            const btn = document.getElementById('btn-submit-otp');
+            const fb = document.getElementById('otp-feedback');
+            const code = input.value.trim();
+
+            if (!code) {
+                fb.className = 'text-xs text-rose-400 mt-1';
+                fb.innerText = 'Vui lòng nhập mã OTP!';
+                fb.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Đang gửi...';
+
+            try {
+                const res = await fetch('/api/hoyo/otp/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session: activeSessionId, code: code })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    fb.className = 'text-xs text-emerald-400 mt-1';
+                    fb.innerText = '✅ Đã gửi mã OTP! Đang chờ HoYoverse xác thực...';
+                    fb.classList.remove('hidden');
+                    input.disabled = true;
+                    startStatusPolling();
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = 'Xác Nhận';
+                    fb.className = 'text-xs text-rose-400 mt-1';
+                    fb.innerText = '❌ ' + (data.error || 'Phiên OTP không hợp lệ hoặc đã hết hạn.');
+                    fb.classList.remove('hidden');
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerText = 'Xác Nhận';
+                fb.className = 'text-xs text-rose-400 mt-1';
+                fb.innerText = '❌ Lỗi gửi mã: ' + err.message;
+                fb.classList.remove('hidden');
+            }
+        }
+
+        function startStatusPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            let attempts = 0;
+            pollTimer = setInterval(async () => {
+                attempts++;
+                if (attempts > 120) {
+                    clearInterval(pollTimer);
+                    return;
+                }
+                try {
+                    const res = await fetch(`/api/hoyo/captcha/status?session=${encodeURIComponent(activeSessionId)}`);
+                    const data = await res.json();
+                    if (!data.success) return;
+
+                    if (data.stage === 'email_captcha') {
+                        clearInterval(pollTimer);
+                        loadCaptcha(activeSessionId);
+                    } else if (data.stage === 'otp_pending') {
+                        clearInterval(pollTimer);
+                        showOtpSection();
+                    } else if (data.stage === 'success') {
+                        clearInterval(pollTimer);
+                        showSuccessSection('🎉 Đăng nhập HoYoverse thành công! Tài khoản đã được lưu vào Database.');
+                    } else if (data.stage === 'error') {
+                        clearInterval(pollTimer);
+                        document.getElementById('loading-indicator').classList.add('hidden');
+                        showNotice('❌ ' + (data.error || 'Xác thực thất bại.'), 'error');
+                        document.getElementById('login-form-area').classList.remove('hidden');
+                    }
+                } catch (e) {}
+            }, 1500);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            prefillUserId();
+            // Nếu có session từ Discord, tự động chuyển sang tab đăng nhập và nạp captcha
+            if (activeSessionId) {
+                switchTab('login');
+                document.getElementById('login-form-area').classList.add('hidden');
+                loadCaptcha(activeSessionId);
+            }
+            const otpInp = document.getElementById('otp-code');
+            if (otpInp) {
+                otpInp.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') submitOtp();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

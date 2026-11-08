@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Sakura Bio Profile</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bio-font: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --bio-title-font: 'Outfit', -apple-system, sans-serif;
+  --bio-accent: #ff79c6;
+  --bio-card-bg: rgba(22, 24, 38, 0.75);
+  --bio-card-border: rgba(255, 255, 255, 0.08);
+}
+body{
+  margin:0;
+  padding:0;
+  font-family: var(--bio-font);
+  background: #090a10;
+  color: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: hidden;
+  transition: background 0.3s ease;
+}
+
+/* Background Aura */
+.bg-aura{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 15%, rgba(255, 121, 198, 0.15), transparent 50%),
+              radial-gradient(circle at 85% 65%, rgba(139, 233, 253, 0.1), transparent 45%);
+}
+
+/* Bio Container */
+.bio-container{
+  width: 100%;
+  max-width: 520px;
+  min-height: 100vh;
+  position: relative;
+  z-index: 10;
+  padding: 0 16px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Top Action Bar (Share & Edit) */
+.bio-top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 0 6px;
+  z-index: 20;
+}
+.bio-action-btn {
+  background: rgba(20, 22, 34, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--bio-card-border);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.bio-action-btn:hover {
+  background: var(--bio-accent);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(255, 121, 198, 0.3);
+}
+
+/* Banner */
+.profile-banner{
+  width: 100%;
+  height: 180px;
+  border-radius: 0 0 24px 24px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #bd93f9, #ff79c6);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Avatar Card */
+.avatar-wrap{
+  position: relative;
+  margin-top: -65px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.avatar-img{
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #090a10;
+  box-shadow: 0 0 25px rgba(255, 121, 198, 0.45);
+  background: #1e1f29;
+  transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.avatar-img:hover{
+  transform: scale(1.06) rotate(2deg);
+}
+.verified-badge{
+  position: absolute;
+  bottom: 8px;
+  right: 6px;
+  background: linear-gradient(135deg, #ff79c6, #bd93f9);
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 2.5px solid #090a10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* Profile Names */
+.profile-name{
+  font-family: var(--bio-title-font);
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 14px 0 2px;
+  text-align: center;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.profile-handle{
+  font-size: 0.88rem;
+  color: var(--bio-accent);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.profile-tagline{
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  text-align: center;
+  max-width: 420px;
+  margin-bottom: 8px;
+}
+.profile-bio{
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 440px;
+  margin: 6px 0 16px;
+  padding: 10px 16px;
+  background: var(--bio-card-bg);
+  border: 1px solid var(--bio-card-border);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+}
+
+/* Social Buttons Row */
+.social-icons-row{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+.social-btn{
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--bio-card-bg);
+  border: 1px solid var(--bio-card-border);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all .25s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+}
+.social-btn:hover{
+  transform: translateY(-3px) scale(1.1);
+  background: rgba(255, 121, 198, 0.2);
+  border-color: var(--bio-accent);
+  box-shadow: 0 6px 18px rgba(255, 121, 198, 0.4);
+}
+
+/* Custom Links List */
+.links-list{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.bio-link-card{
+  background: var(--bio-card-bg);
+  border: 1px solid var(--bio-card-border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.bio-link-card:hover{
+  transform: translateY(-3px);
+  border-color: var(--bio-accent);
+  box-shadow: 0 8px 24px rgba(255, 121, 198, 0.25);
+  background: rgba(30, 34, 52, 0.85);
+}
+.bio-link-card.highlight{
+  border-color: var(--bio-accent);
+  background: linear-gradient(135deg, rgba(255, 121, 198, 0.15), rgba(189, 147, 249, 0.15));
+}
+.bio-link-card.highlight::after{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--bio-accent);
+}
+.link-icon{
+  font-size: 20px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+}
+.link-arrow{
+  font-size: 16px;
+  color: #94a3b8;
+  transition: transform .2s;
+}
+.bio-link-card:hover .link-arrow{
+  transform: translateX(4px);
+  color: var(--bio-accent);
+}
+
+/* Donate Section */
+.donate-card{
+  width: 100%;
+  background: var(--bio-card-bg);
+  border: 1px solid var(--bio-card-border);
+  border-radius: 18px;
+  padding: 18px;
+  backdrop-filter: blur(12px);
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+.donate-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.copy-badge{
+  background: rgba(255, 121, 198, 0.15);
+  border: 1px solid rgba(255, 121, 198, 0.3);
+  color: var(--bio-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.copy-badge:hover{
+  background: var(--bio-accent);
+  color: #fff;
+}
+
+/* Footer */
+.profile-footer{
+  margin-top: auto;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.create-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all .2s ease;
+}
+.create-btn:hover{
+  background: rgba(255, 121, 198, 0.2);
+  border-color: rgba(255, 121, 198, 0.4);
+  color: #fff;
+  transform: scale(1.03);
+}
+
+/* Share Modal */
+.share-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.share-modal-overlay.active {
+  display: flex;
+}
+.share-modal {
+  background: #151824;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(255, 121, 198, 0.2);
+  text-align: center;
+}
+.qr-preview {
+  width: 180px;
+  height: 180px;
+  border-radius: 12px;
+  margin: 14px auto;
+  background: #fff;
+  padding: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.share-url-box {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 16px 0;
+}
+.social-share-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+}
+.social-share-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s;
+}
+.social-share-btn:hover {
+  transform: translateY(-2px);
+}
+</style>
+</head>
+<body>
+<div class="bg-aura"></div>
+<canvas id="sakuraPetalsCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1"></canvas>
+
+<div class="bio-container" id="bioContainer">
+  <!-- Top Bar -->
+  <div class="bio-top-bar">
+    <button class="bio-action-btn" onclick="openShareModal()">
+      <span>🔗</span> Chia Sẻ
+    </button>
+    <a id="editLinkBtn" href="/add-profile" class="bio-action-btn" style="display:none">
+      <span>✏️</span> Chỉnh Sửa
+    </a>
+  </div>
+
+  <!-- Box 1: Banner -->
+  <div id="box_banner" style="width:100%">
+    <img id="profBanner" class="profile-banner" alt="Banner" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=1200&auto=format&fit=crop">
+  </div>
+
+  <!-- Box 2: Avatar & Name -->
+  <div id="box_avatar" style="width:100%;display:flex;flex-direction:column;align-items:center">
+    <div class="avatar-wrap">
+      <img id="profAvatar" class="avatar-img" alt="Avatar" src="https://cdn.discordapp.com/embed/avatars/0.png">
+      <span class="verified-badge" id="profVerified" style="display:none" title="Đã xác minh">✓</span>
+    </div>
+    <h1 class="profile-name" id="profName">Đang tải...</h1>
+    <div class="profile-handle" id="profHandle">@profile</div>
+    <div class="profile-tagline" id="profTagline" style="display:none"></div>
+  </div>
+
+  <!-- Box 3: Bio Giới Thiệu -->
+  <div id="box_bio" style="width:100%;display:flex;justify-content:center">
+    <div class="profile-bio" id="profBio" style="display:none"></div>
+  </div>
+
+  <!-- Box 4: Mạng Xã Hội -->
+  <div id="box_socials" style="width:100%">
+    <div class="social-icons-row" id="profSocials"></div>
+  </div>
+
+  <!-- Box 5: Danh Sách Liên Kết -->
+  <div id="box_links" style="width:100%">
+    <div class="links-list" id="profLinks"></div>
+  </div>
+
+  <!-- Box 6: Donate / Ủng Hộ -->
+  <div id="box_donate" style="width:100%">
+    <div class="donate-card" id="profDonate" style="display:none">
+      <div style="font-weight:800;font-size:.92rem;display:flex;align-items:center;gap:6px;color:var(--bio-accent)">
+        <span>💖</span> Hỗ Trợ & Donate
+      </div>
+      <div id="donateRows" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div id="donateNote" style="font-size:.78rem;color:#94a3b8;font-style:italic;text-align:center;margin-top:2px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="profile-footer">
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/add-profile" class="create-btn">
+        <span>🌸 Tạo Profile Của Bạn</span>
+        <span>→</span>
+      </a>
+      <a href="/profiles" class="create-btn" style="background:transparent">
+        <span>🌐 Xem Danh Sách Bio</span>
+      </a>
+    </div>
+    <div style="margin-top:6px">Powered by Sakura Bio Platform</div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div class="share-modal-overlay" id="shareModalOverlay" onclick="if(event.target===this) closeShareModal()">
+  <div class="share-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#fff">🌸 Chia Sẻ Bio Cá Nhân</h3>
+      <button onclick="closeShareModal()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <p style="font-size:0.85rem;color:#94a3b8;margin:0 0 10px">Quét mã QR hoặc sao chép liên kết để chia sẻ hồ sơ của bạn với bạn bè:</p>
+    
+    <img id="shareQrImg" class="qr-preview" alt="QR Code">
+
+    <div class="share-url-box">
+      <span id="shareUrlText" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <button class="copy-badge" onclick="copyProfileUrl()">Sao Chép</button>
+    </div>
+
+    <div class="social-share-row">
+      <a id="shareFb" target="_blank" class="social-share-btn" style="background:#1877f2">Facebook</a>
+      <a id="shareTwitter" target="_blank" class="social-share-btn" style="background:#1da1f2">X / Twitter</a>
+      <a id="shareTg" target="_blank" class="social-share-btn" style="background:#0088cc">Telegram</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/static/js/sakura-fx.js"></script>
+<script>
+function showToast(m, t='info'){
+  const c = document.getElementById('toastContainer');
+  if(!c) return;
+  const d = document.createElement('div');
+  d.className = 'toast-message';
+  let i = '🌸';
+  if(t==='success') i='✅';
+  if(t==='error') i='❌';
+  d.innerHTML = `<span>${i}</span><span>${m}</span>`;
+  c.appendChild(d);
+  setTimeout(()=>{
+    d.style.opacity='0';
+    d.style.transform='translateY(10px)';
+    d.style.transition='all .3s';
+    setTimeout(()=> d.remove(), 300);
+  }, 2500);
+}
+
+function copyText(str){
+  navigator.clipboard.writeText(str).then(()=>{
+    showToast('Đã sao chép: ' + str, 'success');
+  }).catch(()=>{
+    showToast('Đã sao chép: ' + str, 'success');
+  });
+}
+
+function copyProfileUrl(){
+  copyText(window.location.href);
+}
+
+function openShareModal(){
+  const url = window.location.href;
+  document.getElementById('shareUrlText').innerText = url;
+  document.getElementById('shareQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
+  document.getElementById('shareFb').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  document.getElementById('shareTwitter').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Xem hồ sơ Sakura Bio của mình nè!')}`;
+  document.getElementById('shareTg').href = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Xem hồ sơ Sakura Bio của mình!')}`;
+  document.getElementById('shareModalOverlay').classList.add('active');
+}
+
+function closeShareModal(){
+  document.getElementById('shareModalOverlay').classList.remove('active');
+}
+
+// Lấy username từ pathname (/linh/profile -> linh)
+const pathSegments = location.pathname.split('/').filter(Boolean);
+let username = pathSegments[0] || 'linh';
+if (username === 'profile' && pathSegments[1]) {
+  username = pathSegments[1];
+}
+
+async function checkEditPermission(){
+  try {
+    const res = await fetch(`/api/profile/check-permission?user=${encodeURIComponent(username)}`);
+    const data = await res.json();
+    if(data.ok && data.can_edit){
+      const editBtn = document.getElementById('editLinkBtn');
+      editBtn.href = `/add-profile?user=${encodeURIComponent(username)}`;
+      editBtn.style.display = 'inline-flex';
+    }
+  } catch(e) {}
+}
+
+async function loadProfile(){
+  try {
+    const res = await fetch(`/api/profile/${username}`);
+    const data = await res.json();
+    if(!data.ok || !data.profile){
+      document.getElementById('profName').textContent = 'Chưa tìm thấy Profile';
+      document.getElementById('profHandle').textContent = `@${username}`;
+      document.getElementById('profBio').style.display = 'block';
+      document.getElementById('profBio').innerHTML = `Hồ sơ này chưa được tạo.<br><a href="/add-profile?user=${username}" class="btn btn-primary btn-sm" style="margin-top:10px;display:inline-block">Tạo hồ sơ @${username} ngay →</a>`;
+      return;
+    }
+
+    const p = data.profile;
+    document.title = `${p.name || username} (@${p.username}) — Sakura Bio`;
+    document.getElementById('profName').textContent = p.name || username;
+    document.getElementById('profHandle').textContent = p.handle || `@${p.username}`;
+
+    // Custom styles
+    if (p.background_image) {
+      document.body.style.backgroundImage = `url("${p.background_image}")`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+      document.body.style.backgroundAttachment = 'fixed';
+    }
+    if (p.bg_color) {
+      document.body.style.backgroundColor = p.bg_color;
+    }
+    if (p.accent_color) {
+      document.documentElement.style.setProperty('--bio-accent', p.accent_color);
+    }
+    if (p.card_bg) {
+      document.documentElement.style.setProperty('--bio-card-bg', p.card_bg);
+    }
+
+    // Box Reordering
+    if (p.box_order && Array.isArray(p.box_order)) {
+      const container = document.getElementById('bioContainer');
+      p.box_order.forEach(boxId => {
+        const el = document.getElementById(`box_${boxId}`);
+        if (el && container.contains(el)) {
+          container.appendChild(el);
+        }
+      });
+      // Move footer to the end
+      const footer = container.querySelector('.profile-footer');
+      if (footer) container.appendChild(footer);
+    }
+
+    if(p.banner) document.getElementById('profBanner').src = p.banner;
+    if(p.avatar) document.getElementById('profAvatar').src = p.avatar;
+    if(p.verified) document.getElementById('profVerified').style.display = 'flex';
+
+    if(p.tagline){
+      const el = document.getElementById('profTagline');
+      el.textContent = p.tagline;
+      el.style.display = 'block';
+    }
+
+    if(p.bio){
+      const el = document.getElementById('profBio');
+      el.textContent = p.bio;
+      el.style.display = 'block';
+    }
+
+    // Socials
+    const soc = p.socials || {};
+    const socContainer = document.getElementById('profSocials');
+    socContainer.innerHTML = '';
+    const socialMap = [
+      { key: 'discord', icon: '💬', title: 'Discord' },
+      { key: 'zalo', icon: '📱', title: 'Zalo' },
+      { key: 'facebook', icon: '📘', title: 'Facebook' },
+      { key: 'youtube', icon: '📺', title: 'YouTube' },
+      { key: 'tiktok', icon: '🎵', title: 'TikTok' },
+      { key: 'github', icon: '🐙', title: 'GitHub' }
+    ];
+    socialMap.forEach(s => {
+      if(soc[s.key]){
+        const a = document.createElement('a');
+        a.href = soc[s.key];
+        a.target = '_blank';
+        a.className = 'social-btn';
+        a.title = s.title;
+        a.textContent = s.icon;
+        socContainer.appendChild(a);
+      }
+    });
+
+    // Custom links
+    const linksContainer = document.getElementById('profLinks');
+    linksContainer.innerHTML = '';
+    (p.links || []).forEach(l => {
+      const a = document.createElement('a');
+      a.href = l.url;
+      a.target = '_blank';
+      a.className = 'bio-link-card' + (l.highlight ? ' highlight' : '');
+      a.innerHTML = `
+        <span class="link-icon">${l.icon || '🌸'}</span>
+        <span>${l.title}</span>
+        <span class="link-arrow">→</span>
+      `;
+      linksContainer.appendChild(a);
+    });
+
+    // Donate
+    const don = p.donate || {};
+    if(don.bank_account || don.momo){
+      document.getElementById('profDonate').style.display = 'flex';
+      const rows = document.getElementById('donateRows');
+      rows.innerHTML = '';
+      if(don.bank_account){
+        rows.innerHTML += `
+          <div class="donate-row">
+            <div>
+              <div style="font-weight:700">${don.bank_name || 'Ngân Hàng'}</div>
+              <div style="font-size:.82rem;color:#94a3b8">STK: <b>${don.bank_account}</b> (${don.bank_owner || ''})</div>
+            </div>
+            <span class="copy-badge" onclick="copyText('${don.bank_account}')">Copy STK</span>
+          </div>
+        `;
+      }
+      if(don.momo){
+        rows.innerHTML += `
+          <div class="donate-row">
+            <div>
+              <div style="font-weight:700">Ví MoMo</div>
+              <div style="font-size:.82rem;color:#94a3b8">SĐT: <b>${don.momo}</b></div>
+            </div>
+            <span class="copy-badge" onclick="copyText('${don.momo}')">Copy SĐT</span>
+          </div>
+        `;
+      }
+      if(don.note){
+        const ne = document.getElementById('donateNote');
+        ne.textContent = don.note;
+        ne.style.display = 'block';
+      }
+    }
+
+    // Kiểm tra quyền chỉnh sửa
+    checkEditPermission();
+
+  } catch(e) {
+    document.getElementById('profName').textContent = 'Lỗi tải hồ sơ';
+  }
+}
+
+loadProfile();
+</script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

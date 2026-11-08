@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Chính sách Bảo mật — Sakura Bot</title>
+    <script>
+        (function () {
+            const t = localStorage.getItem('sakura_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="/images/avatar-bot.jpg">
+    <style>
+        .doc-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: .3s;
+        }
+
+        .doc-wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 24px 64px;
+        }
+
+        .doc-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(18px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .doc-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--sakura-gradient);
+        }
+
+        .doc-header {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .doc-badge {
+            display: inline-flex;
+            gap: 8px;
+            background: rgba(80, 250, 123, 0.12);
+            border: 1px solid rgba(80, 250, 123, 0.35);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            color: var(--accent-green);
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .doc-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .doc-meta {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .doc-section {
+            margin-bottom: 28px;
+        }
+
+        .doc-section h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .doc-section p, .doc-section li {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .doc-section ul {
+            padding-left: 20px;
+            margin-bottom: 14px;
+        }
+
+        .highlight-box {
+            background: rgba(139, 233, 253, 0.06);
+            border: 1px solid rgba(139, 233, 253, 0.25);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin: 18px 0;
+            font-size: 0.92rem;
+            color: var(--text-main);
+        }
+
+        .doc-footer {
+            margin-top: 36px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        @media(max-width:768px) {
+            .doc-nav {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .doc-card {
+                padding: 24px 18px;
+            }
+            .doc-title {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="doc-nav">
+        <a href="/" style="display:flex;gap:12px;align-items:center;text-decoration:none">
+            <div class="avatar-aura-wrapper">
+                <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
+                    class="bot-avatar-animated" style="width:36px;height:36px;border-radius:10px;border:2px solid var(--sakura-pink)" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+            </div>
+            <span style="font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Sakura Bot</span>
+            <span style="color:var(--text-muted);font-size:0.9rem">/ Bảo mật</span>
+        </a>
+        <div style="display:flex;gap:10px;align-items:center">
+            <button class="theme-toggle-btn" aria-label="Đổi giao diện">
+                <span class="theme-icon">🌙</span>
+            </button>
+            <div class="lang-switch-dropdown">
+                <button type="button" class="lang-switch-btn" aria-label="Đổi ngôn ngữ" title="Ngôn ngữ / Language">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VI</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div class="lang-menu">
+                    <button type="button" class="lang-option active" data-lang="vi"><span>🇻🇳 Tiếng Việt</span><span class="lang-check">✓</span></button>
+                    <button type="button" class="lang-option" data-lang="en"><span>🇬🇧 English</span><span class="lang-check"></span></button>
+                    <button type="button" class="lang-option" data-lang="ja"><span>🇯🇵 日本語</span><span class="lang-check"></span></button>
+                </div>
+            </div>
+            <a href="/discord/terms" class="btn btn-secondary btn-sm">Điều khoản Dịch vụ</a>
+            <a href="/" class="btn btn-secondary btn-sm">Trang chủ</a>
+            <a href="/dashboard" class="btn btn-primary btn-sm">Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="doc-wrapper">
+        <div class="doc-card">
+            <div class="doc-header">
+                <div class="doc-badge">🛡️ Privacy Policy</div>
+                <h1 class="doc-title">Chính Sách Bảo Mật Sakura Bot</h1>
+                <div class="doc-meta">Cập nhật lần cuối: <b>Ngày 31 tháng 08 năm 2026</b> • Tuân thủ chính sách Discord Developer</div>
+            </div>
+
+            <div class="doc-section">
+                <h3><span>1.</span> Giới Thiệu & Cam Kết Bảo Mật</h3>
+                <p>Chính sách Bảo mật này giải thích cách <b>Sakura Bot</b> và hệ thống Web Dashboard thu thập, sử dụng và bảo vệ thông tin của bạn khi bạn sử dụng dịch vụ của chúng tôi.</p>
+                <p>Chúng tôi tôn trọng quyền riêng tư của người dùng và cam kết <b>không bao giờ bán, chia sẻ hoặc thương mại hóa dữ liệu cá nhân</b> của bạn cho bất kỳ bên thứ ba nào.</p>
+            </div>
+
+            <div class="doc-section">
+                <h3><span>2.</span> Dữ Liệu Chúng Tôi Thu Thập</h3>
+                <p>Để vận hành các tính năng bot một cách trơn tru, Sakura Bot chỉ thu thập những thông tin cần thiết tối thiểu:</p>
+                <ul>
+                    <li><b>ID Người Dùng & Tên Hiển Thị Discord:</b> Dùng để lưu trữ điểm kinh nghiệm (EXP), số dư Coins, Level cá nhân và danh sách liên kết tài khoản Minecraft.</li>
+                    <li><b>ID Máy Chủ (Guild ID) & Cấu Hình Kênh:</b> Dùng để lưu trữ cài đặt riêng của server (Prefix, Kênh Welcome, Cấu hình AutoMod, Danh sách từ cấm).</li>
+                    <li><b>Lịch Sử Hội Thoại Ticket (Transcript):</b> Chỉ được lưu lại khi người quản trị hoặc người dùng bấm đóng Ticket hỗ trợ nhằm mục đích tra cứu nội bộ.</li>
+                </ul>
+            </div>
+
+            <div class="doc-section">
+                <h3><span>3.</span> Những Gì Chúng Tôi KHÔNG Thu Thập</h3>
+                <div class="highlight-box">
+                    🔒 <b>Cam kết bảo mật:</b> Sakura Bot <b>KHÔNG</b> đọc hoặc lưu trữ tin nhắn riêng tư (Direct Messages), <b>KHÔNG</b> lưu trữ mật khẩu Discord, và <b>KHÔNG</b> thu thập bất kỳ thông tin thanh toán hay tài chính nhạy cảm nào.
+                </div>
+            </div>
+
+            <div class="doc-section">
+                <h3><span>4.</span> Mục Đích Sử Dụng Dữ Liệu</h3>
+                <p>Thông tin thu thập chỉ phục vụ cho các mục đích:</p>
+                <ul>
+                    <li>Cung cấp tính năng AutoMod và phát hiện các hành vi phá hoại (Anti-Raid, Anti-Nuke, Anti-Spam).</li>
+                    <li>Hiển thị Bảng xếp hạng Level, EXP và quản lý số dư Sakura Coins.</li>
+                    <li>Đồng bộ trạng thái và danh sách Whitelist cho máy chủ Minecraft SMP.</li>
+                    <li>Xác thực quyền quản trị khi bạn đăng nhập vào Web Dashboard.</li>
+                </ul>
+            </div>
+
+            <div class="doc-section">
+                <h3><span>5.</span> Quyền Xóa Dữ Liệu Của Người Dùng</h3>
+                <p>Bạn có toàn quyền yêu cầu xóa toàn bộ dữ liệu của bạn hoặc máy chủ của bạn khỏi hệ thống của Sakura Bot:</p>
+                <ul>
+                    <li>Khi Bot bị gỡ khỏi máy chủ, bạn có thể liên hệ để yêu cầu dọn dẹp toàn bộ cấu hình máy chủ.</li>
+                    <li>Yêu cầu xóa thông tin liên kết Minecraft hoặc đặt lại Level/Coins bằng cách liên hệ với Ban quản trị qua Discord.</li>
+                </ul>
+            </div>
+
+            <div class="doc-section">
+                <h3><span>6.</span> Liên Hệ</h3>
+                <p>Nếu bạn có thắc mắc hoặc yêu cầu về quyền riêng tư và dữ liệu cá nhân, vui lòng liên hệ:</p>
+                <ul>
+                    <li>Kênh hỗ trợ Discord: <a href="https://discord.gg/jXvKRJkJgh" target="_blank" style="color:var(--sakura-pink);font-weight:700">Tham gia Discord Server</a></li>
+                    <li>GitHub: <a href="https://github.com/tuyetlinh2k7-hp" target="_blank" style="color:var(--sakura-pink)">github.com/tuyetlinh2k7-hp</a></li>
+                </ul>
+            </div>
+
+            <div class="doc-footer">
+                <span style="font-size:0.85rem;color:var(--text-dim)">🌸 © 2026 Sakura Bot • Phát triển bởi Đồng Linh</span>
+                <div style="display:flex;gap:12px">
+                    <a href="/discord/terms" class="btn btn-secondary btn-sm">Xem Điều khoản Dịch vụ →</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="/static/js/sakura-fx.js"></script>
+    <script src="/static/js/i18n.js"></script>
+</body>
+
+</html>

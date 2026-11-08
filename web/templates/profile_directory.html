@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakura Profiles • Danh Sách Hồ Sơ Cá Nhân</title>
+    <link rel="icon" href="/images/avatar-bot.jpg">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            const t = localStorage.getItem('sakura_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <style>
+        :root {
+            --font-title: 'Outfit', sans-serif;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --bg-page: #0a0f1a;
+            --card-bg: rgba(18, 24, 38, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover: rgba(255, 121, 198, 0.15);
+            --pink-accent: #ff79c6;
+            --cyan-accent: #7bdff2;
+            --purple-accent: #c77dff;
+        }
+
+        [data-theme="light"] {
+            --bg-page: #fff8fc;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(214, 135, 182, 0.25);
+            --card-hover: rgba(216, 27, 96, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-page);
+            font-family: var(--font-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 15%, rgba(255, 121, 198, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(123, 223, 242, 0.1) 0%, transparent 40%);
+        }
+
+        .prof-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: rgba(10, 15, 26, 0.85);
+            border-bottom: 1px solid var(--card-border);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        [data-theme="light"] .prof-nav {
+            background: rgba(255, 248, 252, 0.88);
+        }
+
+        .prof-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-family: var(--font-title);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .prof-brand img {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 2px solid var(--pink-accent);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 36px 20px 80px;
+        }
+
+        .hero-banner {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .hero-banner h1 {
+            font-family: var(--font-title);
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            margin: 0 0 12px;
+            background: linear-gradient(135deg, #ff79c6 0%, #c77dff 50%, #7bdff2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-banner p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 650px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .search-filter-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 36px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            backdrop-filter: blur(12px);
+        }
+
+        .search-input-wrap {
+            flex: 1;
+            min-width: 260px;
+            position: relative;
+        }
+
+        .search-input-wrap input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 12px 16px 12px 42px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: .2s;
+        }
+
+        .search-input-wrap input:focus {
+            border-color: var(--pink-accent);
+            box-shadow: 0 0 0 3px rgba(255, 121, 198, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            pointer-events: none;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .filter-tab:hover, .filter-tab.active {
+            background: rgba(255, 121, 198, 0.15);
+            color: var(--pink-accent);
+            border-color: rgba(255, 121, 198, 0.35);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 40px 0 20px;
+            font-family: var(--font-title);
+            font-size: 1.45rem;
+        }
+
+        .section-heading .badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: var(--font-main);
+            font-weight: 700;
+        }
+
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 22px;
+        }
+
+        .profile-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(12px);
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 121, 198, 0.4);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+        }
+
+        .profile-card.my-profile-highlight {
+            border: 2px solid #ff79c6;
+            box-shadow: 0 0 24px rgba(255, 121, 198, 0.25);
+        }
+
+        .card-banner {
+            height: 105px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            background-color: #1a1e2e;
+        }
+
+        .card-banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(18, 24, 38, 0.95) 100%);
+        }
+
+        .card-avatar-wrap {
+            position: relative;
+            margin: -44px 0 0 20px;
+            display: inline-block;
+            z-index: 2;
+        }
+
+        .card-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            border: 3.5px solid #121826;
+            object-fit: cover;
+            background: #2a2f45;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-body {
+            padding: 12px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .card-name-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
+
+        .card-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            font-family: var(--font-title);
+            color: var(--text-main);
+        }
+
+        .badge-verified {
+            color: #38bdf8;
+            font-size: 0.95rem;
+            title: "Đã xác minh";
+        }
+
+        .card-handle {
+            color: var(--pink-accent);
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .card-bio {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            padding-top: 10px;
+            border-top: 1px solid var(--card-border);
+            margin-bottom: 14px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-card-view {
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            padding: 9px 14px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ff79c6 0%, #c77dff 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: opacity .2s;
+        }
+
+        .btn-card-view:hover {
+            opacity: 0.9;
+        }
+
+        .btn-card-edit {
+            text-decoration: none;
+            padding: 9px 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: .2s;
+        }
+
+        .btn-card-edit:hover {
+            background: rgba(255, 121, 198, 0.15);
+            border-color: var(--pink-accent);
+            color: var(--pink-accent);
+        }
+
+        .empty-placeholder {
+            text-align: center;
+            padding: 48px 24px;
+            background: var(--card-bg);
+            border: 1px dashed var(--card-border);
+            border-radius: 18px;
+            grid-column: 1 / -1;
+        }
+
+        .empty-placeholder h3 {
+            margin: 12px 0 6px;
+            font-family: var(--font-title);
+        }
+
+        .empty-placeholder p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 0.92rem;
+        }
+
+        @media (max-width: 640px) {
+            .prof-nav {
+                padding: 12px 18px;
+            }
+            .hero-banner h1 {
+                font-size: 1.85rem;
+            }
+            .profiles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="prof-nav">
+        <a href="/" class="prof-brand">
+            <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Logo" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+            <span>Sakura Profiles</span>
+        </a>
+        <div class="nav-actions">
+            <a href="/" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px;">🏠 Trang Chủ</a>
+            <a href="/add-profile" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 6px;">➕ Tạo Hồ Sơ</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <h1>Khám Phá Sakura Bio Profiles</h1>
+            <p>Trang tổng hợp hồ sơ liên kết cá nhân của cộng đồng Sakura Bot. Tạo trang bio đẹp mắt của riêng bạn chỉ trong 30 giây!</p>
+            <div class="hero-ctas">
+                <a href="/add-profile" class="btn btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 0.95rem;">
+                    🚀 Tạo Trang Hồ Sơ Của Bạn
+                </a>
+                <a href="/" class="btn btn-secondary" style="padding: 10px 20px; font-size: 0.95rem;">
+                    🌸 Về Trang Chủ Sakura Bot
+                </a>
+            </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="search-filter-box">
+            <div class="search-input-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Tìm theo tên, username (@slug), mô tả..." oninput="filterProfiles()">
+            </div>
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all" onclick="setTab('all')">🌟 Tất Cả (<span id="countAll">0</span>)</button>
+                <button class="filter-tab" data-filter="mine" onclick="setTab('mine')">👤 Của Mình (<span id="countMine">0</span>)</button>
+                <button class="filter-tab" data-filter="others" onclick="setTab('others')">🌐 Của Người Khác (<span id="countOthers">0</span>)</button>
+            </div>
+        </div>
+
+        <!-- SECTION 1: HỒ SƠ CỦA BẠN (CỦA MÌNH) -->
+        <div id="mineSection">
+            <div class="section-heading">
+                <span>👤 Hồ Sơ Của Bạn (Của Mình)</span>
+                <span class="badge" style="background: rgba(255, 121, 198, 0.2); color: #ff79c6; border: 1px solid rgba(255, 121, 198, 0.4);">
+                    QUẢN LÝ CỦA TÔI
+                </span>
+            </div>
+            <div class="profiles-grid" id="mineGrid">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- SECTION 2: HỒ SƠ CỘNG ĐỒNG (CỦA NGƯỜI KHÁC) -->
+        <div id="othersSection">
+            <div class="section-heading">
+                <span>🌐 Hồ Sơ Cộng Đồng (Của Người Khác)</span>
+                <span class="badge" style="background: rgba(123, 223, 242, 0.15); color: #7bdff2; border: 1px solid rgba(123, 223, 242, 0.3);">
+                    CỘNG ĐỒNG SAKURA
+                </span>
+            </div>
+            <div class="profiles-grid" id="othersGrid">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allProfiles = [];
+        let currentFilter = 'all';
+        let currentUser = null;
+
+        // Xác định username sở hữu của người dùng hiện tại
+        function getMyUsernames() {
+            const list = new Set();
+            // 1. Từ session / API
+            if (currentUser && currentUser.username) {
+                list.add(currentUser.username.toLowerCase());
+            }
+            // 2. Từ localStorage đã lưu
+            try {
+                const saved = localStorage.getItem('sakura_my_profile_username');
+                if (saved) list.add(saved.toLowerCase());
+                const rawUser = localStorage.getItem('sakura_user');
+                if (rawUser) {
+                    const parsed = JSON.parse(rawUser);
+                    if (parsed.username) list.add(parsed.username.toLowerCase());
+                }
+            } catch(e) {}
+            return list;
+        }
+
+        async function loadProfiles() {
+            try {
+                const res = await fetch('/api/profiles');
+                const data = await res.json();
+                if (data.ok) {
+                    allProfiles = data.profiles || [];
+                    currentUser = data.current_user || null;
+                    renderProfiles();
+                } else {
+                    document.getElementById('othersGrid').innerHTML = `
+                        <div class="empty-placeholder">
+                            <h3>⚠️ Không thể tải danh sách hồ sơ</h3>
+                            <p>${data.error || 'Vui lòng thử lại sau.'}</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                document.getElementById('othersGrid').innerHTML = `
+                    <div class="empty-placeholder">
+                        <h3>⚠️ Lỗi kết nối máy chủ</h3>
+                        <p>Không thể kết nối đến API hồ sơ. Vui lòng thử lại sau.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createCardHtml(p, isMine) {
+            const avatarUrl = p.avatar || 'https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256';
+            const bannerUrl = p.banner || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=800&auto=format&fit=crop';
+            const verifiedBadge = p.verified ? '<span class="badge-verified" title="Đã xác minh">✓</span>' : '';
+            const linksCount = Array.isArray(p.links) ? p.links.length : 0;
+            const socialsCount = p.socials ? Object.values(p.socials).filter(Boolean).length : 0;
+            const bioText = p.bio || p.tagline || 'Chưa có giới thiệu.';
+
+            return `
+                <div class="profile-card ${isMine ? 'my-profile-highlight' : ''}" data-username="${escapeHtml(p.username)}" data-name="${escapeHtml(p.name || '')}">
+                    <div class="card-banner" style="background-image: url('${escapeHtml(bannerUrl)}');">
+                        <div class="card-banner-overlay"></div>
+                    </div>
+                    <div class="card-avatar-wrap">
+                        <img src="${escapeHtml(avatarUrl)}" class="card-avatar" alt="${escapeHtml(p.name || p.username)}" onerror="this.src='https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256'">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-name-row">
+                            <span class="card-name">${escapeHtml(p.name || p.username)}</span>
+                            ${verifiedBadge}
+                            ${isMine ? '<span class="badge" style="background:rgba(255,121,198,0.25);color:#ff79c6;font-size:0.68rem;padding:2px 6px;margin-left:auto;">CỦA BẠN</span>' : ''}
+                        </div>
+                        <div class="card-handle">@${escapeHtml(p.username)}</div>
+                        <div class="card-bio">${escapeHtml(bioText)}</div>
+                        <div class="card-meta">
+                            <span>🔗 ${linksCount} liên kết</span>
+                            <span>•</span>
+                            <span>🌐 ${socialsCount} mạng xã hội</span>
+                        </div>
+                        <div class="card-actions">
+                            <a href="/${escapeHtml(p.username)}/profile" class="btn-card-view">
+                                👁️ Xem Profile
+                            </a>
+                            ${isMine ? `
+                                <a href="/add-profile?edit=${escapeHtml(p.username)}" class="btn-card-edit" title="Chỉnh sửa hồ sơ">
+                                    ✏️ Sửa
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProfiles() {
+            const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const myUsernames = getMyUsernames();
+
+            let mineList = [];
+            let othersList = [];
+
+            allProfiles.forEach(p => {
+                const u = (p.username || '').toLowerCase();
+                const matchesSearch = !query || 
+                    u.includes(query) || 
+                    (p.name && p.name.toLowerCase().includes(query)) ||
+                    (p.bio && p.bio.toLowerCase().includes(query)) ||
+                    (p.tagline && p.tagline.toLowerCase().includes(query));
+
+                if (!matchesSearch) return;
+
+                if (myUsernames.has(u)) {
+                    mineList.push(p);
+                } else {
+                    othersList.push(p);
+                }
+            });
+
+            document.getElementById('countAll').textContent = mineList.length + othersList.length;
+            document.getElementById('countMine').textContent = mineList.length;
+            document.getElementById('countOthers').textContent = othersList.length;
+
+            const mineSection = document.getElementById('mineSection');
+            const othersSection = document.getElementById('othersSection');
+            const mineGrid = document.getElementById('mineGrid');
+            const othersGrid = document.getElementById('othersGrid');
+
+            // Render Mine
+            if (mineList.length > 0) {
+                mineGrid.innerHTML = mineList.map(p => createCardHtml(p, true)).join('');
+            } else {
+                mineGrid.innerHTML = `
+                    <div class="empty-placeholder">
+                        <div style="font-size: 2.2rem; margin-bottom: 8px;">🌸</div>
+                        <h3>Bạn chưa có trang hồ sơ cá nhân</h3>
+                        <p>Tạo ngay trang Bio Profile độc quyền để chia sẻ thông tin, mạng xã hội và donate của bạn!</p>
+                        <a href="/add-profile" class="btn btn-primary" style="padding: 9px 20px;">
+                            ➕ Tạo Hồ Sơ Của Bạn Ngay
+                        </a>
+                    </div>
+                `;
+            }
+
+            // Render Others
+            if (othersList.length > 0) {
+                othersGrid.innerHTML = othersList.map(p => createCardHtml(p, false)).join('');
+            } else {
+                othersGrid.innerHTML = `
+                    <div class="empty-placeholder">
+                        <h3>Không tìm thấy hồ sơ phù hợp</h3>
+                        <p>Hãy thử tìm kiếm với từ khóa khác.</p>
+                    </div>
+                `;
+            }
+
+            // Tabs Visibility
+            if (currentFilter === 'mine') {
+                mineSection.style.display = 'block';
+                othersSection.style.display = 'none';
+            } else if (currentFilter === 'others') {
+                mineSection.style.display = 'none';
+                othersSection.style.display = 'block';
+            } else {
+                mineSection.style.display = 'block';
+                othersSection.style.display = 'block';
+            }
+        }
+
+        function setTab(tab) {
+            currentFilter = tab;
+            document.querySelectorAll('.filter-tab').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-filter') === tab);
+            });
+            renderProfiles();
+        }
+
+        function filterProfiles() {
+            renderProfiles();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        loadProfiles();
+    </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⛏️ Sakura Hosting — Quản Lý Máy Chủ Minecraft</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/mc_hosting.css">
+  <link rel="icon" href="/images/avatar-bot.jpg">
+</head>
+<body class="mc-hosting-body">
+  <div class="mc-layout">
+    <!-- Sidebar -->
+    <aside class="mc-sidebar" id="mcSidebar">
+      <div class="mc-brand">
+        <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Logo" class="mc-brand-avatar" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+        <div>
+          <div class="mc-brand-title">Sakura Hosting</div>
+          <div class="mc-brand-sub">Minecraft Cloud Panel</div>
+        </div>
+      </div>
+
+      <nav class="mc-nav">
+        <div class="mc-nav-section-title">Máy Chủ</div>
+        <a href="/minecraft" class="mc-nav-link active">
+          <span class="nav-icon">🌐</span> Tất Cả Máy Chủ
+        </a>
+        <a href="/minecraft/console" class="mc-nav-link">
+          <span class="nav-icon">🖥️</span> Bảng Console
+        </a>
+        <a href="/minecraft/file" class="mc-nav-link">
+          <span class="nav-icon">📁</span> Quản Lý Tệp
+        </a>
+        <a href="/minecraft/properties" class="mc-nav-link">
+          <span class="nav-icon">⚙️</span> Cấu Hình Server
+        </a>
+
+        <div class="mc-nav-section-title">Điều Hướng</div>
+        <a href="/dashboard" class="mc-nav-link">
+          <span class="nav-icon">📊</span> Bot Dashboard
+        </a>
+        <a href="/profile" class="mc-nav-link">
+          <span class="nav-icon">👥</span> Hồ Sơ Cộng Đồng
+        </a>
+        <a href="/" class="mc-nav-link">
+          <span class="nav-icon">🌸</span> Trang Chủ
+        </a>
+      </nav>
+
+      <div class="mc-sidebar-footer">
+        <span id="userBadge">👑 Admin Panel</span>
+        <span>v3.2</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="mc-main">
+      <header class="mc-topbar">
+        <div class="mc-topbar-left">
+          <div class="mc-server-badge">
+            <span class="status-dot online"></span>
+            <span>Hệ Thống Hosting Đang Hoạt Động</span>
+          </div>
+        </div>
+        <div class="mc-topbar-right">
+          <button class="mc-btn mc-btn-secondary" onclick="loadServers()">
+            <span>🔄</span> Làm Mới
+          </button>
+          <a href="/dashboard" class="mc-btn mc-btn-primary">
+            <span>⚙️</span> Dashboard
+          </a>
+        </div>
+      </header>
+
+      <div class="mc-container">
+        <!-- KPI Cards -->
+        <div class="mc-kpi-grid">
+          <div class="mc-kpi-card pink">
+            <div class="mc-kpi-icon">⛏️</div>
+            <div>
+              <div class="mc-kpi-val" id="kpiTotal">0</div>
+              <div class="mc-kpi-label">Tổng Số Máy Chủ</div>
+            </div>
+          </div>
+          <div class="mc-kpi-card green">
+            <div class="mc-kpi-icon">🟢</div>
+            <div>
+              <div class="mc-kpi-val" id="kpiOnline">0</div>
+              <div class="mc-kpi-label">Đang Hoạt Động</div>
+            </div>
+          </div>
+          <div class="mc-kpi-card blue">
+            <div class="mc-kpi-icon">🧠</div>
+            <div>
+              <div class="mc-kpi-val" id="kpiRam">--</div>
+              <div class="mc-kpi-label">RAM Hệ Thống</div>
+            </div>
+          </div>
+          <div class="mc-kpi-card purple">
+            <div class="mc-kpi-icon">💾</div>
+            <div>
+              <div class="mc-kpi-val" id="kpiDisk">--</div>
+              <div class="mc-kpi-label">Ổ Đĩa Khả Dụng</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div>
+            <h2 style="margin:0 0 4px 0;font-size:1.4rem;font-weight:800">Danh Sách Máy Chủ Minecraft</h2>
+            <p style="margin:0;font-size:0.88rem;color:var(--mc-text-muted)">Các máy chủ được tự động phát hiện trong thư mục bot</p>
+          </div>
+        </div>
+
+        <!-- Servers Grid Container -->
+        <div id="serversContainer">
+          <div style="text-align:center;padding:60px 0;color:var(--mc-text-muted)">
+            <div style="font-size:2rem;margin-bottom:12px">⏳</div>
+            <div>Đang tải danh sách máy chủ...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="mc-toast-container" id="toastContainer"></div>
+
+  <script>
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'mc-toast';
+      let icon = '🌸';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+      if (type === 'warning') icon = '⚠️';
+      t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 4000);
+    }
+
+    async function loadServers() {
+      const container = document.getElementById('serversContainer');
+      try {
+        const token = localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/) || [])[1];
+        const res = await fetch('/api/mc/hosting/servers', {
+          headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+        });
+        const data = await res.json();
+
+        if (!data.ok) {
+          container.innerHTML = `
+            <div class="mc-empty-box">
+              <div class="mc-empty-icon">⚠️</div>
+              <div class="mc-empty-title">Không thể tải dữ liệu máy chủ</div>
+              <div class="mc-empty-desc">${data.error || 'Vui lòng kiểm tra quyền truy cập hoặc đăng nhập quản trị.'}</div>
+            </div>
+          `;
+          return;
+        }
+
+        const servers = data.servers || [];
+        document.getElementById('kpiTotal').innerText = servers.length;
+        document.getElementById('kpiOnline').innerText = servers.filter(s => s.is_online).length;
+        if (data.system) {
+          document.getElementById('kpiRam').innerText = `${data.system.sys_ram_used_mb || 0} MB`;
+          document.getElementById('kpiDisk').innerText = `${data.system.disk_free_gb || 0} GB`;
+        }
+
+        if (servers.length === 0) {
+          container.innerHTML = `
+            <div class="mc-empty-box">
+              <div class="mc-empty-icon">📦</div>
+              <div class="mc-empty-title">Không có server nào đang tồn tại</div>
+              <div class="mc-empty-desc">
+                Hệ thống chưa tìm thấy thư mục máy chủ Minecraft nào trong thư mục bot.<br>
+                Hãy tạo thư mục <code>server/</code> chứa <code>server.jar</code> và <code>server.properties</code> để hệ thống tự động nhận diện và quản trị.
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '<div class="mc-servers-grid">';
+        servers.forEach(srv => {
+          const isOnline = srv.is_online;
+          const statusDot = isOnline ? 'online' : 'offline';
+          const statusText = isOnline ? '🟢 Đang Chạy' : '🔴 Đã Dừng';
+          const cpuVal = isOnline ? srv.cpu_percent : 0;
+          const ramVal = isOnline ? `${srv.memory_mb} MB` : '0 MB';
+
+          html += `
+            <div class="mc-server-card">
+              <div class="mc-server-card-header">
+                <div>
+                  <div class="mc-server-name">${srv.name}</div>
+                  <div class="mc-server-ip">
+                    <span>📡</span> ${srv.ip}:${srv.port}
+                  </div>
+                </div>
+                <span class="mc-server-badge">
+                  <span class="status-dot ${statusDot}"></span>
+                  <span>${statusText}</span>
+                </span>
+              </div>
+
+              <div class="mc-server-card-body">
+                <div class="mc-server-stat-row">
+                  <span class="mc-server-stat-label">Phiên bản / Core</span>
+                  <span class="mc-server-stat-val">${srv.version}</span>
+                </div>
+                <div class="mc-server-stat-row">
+                  <span class="mc-server-stat-label">Chế độ / Độ khó</span>
+                  <span class="mc-server-stat-val">${srv.gamemode} (${srv.difficulty})</span>
+                </div>
+                <div class="mc-server-stat-row">
+                  <span class="mc-server-stat-label">Người chơi trực tuyến</span>
+                  <span class="mc-server-stat-val">${srv.players_online} / ${srv.max_players}</span>
+                </div>
+                <div class="mc-server-stat-row">
+                  <span class="mc-server-stat-label">Bộ nhớ RAM máy chủ</span>
+                  <span class="mc-server-stat-val">${ramVal}</span>
+                </div>
+                <div>
+                  <div class="mc-server-stat-row">
+                    <span class="mc-server-stat-label">CPU Sử Dụng</span>
+                    <span class="mc-server-stat-val">${cpuVal}%</span>
+                  </div>
+                  <div class="mc-progress-bar-bg">
+                    <div class="mc-progress-bar-fill" style="width:${Math.min(cpuVal, 100)}%;background:var(--mc-accent)"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mc-server-card-footer">
+                <div style="display:flex;gap:6px">
+                  <a href="/minecraft/console?server=${encodeURIComponent(srv.id)}" class="mc-btn mc-btn-secondary" title="Mở Console">
+                    <span>🖥️</span> Console
+                  </a>
+                  <a href="/minecraft/file?server=${encodeURIComponent(srv.id)}" class="mc-btn mc-btn-secondary" title="Quản lý File">
+                    <span>📁</span> File
+                  </a>
+                  <a href="/minecraft/properties?server=${encodeURIComponent(srv.id)}" class="mc-btn mc-btn-secondary" title="Cài đặt">
+                    <span>⚙️</span> Cài đặt
+                  </a>
+                </div>
+                <div>
+                  ${isOnline ? `
+                    <button class="mc-btn mc-btn-danger" onclick="triggerPower('${srv.id}', 'stop')">⏹ Dừng</button>
+                  ` : `
+                    <button class="mc-btn mc-btn-success" onclick="triggerPower('${srv.id}', 'start')">▶ Bật</button>
+                  `}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `
+          <div class="mc-empty-box">
+            <div class="mc-empty-icon">❌</div>
+            <div class="mc-empty-title">Lỗi kết nối máy chủ</div>
+            <div class="mc-empty-desc">${err.message}</div>
+          </div>
+        `;
+      }
+    }
+
+    async function triggerPower(serverId, action) {
+      try {
+        const token = localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/) || [])[1];
+        const res = await fetch(`/api/mc/hosting/server/${encodeURIComponent(serverId)}/power`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+          },
+          body: JSON.stringify({ action })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message || 'Thao tác máy chủ thành công!', 'success');
+          setTimeout(loadServers, 1200);
+        } else {
+          showToast(data.error || 'Thao tác thất bại', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'error');
+      }
+    }
+
+    loadServers();
+    setInterval(loadServers, 10000);
+  </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>♟️ Cờ Vua AI Đa Cấp Độ — Sakura Game</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+<style>
+.chess-wrap{max-width:1050px;margin:0 auto;padding:20px 16px;display:grid;grid-template-columns: 480px 1fr;gap:22px}
+@media(max-width:900px){.chess-wrap{grid-template-columns:1fr}}
+.chess-board{width:100%;max-width:480px;aspect-ratio:1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border:3px solid var(--border-glass);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-card)}
+.sq{display:flex;align-items:center;justify-content:center;font-size:2.2rem;cursor:pointer;position:relative;user-select:none;transition:.12s}
+.sq.light{background:#f0d9b5} .sq.dark{background:#b58863}
+.sq.sel{outline:3px solid var(--sakura-pink);outline-offset:-3px; background:#f7a7d0!important}
+.sq.hint::after{content:'';position:absolute;width:16px;height:16px;background:rgba(255,121,198,0.7);border-radius:50%}
+.sq.cap::after{content:'';position:absolute;inset:4px;border:3px solid rgba(255,121,198,0.8);border-radius:50%;pointer-events:none}
+.piece{filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));transition:transform .12s}
+.sq:hover .piece{transform:scale(1.08)}
+.piece.w{color:#ffffff; text-shadow:0 0 2px #000, 0 1px 4px rgba(0,0,0,0.6)}
+.piece.b{color:#1a1a1a}
+.chess-panel{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.chess-moves{max-height:200px;overflow-y:auto;background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;padding:10px;font-family:var(--font-mono);font-size:.85rem;line-height:1.6}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.modal-overlay.active{display:flex}
+.modal-box{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:18px;max-width:440px;width:100%;padding:22px;box-shadow:var(--shadow-card)}
+</style>
+</head>
+<body>
+<nav class="account-nav" style="position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+  <a href="/game" style="display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--text-main)"><span>←</span><span style="font-weight:800">Game</span><span style="color:var(--text-muted)">/ Cờ Vua</span></a>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <select id="chessMode" class="form-control" style="width:auto;padding:6px 10px" onchange="onModeChange()">
+      <option value="bot" selected>🤖 Vs AI Máy</option>
+      <option value="pvp">👥 2 Người (Local)</option>
+      <option value="online">🌐 Mời Bạn (Online Room)</option>
+    </select>
+    <select id="chessLevel" class="form-control" style="width:auto;padding:6px 10px">
+      <option value="1">🌱 Dễ (Tập Sự)</option>
+      <option value="2" selected>⚔️ Trung Bình (Kỳ Thủ)</option>
+      <option value="3">🔥 Khó (Kiện Tướng)</option>
+      <option value="4">👑 Siêu Khó (Grandmaster)</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="openInviteModal()" style="background:var(--sakura-gradient);color:#fff">💌 Mời Bạn</button>
+    <button class="btn btn-secondary btn-sm" onclick="newGame()">↻ Ván mới</button>
+    <button class="btn btn-secondary btn-sm" onclick="undoMove()">↩ Hoàn tác</button>
+    <button class="btn btn-secondary btn-sm" onclick="flipBoard()">⇅ Lật bàn</button>
+  </div>
+</nav>
+
+<div class="chess-wrap">
+  <div>
+    <div class="chess-board" id="board"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--text-muted);font-size:.85rem">
+      <span>a b c d e f g h</span>
+      <span id="chessStatus" style="font-weight:700;color:var(--sakura-pink)">Trắng đi</span>
+      <span id="aiThinking" style="display:none;color:var(--accent-cyan)">⚡ AI đang tính toán...</span>
+    </div>
+  </div>
+
+  <div class="chess-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="font-weight:800;display:flex;align-items:center;gap:8px">♟️ Cờ Vua Sakura AI</h3>
+      <span class="badge badge-sakura" id="levelBadge">Cấp độ: Trung bình</span>
+    </div>
+    <div style="color:var(--text-muted);font-size:.88rem;line-height:1.5">
+      Tích hợp trí tuệ nhân tạo Minimax & Alpha-Beta Pruning 4 cấp độ. Chạm vào quân để chọn, chạm ô đích để di chuyển.
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="badge badge-sakura" id="turnBadge">Lượt: Trắng</span>
+      <span class="badge" id="fenBadge" style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">FEN</span>
+    </div>
+
+    <div style="font-weight:700;font-size:.9rem;margin-top:4px">Lịch sử nước đi:</div>
+    <div class="chess-moves" id="moves">Chưa có nước đi</div>
+
+    <div style="background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:12px;padding:12px">
+      <div style="font-weight:800;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+        <span>🏆 Bảng Xếp Hạng Cờ Vua</span>
+        <span style="font-size:.78rem;color:var(--text-dim)">Top cao thủ</span>
+      </div>
+      <div id="chessLb" style="font-size:.88rem;color:var(--text-muted)">Đang tải...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Mời Bạn Chơi (Không cần đăng nhập vẫn chơi được) -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="font-weight:800;font-size:1.15rem">💌 Mời Bạn Chơi Cờ Vua</h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeInviteModal()">✕</button>
+    </div>
+    <p style="color:var(--text-muted);font-size:.9rem;line-height:1.5;margin-bottom:14px">
+      Gửi liên kết bên dưới cho bạn bè. Họ chỉ cần bấm vào là có thể tham gia ngay lập tức <b>(không bắt buộc đăng nhập)</b>!
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input type="text" id="inviteLinkInput" class="form-control" readonly style="font-size:.85rem;font-family:var(--font-mono)">
+      <button class="btn btn-primary" onclick="copyInviteLink()" style="flex-shrink:0">Sao chép</button>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-secondary btn-sm" onclick="closeInviteModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/static/js/sakura-fx.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script>
+let game = new Chess(), selected = null, flipped = false, history = [];
+let currentRoomId = new URLSearchParams(location.search).get('room') || '';
+
+function showToast(m, t='info'){
+  const c = document.getElementById('toastContainer');
+  const d = document.createElement('div');
+  d.className = 'toast-message';
+  let i = '🌸';
+  if (t === 'success') i = '✅';
+  if (t === 'error') i = '❌';
+  d.innerHTML = `<span>${i}</span><span>${m}</span>`;
+  c.appendChild(d);
+  setTimeout(()=>{
+    d.style.opacity = '0';
+    d.style.transform = 'translateY(10px)';
+    d.style.transition = 'all .3s';
+    setTimeout(()=> d.remove(), 300);
+  }, 2500);
+}
+
+const pieceUnicode = {p:'♟', n:'♞', b:'♝', r:'♜', q:'♛', k:'♚', P:'♟', N:'♞', B:'♝', R:'♜', Q:'♛', K:'♚'};
+
+// Giá trị cơ bản quân cờ
+const PIECE_VALS = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
+
+// Positional Piece-Square Tables cho Đen (AI)
+const PAWN_TABLE = [
+  [0,  0,  0,  0,  0,  0,  0,  0],
+  [50, 50, 50, 50, 50, 50, 50, 50],
+  [10, 10, 20, 30, 30, 20, 10, 10],
+  [5,  5, 10, 25, 25, 10,  5,  5],
+  [0,  0,  0, 20, 20,  0,  0,  0],
+  [5, -5,-10,  0,  0,-10, -5,  5],
+  [5, 10, 10,-20,-20, 10, 10,  5],
+  [0,  0,  0,  0,  0,  0,  0,  0]
+];
+const KNIGHT_TABLE = [
+  [-50,-40,-30,-30,-30,-30,-40,-50],
+  [-40,-20,  0,  0,  0,  0,-20,-40],
+  [-30,  0, 10, 15, 15, 10,  0,-30],
+  [-30,  5, 15, 20, 20, 15,  5,-30],
+  [-30,  0, 15, 20, 20, 15,  0,-30],
+  [-30,  5, 10, 15, 15, 10,  5,-30],
+  [-40,-20,  0,  5,  5,  0,-20,-40],
+  [-50,-40,-30,-30,-30,-30,-40,-50]
+];
+const BISHOP_TABLE = [
+  [-20,-10,-10,-10,-10,-10,-10,-20],
+  [-10,  0,  0,  0,  0,  0,  0,-10],
+  [-10,  0,  5, 10, 10,  5,  0,-10],
+  [-10,  5,  5, 10, 10,  5,  5,-10],
+  [-10,  0, 10, 10, 10, 10,  0,-10],
+  [-10, 10, 10, 10, 10, 10, 10,-10],
+  [-10,  5,  0,  0,  0,  0,  5,-10],
+  [-20,-10,-10,-10,-10,-10,-10,-20]
+];
+
+function evaluateBoard(g) {
+  let totalScore = 0;
+  const b = g.board();
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = b[r][c];
+      if (!p) continue;
+      let val = PIECE_VALS[p.type] || 0;
+      let pst = 0;
+      if (p.type === 'p') pst = (p.color === 'w' ? PAWN_TABLE[7 - r][c] : PAWN_TABLE[r][c]);
+      else if (p.type === 'n') pst = (p.color === 'w' ? KNIGHT_TABLE[7 - r][c] : KNIGHT_TABLE[r][c]);
+      else if (p.type === 'b') pst = (p.color === 'w' ? BISHOP_TABLE[7 - r][c] : BISHOP_TABLE[r][c]);
+      
+      const pieceTotal = val + pst;
+      totalScore += (p.color === 'b' ? pieceTotal : -pieceTotal);
+    }
+  }
+  return totalScore;
+}
+
+// Minimax có Alpha-Beta Pruning
+function minimax(depth, isMax, alpha, beta) {
+  if (depth === 0 || game.game_over()) {
+    return evaluateBoard(game);
+  }
+  const moves = game.moves();
+  if (isMax) {
+    let maxEval = -999999;
+    for (const m of moves) {
+      game.move(m);
+      const ev = minimax(depth - 1, false, alpha, beta);
+      game.undo();
+      maxEval = Math.max(maxEval, ev);
+      alpha = Math.max(alpha, ev);
+      if (beta <= alpha) break;
+    }
+    return maxEval;
+  } else {
+    let minEval = 999999;
+    for (const m of moves) {
+      game.move(m);
+      const ev = minimax(depth - 1, true, alpha, beta);
+      game.undo();
+      minEval = Math.min(minEval, ev);
+      beta = Math.min(beta, ev);
+      if (beta <= alpha) break;
+    }
+    return minEval;
+  }
+}
+
+function getBestMove(level) {
+  const moves = game.moves({ verbose: true });
+  if (!moves.length) return null;
+
+  // Level 1: Dễ - 65% random, 35% ăn quân
+  if (level === 1) {
+    if (Math.random() < 0.35) {
+      const captures = moves.filter(m => m.flags.includes('c') || m.flags.includes('e'));
+      if (captures.length) return captures[Math.floor(Math.random() * captures.length)];
+    }
+    return moves[Math.floor(Math.random() * moves.length)];
+  }
+
+  // Level 2: Trung bình - Minimax depth 2
+  if (level === 2) {
+    let best = null, bestVal = -999999;
+    for (const m of moves) {
+      game.move(m);
+      const val = minimax(1, false, -999999, 999999);
+      game.undo();
+      if (val > bestVal) {
+        bestVal = val;
+        best = m;
+      }
+    }
+    return best || moves[0];
+  }
+
+  // Level 3: Khó - Minimax Alpha-Beta depth 3
+  if (level === 3) {
+    let best = null, bestVal = -999999;
+    // Sắp xếp moves: ưu tiên ăn quân hoặc chiếu
+    moves.sort((a,b) => (b.flags.includes('c') ? 1 : 0) - (a.flags.includes('c') ? 1 : 0));
+    for (const m of moves) {
+      game.move(m);
+      const val = minimax(2, false, -999999, 999999);
+      game.undo();
+      if (val > bestVal) {
+        bestVal = val;
+        best = m;
+      }
+    }
+    return best || moves[0];
+  }
+
+  // Level 4: Siêu Khó - Grandmaster (Depth 3+ kết hợp PST sâu)
+  let best = null, bestVal = -999999;
+  moves.sort((a,b) => {
+    let sa = (a.captured ? PIECE_VALS[a.captured] * 10 : 0);
+    let sb = (b.captured ? PIECE_VALS[b.captured] * 10 : 0);
+    return sb - sa;
+  });
+  for (const m of moves) {
+    game.move(m);
+    const val = minimax(3, false, -999999, 999999);
+    game.undo();
+    if (val > bestVal) {
+      bestVal = val;
+      best = m;
+    }
+  }
+  return best || moves[0];
+}
+
+async function submitChess(result){
+  try {
+    const t = localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/)||[])[1] || '';
+    const h = {'Content-Type':'application/json'};
+    if (t) h['Authorization'] = 'Bearer ' + t;
+    await fetch('/api/game/chess/score', { method:'POST', headers:h, body:JSON.stringify({ result }) });
+    loadChessLb();
+  } catch {}
+}
+
+async function loadChessLb(){
+  try {
+    const t = localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/)||[])[1] || '';
+    const h = {};
+    if (t) h['Authorization'] = 'Bearer ' + t;
+    const r = await fetch('/api/game/chess/leaderboard', { headers: h });
+    const j = await r.json();
+    const el = document.getElementById('chessLb');
+    if (!j.ok) {
+      el.innerHTML = '<span style="color:var(--text-dim)">Đăng nhập để lưu điểm & xếp hạng</span>';
+      return;
+    }
+    if (!j.leaderboard.length) {
+      el.innerHTML = '<span style="color:var(--text-dim)">Chưa có dữ liệu ván đấu nào</span>';
+    } else {
+      el.innerHTML = j.leaderboard.slice(0, 10).map((u, i) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:8px;margin-bottom:6px">
+          <span style="display:flex;gap:8px;align-items:center">
+            <span style="font-weight:800;color:${i===0?'#f1fa8c':i===1?'#8be9fd':i===2?'#ffb86c':'var(--text-muted)'}">#${i+1}</span>
+            <img src="${u.avatar||'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width:22px;height:22px;border-radius:50%" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+            <span>${u.username}</span>
+          </span>
+          <span style="font-size:.82rem;font-weight:700">${u.wins}W <span style="color:var(--accent-red)">${u.losses}L</span></span>
+        </div>
+      `).join('');
+    }
+  } catch {
+    const el = document.getElementById('chessLb');
+    if (el) el.innerText = 'Lỗi tải BXH';
+  }
+}
+loadChessLb();
+
+function render(){
+  const boardEl = document.getElementById('board');
+  boardEl.innerHTML = '';
+  const pos = game.board();
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const rr = flipped ? 7 - r : r, cc = flipped ? 7 - c : c;
+      const sq = (r + c) % 2 === 0 ? 'light' : 'dark';
+      const div = document.createElement('div');
+      div.className = 'sq ' + sq;
+      const sqName = String.fromCharCode(97 + cc) + (8 - rr);
+      div.dataset.sq = sqName;
+      const piece = pos[rr][cc];
+      if (piece) {
+        const span = document.createElement('span');
+        span.className = 'piece ' + (piece.color === 'w' ? 'w' : 'b');
+        span.textContent = pieceUnicode[piece.color === 'w' ? piece.type.toUpperCase() : piece.type];
+        div.appendChild(span);
+      }
+      if (selected === sqName) div.classList.add('sel');
+      if (selected) {
+        const moves = game.moves({ square: selected, verbose: true });
+        if (moves.some(m => m.to === sqName)) {
+          const targetPiece = pos[rr][cc];
+          div.classList.add(targetPiece ? 'cap' : 'hint');
+        }
+      }
+      div.onclick = () => onSquare(sqName);
+      boardEl.appendChild(div);
+    }
+  }
+  const turn = game.turn() === 'w' ? 'Trắng' : 'Đen';
+  document.getElementById('turnBadge').textContent = 'Lượt: ' + turn;
+  const statusEl = document.getElementById('chessStatus');
+  if (game.in_checkmate()) {
+    statusEl.textContent = 'Chiếu hết! 🎉';
+    statusEl.style.color = '#ff5555';
+  } else if (game.in_draw()) {
+    statusEl.textContent = 'Hòa cờ!';
+    statusEl.style.color = '#8be9fd';
+  } else if (game.in_check()) {
+    statusEl.textContent = 'Đang bị Chiếu! ⚠️';
+    statusEl.style.color = '#ffb86c';
+  } else {
+    statusEl.textContent = 'Lượt đi: ' + turn;
+    statusEl.style.color = 'var(--sakura-pink)';
+  }
+  document.getElementById('fenBadge').textContent = game.fen().slice(0, 48) + '…';
+  const hist = game.history();
+  document.getElementById('moves').innerHTML = hist.length ? hist.map((m, i) => (i % 2 === 0 ? `<span style="color:var(--text-dim)">${Math.floor(i / 2) + 1}.</span> ` : '') + `<span style="${i % 2 === 0 ? 'color:#ff79c6;font-weight:700' : 'color:#8be9fd'}">${m}</span>`).join(' ') : 'Chưa có nước đi';
+}
+
+function onSquare(sq){
+  if (selected) {
+    const move = game.move({ from: selected, to: sq, promotion: 'q' });
+    if (move) {
+      history.push(move);
+      selected = null;
+      render();
+      if (game.game_over()) {
+        handleGameOver(move);
+        return;
+      }
+      const mode = document.getElementById('chessMode').value;
+      if (mode === 'bot' && game.turn() === 'b' && !game.game_over()) {
+        document.getElementById('aiThinking').style.display = 'inline';
+        setTimeout(botMove, 220);
+      }
+      return;
+    } else {
+      const piece = game.get(sq);
+      if (piece && piece.color === game.turn()) {
+        selected = sq;
+        render();
+      } else {
+        selected = null;
+        render();
+      }
+      return;
+    }
+  } else {
+    const piece = game.get(sq);
+    if (piece && piece.color === game.turn()) {
+      selected = sq;
+      render();
+    }
+  }
+}
+
+function botMove(){
+  document.getElementById('aiThinking').style.display = 'none';
+  if (game.game_over()) return;
+  const level = parseInt(document.getElementById('chessLevel').value) || 2;
+  const bestMv = getBestMove(level);
+  if (!bestMv) return;
+  game.move(bestMv);
+  render();
+  if (game.game_over()) {
+    handleGameOver(bestMv);
+  }
+}
+
+function handleGameOver(lastMove){
+  if (game.in_draw()) {
+    showToast('Hòa cờ!', 'info');
+    submitChess('draw');
+  } else {
+    const winColor = lastMove.color;
+    const mode = document.getElementById('chessMode').value;
+    if (mode === 'bot') {
+      if (winColor === 'w') {
+        showToast('Bạn đã chiến thắng AI! 🏆', 'success');
+        submitChess('win');
+      } else {
+        showToast('AI đã chiến thắng!', 'error');
+        submitChess('loss');
+      }
+    } else {
+      showToast((winColor === 'w' ? 'Bên Trắng' : 'Bên Đen') + ' chiến thắng! 🎉', 'success');
+      submitChess('win');
+    }
+  }
+}
+
+function onModeChange(){
+  const m = document.getElementById('chessMode').value;
+  const lvl = document.getElementById('chessLevel');
+  if (m === 'bot') {
+    lvl.style.display = 'inline-block';
+  } else {
+    lvl.style.display = 'none';
+  }
+  if (m === 'online') {
+    openInviteModal();
+  }
+}
+
+function newGame(){
+  game = new Chess();
+  selected = null;
+  render();
+  showToast('Đã bắt đầu ván mới!', 'success');
+}
+
+function undoMove(){
+  game.undo();
+  if (document.getElementById('chessMode').value === 'bot') {
+    game.undo();
+  }
+  selected = null;
+  render();
+}
+
+function flipBoard(){
+  flipped = !flipped;
+  render();
+}
+
+// Mời bạn chơi
+function openInviteModal(){
+  if (!currentRoomId) {
+    currentRoomId = 'room_' + Math.random().toString(36).substring(2, 9);
+  }
+  const inviteUrl = `${location.origin}/game/chess?room=${currentRoomId}`;
+  document.getElementById('inviteLinkInput').value = inviteUrl;
+  document.getElementById('inviteModal').classList.add('active');
+}
+
+function closeInviteModal(){
+  document.getElementById('inviteModal').classList.remove('active');
+}
+
+function copyInviteLink(){
+  const inp = document.getElementById('inviteLinkInput');
+  inp.select();
+  navigator.clipboard.writeText(inp.value).then(()=>{
+    showToast('Đã sao chép link mời! Gửi cho bạn bè nhé 📋', 'success');
+  }).catch(()=>{
+    document.execCommand('copy');
+    showToast('Đã sao chép link mời!', 'success');
+  });
+}
+
+// Cập nhật nhãn level
+document.getElementById('chessLevel').addEventListener('change', (e)=>{
+  const txt = e.target.options[e.target.selectedIndex].text;
+  document.getElementById('levelBadge').textContent = 'Cấp: ' + txt;
+  showToast('Đã chuyển sang: ' + txt, 'info');
+});
+
+render();
+</script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

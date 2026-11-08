@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔐 Đăng nhập Discord — Sakura Bot</title>
+  <script>
+    (function () {
+      const t = localStorage.getItem('sakura_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="/images/avatar-bot.jpg">
+  <style>
+    .login-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: .3s;
+    }
+
+    .login-wrapper {
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      padding: 36px 32px;
+      box-shadow: var(--shadow-pop);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--sakura-gradient);
+    }
+
+    .discord-btn {
+      width: 100%;
+      background: #5865F2;
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all .25s ease;
+      margin-top: 24px;
+      box-shadow: 0 4px 16px rgba(88, 101, 242, 0.35);
+    }
+
+    .discord-btn:hover {
+      background: #4752d6;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(88, 101, 242, 0.5);
+    }
+
+    .loading-pulse {
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0.6; transform: scale(0.98); }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="login-nav">
+    <a href="/" style="display:flex;gap:12px;align-items:center;text-decoration:none">
+      <div class="avatar-aura-wrapper">
+        <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
+          class="bot-avatar-animated"
+          style="width:36px;height:36px;border-radius:10px;border:2px solid var(--sakura-pink)" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+      </div>
+      <span
+        style="font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Sakura
+        Bot</span>
+    </a>
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="theme-toggle-btn" aria-label="Đổi giao diện">
+        <span class="theme-icon">🌙</span>
+      </button>
+            <div class="lang-switch-dropdown">
+                <button type="button" class="lang-switch-btn" aria-label="Đổi ngôn ngữ" title="Ngôn ngữ / Language">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-code">VI</span>
+                    <span class="lang-arrow">▾</span>
+                </button>
+                <div class="lang-menu">
+                    <button type="button" class="lang-option active" data-lang="vi"><span>🇻🇳 Tiếng Việt</span><span class="lang-check">✓</span></button>
+                    <button type="button" class="lang-option" data-lang="en"><span>🇬🇧 English</span><span class="lang-check"></span></button>
+                    <button type="button" class="lang-option" data-lang="ja"><span>🇯🇵 日本語</span><span class="lang-check"></span></button>
+                </div>
+            </div>
+      <a href="/help" style="color:var(--text-muted);text-decoration:none;font-size:.9rem">Hướng dẫn</a>
+      <a href="/" style="color:var(--text-muted);text-decoration:none;font-size:.9rem">Trang chủ</a>
+    </div>
+  </nav>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="avatar-aura-wrapper" style="width:72px;height:72px;margin:0 auto 16px">
+        <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
+          class="bot-avatar-animated"
+          style="width:72px;height:72px;border-radius:20px;border:2.5px solid var(--sakura-pink)" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
+      </div>
+      <h2 style="font-size:1.5rem;font-weight:800">Đăng nhập Dashboard</h2>
+      <p style="color:var(--text-muted);font-size:.9rem;margin-top:6px;line-height:1.5">
+        Sakura Bot sử dụng xác thực bảo mật trực tiếp qua Discord để tự động đồng bộ máy chủ bạn có quyền Quản lý.
+      </p>
+
+      <button class="discord-btn" id="btnDiscord" onclick="loginDiscord()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+        </svg>
+        <span>Đăng nhập bằng Discord</span>
+      </button>
+
+      <p id="discordHint" class="loading-pulse" style="font-size:.84rem;color:var(--text-dim);margin-top:16px">
+        Đang chuẩn bị xác thực Discord...
+      </p>
+
+      <p style="text-align:center;color:var(--text-dim);font-size:.82rem;margin-top:24px;border-top:1px solid var(--border-subtle);padding-top:16px">
+        Cần giúp đỡ? <a href="/help" style="color:var(--sakura-pink);font-weight:600">Xem hướng dẫn chi tiết</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Sakura FX Engine (Petals + Swaying Branches + Theme) -->
+  <script src="/static/js/sakura-fx.js"></script>
+    <script src="/static/js/i18n.js"></script>
+
+  <script>
+    function showToast(m, t = 'info') { const c = document.getElementById('toastContainer'); if (!c) return; const d = document.createElement('div'); d.className = 'toast-message'; let i = '🌸'; if (t === 'success') i = '✅'; if (t === 'error') i = '❌'; if (t === 'warning') i = '⚠️'; d.innerHTML = `<span>${i}</span><span>${m}</span>`; c.appendChild(d); setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateY(10px)'; d.style.transition = 'all .3s'; setTimeout(() => d.remove(), 300) }, 4000) }
+
+    async function loginDiscord() {
+      const btn = document.getElementById('btnDiscord');
+      const hint = document.getElementById('discordHint');
+      if (btn) btn.disabled = true;
+      if (hint) hint.innerText = 'Đang chuyển hướng tới Discord...';
+      try {
+        const r = await fetch('/api/auth/discord/login');
+        const j = await r.json();
+        if (j.ok && j.url) {
+          location.href = j.url;
+        } else {
+          showToast(j.error || 'Discord OAuth chưa cấu hình', 'error');
+          if (btn) btn.disabled = false;
+          if (hint) hint.innerText = j.error || 'Lỗi cấu hình Discord OAuth';
+        }
+      } catch (e) {
+        showToast(e.message, 'error');
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    (async () => {
+      // 1. Nếu đã có token và phiên còn hợp lệ -> chuyển thẳng Dashboard
+      const t = localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/) || [])[1];
+      if (t) {
+        try {
+          const r = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + t } });
+          const j = await r.json();
+          if (j.ok) {
+            location.href = '/dashboard';
+            return;
+          }
+        } catch (e) { }
+      }
+
+      // 2. Tự động chuyển hướng sang Discord OAuth
+      loginDiscord();
+    })();
+  </script>
+</body>
+
+</html>

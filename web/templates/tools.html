@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸 Sakura Tools — Trung Tâm Tiện Ích Đa Năng</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+  <style>
+    body {
+      background: var(--bg-primary, #07090e);
+      color: var(--text-main, #f0f2f8);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass, rgba(12, 16, 26, 0.85));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass, rgba(255, 121, 198, 0.18));
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .tool-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--sakura-pink, #ff79c6);
+      box-shadow: 0 0 14px rgba(255, 121, 198, 0.35);
+    }
+
+    .tool-brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff79c6, #bd93f9 50%, #8be9fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 16px 80px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 121, 198, 0.12);
+      border: 1px solid rgba(255, 121, 198, 0.35);
+      color: var(--sakura-pink, #ff79c6);
+      padding: 6px 18px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-title {
+      font-size: 2.6rem;
+      font-weight: 900;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #fff 15%, #ffb8e2 50%, #8be9fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.25;
+    }
+
+    .hero-desc {
+      color: var(--text-muted, #94a3b8);
+      font-size: 1.05rem;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Tools Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+
+    .tool-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.75));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.18));
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(16px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--card-accent, linear-gradient(90deg, #ff79c6, #bd93f9));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255, 121, 198, 0.45);
+      box-shadow: 0 18px 45px rgba(255, 121, 198, 0.18);
+    }
+
+    .tool-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      background: var(--icon-bg, rgba(255, 121, 198, 0.15));
+      border: 1px solid var(--icon-border, rgba(255, 121, 198, 0.3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+
+    .card-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-desc {
+      color: var(--text-muted, #94a3b8);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      flex: 1;
+      margin-bottom: 20px;
+    }
+
+    .card-cta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--sakura-pink, #ff79c6);
+      transition: gap 0.2s;
+    }
+
+    .tool-card:hover .card-cta {
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="tool-nav">
+    <a href="/" class="tool-brand">
+      <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot" onerror="this.src='/images/avatar-bot.jpg'">
+      <div>
+        <div class="tool-brand-title">Sakura Tools</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">Trung Tâm Tiện Ích Trực Tuyến</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/dashboard" class="btn btn-secondary btn-sm" style="text-decoration:none">🌐 Dashboard</a>
+      <a href="/" class="btn btn-secondary btn-sm" style="text-decoration:none">Trang Chủ</a>
+    </div>
+  </nav>
+
+  <div class="tool-wrap">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-badge">✨ Bộ Tiện Ích Trực Tuyến Sakura</div>
+      <h1 class="hero-title">Trung Tâm Tiện Ích Sakura Bot</h1>
+      <p class="hero-desc">Tổng hợp các công cụ trực tuyến miễn phí, tiện lợi và mạnh mẽ phục vụ nhu cầu dịch thuật, tạo mã QR, phát âm văn bản, tải video và giải trí.</p>
+    </div>
+
+    <!-- Tools Showcase Grid -->
+    <div class="tools-grid">
+
+      <!-- 1. Translator -->
+      <a href="/translate" class="tool-card" style="--card-accent: linear-gradient(90deg, #ff79c6, #bd93f9); --icon-bg: rgba(255, 121, 198, 0.15); --icon-border: rgba(255, 121, 198, 0.35);">
+        <div class="card-top">
+          <div class="card-icon">🌐</div>
+          <span class="card-badge">Đa Ngôn Ngữ</span>
+        </div>
+        <div class="card-title">Dịch Thuật Đa Ngôn Ngữ</div>
+        <div class="card-desc">Chuyển đổi ngôn ngữ chính xác giữa 50+ thứ tiếng trên thế giới. Hỗ trợ tự động nhận diện ngôn ngữ nguồn, phát âm giọng đọc và lưu lịch sử dịch thuật.</div>
+        <div class="card-cta">
+          <span>Khám phá ngay</span>
+          <span>➔</span>
+        </div>
+      </a>
+
+      <!-- 2. QR Code Studio -->
+      <a href="/qrcode" class="tool-card" style="--card-accent: linear-gradient(90deg, #50fa7b, #8be9fd); --icon-bg: rgba(80, 250, 123, 0.15); --icon-border: rgba(80, 250, 123, 0.35);">
+        <div class="card-top">
+          <div class="card-icon">📱</div>
+          <span class="card-badge">QR Studio</span>
+        </div>
+        <div class="card-title">Tạo & Quét Mã QR</div>
+        <div class="card-desc">Tạo mã QR tùy biến cho Link, Mạng Wi-Fi, Danh bạ vCard, Email, Số điện thoại. Hỗ trợ đổi màu, gắn logo Sakura chính giữa và tính năng quét mã qua camera.</div>
+        <div class="card-cta" style="color:#50fa7b">
+          <span>Khám phá ngay</span>
+          <span>➔</span>
+        </div>
+      </a>
+
+      <!-- 3. Text to Speech (TTS) -->
+      <a href="/tts" class="tool-card" style="--card-accent: linear-gradient(90deg, #f1fa8c, #ffb86c); --icon-bg: rgba(241, 250, 140, 0.15); --icon-border: rgba(241, 250, 140, 0.35);">
+        <div class="card-top">
+          <div class="card-icon">🎙️</div>
+          <span class="card-badge">Giọng Nói AI</span>
+        </div>
+        <div class="card-title">Chuyển Văn Bản Thành Giọng Nói</div>
+        <div class="card-desc">Chuyển đổi văn bản thành giọng đọc tự nhiên, mượt mà với nhiều ngôn ngữ (Việt, Anh, Nhật, Trung, Hàn...). Hỗ trợ điều chỉnh tốc độ và tải file âm thanh MP3.</div>
+        <div class="card-cta" style="color:#f1fa8c">
+          <span>Khám phá ngay</span>
+          <span>➔</span>
+        </div>
+      </a>
+
+      <!-- 4. TikTok Downloader -->
+      <a href="/tiktok" class="tool-card" style="--card-accent: linear-gradient(90deg, #fe2c55, #25f4ee); --icon-bg: rgba(254, 44, 85, 0.15); --icon-border: rgba(254, 44, 85, 0.35);">
+        <div class="card-top">
+          <div class="card-icon">🎬</div>
+          <span class="card-badge">Media Video</span>
+        </div>
+        <div class="card-title">Tải Video TikTok Không Logo</div>
+        <div class="card-desc">Xem trước và tải video từ TikTok / Douyin không dính watermark logo. Hỗ trợ tùy chọn độ phân giải Full HD / SD, tải âm thanh MP3 và trọn bộ album ảnh Slideshow.</div>
+        <div class="card-cta" style="color:#fe2c55">
+          <span>Khám phá ngay</span>
+          <span>➔</span>
+        </div>
+      </a>
+
+      <!-- 5. URL Shortener -->
+      <a href="/shortener" class="tool-card" style="--card-accent: linear-gradient(90deg, #bd93f9, #ff79c6); --icon-bg: rgba(189, 147, 249, 0.15); --icon-border: rgba(189, 147, 249, 0.35);">
+        <div class="card-top">
+          <div class="card-icon">🔗</div>
+          <span class="card-badge">Rút Gọn Link</span>
+        </div>
+        <div class="card-title">Rút Gọn Link Siêu Tốc</div>
+        <div class="card-desc">Biến các đường dẫn URL dài thành liên kết ngắn gọn, tạo mã QR liên kết tự động và theo dõi số lượt click truy cập thời gian thực.</div>
+        <div class="card-cta" style="color:#bd93f9">
+          <span>Khám phá ngay</span>
+          <span>➔</span>
+        </div>
+      </a>
+
+      <!-- 6. Anime Image Gallery -->
+      <a href="/image" class="tool-card" style="--card-accent: linear-gradient(90deg, #8be9fd, #bd93f9); --icon-bg: rgba(139, 233, 253, 0.15); --icon-border: rgba(139, 233, 253, 0.35);">
+        <div class="card-top">
+          <div class="card-icon">🖼️</div>
+          <span class="card-badge">Hình Ảnh</span>
+        </div>
+        <div class="card-title">Thư Viện Ảnh Anime</div>
+        <div class="card-desc">Khám phá và tải xuống bộ sưu tập hình nền hoa anh đào, nhân vật anime chất lượng cao sắc nét được tối ưu hoá cho desktop và điện thoại.</div>
+        <div class="card-cta" style="color:#8be9fd">
+          <span>Khám phá ngay</span>
+          <span>➔</span>
+        </div>
+      </a>
+
+      <!-- 7. Tarot 3D -->
+      <a href="/tarot" class="tool-card" style="--card-accent: linear-gradient(90deg, #a855f7, #ec4899); --icon-bg: rgba(168, 85, 247, 0.15); --icon-border: rgba(168, 85, 247, 0.35);">
+        <div class="card-top">
+          <div class="card-icon">🔮</div>
+          <span class="card-badge">Bói Bài Tarot</span>
+        </div>
+        <div class="card-title">Bói Bài Tarot 3D</div>
+        <div class="card-desc">Trải nghiệm rút bài Tarot huyền bí với hiệu ứng lật thẻ bài 3D sống động và lời giải mã chi tiết về công việc, tình duyên và vận mệnh.</div>
+        <div class="card-cta" style="color:#a855f7">
+          <span>Khám phá ngay</span>
+          <span>➔</span>
+        </div>
+      </a>
+
+      <!-- 8. Minigames -->
+      <a href="/games" class="tool-card" style="--card-accent: linear-gradient(90deg, #ffb86c, #ff5555); --icon-bg: rgba(255, 184, 108, 0.15); --icon-border: rgba(255, 184, 108, 0.35);">
+        <div class="card-top">
+          <div class="card-icon">🎮</div>
+          <span class="card-badge">Giải Trí Game</span>
+        </div>
+        <div class="card-title">Minigames & Giải Trí</div>
+        <div class="card-desc">Sảnh trò chơi trực tuyến phong phú: Cờ Caro thông minh, Cờ Vua, Nối Từ Tiếng Việt và Vẽ Tranh Đoán Chữ (Scribble) giao lưu nhiều người chơi.</div>
+        <div class="card-cta" style="color:#ffb86c">
+          <span>Khám phá ngay</span>
+          <span>➔</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>
+

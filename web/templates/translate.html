@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸 Sakura Translate — Trình Dịch Thuật Đa Ngôn Ngữ Thông Minh</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+  <style>
+    body {
+      background: var(--bg-primary, #07090e);
+      color: var(--text-main, #f0f2f8);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass, rgba(12, 16, 26, 0.85));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass, rgba(255, 121, 198, 0.18));
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .tool-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--sakura-pink, #ff79c6);
+      box-shadow: 0 0 14px rgba(255, 121, 198, 0.35);
+    }
+
+    .tool-brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff79c6, #bd93f9 50%, #8be9fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .tool-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 121, 198, 0.12);
+      border: 1px solid rgba(255, 121, 198, 0.35);
+      color: var(--sakura-pink, #ff79c6);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tool-title {
+      font-size: 2.3rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 20%, #ffb8e2 60%, #8be9fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-subtitle {
+      color: var(--text-muted, #94a3b8);
+      font-size: 1rem;
+      max-width: 650px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Quick Language Pairs */
+    .lang-chips {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .lang-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main, #fff);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .lang-chip:hover {
+      background: rgba(255, 121, 198, 0.15);
+      border-color: var(--sakura-pink, #ff79c6);
+      color: var(--sakura-pink, #ff79c6);
+      transform: translateY(-2px);
+    }
+
+    /* Translator Box Container */
+    .translator-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.75));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.2));
+      border-radius: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .translator-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: rgba(10, 14, 23, 0.6);
+      border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .lang-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .lang-select {
+      background: var(--bg-input, rgba(10, 14, 23, 0.85));
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      flex: 1;
+      max-width: 220px;
+    }
+
+    .lang-select:focus {
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    .btn-swap {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
+      color: var(--sakura-pink, #ff79c6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-swap:hover {
+      background: rgba(255, 121, 198, 0.2);
+      transform: rotate(180deg);
+    }
+
+    .btn-translate {
+      background: linear-gradient(135deg, #ff79c6, #bd93f9);
+      border: none;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-translate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 121, 198, 0.4);
+    }
+
+    /* Two-pane layout */
+    .panes-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 280px;
+    }
+
+    @media (max-width: 768px) {
+      .panes-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 20px;
+      position: relative;
+    }
+
+    .pane-source {
+      border-right: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    }
+
+    @media (max-width: 768px) {
+      .pane-source {
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+      }
+    }
+
+    .pane-target {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .pane-textarea {
+      flex: 1;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+      min-height: 180px;
+    }
+
+    .pane-textarea::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .pane-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      font-size: 0.85rem;
+      color: var(--text-muted, #94a3b8);
+    }
+
+    .pane-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main, #fff);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 121, 198, 0.15);
+      border-color: var(--sakura-pink, #ff79c6);
+      color: var(--sakura-pink, #ff79c6);
+    }
+
+    /* History & Features Section */
+    .history-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.6));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.15));
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .history-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      background: rgba(10, 14, 23, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 10px 14px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .history-item:hover {
+      border-color: var(--sakura-pink, #ff79c6);
+      background: rgba(255, 121, 198, 0.05);
+    }
+
+    .history-text {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.92rem;
+    }
+
+    .history-badge {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      color: var(--text-muted);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(18, 24, 38, 0.95);
+      border: 1px solid var(--sakura-pink, #ff79c6);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="tool-nav">
+    <a href="/tools" class="tool-brand">
+      <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot" onerror="this.src='/images/avatar-bot.jpg'">
+      <div>
+        <div class="tool-brand-title">Sakura Translate</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">Dịch Thuật Đa Ngôn Ngữ Thông Minh</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/tools" class="btn btn-secondary btn-sm" style="text-decoration:none">✨ Tất Cả Tiện Ích</a>
+      <a href="/dashboard" class="btn btn-secondary btn-sm" style="text-decoration:none">🌐 Dashboard</a>
+      <a href="/" class="btn btn-secondary btn-sm" style="text-decoration:none">Trang Chủ</a>
+    </div>
+  </nav>
+
+  <div class="tool-wrap">
+    <!-- Header -->
+    <div class="tool-header">
+      <div class="tool-badge">🌐 Trình Dịch Thuật AI Toàn Cầu</div>
+      <h1 class="tool-title">Dịch Thuật Văn Bản Đa Ngôn Ngữ</h1>
+      <p class="tool-subtitle">Chuyển đổi ngữ nghĩa mượt mà, hỗ trợ phát âm giọng đọc, tự động nhận diện ngôn ngữ và tối ưu hoá giao tiếp quốc tế.</p>
+
+      <!-- Quick Language Pair Chips -->
+      <div class="lang-chips">
+        <button type="button" class="lang-chip" onclick="setPair('vi', 'en')">🇻🇳 Tiếng Việt ➔ 🇬🇧 English</button>
+        <button type="button" class="lang-chip" onclick="setPair('en', 'vi')">🇬🇧 English ➔ 🇻🇳 Tiếng Việt</button>
+        <button type="button" class="lang-chip" onclick="setPair('ja', 'vi')">🇯🇵 日本語 ➔ 🇻🇳 Tiếng Việt</button>
+        <button type="button" class="lang-chip" onclick="setPair('cn', 'vi')">🇨🇳 中文 ➔ 🇻🇳 Tiếng Việt</button>
+        <button type="button" class="lang-chip" onclick="setPair('vi', 'ja')">🇻🇳 Tiếng Việt ➔ 🇯🇵 日本語</button>
+        <button type="button" class="lang-chip" onclick="setPair('vi', 'cn')">🇻🇳 Tiếng Việt ➔ 🇨🇳 中文</button>
+      </div>
+    </div>
+
+    <!-- Main Translator Card -->
+    <div class="translator-card">
+      <div class="translator-bar">
+        <div class="lang-selector-group">
+          <select id="sourceLang" class="lang-select">
+            <option value="auto">🌐 Tự động nhận diện</option>
+            <option value="vi" selected>🇻🇳 Tiếng Việt</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="ja">🇯🇵 日本語 (Japanese)</option>
+            <option value="cn">🇨🇳 中文 (Chinese)</option>
+            <option value="ko">🇰🇷 한국어 (Korean)</option>
+            <option value="fr">🇫🇷 Français (French)</option>
+            <option value="de">🇩🇪 Deutsch (German)</option>
+            <option value="es">🇪🇸 Español (Spanish)</option>
+            <option value="ru">🇷🇺 Русский (Russian)</option>
+            <option value="th">🇹🇭 ภาษาไทย (Thai)</option>
+            <option value="id">🇮🇩 Bahasa Indonesia</option>
+          </select>
+
+          <button type="button" id="btnSwap" class="btn-swap" title="Đảo ngược 2 ngôn ngữ">
+            ⇄
+          </button>
+
+          <select id="targetLang" class="lang-select">
+            <option value="en" selected>🇬🇧 English</option>
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="ja">🇯🇵 日本語 (Japanese)</option>
+            <option value="cn">🇨🇳 中文 (Chinese)</option>
+            <option value="ko">🇰🇷 한국어 (Korean)</option>
+            <option value="fr">🇫🇷 Français (French)</option>
+            <option value="de">🇩🇪 Deutsch (German)</option>
+            <option value="es">🇪🇸 Español (Spanish)</option>
+            <option value="ru">🇷🇺 Русский (Russian)</option>
+            <option value="th">🇹🇭 ภาษาไทย (Thai)</option>
+            <option value="id">🇮🇩 Bahasa Indonesia</option>
+          </select>
+        </div>
+
+        <button type="button" id="btnTranslate" class="btn-translate">
+          <span>⚡ Dịch Ngay</span>
+        </button>
+      </div>
+
+      <div class="panes-container">
+        <!-- Source Input Pane -->
+        <div class="pane pane-source">
+          <textarea id="sourceText" class="pane-textarea" placeholder="Nhập hoặc dán văn bản cần dịch tại đây... (Nhấn Ctrl + Enter để dịch nhanh)" spellcheck="false"></textarea>
+          <div class="pane-footer">
+            <div class="pane-actions">
+              <button type="button" class="icon-btn" id="btnSpeakSource" title="Nghe phát âm">🔊</button>
+              <button type="button" class="icon-btn" id="btnPasteSource" title="Dán từ Clipboard">📋</button>
+              <button type="button" class="icon-btn" id="btnClearSource" title="Xóa nội dung">✕</button>
+            </div>
+            <div id="charCount">0 / 5,000 ký tự</div>
+          </div>
+        </div>
+
+        <!-- Target Output Pane -->
+        <div class="pane pane-target">
+          <textarea id="targetText" class="pane-textarea" placeholder="Bản dịch sẽ xuất hiện ở đây..." readonly spellcheck="false"></textarea>
+          <div class="pane-footer">
+            <div class="pane-actions">
+              <button type="button" class="icon-btn" id="btnSpeakTarget" title="Nghe bản dịch">🔊</button>
+              <button type="button" class="icon-btn" id="btnCopyTarget" title="Sao chép bản dịch">📄</button>
+            </div>
+            <div id="statusIndicator">Sẵn sàng</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Card -->
+    <div class="history-card">
+      <div class="history-header">
+        <div class="history-title">
+          <span>🕒 Lịch Sử Dịch Gần Đây</span>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="clearHistory()">Xóa lịch sử</button>
+      </div>
+      <div id="historyList" class="history-list">
+        <div style="color:var(--text-muted);font-size:0.88rem;text-align:center;padding:16px;">Chưa có bản dịch nào được lưu.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toastIcon">🌸</span>
+    <span id="toastMsg">Thông báo</span>
+  </div>
+
+  <script src="/static/js/i18n.js"></script>
+  <script>
+    const sourceText = document.getElementById('sourceText');
+    const targetText = document.getElementById('targetText');
+    const sourceLang = document.getElementById('sourceLang');
+    const targetLang = document.getElementById('targetLang');
+    const btnTranslate = document.getElementById('btnTranslate');
+    const btnSwap = document.getElementById('btnSwap');
+    const charCount = document.getElementById('charCount');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const historyList = document.getElementById('historyList');
+
+    let debounceTimer = null;
+
+    function showToast(msg, icon = '🌸') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      document.getElementById('toastIcon').textContent = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function setPair(src, tgt) {
+      sourceLang.value = src;
+      targetLang.value = tgt;
+      if (sourceText.value.trim()) {
+        doTranslate();
+      }
+    }
+
+    btnSwap.addEventListener('click', () => {
+      const sVal = sourceLang.value;
+      const tVal = targetLang.value;
+      if (sVal === 'auto') {
+        showToast('Không thể đảo chiều khi nguồn là tự động!', '⚠️');
+        return;
+      }
+      sourceLang.value = tVal;
+      targetLang.value = sVal;
+      const curSrc = sourceText.value;
+      const curTgt = targetText.value;
+      sourceText.value = curTgt;
+      targetText.value = curSrc;
+      updateCharCount();
+      if (sourceText.value.trim()) {
+        doTranslate();
+      }
+    });
+
+    function updateCharCount() {
+      const len = sourceText.value.length;
+      charCount.textContent = `${len.toLocaleString()} / 5,000 ký tự`;
+      if (len > 5000) {
+        charCount.style.color = '#ff5555';
+      } else {
+        charCount.style.color = 'var(--text-muted)';
+      }
+    }
+
+    sourceText.addEventListener('input', () => {
+      updateCharCount();
+      clearTimeout(debounceTimer);
+      if (sourceText.value.trim().length > 0) {
+        debounceTimer = setTimeout(doTranslate, 600);
+      } else {
+        targetText.value = '';
+        statusIndicator.textContent = 'Sẵn sàng';
+      }
+    });
+
+    sourceText.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        doTranslate();
+      }
+    });
+
+    btnTranslate.addEventListener('click', doTranslate);
+
+    async function doTranslate() {
+      const text = sourceText.value.trim();
+      if (!text) {
+        targetText.value = '';
+        return;
+      }
+
+      statusIndicator.textContent = '⏳ Đang dịch...';
+      try {
+        const res = await fetch('/api/tools/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: text,
+            source: sourceLang.value,
+            target: targetLang.value
+          })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          targetText.value = data.translated;
+          statusIndicator.textContent = '✅ Đã hoàn tất';
+          saveHistory(text, data.translated, sourceLang.value, targetLang.value);
+        } else {
+          statusIndicator.textContent = '❌ Lỗi dịch';
+          showToast(data.error || 'Dịch thất bại, vui lòng thử lại', '❌');
+        }
+      } catch (err) {
+        statusIndicator.textContent = '❌ Lỗi mạng';
+        showToast('Không thể kết nối máy chủ dịch', '❌');
+      }
+    }
+
+    // Copy Button
+    document.getElementById('btnCopyTarget').addEventListener('click', () => {
+      if (!targetText.value.trim()) return;
+      navigator.clipboard.writeText(targetText.value)
+        .then(() => showToast('Đã sao chép bản dịch vào bộ nhớ tạm!', '📋'))
+        .catch(() => showToast('Không thể sao chép!', '⚠️'));
+    });
+
+    // Paste Button
+    document.getElementById('btnPasteSource').addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          sourceText.value = text;
+          updateCharCount();
+          doTranslate();
+          showToast('Đã dán văn bản!', '📋');
+        }
+      } catch {
+        showToast('Vui lòng cấp quyền đọc Clipboard!', '⚠️');
+      }
+    });
+
+    // Clear Button
+    document.getElementById('btnClearSource').addEventListener('click', () => {
+      sourceText.value = '';
+      targetText.value = '';
+      updateCharCount();
+      statusIndicator.textContent = 'Sẵn sàng';
+    });
+
+    // Speech synthesis
+    function speakText(text, langCode) {
+      if (!text.trim()) return;
+      if (!('speechSynthesis' in window)) {
+        showToast('Trình duyệt không hỗ trợ phát âm!', '⚠️');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      if (langCode === 'vi') utterance.lang = 'vi-VN';
+      else if (langCode === 'en') utterance.lang = 'en-US';
+      else if (langCode === 'ja') utterance.lang = 'ja-JP';
+      else if (langCode === 'cn') utterance.lang = 'zh-CN';
+      else if (langCode === 'ko') utterance.lang = 'ko-KR';
+      else if (langCode === 'fr') utterance.lang = 'fr-FR';
+      else if (langCode === 'de') utterance.lang = 'de-DE';
+      else if (langCode === 'es') utterance.lang = 'es-ES';
+      else if (langCode === 'ru') utterance.lang = 'ru-RU';
+      window.speechSynthesis.speak(utterance);
+    }
+
+    document.getElementById('btnSpeakSource').addEventListener('click', () => {
+      speakText(sourceText.value, sourceLang.value);
+    });
+
+    document.getElementById('btnSpeakTarget').addEventListener('click', () => {
+      speakText(targetText.value, targetLang.value);
+    });
+
+    // Translation History in localStorage
+    const HIST_KEY = 'sakura_trans_hist';
+    function loadHistory() {
+      const items = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+      if (items.length === 0) {
+        historyList.innerHTML = '<div style="color:var(--text-muted);font-size:0.88rem;text-align:center;padding:16px;">Chưa có bản dịch nào được lưu.</div>';
+        return;
+      }
+
+      historyList.innerHTML = items.map((it, idx) => `
+        <div class="history-item" onclick="restoreHistory(${idx})">
+          <div class="history-text">
+            <strong>${escapeHtml(it.src)}</strong> ➔ <span>${escapeHtml(it.tgt)}</span>
+          </div>
+          <span class="history-badge">${it.sLang.toUpperCase()} → ${it.tLang.toUpperCase()}</span>
+        </div>
+      `).join('');
+    }
+
+    function saveHistory(src, tgt, sLang, tLang) {
+      let items = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+      items = items.filter(i => i.src !== src);
+      items.unshift({ src, tgt, sLang, tLang, time: Date.now() });
+      if (items.length > 20) items.pop();
+      localStorage.setItem(HIST_KEY, JSON.stringify(items));
+      loadHistory();
+    }
+
+    function restoreHistory(idx) {
+      const items = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+      if (items[idx]) {
+        sourceText.value = items[idx].src;
+        targetText.value = items[idx].tgt;
+        if (items[idx].sLang) sourceLang.value = items[idx].sLang;
+        if (items[idx].tLang) targetLang.value = items[idx].tLang;
+        updateCharCount();
+        statusIndicator.textContent = '✅ Đã tải từ lịch sử';
+      }
+    }
+
+    function clearHistory() {
+      localStorage.removeItem(HIST_KEY);
+      loadHistory();
+      showToast('Đã xóa lịch sử dịch!', '🗑️');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    document.addEventListener('DOMContentLoaded', loadHistory);
+  </script>
+</body>
+</html>
+

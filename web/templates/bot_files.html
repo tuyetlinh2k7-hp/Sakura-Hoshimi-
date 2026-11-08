@@ -1,0 +1,2592 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📁 Sakura Bot — Quản Lý Tệp & Nạp Lại Cogs</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="/images/avatar-bot.jpg">
+  <!-- Ace Editor for High-Performance Code Editing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.min.js"></script>
+  <style>
+    :root {
+      --bf-bg-sidebar: rgba(13, 17, 27, 0.85);
+      --bf-bg-editor: #090d16;
+      --bf-border: rgba(255, 121, 198, 0.18);
+      --bf-border-active: rgba(255, 121, 198, 0.45);
+      --bf-accent: #ff79c6;
+      --bf-accent-hover: #ff2a85;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ẨN CÀNH HOA BÊN GÓC KHI VÀO QUẢN LÝ TỆP (Tránh che khuất các nút và breadcrumbs) */
+    .sakura-branch-container,
+    .sakura-branch-decor,
+    .sakura-branch-image,
+    .branch-top-left {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
+    }
+
+    /* Top Navigation Bar */
+    .bf-topbar {
+      height: 64px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .bf-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .bf-brand-img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--bf-accent);
+      object-fit: cover;
+    }
+
+    .bf-brand-text {
+      font-weight: 700;
+      font-size: 1.15rem;
+      background: var(--sakura-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .bf-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bf-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .bf-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--bf-accent);
+      transform: translateY(-1px);
+    }
+
+    .bf-btn-primary {
+      background: var(--sakura-gradient);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(255, 42, 133, 0.35);
+    }
+
+    .bf-btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(255, 42, 133, 0.5);
+    }
+
+    .bf-btn-success {
+      background: rgba(80, 250, 123, 0.15);
+      border-color: rgba(80, 250, 123, 0.4);
+      color: #50fa7b;
+    }
+
+    .bf-btn-success:hover {
+      background: rgba(80, 250, 123, 0.25);
+    }
+
+    .bf-btn-danger {
+      background: rgba(255, 85, 85, 0.15);
+      border-color: rgba(255, 85, 85, 0.4);
+      color: #ff5555;
+    }
+
+    .bf-btn-danger:hover {
+      background: rgba(255, 85, 85, 0.25);
+    }
+
+    /* Main Container Split View */
+    .bf-workspace {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      height: calc(100vh - 64px);
+      overflow: hidden;
+    }
+
+    /* Left Sidebar: File Explorer */
+    .bf-sidebar {
+      background: var(--bf-bg-sidebar);
+      border-right: 1px solid var(--border-glass);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .bf-quick-tabs {
+      display: flex;
+      gap: 6px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .bf-tab-btn {
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .bf-tab-btn:hover, .bf-tab-btn.active {
+      background: var(--bg-hover);
+      border-color: var(--bf-accent);
+      color: var(--bf-accent);
+    }
+
+    .bf-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      background: rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid var(--border-subtle);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .bf-crumb-link {
+      color: #8be9fd;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .bf-crumb-link:hover {
+      text-decoration: underline;
+    }
+
+    /* 2-Row Explorer Tools: Search Row 1, 4 Clear Action Buttons Row 2 */
+    .bf-explorer-tools {
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .bf-search-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 7px 12px;
+      font-size: 0.82rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      outline: none;
+    }
+    .bf-search-input:focus {
+      border-color: var(--bf-accent);
+    }
+
+    .bf-tools-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .bf-tool-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 7px 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .bf-tool-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--bf-accent);
+      color: var(--bf-accent);
+      transform: translateY(-1px);
+    }
+
+    .bf-tool-btn-refresh {
+      background: rgba(80, 250, 123, 0.08);
+      border-color: rgba(80, 250, 123, 0.3);
+      color: #50fa7b;
+    }
+
+    .bf-tool-btn-refresh:hover {
+      background: rgba(80, 250, 123, 0.22);
+      border-color: #50fa7b;
+      color: #fff;
+    }
+
+    .bf-file-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      margin: 0;
+      list-style: none;
+    }
+
+    .bf-file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.15s;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+
+    .bf-file-item:hover {
+      background: rgba(255, 121, 198, 0.08);
+    }
+
+    .bf-file-item.active {
+      background: rgba(255, 121, 198, 0.18);
+      border-left: 3px solid var(--bf-accent);
+    }
+
+    .bf-item-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .bf-item-icon {
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+
+    .bf-item-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bf-item-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      background: rgba(189, 147, 249, 0.2);
+      color: var(--accent-purple);
+      border: 1px solid rgba(189, 147, 249, 0.4);
+    }
+
+    .bf-item-actions {
+      display: none;
+      gap: 4px;
+    }
+
+    .bf-file-item:hover .bf-item-actions {
+      display: flex;
+    }
+
+    .bf-mini-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+    .bf-mini-btn:hover {
+      color: #fff;
+    }
+
+    /* Right Pane: Editor & Database Viewer */
+    .bf-editor-pane {
+      background: var(--bf-bg-editor);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bf-editor-header {
+      height: 52px;
+      background: rgba(13, 17, 27, 0.95);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 10;
+    }
+
+    .bf-editor-file-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      overflow: hidden;
+    }
+
+    .bf-editor-box {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .bf-editor-half {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      transition: width 0.2s ease;
+    }
+
+    .bf-preview-half {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      border-left: 1px solid var(--border-subtle);
+      background: #090d16;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      transition: width 0.2s ease;
+    }
+
+    .bf-preview-bar {
+      height: 38px;
+      background: rgba(13, 17, 27, 0.95);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      z-index: 5;
+    }
+
+    .bf-preview-frame-wrap {
+      flex: 1;
+      height: calc(100% - 38px);
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      background: #111624;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #htmlPreviewFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #ffffff;
+      transition: all 0.25s ease;
+    }
+
+    .bf-preview-frame-wrap.mobile-view {
+      padding: 14px 0;
+      background: #070a12;
+    }
+
+    .bf-preview-frame-wrap.mobile-view #htmlPreviewFrame {
+      width: 390px;
+      height: 95%;
+      border-radius: 22px;
+      border: 4px solid #334155;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85);
+    }
+
+
+    #aceEditor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    #fallbackTextarea {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      background: #090d16;
+      color: #f8f8f2;
+      border: none;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      resize: none;
+      outline: none;
+      box-sizing: border-box;
+      display: none;
+    }
+
+    .bf-cog-alert-banner {
+      background: rgba(255, 121, 198, 0.12);
+      border-bottom: 1px solid rgba(255, 121, 198, 0.35);
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #f8f8f2;
+    }
+
+    .bf-statusbar {
+      height: 30px;
+      background: rgba(13, 17, 27, 0.95);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* Database Viewer Styles */
+    .bf-db-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .bf-db-schema-bar {
+      display: flex;
+      gap: 6px;
+      padding: 6px 16px;
+      background: rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid var(--border-subtle);
+      overflow-x: auto;
+      white-space: nowrap;
+      min-height: 28px;
+      align-items: center;
+    }
+
+    .bf-col-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+    .bf-col-pill.pk {
+      border-color: rgba(255, 184, 108, 0.4);
+      color: #ffb86c;
+      background: rgba(255, 184, 108, 0.1);
+    }
+
+    .bf-db-table-wrapper {
+      flex: 1;
+      overflow: auto;
+      background: #090d16;
+      position: relative;
+    }
+
+    .bf-db-data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
+    .bf-db-data-table th {
+      position: sticky;
+      top: 0;
+      background: #141a29;
+      color: #ff79c6;
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--bf-accent);
+      z-index: 5;
+      user-select: none;
+    }
+
+    .bf-db-data-table td {
+      padding: 7px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bf-db-data-table tr:hover td {
+      background: rgba(255, 121, 198, 0.08);
+    }
+
+    .bf-db-row-idx {
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      width: 40px;
+      text-align: right;
+      padding-right: 8px !important;
+      user-select: none;
+    }
+
+    .bf-db-null {
+      color: #6272a4;
+      font-style: italic;
+      background: rgba(98, 114, 164, 0.15);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.75rem;
+    }
+
+    .bf-db-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(13, 17, 27, 0.95);
+      border-top: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .bf-db-tab-switcher {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 3px;
+      border-radius: 6px;
+      gap: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Modal */
+    .bf-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .bf-modal.active {
+      display: flex;
+    }
+
+    .bf-modal-content {
+      background: #141a29;
+      border: 1px solid var(--bf-accent);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+
+    .bf-modal-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .bf-modal-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .bf-cogs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .bf-cogs-table th {
+      text-align: left;
+      padding: 8px 10px;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .bf-cogs-table td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Toast Notification */
+    .bf-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: #182234;
+      border: 1px solid var(--bf-accent);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bf-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .bf-toast.success {
+      border-color: #50fa7b;
+      box-shadow: 0 0 20px rgba(80, 250, 123, 0.25);
+    }
+
+    .bf-toast.error {
+      border-color: #ff5555;
+      box-shadow: 0 0 20px rgba(255, 85, 85, 0.25);
+    }
+
+    @media (max-width: 900px) {
+      .bf-workspace {
+        grid-template-columns: 1fr;
+      }
+      .bf-sidebar {
+        height: 45vh;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="bf-topbar">
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <a href="/dashboard" class="bf-brand">
+        <img src="/images/avatar-bot.jpg" alt="Avatar Bot" class="bf-brand-img" onerror="this.onerror=null; this.src='/static/images/avatar-bot.jpg';">
+        <span class="bf-brand-text">Sakura Bot Admin</span>
+      </a>
+      <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">📁 Quản Lý Tệp & Nạp Lại Cogs</span>
+    </div>
+
+    <div class="bf-topbar-actions">
+      <!-- Bot Status Pill -->
+      <div id="botStatusPill" class="bf-btn" style="cursor: default; pointer-events: none; border-color: rgba(80, 250, 123, 0.3);">
+        <span style="color: #50fa7b;">🟢</span> <span id="botStatusText">Bot Online</span>
+      </div>
+
+      <!-- Quick Cogs Action Buttons -->
+      <button class="bf-btn bf-btn-primary" onclick="openCogsModal()">
+        <span>🧩</span> Danh Sách Cogs (<span id="loadedCogsCount">0</span>)
+      </button>
+
+      <button class="bf-btn bf-btn-success" onclick="reloadAllCogs()" title="Nạp lại toàn bộ Cogs trong Command_vi, Anti, Logs_vi">
+        <span>⚡</span> Nạp Lại Toàn Bộ Cogs
+      </button>
+
+      <button class="bf-btn" onclick="syncSlashTree()" title="Đồng bộ lại cây lệnh Slash Commands">
+        <span>🌲</span> Đồng Bộ Lệnh
+      </button>
+
+      <!-- Theme Switcher -->
+      <button id="themeToggleBtn" class="bf-btn" style="padding: 8px 10px; font-size: 1.1rem;" onclick="toggleTheme()" title="Chuyển chế độ Sáng / Tối">
+        🌙
+      </button>
+
+      <a href="/dashboard" class="bf-btn">
+        <span>📊</span> Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Workspace Dual Pane -->
+  <div class="bf-workspace">
+
+    <!-- Left Pane: File Explorer -->
+    <aside class="bf-sidebar">
+      <!-- Quick Folder Filter Tabs -->
+      <div class="bf-quick-tabs">
+        <button class="bf-tab-btn active" onclick="navigatePath('')">📁 Tất Cả</button>
+        <button class="bf-tab-btn" onclick="navigatePath('Command_vi')">🤖 Command_vi</button>
+        <button class="bf-tab-btn" onclick="navigatePath('Anti')">🛡️ Anti</button>
+        <button class="bf-tab-btn" onclick="navigatePath('Logs_vi')">📜 Logs_vi</button>
+        <button class="bf-tab-btn" onclick="navigatePath('Checks_vi')">⚙️ Checks_vi</button>
+        <button class="bf-tab-btn" onclick="navigatePath('languages')">🌐 languages</button>
+        <button class="bf-tab-btn" onclick="navigatePath('web')">💻 web</button>
+        <button class="bf-tab-btn" onclick="navigatePath('data')">🗄️ data</button>
+      </div>
+
+      <!-- Breadcrumbs Path -->
+      <div class="bf-breadcrumb" id="breadcrumbBar">
+        <span class="bf-crumb-link" onclick="navigatePath('')">root</span> /
+      </div>
+
+      <!-- Explorer Tools: Search Row 1, 4 Action Buttons Row 2 -->
+      <div class="bf-explorer-tools">
+        <input type="text" id="fileSearchInput" class="bf-search-input" placeholder="🔍 Tìm kiếm tệp tin..." oninput="filterFiles(this.value)">
+        <div class="bf-tools-actions">
+          <button class="bf-tool-btn" onclick="promptCreateFile(false)" title="Tạo tệp mới">
+            <span>📄</span> Tệp
+          </button>
+          <button class="bf-tool-btn" onclick="promptCreateFile(true)" title="Tạo thư mục mới">
+            <span>📁</span> Mục
+          </button>
+          <button class="bf-tool-btn" onclick="document.getElementById('fileUploadInput').click()" title="Tải lên tệp">
+            <span>⬆️</span> Tải lên
+          </button>
+          <button class="bf-tool-btn bf-tool-btn-refresh" onclick="refreshFiles()" title="Làm mới danh sách tệp">
+            <span>🔄</span> Làm mới
+          </button>
+        </div>
+        <input type="file" id="fileUploadInput" style="display: none;" multiple onchange="uploadFiles(this.files)">
+      </div>
+
+      <!-- File and Directory Tree -->
+      <ul class="bf-file-list" id="fileList">
+        <li style="padding: 20px; text-align: center; color: var(--text-muted);">Đang tải dữ liệu tệp tin...</li>
+      </ul>
+    </aside>
+
+    <!-- Right Pane: Code Editor & Database Viewer Container -->
+    <main class="bf-editor-pane">
+
+      <!-- 1. CODE EDITOR CONTAINER -->
+      <div id="codeEditorContainer" style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+        <!-- Editor Header -->
+        <div class="bf-editor-header">
+          <div class="bf-editor-file-info">
+            <span id="editorFileIcon">📄</span>
+            <span id="editorFilePath" style="font-weight: 700; color: #fff;">Chưa mở tệp nào</span>
+            <span id="unsavedBadge" style="display: none; color: #ff5555; font-size: 1.2rem;">●</span>
+            <span id="fileSizeBadge" style="color: var(--text-muted); font-size: 0.78rem;"></span>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <!-- HTML Live Preview Mode Switcher (Chỉ hiển thị khi mở tệp HTML) -->
+            <div id="htmlPreviewTools" style="display: none; align-items: center; gap: 8px;">
+              <div class="bf-db-tab-switcher">
+                <button id="btnHtmlModeCode" class="bf-tab-btn" onclick="setHtmlPreviewMode('code')" title="Chỉ xem mã nguồn HTML">
+                  <span>📝</span> Mã
+                </button>
+                <button id="btnHtmlModeSplit" class="bf-tab-btn active" onclick="setHtmlPreviewMode('split')" title="Chia đôi màn hình: Mã nguồn & Xem trước trực tiếp">
+                  <span>🪟</span> Chia Đôi
+                </button>
+                <button id="btnHtmlModePreview" class="bf-tab-btn" onclick="setHtmlPreviewMode('preview')" title="Xem trước toàn màn hình">
+                  <span>👁️</span> Xem Trước
+                </button>
+              </div>
+              <button class="bf-btn" style="padding: 6px 10px;" onclick="openHtmlPreviewInNewTab()" title="Mở trang xem trước trong tab trình duyệt mới">
+                <span>🔗</span> Tab Mới
+              </button>
+            </div>
+
+            <button id="saveBtn" class="bf-btn bf-btn-primary" onclick="saveActiveFile()" disabled>
+              <span>💾</span> Lưu Tệp (Ctrl+S)
+            </button>
+          </div>
+        </div>
+
+        <!-- Cog Quick Reload Alert Banner -->
+        <div id="cogBanner" class="bf-cog-alert-banner" style="display: none;">
+          <div>
+            <span>⚡ Tệp này là một Extension Cog của SakuraBot: </span>
+            <strong id="cogModuleName" style="color: #ff79c6;">Command_vi.bank</strong>
+          </div>
+          <button class="bf-btn bf-btn-success" style="padding: 4px 10px; font-size: 0.8rem;" onclick="reloadCurrentCog()">
+            <span>🔄</span> Nạp Lại Cog Này Ngay
+          </button>
+        </div>
+
+        <!-- Editor Box with HTML Live Preview Support -->
+        <div class="bf-editor-box" id="editorBoxContainer">
+          <div id="editorHalfPane" class="bf-editor-half">
+            <div id="aceEditor"></div>
+            <textarea id="fallbackTextarea" spellcheck="false" placeholder="Nội dung tệp sẽ xuất hiện ở đây..."></textarea>
+          </div>
+
+          <!-- HTML Live Preview Half Pane -->
+          <div id="htmlPreviewPane" class="bf-preview-half">
+            <!-- Preview Top Control Bar -->
+            <div class="bf-preview-bar">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.8rem; font-weight: 700; color: #ff79c6;">👁️ Xem Trước HTML</span>
+                <span class="bf-item-badge" style="background: rgba(80, 250, 123, 0.15); color: #50fa7b; border-color: rgba(80, 250, 123, 0.4); font-size: 0.65rem;">
+                  ● Trực Tiếp (Live)
+                </span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button class="bf-tab-btn active" id="btnPreviewDesktop" onclick="setPreviewDevice('desktop')" title="Chế độ Máy tính (100%)">🖥️ Desktop</button>
+                <button class="bf-tab-btn" id="btnPreviewMobile" onclick="setPreviewDevice('mobile')" title="Chế độ Điện thoại di động (390px)">📱 Mobile</button>
+                <button class="bf-mini-btn" onclick="updateHtmlPreview()" title="Tải lại bản xem trước" style="padding: 4px 8px; font-size: 0.9rem;">🔄</button>
+                <button class="bf-mini-btn" onclick="openHtmlPreviewInNewTab()" title="Mở trong tab mới" style="padding: 4px 8px; font-size: 0.9rem;">🔗</button>
+              </div>
+            </div>
+
+            <!-- Iframe Container Wrapper -->
+            <div class="bf-preview-frame-wrap" id="previewFrameWrap">
+              <iframe id="htmlPreviewFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups" title="HTML Preview"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="bf-statusbar">
+          <div style="display: flex; gap: 16px;">
+            <span id="syntaxStatus">⚪ Chưa kiểm tra cú pháp</span>
+            <span id="cursorPos">Dòng 1, Cột 1</span>
+          </div>
+          <div style="display: flex; gap: 16px;">
+            <span id="editorMode">Mode: PlainText</span>
+            <span>UTF-8</span>
+          </div>
+        </footer>
+      </div>
+
+      <!-- 2. DATABASE VIEWER CONTAINER (Kích hoạt khi mở tệp SQLite: .db, .sqlite, .sqlite3) -->
+      <div id="dbViewerContainer" style="display: none; flex-direction: column; height: 100%; overflow: hidden; background: #0c101c;">
+        <!-- DB Header Bar -->
+        <div class="bf-editor-header" style="background: rgba(12, 16, 28, 0.98); border-bottom: 1px solid var(--border-glass);">
+          <div class="bf-editor-file-info">
+            <span style="font-size: 1.3rem;">🗄️</span>
+            <span id="dbFilePath" style="font-weight: 700; color: #fff;">Chưa chọn database</span>
+            <span class="bf-item-badge" style="background: rgba(80, 250, 123, 0.15); color: #50fa7b; border-color: rgba(80, 250, 123, 0.4);">
+              🛡️ Chỉ đọc (Safe Read-Only)
+            </span>
+            <span id="dbTablesCountBadge" style="color: var(--text-muted); font-size: 0.78rem;"></span>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="bf-db-tab-switcher">
+              <button id="dbTabBtnTable" class="bf-tab-btn active" onclick="switchDbTab('table')">📊 Bảng Dữ Liệu</button>
+              <button id="dbTabBtnSql" class="bf-tab-btn" onclick="switchDbTab('sql')">⚡ Truy Vấn SQL</button>
+            </div>
+            <button class="bf-btn" style="padding: 6px 12px;" onclick="refreshCurrentDatabase()" title="Tải lại cơ sở dữ liệu">
+              <span>🔄</span> Làm Mới
+            </button>
+            <button class="bf-btn" style="padding: 6px 12px;" onclick="closeDatabaseView()" title="Đóng database viewer">
+              <span>✖</span> Đóng
+            </button>
+          </div>
+        </div>
+
+        <!-- DB Tab 1: Table Browser -->
+        <div id="dbTableTab" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+          <!-- Table Controls Toolbar -->
+          <div class="bf-db-toolbar">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+              <label for="dbTableSelect" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">Bảng:</label>
+              <select id="dbTableSelect" class="bf-search-input" style="width: auto; min-width: 220px; font-weight: 600; cursor: pointer;" onchange="onDbTableChange(this.value)">
+                <option value="">Đang tải danh sách bảng...</option>
+              </select>
+
+              <div style="display: flex; align-items: center; gap: 6px; flex: 1; max-width: 340px;">
+                <input type="text" id="dbSearchInput" class="bf-search-input" placeholder="🔍 Lọc từ khóa trong bảng..." onkeydown="if(event.key==='Enter') searchCurrentTable()">
+                <button class="bf-btn" style="padding: 6px 10px;" onclick="searchCurrentTable()" title="Lọc dữ liệu">Lọc</button>
+                <button class="bf-btn" style="padding: 6px 8px;" onclick="clearDbSearch()" title="Xóa tìm kiếm">✕</button>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="dbRowStats" style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono);">0 dòng</span>
+              <button class="bf-btn" style="padding: 6px 10px; font-size: 0.78rem;" onclick="exportCurrentTable('json')" title="Xuất dữ liệu dạng JSON">📥 JSON</button>
+              <button class="bf-btn" style="padding: 6px 10px; font-size: 0.78rem;" onclick="exportCurrentTable('csv')" title="Xuất dữ liệu dạng CSV">📥 CSV</button>
+            </div>
+          </div>
+
+          <!-- Schema info tag bar -->
+          <div id="dbSchemaBar" class="bf-db-schema-bar">
+            <span style="color: var(--text-muted); font-size: 0.75rem;">Đang tải cấu trúc cột...</span>
+          </div>
+
+          <!-- Interactive Data Grid -->
+          <div class="bf-db-table-wrapper" id="dbTableWrapper">
+            <table class="bf-db-data-table" id="dbDataTable">
+              <thead id="dbTableHead"></thead>
+              <tbody id="dbTableBody">
+                <tr><td style="text-align: center; padding: 40px; color: var(--text-muted);">Vui lòng chọn một bảng để xem dữ liệu.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- DB Pagination Footer -->
+          <div class="bf-db-pagination">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span id="dbPaginationInfo" style="font-size: 0.8rem; color: var(--text-muted);">Dòng 0 - 0 / 0</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <label style="font-size: 0.78rem; color: var(--text-muted);">Dòng/trang:</label>
+                <select id="dbPageSizeSelect" class="bf-tab-btn" style="padding: 3px 6px; cursor: pointer;" onchange="changeDbPageSize(this.value)">
+                  <option value="25">25</option>
+                  <option value="50" selected>50</option>
+                  <option value="100">100</option>
+                  <option value="250">250</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button class="bf-btn" id="dbFirstBtn" onclick="goToDbPage(1)" disabled title="Trang đầu">⏮️</button>
+              <button class="bf-btn" id="dbPrevBtn" onclick="changeDbPage(-1)" disabled title="Trang trước">◀️ Trước</button>
+              <span id="dbCurrentPageBadge" style="font-size: 0.82rem; font-weight: 700; padding: 0 10px; color: var(--bf-accent);">Trang 1 / 1</span>
+              <button class="bf-btn" id="dbNextBtn" onclick="changeDbPage(1)" disabled title="Trang sau">Tiếp ▶️</button>
+              <button class="bf-btn" id="dbLastBtn" onclick="goToDbPage('last')" disabled title="Trang cuối">⏭️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DB Tab 2: SQL Console Runner -->
+        <div id="dbSqlTab" style="display: none; flex-direction: column; flex: 1; overflow: hidden; padding: 14px; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 700; color: #fff; font-size: 0.9rem;">⚡ Bàn Điều Khiển Truy Vấn SQL</span>
+              <span style="font-size: 0.75rem; color: #50fa7b; background: rgba(80, 250, 123, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(80, 250, 123, 0.3);">
+                Chỉ cho phép đọc: SELECT, PRAGMA, EXPLAIN
+              </span>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button class="bf-btn" style="padding: 4px 8px; font-size: 0.75rem;" onclick="insertSqlSample(1)">Mẫu: SELECT 20 dòng</button>
+              <button class="bf-btn" style="padding: 4px 8px; font-size: 0.75rem;" onclick="insertSqlSample(2)">Mẫu: Đếm tổng dòng</button>
+              <button class="bf-btn" style="padding: 4px 8px; font-size: 0.75rem;" onclick="insertSqlSample(3)">Mẫu: Danh sách bảng</button>
+              <button class="bf-btn bf-btn-primary" style="padding: 6px 14px;" onclick="runDbSqlQuery()">
+                <span>▶️</span> Chạy Truy Vấn
+              </button>
+            </div>
+          </div>
+
+          <!-- SQL Textarea Box -->
+          <div style="height: 130px; border-radius: 8px; border: 1px solid var(--border-subtle); overflow: hidden; background: #070a10;">
+            <textarea id="dbSqlInput" style="width: 100%; height: 100%; box-sizing: border-box; background: transparent; color: #f8f8f2; border: none; outline: none; padding: 10px; font-family: var(--font-mono); font-size: 0.88rem; resize: none;" spellcheck="false" placeholder="Nhập câu lệnh SQL chỉ đọc (SELECT / PRAGMA)..."></textarea>
+          </div>
+
+          <!-- SQL Results Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="dbSqlStatus" style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">Chưa thực thi truy vấn nào.</span>
+            <button id="dbSqlExportBtn" class="bf-btn" style="display: none; padding: 4px 10px; font-size: 0.78rem;" onclick="exportSqlQueryResult()">📥 Xuất Kết Quả JSON</button>
+          </div>
+
+          <!-- SQL Results Table Container -->
+          <div class="bf-db-table-wrapper" id="dbSqlResultWrapper" style="flex: 1;">
+            <table class="bf-db-data-table" id="dbSqlDataTable">
+              <thead id="dbSqlTableHead"></thead>
+              <tbody id="dbSqlTableBody">
+                <tr><td style="text-align: center; padding: 30px; color: var(--text-muted);">Kết quả truy vấn sẽ hiển thị ở đây.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. MEDIA VIEWER CONTAINER (Ảnh, GIF, Video, Audio) -->
+      <div id="mediaViewerContainer" style="display: none; flex-direction: column; height: 100%; overflow: hidden; background: #080b12;">
+        <!-- Media Header -->
+        <div class="bf-editor-header" style="background: rgba(12, 16, 28, 0.98); border-bottom: 1px solid var(--border-glass);">
+          <div class="bf-editor-file-info">
+            <span id="mediaIcon" style="font-size: 1.3rem;">🖼️</span>
+            <span id="mediaFilePath" style="font-weight: 700; color: #fff;">Chưa chọn tệp</span>
+            <span id="mediaTypeBadge" class="bf-item-badge" style="background: rgba(189, 147, 249, 0.2); color: #bd93f9; border-color: rgba(189, 147, 249, 0.4);"></span>
+            <span id="mediaDimensionsBadge" style="color: #8be9fd; font-size: 0.78rem; font-family: var(--font-mono);"></span>
+            <span id="mediaSizeBadge" style="color: var(--text-muted); font-size: 0.78rem;"></span>
+          </div>
+
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <!-- Image Zoom Controls (Chỉ hiển thị cho Ảnh/GIF) -->
+            <div id="mediaZoomControls" style="display: flex; align-items: center; gap: 4px;">
+              <button class="bf-btn" style="padding: 6px 10px;" onclick="zoomMedia(-0.2)" title="Thu nhỏ (Zoom Out)">🔍-</button>
+              <button class="bf-btn" style="padding: 6px 10px;" onclick="resetMediaZoom()" title="Vừa màn hình (Fit Screen)">100%</button>
+              <button class="bf-btn" style="padding: 6px 10px;" onclick="zoomMedia(0.2)" title="Phóng to (Zoom In)">🔍+</button>
+            </div>
+
+            <button class="bf-btn" style="padding: 6px 12px;" onclick="downloadActiveMedia()" title="Tải xuống tệp">
+              <span>📥</span> Tải Về
+            </button>
+
+            <button class="bf-btn" style="padding: 6px 12px;" onclick="openMediaInNewTab()" title="Mở tệp gốc trong tab trình duyệt mới">
+              <span>🔗</span> Tab Mới
+            </button>
+
+            <button class="bf-btn" style="padding: 6px 12px;" onclick="closeMediaView()" title="Đóng trình xem media">
+              <span>✖</span> Đóng
+            </button>
+          </div>
+        </div>
+
+        <!-- Media Display Area -->
+        <div class="bf-media-display-area" id="mediaDisplayArea">
+          <!-- Image / GIF Display -->
+          <div id="mediaImageWrap" class="bf-media-img-wrap" style="display: none;">
+            <img id="mediaImageEl" src="" alt="Media Preview" onclick="toggleMediaZoom()">
+          </div>
+
+          <!-- Video Display -->
+          <div id="mediaVideoWrap" class="bf-media-video-wrap" style="display: none;">
+            <video id="mediaVideoEl" controls autoplay loop playsinline>
+              Trình duyệt không hỗ trợ thẻ video này.
+            </video>
+          </div>
+
+          <!-- Audio Display -->
+          <div id="mediaAudioWrap" class="bf-media-audio-wrap" style="display: none;">
+            <div class="bf-audio-card">
+              <div style="font-size: 3rem; margin-bottom: 12px;">🎵</div>
+              <div id="audioFileName" style="font-weight: 700; font-size: 1.1rem; color: #fff; margin-bottom: 6px;"></div>
+              <div id="audioFileSize" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;"></div>
+              <audio id="mediaAudioEl" controls style="width: 100%; outline: none;"></audio>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Cogs Manager Modal -->
+  <div class="bf-modal" id="cogsModal">
+    <div class="bf-modal-content">
+      <div class="bf-modal-header">
+        <span>🧩 Quản Lý & Nạp Lại Cogs / Extensions</span>
+        <button class="bf-mini-btn" onclick="closeCogsModal()" style="font-size: 1.2rem;">✖</button>
+      </div>
+      <div class="bf-modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">
+            Tổng cộng: <strong id="modalCogsTotal" style="color: #fff;">0</strong> extensions
+          </span>
+          <button class="bf-btn bf-btn-success" onclick="reloadAllCogs()">
+            <span>⚡</span> Nạp Lại Tất Cả Cogs
+          </button>
+        </div>
+        <table class="bf-cogs-table">
+          <thead>
+            <tr>
+              <th>Extension Module</th>
+              <th>Cogs Đăng Ký</th>
+              <th>Số Lệnh</th>
+              <th>Trạng Thái</th>
+              <th style="text-align: right;">Hành Động</th>
+            </tr>
+          </thead>
+          <tbody id="cogsTableBody">
+            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Đang tải danh sách Cogs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="bfToast" class="bf-toast">
+    <span id="toastIcon">ℹ️</span>
+    <span id="toastMsg">Thông báo</span>
+  </div>
+
+  <!-- Sakura Blossom Floating Effect -->
+  <script src="/static/js/sakura-fx.js"></script>
+
+  <!-- Main JavaScript Logic -->
+  <script>
+    let currentPath = "";
+    let activeFilePath = "";
+    let activeFileIsCog = false;
+    let activeCogModule = "";
+    let fileCache = [];
+    let editor = null;
+    let isDirty = false;
+
+    // HTML Preview State
+    let activeFileIsHtml = false;
+    let htmlPreviewMode = "split"; // "code" | "split" | "preview"
+    let previewDevice = "desktop"; // "desktop" | "mobile"
+    let previewDebounceTimer = null;
+
+    // Database Viewer State
+    let currentDbPath = "";
+    let currentDbSchema = null;
+    let currentDbTable = "";
+    let dbCurrentPage = 1;
+    let dbPageSize = 50;
+    let dbSearchKeyword = "";
+    let currentTableData = null;
+    let lastQueryResult = null;
+
+    // Khởi tạo ứng dụng
+    document.addEventListener("DOMContentLoaded", () => {
+      initAceEditor();
+      loadBotStatus();
+      loadDirectory("");
+      loadCogsSummary();
+
+      // Phím tắt Ctrl + S để lưu tệp code
+      window.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+          e.preventDefault();
+          if (activeFilePath && document.getElementById("codeEditorContainer").style.display !== "none") {
+            saveActiveFile();
+          }
+        }
+      });
+    });
+
+    function initAceEditor() {
+      try {
+        if (window.ace) {
+          editor = ace.edit("aceEditor");
+          editor.setTheme("ace/theme/dracula");
+          editor.session.setMode("ace/mode/python");
+          editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            showPrintMargin: false,
+            tabSize: 4,
+            useSoftTabs: true
+          });
+
+          editor.session.on('change', () => {
+            if (!isDirty && activeFilePath) {
+              setDirty(true);
+            }
+            if (activeFileIsHtml && (htmlPreviewMode === 'split' || htmlPreviewMode === 'preview')) {
+              debounceUpdatePreview();
+            }
+          });
+
+          editor.selection.on('changeCursor', () => {
+            const pos = editor.getCursorPosition();
+            document.getElementById("cursorPos").textContent = `Dòng ${pos.row + 1}, Cột ${pos.column + 1}`;
+          });
+        } else {
+          showFallbackEditor();
+        }
+      } catch (e) {
+        console.warn("Ace editor load failed, fallback to textarea", e);
+        showFallbackEditor();
+      }
+    }
+
+    function showFallbackEditor() {
+      document.getElementById("aceEditor").style.display = "none";
+      const fb = document.getElementById("fallbackTextarea");
+      fb.style.display = "block";
+      fb.addEventListener("input", () => {
+        if (!isDirty && activeFilePath) {
+          setDirty(true);
+        }
+        if (activeFileIsHtml && (htmlPreviewMode === 'split' || htmlPreviewMode === 'preview')) {
+          debounceUpdatePreview();
+        }
+      });
+    }
+
+    function setEditorContent(content, ext) {
+      if (editor) {
+        editor.setValue(content, -1);
+        setEditorModeByExt(ext);
+      } else {
+        document.getElementById("fallbackTextarea").value = content;
+      }
+      setDirty(false);
+    }
+
+    function getEditorContent() {
+      if (editor) {
+        return editor.getValue();
+      }
+      return document.getElementById("fallbackTextarea").value;
+    }
+
+    function setEditorModeByExt(ext) {
+      if (!editor) return;
+      const modeMap = {
+        ".py": "ace/mode/python",
+        ".json": "ace/mode/json",
+        ".html": "ace/mode/html",
+        ".css": "ace/mode/css",
+        ".js": "ace/mode/javascript",
+        ".yaml": "ace/mode/yaml",
+        ".yml": "ace/mode/yaml",
+        ".md": "ace/mode/markdown",
+        ".txt": "ace/mode/text",
+        ".sql": "ace/mode/sql",
+        ".env": "ace/mode/sh"
+      };
+      const mode = modeMap[ext] || "ace/mode/text";
+      editor.session.setMode(mode);
+      document.getElementById("editorMode").textContent = `Mode: ${mode.replace("ace/mode/", "").toUpperCase()}`;
+    }
+
+    function setDirty(dirty) {
+      isDirty = dirty;
+      document.getElementById("unsavedBadge").style.display = dirty ? "inline" : "none";
+      document.getElementById("saveBtn").disabled = !activeFilePath;
+    }
+
+    // ==========================================
+    // API CALLS: FILES
+    // ==========================================
+    async function loadDirectory(path) {
+      currentPath = path;
+      updateBreadcrumb(path);
+      updateTabHighlight(path);
+
+      try {
+        const res = await fetch(`/api/admin/bot-files/list?path=${encodeURIComponent(path)}`);
+        const data = await res.json();
+        if (data.ok) {
+          fileCache = [...data.directories, ...data.files];
+          renderFileList(data.directories, data.files, data.parent_path);
+        } else {
+          showToast(data.error || "Không thể tải thư mục", "error");
+        }
+      } catch (e) {
+        showToast("Lỗi kết nối máy chủ khi tải tệp", "error");
+      }
+    }
+
+    function renderFileList(dirs, files, parentPath) {
+      const listEl = document.getElementById("fileList");
+      listEl.innerHTML = "";
+
+      // Nút quay lại thư mục cha
+      if (currentPath) {
+        const upLi = document.createElement("li");
+        upLi.className = "bf-file-item";
+        upLi.innerHTML = `
+          <div class="bf-item-left">
+            <span class="bf-item-icon">📁</span>
+            <strong>.. (Quay lại)</strong>
+          </div>
+        `;
+        upLi.onclick = () => navigatePath(parentPath || "");
+        listEl.appendChild(upLi);
+      }
+
+      // Thư mục
+      dirs.forEach(d => {
+        const li = document.createElement("li");
+        li.className = "bf-file-item";
+        li.innerHTML = `
+          <div class="bf-item-left">
+            <span class="bf-item-icon">📁</span>
+            <span class="bf-item-name" style="font-weight: 600;">${escapeHtml(d.name)}</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">(${d.item_count})</span>
+          </div>
+          <div class="bf-item-actions">
+            <button class="bf-mini-btn" onclick="event.stopPropagation(); promptRename('${escapeJs(d.path)}', '${escapeJs(d.name)}')">✏️</button>
+            <button class="bf-mini-btn" onclick="event.stopPropagation(); promptDelete('${escapeJs(d.path)}', true)">🗑️</button>
+          </div>
+        `;
+        li.onclick = () => navigatePath(d.path);
+        listEl.appendChild(li);
+      });
+
+      // Tệp tin
+      files.forEach(f => {
+        const li = document.createElement("li");
+        const isDb = [".db", ".sqlite", ".sqlite3"].includes(f.ext);
+        const isImg = [".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".bmp", ".avif"].includes(f.ext);
+        const isGif = f.ext === ".gif";
+        const isVid = [".mp4", ".webm", ".mov", ".mkv", ".avi"].includes(f.ext);
+        const isAud = [".mp3", ".wav", ".ogg", ".m4a", ".flac"].includes(f.ext);
+        const isMedia = isImg || isGif || isVid || isAud || f.is_media;
+
+        const isActive = (isDb && currentDbPath === f.path) || (isMedia && currentMediaPath === f.path) || (!isDb && !isMedia && activeFilePath === f.path);
+        li.className = "bf-file-item" + (isActive ? " active" : "");
+        li.dataset.path = f.path;
+        const icon = getFileIcon(f.ext);
+        let badge = "";
+        if (f.is_cog) {
+          badge = `<span class="bf-item-badge">⚡ Cog</span>`;
+        } else if (isDb) {
+          badge = `<span class="bf-item-badge" style="background: rgba(80, 250, 123, 0.15); color: #50fa7b; border-color: rgba(80, 250, 123, 0.4);">🗄️ DB</span>`;
+        } else if (isGif) {
+          badge = `<span class="bf-item-badge" style="background: rgba(255, 121, 198, 0.2); color: #ff79c6; border-color: rgba(255, 121, 198, 0.4);">🎞️ GIF</span>`;
+        } else if (isImg) {
+          badge = `<span class="bf-item-badge" style="background: rgba(189, 147, 249, 0.2); color: #bd93f9; border-color: rgba(189, 147, 249, 0.4);">🖼️ ẢNH</span>`;
+        } else if (isVid) {
+          badge = `<span class="bf-item-badge" style="background: rgba(80, 250, 123, 0.2); color: #50fa7b; border-color: rgba(80, 250, 123, 0.4);">🎬 VIDEO</span>`;
+        } else if (isAud) {
+          badge = `<span class="bf-item-badge" style="background: rgba(241, 250, 140, 0.2); color: #f1fa8c; border-color: rgba(241, 250, 140, 0.4);">🎵 AUDIO</span>`;
+        }
+
+        li.innerHTML = `
+          <div class="bf-item-left">
+            <span class="bf-item-icon">${icon}</span>
+            <span class="bf-item-name">${escapeHtml(f.name)}</span>
+            ${badge}
+          </div>
+          <div class="bf-item-actions">
+            ${f.is_cog ? `<button class="bf-mini-btn" title="Nạp lại Cog" onclick="event.stopPropagation(); reloadSpecificCog('${escapeJs(f.cog_module)}')">🔄</button>` : ""}
+            ${[".html", ".htm"].includes(f.ext) ? `<button class="bf-mini-btn" title="Xem trước HTML" onclick="event.stopPropagation(); openFile('${escapeJs(f.path)}', '${escapeJs(f.ext)}'); setHtmlPreviewMode('preview');">👁️</button>` : ""}
+            ${isMedia ? `<button class="bf-mini-btn" title="Xem Media" onclick="event.stopPropagation(); openMediaFile('${escapeJs(f.path)}', '${escapeJs(f.ext)}')">👁️</button>` : ""}
+            <button class="bf-mini-btn" onclick="event.stopPropagation(); promptRename('${escapeJs(f.path)}', '${escapeJs(f.name)}')">✏️</button>
+            <button class="bf-mini-btn" onclick="event.stopPropagation(); promptDelete('${escapeJs(f.path)}', false)">🗑️</button>
+          </div>
+        `;
+        li.onclick = () => {
+          if (isDb) {
+            openDatabaseFile(f.path);
+          } else if (isMedia) {
+            openMediaFile(f.path, f.ext);
+          } else {
+            openFile(f.path, f.ext);
+          }
+        };
+        listEl.appendChild(li);
+      });
+
+      if (dirs.length === 0 && files.length === 0) {
+        listEl.innerHTML = `<li style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Thư mục này hiện đang trống.</li>`;
+      }
+    }
+
+    async function openFile(relPath, ext) {
+      const normExt = (ext || "").toLowerCase();
+      const lowerPath = (relPath || "").toLowerCase();
+      if ([".db", ".sqlite", ".sqlite3"].includes(normExt) || lowerPath.endsWith(".db") || lowerPath.endsWith(".sqlite") || lowerPath.endsWith(".sqlite3")) {
+        return openDatabaseFile(relPath);
+      }
+      const mediaExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".bmp", ".avif", ".mp4", ".webm", ".mov", ".mkv", ".avi", ".mp3", ".wav", ".ogg"];
+      if (mediaExts.includes(normExt) || mediaExts.some(m => lowerPath.endsWith(m))) {
+        return openMediaFile(relPath, ext);
+      }
+
+      if (isDirty) {
+        if (!confirm("Bạn có thay đổi chưa lưu trong tệp hiện tại. Tiếp tục mở tệp khác và hủy thay đổi?")) {
+          return;
+        }
+      }
+
+      // Đóng chế độ DB & Media viewer nếu đang mở
+      document.getElementById("dbViewerContainer").style.display = "none";
+      document.getElementById("mediaViewerContainer").style.display = "none";
+      document.getElementById("codeEditorContainer").style.display = "flex";
+      currentDbPath = "";
+      currentMediaPath = "";
+
+      showToast(`Đang tải tệp ${relPath}...`);
+      try {
+        const res = await fetch(`/api/admin/bot-files/read?path=${encodeURIComponent(relPath)}`);
+        const data = await res.json();
+        if (data.ok) {
+          activeFilePath = data.file.path;
+          activeFileIsCog = data.file.is_cog;
+          activeCogModule = data.file.cog_module;
+
+          document.getElementById("editorFilePath").textContent = data.file.path;
+          document.getElementById("editorFileIcon").textContent = getFileIcon(ext || "." + data.file.name.split(".").pop());
+          document.getElementById("fileSizeBadge").textContent = formatBytes(data.file.size);
+
+          setEditorContent(data.file.content, ext);
+
+          // Cập nhật banner nạp Cog
+          const banner = document.getElementById("cogBanner");
+          if (activeFileIsCog) {
+            banner.style.display = "flex";
+            document.getElementById("cogModuleName").textContent = activeCogModule;
+          } else {
+            banner.style.display = "none";
+          }
+
+          document.getElementById("syntaxStatus").textContent = "✅ Tệp đã mở";
+          document.getElementById("saveBtn").disabled = false;
+
+          // Xử lý chế độ Xem Trước nếu là tệp HTML
+          activeFileIsHtml = [".html", ".htm"].includes((ext || "").toLowerCase()) || data.file.name.toLowerCase().endsWith(".html") || data.file.name.toLowerCase().endsWith(".htm");
+          const htmlTools = document.getElementById("htmlPreviewTools");
+          if (activeFileIsHtml) {
+            htmlTools.style.display = "inline-flex";
+            setHtmlPreviewMode("split");
+          } else {
+            htmlTools.style.display = "none";
+            setHtmlPreviewMode("code");
+          }
+
+          // Đánh dấu active trong danh sách
+          document.querySelectorAll(".bf-file-item").forEach(el => el.classList.remove("active"));
+          showToast(`Đã mở ${data.file.name}`, "success");
+        } else {
+          showToast(data.error || "Không thể đọc tệp", "error");
+        }
+      } catch (e) {
+        showToast("Lỗi kết nối khi mở tệp", "error");
+      }
+    }
+
+    async function saveActiveFile() {
+      if (!activeFilePath) return;
+
+      const content = getEditorContent();
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span>⏳</span> Đang lưu...`;
+
+      try {
+        const res = await fetch("/api/admin/bot-files/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: activeFilePath, content: content })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          setDirty(false);
+          document.getElementById("syntaxStatus").textContent = "✅ Cú pháp Python hợp lệ • Đã lưu!";
+          showToast(data.message || "Đã lưu tệp thành công!", "success");
+
+          // Nếu tệp này là Cog, gợi ý nạp lại ngay
+          if (data.is_cog && data.cog_module) {
+            if (confirm(`Tệp ${activeFilePath} là extension Cog [${data.cog_module}]. Bạn có muốn nạp lại Cog này ngay bây giờ không?`)) {
+              reloadSpecificCog(data.cog_module);
+            }
+          }
+        } else {
+          if (data.syntax_error) {
+            document.getElementById("syntaxStatus").textContent = `❌ ${data.error}`;
+            alert(`⚠️ CẢNH BÁO LỖI CÚ PHÁP:
+
+${data.error}
+
+Vui lòng sửa lỗi trước khi lưu lại để tránh gây gián đoạn bot.`);
+          }
+          showToast(data.error || "Lỗi lưu tệp", "error");
+        }
+      } catch (e) {
+        showToast("Lỗi kết nối khi gửi dữ liệu lưu", "error");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<span>💾</span> Lưu Tệp (Ctrl+S)`;
+      }
+    }
+
+    function reloadCurrentCog() {
+      if (activeFileIsCog && activeCogModule) {
+        reloadSpecificCog(activeCogModule);
+      }
+    }
+
+    // ==========================================
+    // MEDIA VIEWER LOGIC (ẢNH, GIF, VIDEO, AUDIO)
+    // ==========================================
+    let currentMediaPath = "";
+    let mediaZoomLevel = 1.0;
+
+    function openMediaFile(relPath, ext) {
+      if (isDirty) {
+        if (!confirm("Bạn có thay đổi chưa lưu trong tệp hiện tại. Hủy thay đổi và chuyển sang xem Media?")) {
+          return;
+        }
+        setDirty(false);
+      }
+
+      currentMediaPath = (relPath || "").replace(/\\/g, "/");
+      const normExt = (ext || "." + currentMediaPath.split(".").pop()).toLowerCase();
+
+      // Đóng các viewer khác
+      document.getElementById("codeEditorContainer").style.display = "none";
+      document.getElementById("dbViewerContainer").style.display = "none";
+      const mediaContainer = document.getElementById("mediaViewerContainer");
+      mediaContainer.style.display = "flex";
+
+      document.getElementById("mediaFilePath").textContent = currentMediaPath;
+      document.querySelectorAll(".bf-file-item").forEach(el => {
+        if (el.dataset.path === currentMediaPath) el.classList.add("active");
+        else el.classList.remove("active");
+      });
+
+      const rawUrl = `/api/admin/bot-files/raw?path=${encodeURIComponent(currentMediaPath)}&t=${Date.now()}`;
+
+      const imgWrap = document.getElementById("mediaImageWrap");
+      const vidWrap = document.getElementById("mediaVideoWrap");
+      const audWrap = document.getElementById("mediaAudioWrap");
+      const imgEl = document.getElementById("mediaImageEl");
+      const vidEl = document.getElementById("mediaVideoEl");
+      const audEl = document.getElementById("mediaAudioEl");
+      const zoomControls = document.getElementById("mediaZoomControls");
+      const iconEl = document.getElementById("mediaIcon");
+      const badgeEl = document.getElementById("mediaTypeBadge");
+      const dimBadge = document.getElementById("mediaDimensionsBadge");
+
+      dimBadge.textContent = "";
+      resetMediaZoom();
+
+      // Dừng video/audio cũ nếu đang phát
+      vidEl.pause();
+      vidEl.src = "";
+      audEl.pause();
+      audEl.src = "";
+
+      const isImg = [".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".bmp", ".avif"].includes(normExt);
+      const isGif = normExt === ".gif";
+      const isVid = [".mp4", ".webm", ".mov", ".mkv", ".avi"].includes(normExt);
+      const isAud = [".mp3", ".wav", ".ogg", ".m4a", ".flac"].includes(normExt);
+
+      if (isImg || isGif) {
+        imgWrap.style.display = "flex";
+        vidWrap.style.display = "none";
+        audWrap.style.display = "none";
+        zoomControls.style.display = "flex";
+
+        iconEl.textContent = isGif ? "🎞️" : "🖼️";
+        badgeEl.textContent = isGif ? "🎞️ Ảnh Động GIF" : "🖼️ Hình Ảnh";
+        badgeEl.style.color = isGif ? "#ff79c6" : "#bd93f9";
+
+        imgEl.onload = function() {
+          dimBadge.textContent = `• ${this.naturalWidth} × ${this.naturalHeight} px`;
+        };
+        imgEl.src = rawUrl;
+      } else if (isVid) {
+        imgWrap.style.display = "none";
+        vidWrap.style.display = "flex";
+        audWrap.style.display = "none";
+        zoomControls.style.display = "none";
+
+        iconEl.textContent = "🎬";
+        badgeEl.textContent = "🎬 Video Clip";
+        badgeEl.style.color = "#50fa7b";
+
+        vidEl.onloadedmetadata = function() {
+          const dur = Math.round(this.duration);
+          const mins = Math.floor(dur / 60);
+          const secs = dur % 60;
+          dimBadge.textContent = `• ${this.videoWidth} × ${this.videoHeight} px • ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        };
+        vidEl.src = rawUrl;
+        vidEl.load();
+      } else if (isAud) {
+        imgWrap.style.display = "none";
+        vidWrap.style.display = "none";
+        audWrap.style.display = "flex";
+        zoomControls.style.display = "none";
+
+        iconEl.textContent = "🎵";
+        badgeEl.textContent = "🎵 Tệp Âm Thanh";
+        badgeEl.style.color = "#f1fa8c";
+
+        document.getElementById("audioFileName").textContent = currentMediaPath.split("/").pop();
+        audEl.src = rawUrl;
+        audEl.load();
+      }
+
+      showToast(`Đang xem media: ${currentMediaPath.split("/").pop()}`, "info");
+    }
+
+    function closeMediaView() {
+      const vidEl = document.getElementById("mediaVideoEl");
+      if (vidEl) { vidEl.pause(); vidEl.src = ""; }
+      const audEl = document.getElementById("mediaAudioEl");
+      if (audEl) { audEl.pause(); audEl.src = ""; }
+
+      document.getElementById("mediaViewerContainer").style.display = "none";
+      document.getElementById("codeEditorContainer").style.display = "flex";
+      currentMediaPath = "";
+    }
+
+    function zoomMedia(delta) {
+      mediaZoomLevel = Math.max(0.2, Math.min(mediaZoomLevel + delta, 5.0));
+      const img = document.getElementById("mediaImageEl");
+      if (img) {
+        img.style.transform = `scale(${mediaZoomLevel})`;
+      }
+    }
+
+    function resetMediaZoom() {
+      mediaZoomLevel = 1.0;
+      const img = document.getElementById("mediaImageEl");
+      if (img) {
+        img.style.transform = "scale(1)";
+      }
+    }
+
+    function toggleMediaZoom() {
+      if (mediaZoomLevel === 1.0) {
+        zoomMedia(0.8);
+      } else {
+        resetMediaZoom();
+      }
+    }
+
+    function downloadActiveMedia() {
+      if (!currentMediaPath) return;
+      const url = `/api/admin/bot-files/raw?path=${encodeURIComponent(currentMediaPath)}`;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = currentMediaPath.split("/").pop();
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("Đang tải xuống...", "success");
+    }
+
+    function openMediaInNewTab() {
+      if (!currentMediaPath) return;
+      window.open(`/api/admin/bot-files/raw?path=${encodeURIComponent(currentMediaPath)}`, "_blank");
+    }
+
+    // ==========================================
+    // HTML LIVE PREVIEW FUNCTIONS
+    // ==========================================
+    function setHtmlPreviewMode(mode) {
+      htmlPreviewMode = mode;
+      const editorHalf = document.getElementById("editorHalfPane");
+      const previewHalf = document.getElementById("htmlPreviewPane");
+      const btnCode = document.getElementById("btnHtmlModeCode");
+      const btnSplit = document.getElementById("btnHtmlModeSplit");
+      const btnPrev = document.getElementById("btnHtmlModePreview");
+
+      if (btnCode) btnCode.classList.remove("active");
+      if (btnSplit) btnSplit.classList.remove("active");
+      if (btnPrev) btnPrev.classList.remove("active");
+
+      if (mode === "code") {
+        if (btnCode) btnCode.classList.add("active");
+        editorHalf.style.display = "block";
+        editorHalf.style.width = "100%";
+        previewHalf.style.display = "none";
+      } else if (mode === "split") {
+        if (btnSplit) btnSplit.classList.add("active");
+        editorHalf.style.display = "block";
+        editorHalf.style.width = "50%";
+        previewHalf.style.display = "flex";
+        previewHalf.style.width = "50%";
+        updateHtmlPreview();
+      } else if (mode === "preview") {
+        if (btnPrev) btnPrev.classList.add("active");
+        editorHalf.style.display = "none";
+        previewHalf.style.display = "flex";
+        previewHalf.style.width = "100%";
+        updateHtmlPreview();
+      }
+
+      if (editor) {
+        setTimeout(() => editor.resize(), 50);
+      }
+    }
+
+    function setPreviewDevice(device) {
+      previewDevice = device;
+      const wrap = document.getElementById("previewFrameWrap");
+      const btnDesktop = document.getElementById("btnPreviewDesktop");
+      const btnMobile = document.getElementById("btnPreviewMobile");
+
+      if (device === "mobile") {
+        wrap.classList.add("mobile-view");
+        btnMobile.classList.add("active");
+        btnDesktop.classList.remove("active");
+      } else {
+        wrap.classList.remove("mobile-view");
+        btnDesktop.classList.add("active");
+        btnMobile.classList.remove("active");
+      }
+    }
+
+    function debounceUpdatePreview() {
+      clearTimeout(previewDebounceTimer);
+      previewDebounceTimer = setTimeout(() => {
+        updateHtmlPreview();
+      }, 300);
+    }
+
+    function updateHtmlPreview() {
+      if (!activeFileIsHtml) return;
+      const iframe = document.getElementById("htmlPreviewFrame");
+      if (!iframe) return;
+
+      let content = getEditorContent();
+      if (!content || !content.trim()) {
+        content = "<!DOCTYPE html><html><body style='font-family:sans-serif;background:#0d111b;color:#8be9fd;display:flex;align-items:center;justify-content:center;height:80vh;'><h3>📄 Tệp HTML đang trống</h3>  <script src="/static/js/i18n.js"></script>
+</body></html>";
+      }
+
+      // Inject <base href="/"> to allow relative CSS / JS / Images from the bot web server to resolve properly
+      if (!content.includes("<base ") && !content.includes("<base>")) {
+        if (content.includes("<head>")) {
+          content = content.replace("<head>", '<head>\n<base href="/">\n');
+        } else if (content.includes("<head ")) {
+          content = content.replace(/<head[^>]*>/, '$&\n<base href="/">\n');
+        } else {
+          content = '<base href="/">\n' + content;
+        }
+      }
+
+      iframe.srcdoc = content;
+    }
+
+    function openHtmlPreviewInNewTab() {
+      let content = getEditorContent();
+      if (!content.includes("<base ") && !content.includes("<base>")) {
+        const origin = window.location.origin;
+        if (content.includes("<head>")) {
+          content = content.replace("<head>", '<head>\n<base href="' + origin + '/">\n');
+        } else {
+          content = '<base href="' + origin + '/">\n' + content;
+        }
+      }
+      const blob = new Blob([content], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    }
+
+    // ==========================================
+    // DATABASE VIEWER LOGIC (.db, .sqlite, .sqlite3)
+    // ==========================================
+    async function openDatabaseFile(relPath) {
+      if (isDirty) {
+        if (!confirm("Bạn có thay đổi chưa lưu trong tệp code hiện tại. Hủy thay đổi và chuyển sang xem Database?")) {
+          return;
+        }
+        setDirty(false);
+      }
+
+      currentDbPath = (relPath || "").replace(/\\/g, "/");
+      document.getElementById("codeEditorContainer").style.display = "none";
+      const dbContainer = document.getElementById("dbViewerContainer");
+      dbContainer.style.display = "flex";
+      switchDbTab("table");
+
+      document.getElementById("dbFilePath").textContent = currentDbPath;
+      document.querySelectorAll(".bf-file-item").forEach(el => {
+        if (el.dataset.path === currentDbPath) el.classList.add("active");
+        else el.classList.remove("active");
+      });
+
+      showToast(`Đang đọc cấu trúc Database [${currentDbPath}]...`);
+      await loadDatabaseSchema(currentDbPath);
+    }
+
+    function closeDatabaseView() {
+      document.getElementById("dbViewerContainer").style.display = "none";
+      document.getElementById("codeEditorContainer").style.display = "flex";
+      currentDbPath = "";
+    }
+
+    function refreshCurrentDatabase() {
+      if (currentDbPath) {
+        loadDatabaseSchema(currentDbPath);
+      }
+    }
+
+    async function loadDatabaseSchema(relPath) {
+      try {
+        const url = `/api/admin/database/schema?path=${encodeURIComponent(relPath)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.ok) {
+          currentDbSchema = data;
+          const tables = data.tables || [];
+          const byteSize = data.file_size || data.size || 0;
+          document.getElementById("dbTablesCountBadge").textContent = `• ${tables.length} bảng • ${formatBytes(byteSize)}`;
+
+          const select = document.getElementById("dbTableSelect");
+          select.innerHTML = "";
+
+          if (tables.length === 0) {
+            select.innerHTML = `<option value="">(Không có bảng nào trong cơ sở dữ liệu)</option>`;
+            document.getElementById("dbTableHead").innerHTML = "";
+            document.getElementById("dbTableBody").innerHTML = `<tr><td style="text-align: center; padding: 40px; color: var(--text-muted);">Cơ sở dữ liệu này hiện chưa có bảng hoặc dữ liệu nào.</td></tr>`;
+            return;
+          }
+
+          tables.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = t.name;
+            const rCount = (t.row_count !== undefined && t.row_count !== null) ? t.row_count.toLocaleString() : "0";
+            const cCount = (t.columns && t.columns.length) ? t.columns.length : 0;
+            opt.textContent = `${t.name} (${rCount} dòng, ${cCount} cột)`;
+            select.appendChild(opt);
+          });
+
+          // Chọn bảng đầu tiên hoặc giữ bảng hiện tại nếu còn tồn tại
+          let targetTable = tables[0].name;
+          if (currentDbTable && tables.some(t => t.name === currentDbTable)) {
+            targetTable = currentDbTable;
+          }
+          currentDbTable = targetTable;
+          select.value = targetTable;
+          dbCurrentPage = 1;
+          dbSearchKeyword = "";
+          document.getElementById("dbSearchInput").value = "";
+
+          // Mặc định câu lệnh SQL mẫu cho console
+          document.getElementById("dbSqlInput").value = `SELECT * FROM "${targetTable}" LIMIT 20;`;
+
+          await loadDatabaseTable(targetTable, 1, "");
+          showToast(`Đã nạp Database: ${tables.length} bảng`, "success");
+        } else {
+          showToast(data.error || "Không thể đọc cấu trúc database", "error");
+          alert(`❌ ${data.error}`);
+        }
+      } catch (e) {
+        console.error("loadDatabaseSchema error:", e);
+        showToast("Lỗi kết nối khi đọc database: " + e.message, "error");
+      }
+    }
+
+    function onDbTableChange(tableName) {
+      if (!tableName) return;
+      currentDbTable = tableName;
+      dbCurrentPage = 1;
+      dbSearchKeyword = "";
+      document.getElementById("dbSearchInput").value = "";
+      document.getElementById("dbSqlInput").value = `SELECT * FROM "${tableName}" LIMIT 20;`;
+      loadDatabaseTable(tableName, 1, "");
+    }
+
+    async function loadDatabaseTable(tableName, page = 1, search = "") {
+      if (!currentDbPath || !tableName) return;
+
+      dbCurrentPage = page;
+      dbSearchKeyword = search;
+
+      const limit = dbPageSize;
+      const offset = (page - 1) * limit;
+
+      const thead = document.getElementById("dbTableHead");
+      const tbody = document.getElementById("dbTableBody");
+      const schemaBar = document.getElementById("dbSchemaBar");
+
+      tbody.innerHTML = `<tr><td colspan="100" style="text-align: center; padding: 30px; color: var(--text-muted);">⏳ Đang nạp dữ liệu bảng [${escapeHtml(tableName)}]...</td></tr>`;
+
+      try {
+        const url = `/api/admin/database/table-data?path=${encodeURIComponent(currentDbPath)}&table=${encodeURIComponent(tableName)}&limit=${limit}&offset=${offset}&search=${encodeURIComponent(search)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.ok) {
+          currentTableData = data;
+
+          // Render Schema Pill Bar (An toàn có fallback)
+          schemaBar.innerHTML = "";
+          const colsList = data.schema || (currentDbSchema && currentDbSchema.tables ? (currentDbSchema.tables.find(t => t.name === tableName)?.columns || []) : []);
+          if (colsList && colsList.length) {
+            colsList.forEach(col => {
+              const pill = document.createElement("span");
+              pill.className = "bf-col-pill" + (col.pk ? " pk" : "");
+              pill.innerHTML = `<strong>${escapeHtml(col.name)}</strong>: <span style="opacity: 0.8;">${escapeHtml(col.type || 'TEXT')}</span>${col.pk ? ' (PK)' : ''}${col.notnull ? ' *' : ''}`;
+              schemaBar.appendChild(pill);
+            });
+          } else if (data.columns && data.columns.length) {
+            data.columns.forEach(colName => {
+              const pill = document.createElement("span");
+              pill.className = "bf-col-pill";
+              pill.innerHTML = `<strong>${escapeHtml(colName)}</strong>`;
+              schemaBar.appendChild(pill);
+            });
+          }
+
+          // Render Table Header
+          const columns = data.columns || [];
+          let thHtml = `<tr><th class="bf-db-row-idx">#</th>`;
+          columns.forEach(col => {
+            thHtml += `<th>${escapeHtml(col)}</th>`;
+          });
+          thHtml += `</tr>`;
+          thead.innerHTML = thHtml;
+
+          // Render Table Rows
+          const rows = data.rows || [];
+          if (rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${Math.max(1, columns.length + 1)}" style="text-align: center; padding: 36px; color: var(--text-muted); font-size: 0.85rem;">Không tìm thấy dòng dữ liệu nào khớp với điều kiện.</td></tr>`;
+          } else {
+            let tbHtml = "";
+            rows.forEach((row, idx) => {
+              const rowNum = offset + idx + 1;
+              tbHtml += `<tr><td class="bf-db-row-idx">${rowNum}</td>`;
+              columns.forEach(col => {
+                const val = row[col];
+                let valStr = "";
+                if (val === null || val === undefined) {
+                  valStr = `<span class="bf-db-null">NULL</span>`;
+                } else if (typeof val === "boolean") {
+                  valStr = val ? `<span style="color: #50fa7b;">true</span>` : `<span style="color: #ff5555;">false</span>`;
+                } else if (typeof val === "number") {
+                  valStr = `<span style="color: #bd93f9;">${val.toLocaleString()}</span>`;
+                } else {
+                  valStr = escapeHtml(String(val));
+                }
+                tbHtml += `<td title="${escapeHtml(String(val ?? 'NULL'))}">${valStr}</td>`;
+              });
+              tbHtml += `</tr>`;
+            });
+            tbody.innerHTML = tbHtml;
+          }
+
+          // Cập nhật Pagination & Stats
+          const totalRows = data.total_rows || 0;
+          const totalPages = Math.max(1, Math.ceil(totalRows / dbPageSize));
+          const startIdx = totalRows === 0 ? 0 : offset + 1;
+          const endIdx = Math.min(offset + rows.length, totalRows);
+
+          document.getElementById("dbRowStats").textContent = `${totalRows.toLocaleString()} dòng`;
+          document.getElementById("dbPaginationInfo").textContent = `Dòng ${startIdx.toLocaleString()} - ${endIdx.toLocaleString()} trong tổng số ${totalRows.toLocaleString()} dòng`;
+          document.getElementById("dbCurrentPageBadge").textContent = `Trang ${page} / ${totalPages}`;
+
+          document.getElementById("dbFirstBtn").disabled = page <= 1;
+          document.getElementById("dbPrevBtn").disabled = page <= 1;
+          document.getElementById("dbNextBtn").disabled = page >= totalPages;
+          document.getElementById("dbLastBtn").disabled = page >= totalPages;
+
+        } else {
+          tbody.innerHTML = `<tr><td colspan="100" style="text-align: center; padding: 30px; color: #ff5555;">❌ ${escapeHtml(data.error)}</td></tr>`;
+          showToast(data.error || "Không thể tải dữ liệu bảng", "error");
+        }
+      } catch (e) {
+        console.error("loadDatabaseTable error:", e);
+        tbody.innerHTML = `<tr><td colspan="100" style="text-align: center; padding: 30px; color: #ff5555;">❌ Lỗi: ${escapeHtml(e.message || "Lỗi kết nối khi tải bảng")}</td></tr>`;
+      }
+    }
+
+    function searchCurrentTable() {
+      const kw = document.getElementById("dbSearchInput").value.trim();
+      loadDatabaseTable(currentDbTable, 1, kw);
+    }
+
+    function clearDbSearch() {
+      document.getElementById("dbSearchInput").value = "";
+      loadDatabaseTable(currentDbTable, 1, "");
+    }
+
+    function changeDbPage(delta) {
+      const newPage = dbCurrentPage + delta;
+      if (newPage >= 1) {
+        loadDatabaseTable(currentDbTable, newPage, dbSearchKeyword);
+      }
+    }
+
+    function goToDbPage(target) {
+      if (!currentTableData) return;
+      const totalPages = Math.max(1, Math.ceil(currentTableData.total_rows / dbPageSize));
+      if (target === "last") {
+        loadDatabaseTable(currentDbTable, totalPages, dbSearchKeyword);
+      } else {
+        const pageNum = parseInt(target, 10) || 1;
+        loadDatabaseTable(currentDbTable, Math.max(1, Math.min(pageNum, totalPages)), dbSearchKeyword);
+      }
+    }
+
+    function changeDbPageSize(val) {
+      dbPageSize = parseInt(val, 10) || 50;
+      loadDatabaseTable(currentDbTable, 1, dbSearchKeyword);
+    }
+
+    function switchDbTab(tab) {
+      const tableTab = document.getElementById("dbTableTab");
+      const sqlTab = document.getElementById("dbSqlTab");
+      const btnTable = document.getElementById("dbTabBtnTable");
+      const btnSql = document.getElementById("dbTabBtnSql");
+
+      if (tab === "table") {
+        tableTab.style.display = "flex";
+        sqlTab.style.display = "none";
+        btnTable.classList.add("active");
+        btnSql.classList.remove("active");
+      } else {
+        tableTab.style.display = "none";
+        sqlTab.style.display = "flex";
+        btnTable.classList.remove("active");
+        btnSql.classList.add("active");
+      }
+    }
+
+    function insertSqlSample(sampleId) {
+      const t = currentDbTable || "sqlite_master";
+      if (sampleId === 1) {
+        document.getElementById("dbSqlInput").value = `SELECT * FROM "${t}" LIMIT 20;`;
+      } else if (sampleId === 2) {
+        document.getElementById("dbSqlInput").value = `SELECT count(*) AS total_rows FROM "${t}";`;
+      } else if (sampleId === 3) {
+        document.getElementById("dbSqlInput").value = `SELECT name, type FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;`;
+      }
+    }
+
+    async function runDbSqlQuery() {
+      if (!currentDbPath) return;
+      const query = document.getElementById("dbSqlInput").value.trim();
+      if (!query) {
+        showToast("Vui lòng nhập câu lệnh SQL", "error");
+        return;
+      }
+
+      const statusEl = document.getElementById("dbSqlStatus");
+      const thead = document.getElementById("dbSqlTableHead");
+      const tbody = document.getElementById("dbSqlTableBody");
+      const exportBtn = document.getElementById("dbSqlExportBtn");
+
+      statusEl.textContent = "⏳ Đang thực thi truy vấn SQL...";
+      tbody.innerHTML = `<tr><td colspan="100" style="text-align: center; padding: 30px; color: var(--text-muted);">Đang truy vấn cơ sở dữ liệu...</td></tr>`;
+
+      try {
+        const res = await fetch("/api/admin/database/query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: currentDbPath, query: query })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          lastQueryResult = data;
+          exportBtn.style.display = "inline-flex";
+          statusEl.innerHTML = `✅ <span style="color: #50fa7b;">Thành công</span> • <strong>${data.rows.length.toLocaleString()} dòng</strong> • Thời gian: <strong>${data.execution_time_ms}ms</strong>`;
+
+          // Header
+          let thHtml = `<tr><th class="bf-db-row-idx">#</th>`;
+          data.columns.forEach(col => {
+            thHtml += `<th>${escapeHtml(col)}</th>`;
+          });
+          thHtml += `</tr>`;
+          thead.innerHTML = thHtml;
+
+          // Rows
+          if (data.rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${data.columns.length + 1}" style="text-align: center; padding: 30px; color: var(--text-muted);">Truy vấn hợp lệ nhưng không trả về dòng dữ liệu nào.</td></tr>`;
+          } else {
+            let tbHtml = "";
+            data.rows.forEach((row, idx) => {
+              tbHtml += `<tr><td class="bf-db-row-idx">${idx + 1}</td>`;
+              data.columns.forEach(col => {
+                const val = row[col];
+                let valStr = "";
+                if (val === null || val === undefined) {
+                  valStr = `<span class="bf-db-null">NULL</span>`;
+                } else if (typeof val === "number") {
+                  valStr = `<span style="color: #bd93f9;">${val.toLocaleString()}</span>`;
+                } else {
+                  valStr = escapeHtml(String(val));
+                }
+                tbHtml += `<td title="${escapeHtml(String(val ?? 'NULL'))}">${valStr}</td>`;
+              });
+              tbHtml += `</tr>`;
+            });
+            tbody.innerHTML = tbHtml;
+          }
+          showToast(`Truy vấn SQL thành công (${data.rows.length} dòng)`, "success");
+        } else {
+          statusEl.innerHTML = `❌ <span style="color: #ff5555;">Lỗi: ${escapeHtml(data.error)}</span>`;
+          tbody.innerHTML = `<tr><td colspan="100" style="text-align: center; padding: 30px; color: #ff5555;">❌ ${escapeHtml(data.error)}</td></tr>`;
+          showToast(data.error || "Lỗi truy vấn SQL", "error");
+        }
+      } catch (e) {
+        statusEl.textContent = "❌ Lỗi kết nối máy chủ";
+        showToast("Lỗi kết nối khi gửi truy vấn SQL", "error");
+      }
+    }
+
+    function exportCurrentTable(format) {
+      if (!currentTableData || !currentTableData.rows || currentTableData.rows.length === 0) {
+        alert("Không có dữ liệu trong bảng để xuất!");
+        return;
+      }
+      const filename = `${currentDbTable || 'database'}_data.${format}`;
+      if (format === "json") {
+        const jsonStr = JSON.stringify(currentTableData.rows, null, 2);
+        downloadFileBlob(jsonStr, filename, "application/json");
+      } else if (format === "csv") {
+        const cols = currentTableData.columns;
+        let csv = cols.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",") + "\n";
+        currentTableData.rows.forEach(row => {
+          const rowVals = cols.map(c => {
+            const v = row[c];
+            if (v === null || v === undefined) return '""';
+            return `"${String(v).replace(/"/g, '""')}"`;
+          });
+          csv += rowVals.join(",") + "\n";
+        });
+        downloadFileBlob(csv, filename, "text/csv;charset=utf-8;");
+      }
+    }
+
+    function exportSqlQueryResult() {
+      if (!lastQueryResult || !lastQueryResult.rows) return;
+      const jsonStr = JSON.stringify(lastQueryResult.rows, null, 2);
+      downloadFileBlob(jsonStr, `sql_result_${Date.now()}.json`, "application/json");
+    }
+
+    function downloadFileBlob(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Đã tải xuống tệp ${filename}!`, "success");
+    }
+
+    // ==========================================
+    // API CALLS: COG RELOADER
+    // ==========================================
+    async function loadCogsSummary() {
+      try {
+        const res = await fetch("/api/admin/cogs/list");
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById("loadedCogsCount").textContent = `${data.loaded_count}/${data.total_cogs}`;
+          document.getElementById("modalCogsTotal").textContent = data.total_cogs;
+        }
+      } catch (e) {}
+    }
+
+    async function reloadSpecificCog(extName) {
+      showToast(`Đang nạp lại Cog ${extName}...`);
+      try {
+        const res = await fetch("/api/admin/cogs/reload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ extension: extName })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message || `Đã nạp lại ${extName}!`, "success");
+          loadCogsSummary();
+        } else {
+          alert(`❌ NẠP LẠI THẤT BẠI:\n\n${data.error}`);
+          showToast(`Lỗi nạp lại ${extName}`, "error");
+        }
+      } catch (e) {
+        showToast("Lỗi kết nối khi nạp lại Cog", "error");
+      }
+    }
+
+    async function reloadAllCogs() {
+      if (!confirm("Bạn có chắc chắn muốn nạp lại TOÀN BỘ Cogs của SakuraBot không?")) {
+        return;
+      }
+      showToast("Đang nạp lại toàn bộ Cogs, vui lòng đợi...");
+      try {
+        const res = await fetch("/api/admin/cogs/reload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ extension: "all", sync_tree: false })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`✅ KẾT QUẢ NẠP LẠI TOÀN BỘ:\n\n• Thành công: ${data.reloaded_count} extensions\n• Thất bại: ${data.failed_count} extensions`);
+          showToast(data.message, "success");
+          loadCogsSummary();
+        } else {
+          let errDetail = (data.failed || []).map(f => `• ${f.extension}: ${f.error}`).join("\n");
+          alert(`⚠️ NẠP LẠI CÓ LỖI:\n\n${errDetail || data.error}`);
+          showToast("Một số Cog nạp lại thất bại", "error");
+        }
+      } catch (e) {
+        showToast("Lỗi kết nối máy chủ", "error");
+      }
+    }
+
+    async function syncSlashTree() {
+      if (!confirm("Đồng bộ lại cây lệnh Slash Commands (bot.tree.sync()) lên Discord?")) return;
+      showToast("Đang đồng bộ lệnh Slash lên Discord...");
+      try {
+        const res = await fetch("/api/admin/cogs/sync-tree", { method: "POST" });
+        const data = await res.json();
+        if (data.ok) {
+          alert(data.message);
+          showToast(data.message, "success");
+        } else {
+          alert(`❌ Lỗi đồng bộ: ${data.error}`);
+          showToast("Lỗi đồng bộ cây lệnh", "error");
+        }
+      } catch (e) {
+        showToast("Lỗi mạng khi đồng bộ lệnh", "error");
+      }
+    }
+
+    async function openCogsModal() {
+      document.getElementById("cogsModal").classList.add("active");
+      const tbody = document.getElementById("cogsTableBody");
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Đang tải danh sách Cogs...</td></tr>`;
+
+      try {
+        const res = await fetch("/api/admin/cogs/list");
+        const data = await res.json();
+        if (data.ok) {
+          tbody.innerHTML = "";
+          data.cogs.forEach(c => {
+            const tr = document.createElement("tr");
+            const statusHtml = c.loaded ? `<span style="color: #50fa7b; font-weight: 700;">🟢 Hoạt động</span>` : `<span style="color: var(--text-dim);">⚪ Chưa nạp</span>`;
+            tr.innerHTML = `
+              <td><strong style="color: #fff;">${escapeHtml(c.name)}</strong></td>
+              <td>${c.cogs.length ? escapeHtml(c.cogs.join(", ")) : "—"}</td>
+              <td>${c.commands_count || "—"}</td>
+              <td>${statusHtml}</td>
+              <td style="text-align: right;">
+                <button class="bf-btn bf-btn-success" style="padding: 3px 8px; font-size: 0.78rem;" onclick="reloadSpecificCog('${escapeJs(c.name)}')">
+                  🔄 Nạp lại
+                </button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color: #ff5555; text-align: center;">Không thể tải danh sách Cogs.</td></tr>`;
+      }
+    }
+
+    function closeCogsModal() {
+      document.getElementById("cogsModal").classList.remove("active");
+    }
+
+    // ==========================================
+    // CREATE / DELETE / RENAME / UPLOAD
+    // ==========================================
+    async function promptCreateFile(isDir) {
+      const typeLabel = isDir ? "Thư mục" : "Tệp tin";
+      const name = prompt(`Nhập tên ${typeLabel} mới cần tạo trong ${currentPath || "thư mục gốc"}:`);
+      if (!name) return;
+
+      try {
+        const res = await fetch("/api/admin/bot-files/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: currentPath, name: name, is_dir: isDir })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message, "success");
+          loadDirectory(currentPath);
+        } else {
+          alert(`❌ ${data.error}`);
+        }
+      } catch (e) {
+        showToast("Lỗi khi tạo", "error");
+      }
+    }
+
+    async function promptDelete(relPath, isDir) {
+      const typeLabel = isDir ? "thư mục" : "tệp";
+      if (!confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn ${typeLabel} [${relPath}] không? Thao tác này không thể hoàn tác!`)) {
+        return;
+      }
+      try {
+        const res = await fetch("/api/admin/bot-files/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: relPath })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message, "success");
+          if (activeFilePath === relPath) {
+            activeFilePath = "";
+            setEditorContent("", ".txt");
+            document.getElementById("editorFilePath").textContent = "Chưa mở tệp nào";
+            document.getElementById("cogBanner").style.display = "none";
+          }
+          if (currentDbPath === relPath) {
+            closeDatabaseView();
+          }
+          loadDirectory(currentPath);
+        } else {
+          alert(`❌ ${data.error}`);
+        }
+      } catch (e) {
+        showToast("Lỗi khi xóa", "error");
+      }
+    }
+
+    async function promptRename(relPath, oldName) {
+      const newName = prompt(`Nhập tên mới cho [${oldName}]:`, oldName);
+      if (!newName || newName === oldName) return;
+
+      try {
+        const res = await fetch("/api/admin/bot-files/rename", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: relPath, new_name: newName })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message, "success");
+          if (activeFilePath === relPath) {
+            activeFilePath = data.path;
+            document.getElementById("editorFilePath").textContent = data.path;
+          }
+          if (currentDbPath === relPath) {
+            currentDbPath = data.path;
+            document.getElementById("dbFilePath").textContent = data.path;
+          }
+          loadDirectory(currentPath);
+        } else {
+          alert(`❌ ${data.error}`);
+        }
+      } catch (e) {
+        showToast("Lỗi khi đổi tên", "error");
+      }
+    }
+
+    async function uploadFiles(files) {
+      if (!files || files.length === 0) return;
+      const formData = new FormData();
+      formData.append("path", currentPath);
+      for (let i = 0; i < files.length; i++) {
+        formData.append("file", files[i]);
+      }
+
+      showToast(`Đang tải lên ${files.length} tệp...`);
+      try {
+        const res = await fetch("/api/admin/bot-files/upload", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.message, "success");
+          loadDirectory(currentPath);
+        } else {
+          alert(`❌ ${data.error}`);
+        }
+      } catch (e) {
+        showToast("Lỗi khi tải lên tệp", "error");
+      }
+    }
+
+    // ==========================================
+    // UTILS & NAVIGATION
+    // ==========================================
+    function navigatePath(p) {
+      loadDirectory(p);
+    }
+
+    function refreshFiles() {
+      loadDirectory(currentPath);
+    }
+
+    function updateBreadcrumb(p) {
+      const bar = document.getElementById("breadcrumbBar");
+      bar.innerHTML = "";
+      const rootSpan = document.createElement("span");
+      rootSpan.className = "bf-crumb-link";
+      rootSpan.textContent = "root";
+      rootSpan.onclick = () => navigatePath("");
+      bar.appendChild(rootSpan);
+
+      if (!p) return;
+      const parts = p.split("/");
+      let accum = "";
+      parts.forEach(part => {
+        accum += (accum ? "/" : "") + part;
+        const curAccum = accum;
+        const sep = document.createTextNode(" / ");
+        bar.appendChild(sep);
+        const link = document.createElement("span");
+        link.className = "bf-crumb-link";
+        link.textContent = part;
+        link.onclick = () => navigatePath(curAccum);
+        bar.appendChild(link);
+      });
+    }
+
+    function updateTabHighlight(p) {
+      document.querySelectorAll(".bf-tab-btn").forEach(btn => {
+        const txt = btn.textContent.trim();
+        if (!p && txt.includes("Tất Cả")) btn.classList.add("active");
+        else if (p && txt.includes(p.split("/")[0])) btn.classList.add("active");
+        else btn.classList.remove("active");
+      });
+    }
+
+    function filterFiles(keyword) {
+      const kw = (keyword || "").toLowerCase();
+      document.querySelectorAll(".bf-file-item").forEach(item => {
+        const nameEl = item.querySelector(".bf-item-name");
+        if (nameEl) {
+          const name = nameEl.textContent.toLowerCase();
+          item.style.display = name.includes(kw) ? "flex" : "none";
+        }
+      });
+    }
+
+    async function loadBotStatus() {
+      try {
+        const res = await fetch("/api/bot/status");
+        const data = await res.json();
+        const pill = document.getElementById("botStatusPill");
+        const text = document.getElementById("botStatusText");
+        if (data.running) {
+          text.textContent = `Bot Online (${data.username || "Sakura"})`;
+          pill.style.borderColor = "rgba(80, 250, 123, 0.4)";
+        } else {
+          text.textContent = "Bot Offline";
+          pill.style.borderColor = "rgba(255, 85, 85, 0.4)";
+          pill.querySelector("span").textContent = "🔴";
+        }
+      } catch (e) {}
+    }
+
+    function getFileIcon(ext) {
+      const icons = {
+        ".py": "🐍",
+        ".json": "📋",
+        ".html": "🌐",
+        ".css": "🎨",
+        ".js": "📜",
+        ".txt": "📄",
+        ".md": "📝",
+        ".yml": "⚙️",
+        ".yaml": "⚙️",
+        ".env": "🔒",
+        ".log": "📰",
+        ".db": "🗄️",
+        ".sqlite": "🗄️",
+        ".sqlite3": "🗄️",
+        ".sql": "💾",
+        ".png": "🖼️",
+        ".jpg": "🖼️",
+        ".jpeg": "🖼️",
+        ".webp": "🖼️",
+        ".svg": "🎨",
+        ".ico": "🎯",
+        ".bmp": "🖼️",
+        ".avif": "🖼️",
+        ".gif": "🎞️",
+        ".mp4": "🎬",
+        ".webm": "🎬",
+        ".mov": "🎬",
+        ".mkv": "🎬",
+        ".avi": "🎬",
+        ".mp3": "🎵",
+        ".wav": "🎵",
+        ".ogg": "🎵",
+        ".m4a": "🎵",
+        ".flac": "🎵"
+      };
+      return icons[ext] || "📄";
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes <= 0 || isNaN(bytes)) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.min(sizes.length - 1, Math.floor(Math.log(bytes) / Math.log(k)));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function showToast(msg, type = "info") {
+      const toast = document.getElementById("bfToast");
+      document.getElementById("toastMsg").textContent = msg;
+      const icon = document.getElementById("toastIcon");
+      if (type === "success") icon.textContent = "✅";
+      else if (type === "error") icon.textContent = "❌";
+      else icon.textContent = "ℹ️";
+
+      toast.className = `bf-toast show ${type}`;
+      clearTimeout(window._toastTimeout);
+      window._toastTimeout = setTimeout(() => {
+        toast.className = "bf-toast";
+      }, 3500);
+    }
+
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+      document.getElementById("themeToggleBtn").textContent = next === "dark" ? "🌙" : "☀️";
+      if (editor) {
+        editor.setTheme(next === "dark" ? "ace/theme/dracula" : "ace/theme/chrome");
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function escapeJs(str) {
+      return (str || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    }
+  </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

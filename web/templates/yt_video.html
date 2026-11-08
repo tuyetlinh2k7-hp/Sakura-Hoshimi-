@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>▶️ Sakura YT — Xem Video</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+<style>
+.yt-wrap{max-width:1500px;margin:0 auto;padding:24px 16px}
+.yt-layout{display:grid;grid-template-columns:260px minmax(0,1fr) 280px;gap:14px;align-items:start}
+.yt-sidebar,.yt-info-panel{background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:14px;padding:12px 10px;position:sticky;top:78px}
+.yt-sidebar h3,.yt-info-panel h3{margin:0 0 10px;font-size:.95rem;font-weight:800}
+.yt-login-required{padding:10px 11px;border:1px dashed var(--border-subtle);border-radius:10px;color:var(--text-muted);font-size:.78rem;line-height:1.5;background:rgba(255,121,198,.06)}
+.saved-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:62vh;overflow-y:auto;padding-right:4px}
+.yt-info-box{padding:10px;border:1px solid var(--border-subtle);border-radius:12px;background:rgba(255,255,255,.02)}
+.yt-info-box h4{margin:0 0 8px;font-size:.95rem;line-height:1.4;color:var(--text-main)}
+.yt-info-box p{margin:0;color:var(--text-muted);font-size:.8rem;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.saved-item{padding:7px 9px;border:1px solid var(--border-subtle);border-radius:10px;background:rgba(255,255,255,.02);cursor:pointer;transition:.2s ease;min-height:0}
+.saved-item:hover{transform:translateY(-1px);border-color:rgba(255,121,198,.45)}
+.saved-item strong{display:block;font-size:.76rem;margin-bottom:3px;color:var(--text-main);line-height:1.3}
+.saved-item span{display:block;color:var(--text-muted);font-size:.7rem;line-height:1.3;max-height:26px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.saved-item small{display:none}
+.yt-input-bar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.yt-input{flex:1;min-width:260px;background:var(--bg-input);border:1px solid var(--border-subtle);color:var(--text-main);padding:12px 14px;border-radius:12px;outline:none}
+.yt-desc{width:100%;background:var(--bg-input);border:1px solid var(--border-subtle);color:var(--text-main);padding:11px 12px;border-radius:12px;outline:none;min-height:44px}
+.yt-player{aspect-ratio:16/9;background:radial-gradient(circle at center, #0d1018 0%, #04070b 100%);border-radius:20px;overflow:hidden;border:1px solid var(--border-glass);display:flex;align-items:center;justify-content:center;color:var(--text-muted);box-shadow:0 24px 60px rgba(0,0,0,.3), inset 0 0 30px rgba(255,121,198,.08);transition:all .25s ease}
+.yt-player iframe,.yt-player video{width:100%;height:100%;border:none}
+.yt-controls{display:none;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:12px;clear:both}
+.yt-controls button{border:none;background:var(--sakura-gradient);color:#fff;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+.yt-controls button.secondary{background:#2a2f3a}
+.yt-controls input[type="range"]{flex:1;accent-color:#ff79c6}
+.yt-time{min-width:110px;color:var(--text-muted);font-size:.82rem;text-align:right}
+
+body.theater-mode {
+  background: #020406;
+  overflow-x: hidden;
+}
+body.theater-mode .yt-wrap {
+  max-width: 1700px;
+  padding-top: 18px;
+}
+body.theater-mode .yt-layout {
+  grid-template-columns: 1fr;
+}
+body.theater-mode .yt-sidebar,
+body.theater-mode .yt-info-panel {
+  display: none;
+}
+body.theater-mode main {
+  width: min(1400px, 100%);
+  margin: 0 auto;
+}
+body.theater-mode .yt-player {
+  aspect-ratio: 16 / 9;
+  border-radius: 24px;
+  border-color: rgba(255,121,198,.28);
+  box-shadow: 0 30px 70px rgba(0,0,0,.5), inset 0 0 40px rgba(255,121,198,.12);
+}
+body.theater-mode .yt-input-bar,
+body.theater-mode .yt-desc {
+  display: none;
+}
+body.theater-mode .yt-controls {
+  margin-top: 14px;
+}
+
+@media (max-width:900px){.yt-layout{grid-template-columns:1fr}.yt-sidebar{position:static}}
+@media (max-width:760px){body.theater-mode .yt-controls{flex-wrap:wrap}body.theater-mode .yt-controls .yt-time{width:100%;text-align:left}}
+</style>
+</head>
+<body>
+<nav class="account-nav" style="position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+  <a href="/" style="display:flex;gap:10px;align-items:center;text-decoration:none">
+    <span style="font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Sakura YT</span>
+    <span style="color:var(--text-muted)">/ Xem Video</span>
+  </a>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button id="theaterModeBtn" class="btn btn-secondary btn-sm" type="button">🎬 Chế độ rạp</button>
+    <a href="/dashboard" class="btn btn-secondary btn-sm">Dashboard</a>
+    <a href="/" class="btn btn-secondary btn-sm">Trang chủ</a>
+  </div>
+</nav>
+<div class="yt-wrap">
+  <div class="yt-layout">
+    <aside class="yt-sidebar" aria-label="Video tiếp theo">
+      <h3>▶️ Video tiếp theo</h3>
+      <div id="nextVideosNotice" class="yt-login-required" style="display:none;">Bạn cần đăng nhập để lưu video cá nhân. Tuy nhiên danh sách gợi ý bên dưới vẫn có thể xem miễn phí.</div>
+      <div id="nextVideosList" class="saved-list"></div>
+    </aside>
+
+    <main>
+      <h2 style="font-weight:800">▶️ Gán link để xem video</h2>
+      <p style="color:var(--text-muted);font-size:.9rem">Dán link YouTube (youtube.com/watch?v=..., youtu.be/..., shorts) hoặc link file mp4</p>
+      <div class="yt-input-bar">
+        <input id="ytInput" class="yt-input" placeholder="https://www.youtube.com/watch?v=... hoặc https://youtu.be/...">
+        <button class="btn btn-primary" type="button" onclick="loadVideo()">▶️ Xem</button>
+        <button class="btn btn-secondary" type="button" onclick="shareLink()">🔗 Copy link</button>
+        <button id="theaterModeInlineBtn" class="btn btn-secondary" type="button">🎬 Rạp chiếu</button>
+        <button id="saveVideoBtn" class="btn btn-secondary" type="button" onclick="saveCurrentVideo()">💾 Lưu</button>
+      </div>
+      <input id="videoDesc" class="yt-desc" placeholder="Mô tả ngắn cho video này (ví dụ: Hài, nhạc, anime, tập 12...)">
+      <div class="yt-player" id="ytPlayer"><span>Chưa có video — dán link rồi bấm Xem</span></div>
+      <div class="yt-controls" id="ytControls">
+        <button id="playPauseBtn" type="button">▶️</button>
+        <button id="muteBtn" class="secondary" type="button">🔊</button>
+        <input id="seekBar" type="range" min="0" max="100" value="0" aria-label="Tua video">
+        <span id="timeLabel" class="yt-time">00:00 / 00:00</span>
+      </div>
+      <div style="margin-top:12px;color:var(--text-dim);font-size:.85rem">Tip: Bạn cũng có thể mở trực tiếp <code>/yt/video?url=LINK</code> để chia sẻ.</div>
+    </main>
+
+    <aside class="yt-info-panel" aria-label="Mô tả video">
+      <h3>📝 Mô tả video</h3>
+      <div class="yt-info-box">
+        <h4 id="videoTitle">Video YouTube</h4>
+        <p id="videoDescriptionText">Dán link YouTube để xem mô tả chi tiết của video hiện tại.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="/static/js/sakura-fx.js"></script>
+<script>
+function getAuthToken(){
+  const match = document.cookie.match(/(?:^|; )sakura_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+function isLoggedIn(){
+  return !!getAuthToken();
+}
+function showToast(m,t='info'){const c=document.getElementById('toastContainer');const d=document.createElement('div');d.className='toast-message';let i='🌸';if(t==='success')i='✅';if(t==='error')i='❌';if(t==='warning')i='⚠️';d.innerHTML=`<span>${i}</span><span>${m}</span>`;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transform='translateY(10px)';d.style.transition='all .3s';setTimeout(()=>d.remove(),300)},4000)}
+
+function toggleTheaterMode() {
+  const isOn = document.body.classList.toggle('theater-mode');
+  const theaterBtn = document.getElementById('theaterModeBtn');
+  const inlineBtn = document.getElementById('theaterModeInlineBtn');
+  const label = isOn ? '🧭 Thoát rạp' : '🎬 Rạp chiếu';
+
+  if (theaterBtn) theaterBtn.textContent = label;
+  if (inlineBtn) inlineBtn.textContent = label;
+  if (isOn) showToast('🎬 Đã bật chế độ rạp chiếu', 'success');
+  else showToast('🧭 Đã thoát chế độ rạp chiếu', 'info');
+}
+
+function formatTime(sec){
+  if(!Number.isFinite(sec) || sec < 0) return '00:00';
+  const total = Math.floor(sec);
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+}
+function updateVideoInfoPanel(url){
+  const titleEl = document.getElementById('videoTitle');
+  const descEl = document.getElementById('videoDescriptionText');
+  if(!titleEl || !descEl) return;
+
+  const ytId = getYtId(url);
+  if(!ytId){
+    titleEl.textContent = 'Video local / khác';
+    descEl.textContent = 'Video này không phải link YouTube nên mô tả sẽ không được lấy từ YouTube.';
+    return;
+  }
+
+  titleEl.textContent = 'Đang tải mô tả...';
+  descEl.textContent = 'Đang lấy thông tin từ YouTube...';
+
+  fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`)
+    .then(res => res.ok ? res.json() : Promise.reject())
+    .then(data => {
+      const cleanTitle = data && data.title ? String(data.title).trim() : 'Video YouTube';
+      const cleanDesc = data && data.description ? String(data.description).replace(/<[^>]*>/g, '').trim() : '';
+      titleEl.textContent = cleanTitle;
+      descEl.textContent = cleanDesc || 'Mô tả không có sẵn cho video này. Bạn có thể nhập mô tả thủ công ở ô bên trên.';
+    })
+    .catch(() => {
+      titleEl.textContent = 'Video YouTube';
+      descEl.textContent = 'Mô tả không có sẵn cho video này. Bạn có thể nhập mô tả thủ công ở ô bên trên.';
+    });
+}
+function getSavedKey(){
+  const token = getAuthToken();
+  return token ? `sakura_saved_videos_${token}` : 'sakura_saved_videos_guest';
+}
+function saveCurrentVideo(){
+  if(!isLoggedIn()){
+    showToast('Bạn cần đăng nhập để lưu video','warning');
+    return;
+  }
+  const url = document.getElementById('ytInput').value.trim();
+  if(!url){
+    showToast('Dán link trước khi lưu','warning');
+    return;
+  }
+  const desc = document.getElementById('videoDesc').value.trim() || 'Không có mô tả';
+  const key = getSavedKey();
+  const list = JSON.parse(localStorage.getItem(key) || '[]');
+  const existing = list.find(item => item.url === url);
+  const item = {
+    id: existing ? existing.id : Date.now(),
+    url,
+    desc,
+    title: url.replace(/^https?:\/\//, '').split(/[/?#]/)[0] || 'Video',
+    savedAt: new Date().toISOString()
+  };
+  const next = existing ? list.map(v => v.url === url ? item : v) : [item, ...list];
+  localStorage.setItem(key, JSON.stringify(next.slice(0, 30)));
+  renderSavedVideos();
+  showToast('Đã lưu video thành công','success');
+}
+function getNextVideosList(currentUrl = ''){
+  const defaultVideos = [
+    {title:'Rick Astley - Never Gonna Give You Up', url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ', desc:'Bản hit kinh điển, cực dễ nghe và cực dễ lôi kéo bạn xem tiếp.'},
+    {title:'Lo-fi beats to study and relax', url:'https://www.youtube.com/watch?v=jfKfPfyJRdk', desc:'Nhạc lo-fi để tập trung, thư giãn và giữ tâm trạng thoải mái.'},
+    {title:'Adele - Hello', url:'https://www.youtube.com/watch?v=YQHsXMglC9A', desc:'Một bài hát đầy cảm xúc với giai điệu sâu và mạnh mẽ.'},
+    {title:'Lofi Girl - Livestream', url:'https://www.youtube.com/watch?v=5qap5aO4i9A', desc:'Stream nhạc chill, rất thích hợp cho việc làm việc, học tập hoặc nghỉ ngơi.'},
+    {title:'Minecraft Cinematic Music', url:'https://www.youtube.com/watch?v=2yJgwwDcgV8', desc:'Nhạc nền ambient mang cảm giác tối giản và lạ mắt.'},
+    {title:'Official Trailer', url:'https://www.youtube.com/watch?v=aqz-KE-bpKQ', desc:'Trailer nổi tiếng, dạng gợi ý video phổ biến trong các nền tảng YouTube.'}
+  ];
+
+  return fetch('/api/yt/files')
+    .then(res => res.ok ? res.json() : Promise.reject(new Error('no-api')))
+    .then(data => {
+      const list = Array.isArray(data?.videos) ? data.videos : [];
+      if (list.length) {
+        const next = currentUrl ? list.filter(v => v.url !== currentUrl) : list;
+        return next.slice(0, 5);
+      }
+      throw new Error('empty');
+    })
+    .catch(() => {
+      if (!currentUrl) return defaultVideos.slice(0, 5);
+      const current = defaultVideos.find(v => v.url === currentUrl);
+      if (current) return defaultVideos.filter(v => v.url !== currentUrl).slice(0, 5);
+      return defaultVideos.slice(0, 5);
+    });
+}
+
+function renderSavedVideos(){
+  const nextVideosList = document.getElementById('nextVideosList');
+  const notice = document.getElementById('nextVideosNotice');
+  const saveBtn = document.getElementById('saveVideoBtn');
+  if(!nextVideosList) return;
+
+  const currentUrl = document.getElementById('ytInput')?.value?.trim() || '';
+  if (notice) {
+    notice.style.display = isLoggedIn() ? 'none' : 'block';
+  }
+  if (saveBtn) saveBtn.disabled = !isLoggedIn();
+
+  getNextVideosList(currentUrl).then(nextItems => {
+    nextVideosList.innerHTML = nextItems.map(item => `
+      <div class="saved-item" data-url="${item.url}" title="${item.url}">
+        <strong>${item.title}</strong>
+        <span>${(item.desc || 'Không có mô tả').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+        <small>${item.url}</small>
+      </div>
+    `).join('');
+
+    nextVideosList.querySelectorAll('.saved-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const url = el.getAttribute('data-url');
+        document.getElementById('ytInput').value = url;
+        loadVideo();
+        renderSavedVideos();
+      });
+    });
+  }).catch(() => {
+    nextVideosList.innerHTML = '<div class="yt-login-required">Không có video nào trong thư mục của bạn.</div>';
+  });
+}
+function bindVideoControls(video){
+  const controls = document.getElementById('ytControls');
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const seekBar = document.getElementById('seekBar');
+  const timeLabel = document.getElementById('timeLabel');
+  if(!video || !controls || !playPauseBtn || !muteBtn || !seekBar || !timeLabel) return;
+
+  const updateUi = () => {
+    const duration = Number.isFinite(video.duration) ? video.duration : 0;
+    const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+    const percent = duration > 0 ? (current / duration) * 100 : 0;
+    seekBar.value = percent;
+    timeLabel.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+    playPauseBtn.textContent = video.paused ? '▶️' : '⏸️';
+    muteBtn.textContent = video.muted ? '🔇' : '🔊';
+  };
+
+  playPauseBtn.onclick = () => {
+    if(video.paused) video.play(); else video.pause();
+  };
+  muteBtn.onclick = () => {
+    video.muted = !video.muted;
+    updateUi();
+  };
+  seekBar.oninput = () => {
+    if(!Number.isFinite(video.duration) || video.duration <= 0) return;
+    video.currentTime = (Number(seekBar.value) / 100) * video.duration;
+    updateUi();
+  };
+
+  video.onplay = updateUi;
+  video.onpause = updateUi;
+  video.onloadedmetadata = updateUi;
+  video.ontimeupdate = updateUi;
+  video.onvolumechange = updateUi;
+  controls.style.display = 'flex';
+  controls.style.visibility = 'visible';
+  controls.style.opacity = '1';
+  updateUi();
+}
+function getYtId(url){
+  try{
+    const u=new URL(url);
+    if(u.hostname.includes('youtu.be')) return u.pathname.slice(1).split('?')[0].split('/')[0];
+    if(u.searchParams.get('v')) return u.searchParams.get('v');
+    const m=url.match(/\/shorts\/([^?\/]+)/); if(m) return m[1];
+    const m2=url.match(/\/embed\/([^?\/]+)/); if(m2) return m2[1];
+  }catch{}
+  const m=url.match(/[?&]v=([^&]+)/); if(m) return m[1];
+  return null;
+}
+function resolveLocalMediaUrl(input){
+  const url=input.trim();
+  if(!url) return '';
+  if(/^https?:\/\//i.test(url)) return url;
+  if(url.startsWith('/')) return url;
+  if(/^(?:downloads|owner_downloads)\//i.test(url)) return '/' + url.replace(/\\/g, '/');
+  const fileName = url.split(/[\\/]/).pop();
+  if(fileName) return `/downloads/${encodeURIComponent(fileName)}`;
+  return url;
+}
+
+function loadVideo(){
+  const url=document.getElementById('ytInput').value.trim();
+  if(!url) return showToast('Dán link trước','warning');
+  const box=document.getElementById('ytPlayer');
+  const ytId=getYtId(url);
+  if(ytId){
+    document.getElementById('ytControls').style.display='none';
+    box.innerHTML=`<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&controls=1&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+    history.replaceState(null,'','/yt/video?url='+encodeURIComponent(url));
+    updateVideoInfoPanel(url);
+    showToast('Đang phát YouTube','success');
+  } else if(/\.(mp4|webm|ogg)(\?|$)/i.test(url) || /(?:^|\/)(?:downloads|owner_downloads)\//i.test(url)){
+    const mediaUrl = resolveLocalMediaUrl(url);
+    box.innerHTML=`<video src="${mediaUrl}" autoplay controls playsinline preload="metadata" style="width:100%;height:100%"></video>`;
+    history.replaceState(null,'','/yt/video?url='+encodeURIComponent(url));
+    const videoEl=box.querySelector('video');
+    if(videoEl){
+      videoEl.muted = false;
+      videoEl.play().catch(()=>{ videoEl.muted = true; });
+      bindVideoControls(videoEl);
+    }
+    showToast('Đang phát file local','success');
+  } else {
+    document.getElementById('ytControls').style.display='none';
+    box.innerHTML=`<iframe src="${url}" allowfullscreen style="width:100%;height:100%"></iframe>`;
+    history.replaceState(null,'','/yt/video?url='+encodeURIComponent(url));
+    updateVideoInfoPanel(url);
+  }
+}
+function shareLink(){
+  const url=document.getElementById('ytInput').value.trim() || new URLSearchParams(location.search).get('url') || '';
+  if(!url) return showToast('Chưa có link','warning');
+  const share=location.origin+'/yt/video?url='+encodeURIComponent(url);
+  navigator.clipboard.writeText(share).then(()=>showToast('Đã copy: '+share,'success')).catch(()=>showToast(share,'info'));
+}
+(function(){
+  renderSavedVideos();
+  updateVideoInfoPanel(document.getElementById('ytInput').value || '');
+  const q=new URLSearchParams(location.search).get('url');
+  if(q){ document.getElementById('ytInput').value=q; loadVideo(); }
+  document.getElementById('ytInput').addEventListener('keydown',e=>{ if(e.key==='Enter') loadVideo(); });
+  document.getElementById('ytInput').addEventListener('input', () => {
+    renderSavedVideos();
+    updateVideoInfoPanel(document.getElementById('ytInput').value || '');
+  });
+  const theaterBtn = document.getElementById('theaterModeBtn');
+  const inlineBtn = document.getElementById('theaterModeInlineBtn');
+  if (theaterBtn) theaterBtn.addEventListener('click', toggleTheaterMode);
+  if (inlineBtn) inlineBtn.addEventListener('click', toggleTheaterMode);
+})();
+</script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

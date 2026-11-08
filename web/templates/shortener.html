@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸 Sakura Shortener — Rút Gọn Link Siêu Tốc & Theo Dõi Thống Kê</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+  <style>
+    body {
+      background: var(--bg-primary, #07090e);
+      color: var(--text-main, #f0f2f8);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass, rgba(12, 16, 26, 0.85));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass, rgba(255, 121, 198, 0.18));
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .tool-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--sakura-pink, #ff79c6);
+      box-shadow: 0 0 14px rgba(255, 121, 198, 0.35);
+    }
+
+    .tool-brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff79c6, #bd93f9 50%, #50fa7b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .tool-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 121, 198, 0.12);
+      border: 1px solid rgba(255, 121, 198, 0.35);
+      color: var(--sakura-pink, #ff79c6);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tool-title {
+      font-size: 2.3rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 20%, #ffb8e2 60%, #bd93f9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-subtitle {
+      color: var(--text-muted, #94a3b8);
+      font-size: 1rem;
+      max-width: 650px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .short-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.75));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.2));
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(16px);
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .input-long-url {
+      flex: 1;
+      min-width: 280px;
+      background: var(--bg-input, rgba(10, 14, 23, 0.85));
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 0.98rem;
+      outline: none;
+    }
+
+    .input-long-url:focus {
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    .input-alias {
+      width: 220px;
+      background: var(--bg-input, rgba(10, 14, 23, 0.85));
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 0.98rem;
+      outline: none;
+    }
+
+    .input-alias:focus {
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    .btn-shorten {
+      background: linear-gradient(135deg, #ff79c6 0%, #bd93f9 100%);
+      border: none;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-shorten:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 121, 198, 0.45);
+    }
+
+    /* Result Card */
+    .result-card {
+      display: none;
+      background: rgba(10, 14, 23, 0.85);
+      border: 1px solid rgba(80, 250, 123, 0.4);
+      border-radius: 16px;
+      padding: 22px;
+      margin-top: 24px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .result-text-area {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .short-link-display {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #50fa7b;
+      word-break: break-all;
+      margin-bottom: 8px;
+    }
+
+    .result-qr-box {
+      width: 110px;
+      height: 110px;
+      background: #fff;
+      padding: 8px;
+      border-radius: 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-qr-box img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* History Table */
+    .links-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+    }
+
+    .links-table th {
+      text-align: left;
+      padding: 12px;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    .links-table td {
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.92rem;
+    }
+
+    .links-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(18, 24, 38, 0.95);
+      border: 1px solid var(--sakura-pink, #ff79c6);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="tool-nav">
+    <a href="/tools" class="tool-brand">
+      <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot" onerror="this.src='/images/avatar-bot.jpg'">
+      <div>
+        <div class="tool-brand-title">Sakura Shortener</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">Rút Gọn Link Siêu Tốc & Quản Lý Liên Kết</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/tools" class="btn btn-secondary btn-sm" style="text-decoration:none">✨ Tất Cả Tiện Ích</a>
+      <a href="/dashboard" class="btn btn-secondary btn-sm" style="text-decoration:none">🌐 Dashboard</a>
+      <a href="/" class="btn btn-secondary btn-sm" style="text-decoration:none">Trang Chủ</a>
+    </div>
+  </nav>
+
+  <div class="tool-wrap">
+    <!-- Header -->
+    <div class="tool-header">
+      <div class="tool-badge">🔗 URL Shortener & Link Studio</div>
+      <h1 class="tool-title">Rút Gọn Liên Kết & Tạo QR Link</h1>
+      <p class="tool-subtitle">Biến các đường dẫn dài cồng kềnh thành liên kết Sakura ngắn gọn, hỗ trợ đặt bí danh theo ý muốn và theo dõi lượt click trực quan.</p>
+    </div>
+
+    <!-- Main Input Card -->
+    <div class="short-card">
+      <div class="input-group">
+        <input type="url" id="longUrl" class="input-long-url" placeholder="Dán link dài cần rút gọn (https://...)" autocomplete="off">
+        <input type="text" id="customAlias" class="input-alias" placeholder="Bí danh (tùy chọn, vd: my-server)" maxlength="30">
+        <button type="button" id="btnShorten" class="btn-shorten">
+          <span>⚡ Rút Gọn</span>
+        </button>
+      </div>
+
+      <!-- Result Card -->
+      <div id="resultCard" class="result-card">
+        <div class="result-content">
+          <div class="result-text-area">
+            <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:4px">Link rút gọn của bạn:</div>
+            <div id="shortLinkDisplay" class="short-link-display"></div>
+            <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;word-break:break-all;" id="origLinkDisplay"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button type="button" class="btn btn-primary btn-sm" id="btnCopyShort">📋 Sao Chép Link</button>
+              <a href="#" target="_blank" class="btn btn-secondary btn-sm" id="btnOpenShort">🌐 Mở Thử</a>
+            </div>
+          </div>
+          <div class="result-qr-box">
+            <img id="shortQrImg" alt="QR Link">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Links Card -->
+    <div class="short-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:8px">
+          <span>📊 Danh Sách Link Gần Đây</span>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="loadRecentLinks()">Làm mới</button>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table class="links-table">
+          <thead>
+            <tr>
+              <th>Link Rút Gọn</th>
+              <th>Đích Đến Gốc</th>
+              <th>Lượt Click</th>
+              <th>Ngày Tạo</th>
+              <th>Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="linksBody">
+            <tr>
+              <td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">Đang tải danh sách liên kết...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <span id="toastIcon">🌸</span>
+    <span id="toastMsg">Thông báo</span>
+  </div>
+
+  <script src="/static/js/i18n.js"></script>
+  <script>
+    const longUrl = document.getElementById('longUrl');
+    const customAlias = document.getElementById('customAlias');
+    const btnShorten = document.getElementById('btnShorten');
+    const resultCard = document.getElementById('resultCard');
+    const shortLinkDisplay = document.getElementById('shortLinkDisplay');
+    const origLinkDisplay = document.getElementById('origLinkDisplay');
+    const shortQrImg = document.getElementById('shortQrImg');
+    const btnOpenShort = document.getElementById('btnOpenShort');
+    const btnCopyShort = document.getElementById('btnCopyShort');
+    const linksBody = document.getElementById('linksBody');
+
+    function showToast(msg, icon = '🌸') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      document.getElementById('toastIcon').textContent = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    btnShorten.addEventListener('click', shortenUrl);
+    longUrl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') shortenUrl();
+    });
+
+    async function shortenUrl() {
+      const url = longUrl.value.trim();
+      const alias = customAlias.value.trim();
+      if (!url) {
+        showToast('Vui lòng nhập đường dẫn URL hợp lệ!', '⚠️');
+        return;
+      }
+
+      btnShorten.disabled = true;
+      btnShorten.innerHTML = '<span>⏳ Đang tạo...</span>';
+
+      try {
+        const res = await fetch('/api/tools/shorten', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, custom_alias: alias })
+        });
+
+        const data = await res.json();
+        if (data.ok && data.short_url) {
+          shortLinkDisplay.textContent = data.short_url;
+          origLinkDisplay.textContent = `➔ ${data.original_url}`;
+          btnOpenShort.href = data.short_url;
+          if (data.qr_data_url) {
+            shortQrImg.src = data.qr_data_url;
+          }
+          resultCard.style.display = 'block';
+          showToast('Đã rút gọn liên kết thành công!', '🎉');
+          loadRecentLinks();
+        } else {
+          showToast(data.error || 'Lỗi khi rút gọn liên kết', '❌');
+        }
+      } catch (err) {
+        showToast('Không thể kết nối máy chủ!', '❌');
+      } finally {
+        btnShorten.disabled = false;
+        btnShorten.innerHTML = '<span>⚡ Rút Gọn</span>';
+      }
+    }
+
+    btnCopyShort.addEventListener('click', () => {
+      const link = shortLinkDisplay.textContent;
+      if (!link) return;
+      navigator.clipboard.writeText(link)
+        .then(() => showToast('Đã sao chép link rút gọn!', '📋'));
+    });
+
+    async function loadRecentLinks() {
+      try {
+        const res = await fetch('/api/tools/shorten/list');
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.links)) {
+          if (data.links.length === 0) {
+            linksBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">Chưa có link rút gọn nào. Hãy tạo link đầu tiên!</td></tr>';
+            return;
+          }
+
+          linksBody.innerHTML = data.links.map(l => {
+            const shortUrl = `${window.location.origin}/s/${l.alias}`;
+            const dateStr = new Date(l.created_at * 1000).toLocaleDateString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            return `
+              <tr>
+                <td><a href="${shortUrl}" target="_blank" style="color:#50fa7b;font-weight:700;text-decoration:none;">/s/${l.alias}</a></td>
+                <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted)" title="${escapeHtml(l.original_url)}">${escapeHtml(l.original_url)}</td>
+                <td><span style="background:rgba(255,255,255,0.08);padding:3px 10px;border-radius:12px;font-weight:700;">${(l.clicks || 0).toLocaleString()}</span></td>
+                <td style="color:var(--text-muted);font-size:0.85rem">${dateStr}</td>
+                <td>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="copyText('${shortUrl}')">Copy</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        linksBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ff5555;padding:16px;">Lỗi khi tải danh sách link.</td></tr>';
+      }
+    }
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt).then(() => showToast('Đã sao chép!', '📋'));
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    document.addEventListener('DOMContentLoaded', loadRecentLinks);
+  </script>
+</body>
+</html>
+

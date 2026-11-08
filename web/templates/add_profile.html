@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸 Tạo & Tùy Biến Sakura Bio Profile</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+  <style>
+    .add-profile-wrap {
+      max-width: 860px;
+      margin: 24px auto;
+      padding: 0 16px 60px
+    }
+
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 20px
+    }
+
+    .form-section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    @media(max-width:680px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .link-row {
+      display: grid;
+      grid-template-columns: 50px 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+      background: var(--bg-secondary);
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle)
+    }
+
+    @media(max-width:680px) {
+      .link-row {
+        grid-template-columns: 50px 1fr;
+        grid-template-rows: auto auto auto
+      }
+    }
+
+    /* Reorder Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #141724;
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 121, 198, 0.2);
+    }
+
+    .reorder-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .reorder-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      transition: all 0.2s;
+    }
+
+    .reorder-item:hover {
+      background: rgba(255, 121, 198, 0.08);
+      border-color: var(--sakura-pink);
+    }
+
+    .color-picker-input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-swatch {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      padding: 0;
+      background: none;
+    }
+
+    /* Preview Modal */
+    .preview-modal-box {
+      background: #090a10;
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      max-width: 480px;
+      width: 100%;
+      height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 121, 198, 0.3);
+    }
+
+    .preview-iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="account-nav"
+    style="position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:12px 18px;display:flex;justify-content:space-between;align-items:center">
+    <a href="/" style="display:flex;gap:10px;align-items:center;text-decoration:none">
+      <img src="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png"
+        style="width:32px;height:32px;border-radius:8px;border:2px solid var(--sakura-pink)">
+      <span
+        style="font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Sakura
+        Bio</span>
+      <span style="color:var(--text-muted)">/ Tùy Biến Hồ Sơ</span>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="openPreviewModal()">👁️ Xem Trước</button>
+      <a href="/profiles" class="btn btn-secondary btn-sm">Danh Mục Bio</a>
+      <a href="/dashboard" class="btn btn-secondary btn-sm">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="add-profile-wrap">
+    <div style="text-align:center;margin-bottom:24px">
+      <h1
+        style="font-size:2rem;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,#fff,#ff79c6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
+        ✨ Tạo & Thiết Kế Trang Sakura Bio
+      </h1>
+      <p style="color:var(--text-muted);font-size:.95rem;max-width:600px;margin:8px auto 0">
+        Thiết kế trang bio cá nhân hiện đại với giao diện tùy biến, hình nền, màu sắc tương tác và sắp xếp các khối theo
+        ý bạn.
+      </p>
+      <div id="permissionWarning"
+        style="display:none;background:rgba(255,85,85,0.15);border:1px solid #ff5555;color:#ff5555;padding:10px 16px;border-radius:12px;margin-top:14px;font-weight:700">
+        ⚠️ Bạn không phải chủ sở hữu của hồ sơ này và không có quyền chỉnh sửa.
+      </div>
+    </div>
+
+    <form id="profileForm" onsubmit="saveProfile(event)">
+      <!-- 1. Thông tin cơ bản & Định danh -->
+      <div class="form-card">
+        <div class="form-section-title">
+          <span>👤</span> Thông Tin Cá Nhân & Định Danh
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Tên đường dẫn (Username Slug) <span
+                style="color:var(--accent-red)">*</span></label>
+            <div
+              style="display:flex;align-items:center;background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:10px;padding:0 10px">
+              <span style="color:var(--text-dim);font-size:.85rem">/</span>
+              <input type="text" id="profUsername" class="form-control"
+                style="border:none;background:transparent;padding-left:4px" placeholder="vd: linh, sakura, alex"
+                required pattern="[a-zA-Z0-9_\-]+" title="Chỉ gồm chữ cái, số, gạch dưới hoặc gạch ngang">
+              <span style="color:var(--text-dim);font-size:.85rem">/profile</span>
+            </div>
+            <small style="color:var(--text-dim)">Đường dẫn bio của bạn sẽ là: <code>/tên_bạn/profile</code></small>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tên hiển thị (Display Name) <span style="color:var(--accent-red)">*</span></label>
+            <input type="text" id="profName" class="form-control" placeholder="vd: Linh Xinh, Sakura Dev" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-top:12px">
+          <div class="form-group">
+            <label class="form-label">Handle / Tag định danh</label>
+            <input type="text" id="profHandle" class="form-control" placeholder="vd: @linhxinh_dev">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Chức danh / Tagline ngắn</label>
+            <input type="text" id="profTagline" class="form-control"
+              placeholder="vd: Founder & Lead Developer of Sakura Bot 🌸">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:12px">
+          <label class="form-label">Tiểu sử giới thiệu (Bio)</label>
+          <textarea id="profBio" class="form-control" rows="3"
+            placeholder="Viết đôi dòng giới thiệu về bản thân, đam mê, dự án đang thực hiện..."></textarea>
+        </div>
+
+        <div class="form-grid-2" style="margin-top:12px">
+          <div class="form-group">
+            <label class="form-label">URL Ảnh đại diện (Avatar)</label>
+            <input type="url" id="profAvatar" class="form-control" placeholder="https://cdn.discordapp.com/avatars/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">URL Ảnh bìa (Cover Banner)</label>
+            <input type="url" id="profBanner" class="form-control" placeholder="https://images.unsplash.com/...">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Tùy Biến Giao Diện Web & Màu Sắc (Yêu cầu mới) -->
+      <div class="form-card">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-subtle);padding-bottom:10px;margin-bottom:16px">
+          <div class="form-section-title" style="border:none;padding:0;margin:0">
+            <span>🎨</span> Giao Diện, Màu Sắc & Thứ Tự Các Hộp
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openReorderModal()">📐 Sắp Xếp Vị Trí Các
+            Hộp</button>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">URL Ảnh nền trang web (Background Image)</label>
+            <input type="url" id="customBgImage" class="form-control"
+              placeholder="https://images.unsplash.com/... (Để trống nếu dùng màu nền)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Màu nền trang web (Background Color)</label>
+            <div class="color-picker-input-group">
+              <input type="color" id="customBgColorPick" class="color-swatch" value="#090a10"
+                oninput="document.getElementById('customBgColorText').value = this.value">
+              <input type="text" id="customBgColorText" class="form-control" placeholder="#090a10" value="#090a10"
+                oninput="document.getElementById('customBgColorPick').value = this.value">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-top:12px">
+          <div class="form-group">
+            <label class="form-label">Màu tương tác / Điểm nhấn (Accent Color)</label>
+            <div class="color-picker-input-group">
+              <input type="color" id="customAccentPick" class="color-swatch" value="#ff79c6"
+                oninput="document.getElementById('customAccentText').value = this.value">
+              <input type="text" id="customAccentText" class="form-control" placeholder="#ff79c6" value="#ff79c6"
+                oninput="document.getElementById('customAccentPick').value = this.value">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Màu nền các hộp & thẻ (Card Background)</label>
+            <div class="color-picker-input-group">
+              <input type="color" id="customCardBgPick" class="color-swatch" value="#161826"
+                oninput="document.getElementById('customCardBgText').value = this.value">
+              <input type="text" id="customCardBgText" class="form-control" placeholder="rgba(22, 24, 38, 0.75)"
+                value="rgba(22, 24, 38, 0.75)">
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="margin-top:14px;background:rgba(255,255,255,0.02);padding:10px 14px;border-radius:10px;font-size:0.82rem;color:var(--text-muted)">
+          💡 Thứ tự hiển thị hiện tại: <b id="boxOrderLabel" style="color:var(--sakura-pink)">Banner & Avatar → Bio →
+            Mạng Xã Hội → Liên Kết → Donate</b>
+        </div>
+      </div>
+
+      <!-- 3. Mạng xã hội -->
+      <div class="form-card">
+        <div class="form-section-title">
+          <span>🌐</span> Liên Kết Mạng Xã Hội (Social Icons)
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">💬 Discord URL hoặc ID</label>
+            <input type="text" id="socialDiscord" class="form-control" placeholder="https://discord.gg/... hoặc ID">
+          </div>
+          <div class="form-group">
+            <label class="form-label">📱 Zalo URL hoặc Số điện thoại</label>
+            <input type="text" id="socialZalo" class="form-control" placeholder="https://zalo.me/0987524390">
+          </div>
+          <div class="form-group">
+            <label class="form-label">📘 Facebook URL</label>
+            <input type="text" id="socialFacebook" class="form-control" placeholder="https://facebook.com/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">📺 YouTube Channel URL</label>
+            <input type="text" id="socialYoutube" class="form-control" placeholder="https://youtube.com/@...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">🎵 TikTok URL</label>
+            <input type="text" id="socialTiktok" class="form-control" placeholder="https://tiktok.com/@...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">🐙 GitHub URL</label>
+            <input type="text" id="socialGithub" class="form-control" placeholder="https://github.com/...">
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Danh sách nút liên kết -->
+      <div class="form-card">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-subtle);padding-bottom:10px;margin-bottom:16px">
+          <div class="form-section-title" style="border:none;padding:0;margin:0">
+            <span>🔗</span> Danh Sách Nút Liên Kết (Custom Links)
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addLinkRow()">+ Thêm Link</button>
+        </div>
+        <div id="linksContainer"></div>
+      </div>
+
+      <!-- 5. Donate & Tài Khoản Ngân Hàng -->
+      <div class="form-card">
+        <div class="form-section-title">
+          <span>💖</span> Hỗ Trợ & Donate (Tùy chọn)
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Tên Ngân Hàng</label>
+            <input type="text" id="donateBankName" class="form-control" placeholder="vd: MB Bank, Vietcombank">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số Tài Khoản (STK)</label>
+            <input type="text" id="donateBankAccount" class="form-control" placeholder="vd: 0987524390">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Chủ Tài Khoản</label>
+            <input type="text" id="donateBankOwner" class="form-control" placeholder="vd: NGUYEN VAN A">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số Ví MoMo</label>
+            <input type="text" id="donateMomo" class="form-control" placeholder="vd: 0987524390">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label class="form-label">Lời nhắn cảm ơn</label>
+          <input type="text" id="donateNote" class="form-control"
+            placeholder="vd: Cảm ơn bạn đã luôn đồng hành và ủng hộ mình! 💖">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px">
+        <button type="submit" id="saveBtn" class="btn btn-primary"
+          style="padding:14px 32px;font-size:1.05rem;font-weight:800;border-radius:14px">
+          🚀 Lưu & Mở Trang Profile Ngay
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="openPreviewModal()"
+          style="padding:14px 24px;border-radius:14px">
+          👁️ Xem Trước
+        </button>
+        <a href="/" class="btn btn-secondary" style="padding:14px 24px;border-radius:14px">Hủy bỏ</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modal Sắp Xếp Thứ Tự Hộp (Reorder Boxes) -->
+  <div class="modal-overlay" id="reorderModalOverlay" onclick="if(event.target===this) closeReorderModal()">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#fff">📐 Sắp Xếp Thứ Tự Khối Bio</h3>
+        <button onclick="closeReorderModal()"
+          style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer">✕</button>
+      </div>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin:0 0 14px">Dùng các nút Lên / Xuống để điều chỉnh thứ tự
+        xuất hiện của các khối trên trang bio của bạn:</p>
+
+      <div class="reorder-list" id="reorderItemsContainer"></div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeReorderModal()">Xong</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Xem Trước Trực Quan (Live Preview) -->
+  <div class="modal-overlay" id="previewModalOverlay" onclick="if(event.target===this) closePreviewModal()">
+    <div class="preview-modal-box">
+      <div
+        style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.1)">
+        <span style="font-weight:800;font-size:0.95rem;color:#fff">👁️ Xem Trước Trực Quan Bio</span>
+        <button onclick="closePreviewModal()"
+          style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer">✕</button>
+      </div>
+      <iframe id="previewIframe" class="preview-iframe" src="about:blank"></iframe>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/static/js/sakura-fx.js"></script>
+  <script>
+    function showToast(m, t = 'info') {
+      const c = document.getElementById('toastContainer');
+      if (!c) return;
+      const d = document.createElement('div');
+      d.className = 'toast-message';
+      let i = '🌸';
+      if (t === 'success') i = '✅';
+      if (t === 'error') i = '❌';
+      d.innerHTML = `<span>${i}</span><span>${m}</span>`;
+      c.appendChild(d);
+      setTimeout(() => {
+        d.style.opacity = '0';
+        d.style.transform = 'translateY(10px)';
+        d.style.transition = 'all .3s';
+        setTimeout(() => d.remove(), 300);
+      }, 2500);
+    }
+
+    function getToken() {
+      return localStorage.getItem('token') || '';
+    }
+
+    // Danh sách các khối mặc định
+    const boxDefinitions = {
+      'banner': '🖼️ Ảnh Bìa (Cover Banner)',
+      'avatar': '👤 Ảnh Đại Diện & Tên',
+      'bio': '📝 Tiểu Sử Giới Thiệu',
+      'socials': '🌐 Mạng Xã Hội (Socials)',
+      'links': '🔗 Danh Sách Nút Liên Kết',
+      'donate': '💖 Ủng Hộ & Donate'
+    };
+
+    let currentBoxOrder = ['banner', 'avatar', 'bio', 'socials', 'links', 'donate'];
+
+    function updateBoxOrderLabel() {
+      const names = currentBoxOrder.map(b => boxDefinitions[b] ? boxDefinitions[b].split(' ')[1] : b);
+      document.getElementById('boxOrderLabel').innerText = names.join(' → ');
+    }
+
+    function openReorderModal() {
+      renderReorderList();
+      document.getElementById('reorderModalOverlay').classList.add('active');
+    }
+
+    function closeReorderModal() {
+      document.getElementById('reorderModalOverlay').classList.remove('active');
+      updateBoxOrderLabel();
+    }
+
+    function renderReorderList() {
+      const container = document.getElementById('reorderItemsContainer');
+      container.innerHTML = '';
+      currentBoxOrder.forEach((bId, idx) => {
+        const title = boxDefinitions[bId] || bId;
+        const div = document.createElement('div');
+        div.className = 'reorder-item';
+        div.innerHTML = `
+      <span style="font-weight:700;font-size:0.9rem">${idx + 1}. ${title}</span>
+      <div style="display:flex;gap:6px">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="moveBox(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4"' : ''}>⬆️</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="moveBox(${idx}, 1)" ${idx === currentBoxOrder.length - 1 ? 'disabled style="opacity:0.4"' : ''}>⬇️</button>
+      </div>
+    `;
+        container.appendChild(div);
+      });
+    }
+
+    function moveBox(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= currentBoxOrder.length) return;
+      const temp = currentBoxOrder[idx];
+      currentBoxOrder[idx] = currentBoxOrder[target];
+      currentBoxOrder[target] = temp;
+      renderReorderList();
+      updateBoxOrderLabel();
+    }
+
+    function openPreviewModal() {
+      const u = document.getElementById('profUsername').value.trim() || 'linh';
+      document.getElementById('previewIframe').src = `/${encodeURIComponent(u)}/profile`;
+      document.getElementById('previewModalOverlay').classList.add('active');
+    }
+
+    function closePreviewModal() {
+      document.getElementById('previewModalOverlay').classList.remove('active');
+      document.getElementById('previewIframe').src = 'about:blank';
+    }
+
+    function addLinkRow(data = {}) {
+      const container = document.getElementById('linksContainer');
+      const div = document.createElement('div');
+      div.className = 'link-row';
+      div.innerHTML = `
+    <input type="text" class="form-control link-icon" style="text-align:center" placeholder="Icon" value="${data.icon || '🌸'}">
+    <input type="text" class="form-control link-title" placeholder="Tiêu đề nút (vd: Tham Gia Discord)" value="${data.title || ''}" required>
+    <input type="text" class="form-control link-url" placeholder="Đường dẫn URL (https://...)" value="${data.url || ''}" required>
+    <div style="display:flex;gap:6px;align-items:center">
+      <label style="font-size:.78rem;color:var(--text-dim);display:flex;align-items:center;gap:4px;cursor:pointer">
+        <input type="checkbox" class="link-hl" ${data.highlight ? 'checked' : ''}> Nổi bật
+      </label>
+      <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.link-row').remove()" style="padding:4px 8px">✕</button>
+    </div>
+  `;
+      container.appendChild(div);
+    }
+
+    // Khởi tạo sẵn một số link mẫu nếu trống
+    addLinkRow({ icon: '🌸', title: 'Mời Sakura Bot Vào Máy Chủ', url: '/bot', highlight: true });
+    addLinkRow({ icon: '⚙️', title: 'Web Dashboard Quản Trị', url: '/dashboard' });
+    addLinkRow({ icon: '🎮', title: 'Trò Chơi Cờ Vua AI', url: '/game/chess' });
+
+    // Tải thông tin nếu người dùng sửa profile đã có
+    const urlUser = new URLSearchParams(location.search).get('user');
+    if (urlUser) {
+      // Kiểm tra quyền chỉnh sửa
+      fetch(`/api/profile/check-permission?user=${encodeURIComponent(urlUser)}`)
+        .then(r => r.json())
+        .then(chk => {
+          if (chk.ok && !chk.can_edit) {
+            document.getElementById('permissionWarning').style.display = 'block';
+            document.getElementById('saveBtn').disabled = true;
+            document.getElementById('saveBtn').innerText = '🔒 Không có quyền chỉnh sửa';
+          }
+        }).catch(() => { });
+
+      fetch(`/api/profile/${urlUser}`).then(r => r.json()).then(data => {
+        if (data.ok && data.profile) {
+          const p = data.profile;
+          document.getElementById('profUsername').value = p.username || urlUser;
+          document.getElementById('profName').value = p.name || '';
+          document.getElementById('profHandle').value = p.handle || '';
+          document.getElementById('profTagline').value = p.tagline || '';
+          document.getElementById('profBio').value = p.bio || '';
+          document.getElementById('profAvatar').value = p.avatar || '';
+          document.getElementById('profBanner').value = p.banner || '';
+
+          // Tùy biến styles
+          if (p.background_image) document.getElementById('customBgImage').value = p.background_image;
+          if (p.bg_color) {
+            document.getElementById('customBgColorText').value = p.bg_color;
+            document.getElementById('customBgColorPick').value = p.bg_color;
+          }
+          if (p.accent_color) {
+            document.getElementById('customAccentText').value = p.accent_color;
+            document.getElementById('customAccentPick').value = p.accent_color;
+          }
+          if (p.card_bg) {
+            document.getElementById('customCardBgText').value = p.card_bg;
+          }
+          if (p.box_order && Array.isArray(p.box_order)) {
+            currentBoxOrder = p.box_order;
+            updateBoxOrderLabel();
+          }
+
+          const soc = p.socials || {};
+          document.getElementById('socialDiscord').value = soc.discord || '';
+          document.getElementById('socialZalo').value = soc.zalo || '';
+          document.getElementById('socialFacebook').value = soc.facebook || '';
+          document.getElementById('socialYoutube').value = soc.youtube || '';
+          document.getElementById('socialTiktok').value = soc.tiktok || '';
+          document.getElementById('socialGithub').value = soc.github || '';
+
+          const don = p.donate || {};
+          document.getElementById('donateBankName').value = don.bank_name || '';
+          document.getElementById('donateBankAccount').value = don.bank_account || '';
+          document.getElementById('donateBankOwner').value = don.bank_owner || '';
+          document.getElementById('donateMomo').value = don.momo || '';
+          document.getElementById('donateNote').value = don.note || '';
+
+          if (p.links && p.links.length) {
+            document.getElementById('linksContainer').innerHTML = '';
+            p.links.forEach(l => addLinkRow(l));
+          }
+        }
+      }).catch(() => { });
+    }
+
+    async function saveProfile(e) {
+      e.preventDefault();
+      const username = document.getElementById('profUsername').value.trim().toLowerCase();
+      if (!username) {
+        showToast('Vui lòng nhập Username slug', 'error');
+        return;
+      }
+
+      const links = [];
+      document.querySelectorAll('.link-row').forEach(row => {
+        const icon = row.querySelector('.link-icon')?.value.trim() || '🌸';
+        const title = row.querySelector('.link-title')?.value.trim();
+        const url = row.querySelector('.link-url')?.value.trim();
+        const highlight = !!row.querySelector('.link-hl')?.checked;
+        if (title && url) {
+          links.push({ icon, title, url, highlight });
+        }
+      });
+
+      const payload = {
+        username,
+        name: document.getElementById('profName').value.trim(),
+        handle: document.getElementById('profHandle').value.trim(),
+        tagline: document.getElementById('profTagline').value.trim(),
+        bio: document.getElementById('profBio').value.trim(),
+        avatar: document.getElementById('profAvatar').value.trim(),
+        banner: document.getElementById('profBanner').value.trim(),
+        background_image: document.getElementById('customBgImage').value.trim(),
+        bg_color: document.getElementById('customBgColorText').value.trim(),
+        accent_color: document.getElementById('customAccentText').value.trim(),
+        card_bg: document.getElementById('customCardBgText').value.trim(),
+        box_order: currentBoxOrder,
+        verified: username === 'linh',
+        socials: {
+          discord: document.getElementById('socialDiscord').value.trim(),
+          zalo: document.getElementById('socialZalo').value.trim(),
+          facebook: document.getElementById('socialFacebook').value.trim(),
+          youtube: document.getElementById('socialYoutube').value.trim(),
+          tiktok: document.getElementById('socialTiktok').value.trim(),
+          github: document.getElementById('socialGithub').value.trim()
+        },
+        links,
+        donate: {
+          bank_name: document.getElementById('donateBankName').value.trim(),
+          bank_account: document.getElementById('donateBankAccount').value.trim(),
+          bank_owner: document.getElementById('donateBankOwner').value.trim(),
+          momo: document.getElementById('donateMomo').value.trim(),
+          note: document.getElementById('donateNote').value.trim()
+        }
+      };
+
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Đang lưu...';
+
+      try {
+        const res = await fetch('/api/profile/save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.ok) {
+          localStorage.setItem('sakura_my_profile_username', username);
+          showToast('Đã lưu Profile thành công! Đang chuyển hướng...', 'success');
+          setTimeout(() => {
+            location.href = `/${username}/profile`;
+          }, 800);
+        } else {
+          showToast(data.error || 'Lỗi khi lưu profile', 'error');
+          btn.disabled = false;
+          btn.textContent = '🚀 Lưu & Mở Trang Profile Ngay';
+        }
+      } catch (err) {
+        showToast('Lỗi kết nối máy chủ', 'error');
+        btn.disabled = false;
+        btn.textContent = '🚀 Lưu & Mở Trang Profile Ngay';
+      }
+    }
+
+    updateBoxOrderLabel();
+  </script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸 Sakura TTS Studio — Chuyển Văn Bản Thành Giọng Nói Tự Nhiên</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+  <style>
+    body {
+      background: var(--bg-primary, #07090e);
+      color: var(--text-main, #f0f2f8);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass, rgba(12, 16, 26, 0.85));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass, rgba(255, 121, 198, 0.18));
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .tool-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--sakura-pink, #ff79c6);
+      box-shadow: 0 0 14px rgba(255, 121, 198, 0.35);
+    }
+
+    .tool-brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff79c6, #f1fa8c 50%, #8be9fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .tool-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 121, 198, 0.12);
+      border: 1px solid rgba(255, 121, 198, 0.35);
+      color: var(--sakura-pink, #ff79c6);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tool-title {
+      font-size: 2.3rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 20%, #ffb8e2 60%, #f1fa8c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-subtitle {
+      color: var(--text-muted, #94a3b8);
+      font-size: 1rem;
+      max-width: 650px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .tts-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.75));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.2));
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(16px);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted, #94a3b8);
+      margin-bottom: 8px;
+    }
+
+    .tts-textarea {
+      width: 100%;
+      background: var(--bg-input, rgba(10, 14, 23, 0.85));
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+      color: #fff;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      outline: none;
+      resize: vertical;
+      min-height: 150px;
+      line-height: 1.6;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .tts-textarea:focus {
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    .tts-controls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .tts-controls-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-select {
+      width: 100%;
+      background: var(--bg-input, rgba(10, 14, 23, 0.85));
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    /* Action bar */
+    .tts-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-generate {
+      background: linear-gradient(135deg, #ff79c6 0%, #bd93f9 50%, #8be9fd 100%);
+      border: none;
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: 14px;
+      font-size: 1.02rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 121, 198, 0.45);
+    }
+
+    /* Audio Player Card */
+    .player-card {
+      display: none;
+      background: rgba(10, 14, 23, 0.8);
+      border: 1px solid rgba(80, 250, 123, 0.35);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 24px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    audio {
+      flex: 1;
+      min-width: 250px;
+      border-radius: 30px;
+    }
+
+    .btn-download-mp3 {
+      background: rgba(80, 250, 123, 0.15);
+      border: 1px solid rgba(80, 250, 123, 0.4);
+      color: #50fa7b;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-download-mp3:hover {
+      background: rgba(80, 250, 123, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Samples Chips */
+    .sample-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .sample-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sample-chip:hover {
+      color: var(--sakura-pink, #ff79c6);
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(18, 24, 38, 0.95);
+      border: 1px solid var(--sakura-pink, #ff79c6);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="tool-nav">
+    <a href="/tools" class="tool-brand">
+      <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot" onerror="this.src='/images/avatar-bot.jpg'">
+      <div>
+        <div class="tool-brand-title">Sakura TTS Studio</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">Chuyển Văn Bản Thành Giọng Nói Đa Ngôn Ngữ</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/tools" class="btn btn-secondary btn-sm" style="text-decoration:none">✨ Tất Cả Tiện Ích</a>
+      <a href="/dashboard" class="btn btn-secondary btn-sm" style="text-decoration:none">🌐 Dashboard</a>
+      <a href="/" class="btn btn-secondary btn-sm" style="text-decoration:none">Trang Chủ</a>
+    </div>
+  </nav>
+
+  <div class="tool-wrap">
+    <!-- Header -->
+    <div class="tool-header">
+      <div class="tool-badge">🎙️ Text To Speech (TTS) AI</div>
+      <h1 class="tool-title">Chuyển Văn Bản Thành Giọng Nói</h1>
+      <p class="tool-subtitle">Tạo tệp âm thanh tự nhiên từ văn bản bất kỳ, hỗ trợ phát âm nhiều thứ tiếng chuẩn xác và tải file MP3 miễn phí tức thì.</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="tts-card">
+      <div class="form-group">
+        <div class="form-label">
+          <span>Văn bản cần đọc</span>
+          <span id="charCount">0 / 1,000 ký tự</span>
+        </div>
+        <textarea id="ttsInput" class="tts-textarea" placeholder="Nhập câu nói hoặc nội dung cần đọc tại đây... (Ví dụ: Chào mừng các bạn đã ghé thăm website của Sakura Bot!)">Chào mừng các bạn đã ghé thăm Sakura Bot! Hãy khám phá các tiện ích tuyệt vời trên trang web nhé.</textarea>
+
+        <div class="sample-chips">
+          <span style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center">💡 Mẫu thử:</span>
+          <button type="button" class="sample-chip" onclick="setSample('Chào mừng bạn đến với Sakura Bot, trợ lý Discord đa năng của bạn!', 'vi')">🇻🇳 Chào mừng Sakura</button>
+          <button type="button" class="sample-chip" onclick="setSample('Welcome to Sakura Bot dashboard! Enjoy our features.', 'en')">🇬🇧 Welcome to Sakura</button>
+          <button type="button" class="sample-chip" onclick="setSample('こんにちは！サクラボットへようこそ。', 'ja')">🇯🇵 こんにちは</button>
+          <button type="button" class="sample-chip" onclick="setSample('你好！欢迎使用Sakura Bot机器人。', 'cn')">🇨🇳 你好欢迎</button>
+        </div>
+      </div>
+
+      <div class="tts-controls-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Ngôn ngữ & Giọng đọc</label>
+          <select id="ttsLang" class="form-select">
+            <option value="vi" selected>🇻🇳 Tiếng Việt (Giọng tự nhiên)</option>
+            <option value="en">🇺🇸 Tiếng Anh (US English)</option>
+            <option value="en-uk">🇬🇧 Tiếng Anh (UK English)</option>
+            <option value="ja">🇯🇵 Tiếng Nhật (Japanese)</option>
+            <option value="cn">🇨🇳 Tiếng Trung (Mandarin Chinese)</option>
+            <option value="ko">🇰🇷 Tiếng Hàn (Korean)</option>
+            <option value="fr">🇫🇷 Tiếng Pháp (French)</option>
+            <option value="de">🇩🇪 Tiếng Đức (German)</option>
+            <option value="es">🇪🇸 Tiếng Tây Ban Nha (Spanish)</option>
+            <option value="ru">🇷🇺 Tiếng Nga (Russian)</option>
+            <option value="th">🇹🇭 Tiếng Thái (Thai)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Tốc độ phát âm</label>
+          <select id="ttsSpeed" class="form-select">
+            <option value="0.75">Chậm (0.75x)</option>
+            <option value="1.0" selected>Bình thường (1.0x)</option>
+            <option value="1.25">Nhanh (1.25x)</option>
+            <option value="1.5">Rất nhanh (1.5x)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tts-actions">
+        <button type="button" class="btn btn-secondary" onclick="clearText()">✕ Xóa trắng</button>
+        <button type="button" id="btnGenerate" class="btn-generate">
+          <span>🔊 Tạo Giọng Nói & Nghe Thử</span>
+        </button>
+      </div>
+
+      <!-- Player Preview Card -->
+      <div id="playerCard" class="player-card">
+        <div style="font-weight:700;color:#50fa7b;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <span>✅ Đã tạo âm thanh thành công!</span>
+        </div>
+        <div class="player-row">
+          <audio id="audioPlayer" controls></audio>
+          <a href="#" id="btnDownloadAudio" class="btn-download-mp3" download="sakura-tts.mp3">
+            <span>📥 Tải File MP3</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <span id="toastIcon">🌸</span>
+    <span id="toastMsg">Thông báo</span>
+  </div>
+
+  <script src="/static/js/i18n.js"></script>
+  <script>
+    const ttsInput = document.getElementById('ttsInput');
+    const ttsLang = document.getElementById('ttsLang');
+    const ttsSpeed = document.getElementById('ttsSpeed');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const charCount = document.getElementById('charCount');
+    const playerCard = document.getElementById('playerCard');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const btnDownloadAudio = document.getElementById('btnDownloadAudio');
+
+    function showToast(msg, icon = '🌸') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      document.getElementById('toastIcon').textContent = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function updateCount() {
+      const len = ttsInput.value.length;
+      charCount.textContent = `${len.toLocaleString()} / 1,000 ký tự`;
+      if (len > 1000) {
+        charCount.style.color = '#ff5555';
+      } else {
+        charCount.style.color = 'var(--text-muted)';
+      }
+    }
+
+    ttsInput.addEventListener('input', updateCount);
+
+    function setSample(text, lang) {
+      ttsInput.value = text;
+      ttsLang.value = lang;
+      updateCount();
+      generateTts();
+    }
+
+    function clearText() {
+      ttsInput.value = '';
+      updateCount();
+      playerCard.style.display = 'none';
+      audioPlayer.pause();
+    }
+
+    btnGenerate.addEventListener('click', generateTts);
+
+    async function generateTts() {
+      const text = ttsInput.value.trim();
+      if (!text) {
+        showToast('Vui lòng nhập văn bản cần đọc!', '⚠️');
+        return;
+      }
+
+      btnGenerate.disabled = true;
+      btnGenerate.innerHTML = '<span>⏳ Đang tạo âm thanh...</span>';
+
+      try {
+        const res = await fetch('/api/tools/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: text,
+            lang: ttsLang.value,
+            speed: parseFloat(ttsSpeed.value) || 1.0
+          })
+        });
+
+        const data = await res.json();
+        if (data.ok && data.audio_url) {
+          audioPlayer.src = data.audio_url;
+          audioPlayer.playbackRate = parseFloat(ttsSpeed.value) || 1.0;
+          btnDownloadAudio.href = data.audio_url;
+          playerCard.style.display = 'block';
+          audioPlayer.play().catch(() => {});
+          showToast('Tạo giọng nói thành công!', '🎉');
+        } else {
+          showToast(data.error || 'Lỗi khi tạo giọng nói', '❌');
+        }
+      } catch (err) {
+        showToast('Không thể kết nối máy chủ TTS!', '❌');
+      } finally {
+        btnGenerate.disabled = false;
+        btnGenerate.innerHTML = '<span>🔊 Tạo Giọng Nói & Nghe Thử</span>';
+      }
+    }
+
+    ttsSpeed.addEventListener('change', () => {
+      if (audioPlayer.src) {
+        audioPlayer.playbackRate = parseFloat(ttsSpeed.value) || 1.0;
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', updateCount);
+  </script>
+</body>
+</html>
+

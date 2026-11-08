@@ -1,0 +1,23 @@
+{
+  "1308384120056971284": {
+    "admin_only": false,
+    "automod_enabled": false,
+    "leveling_enabled": true,
+    "economy_enabled": true,
+    "tiktok_enabled": false
+  },
+  "1530070878208004208": {
+    "admin_only": false,
+    "automod_enabled": true,
+    "leveling_enabled": true,
+    "economy_enabled": true,
+    "tiktok_enabled": false
+  },
+  "1431259096220438613": {
+    "admin_only": false,
+    "automod_enabled": true,
+    "leveling_enabled": true,
+    "economy_enabled": true,
+    "tiktok_enabled": false
+  }
+}

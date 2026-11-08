@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 Global Chat — Sakura Bot</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+<style>
+.gc-wrap{max-width:960px;margin:0 auto;padding:20px 16px;display:flex;flex-direction:column;height:calc(100dvh - 64px)}
+.gc-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.gc-box{flex:1;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,0.3);position:relative}
+.gc-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--bg-secondary);scroll-behavior:smooth}
+.gc-msg{display:flex;gap:12px;align-items:flex-start;max-width:85%}
+.gc-msg.me{align-self:flex-end;flex-direction:row-reverse}
+.gc-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--border-glass);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.gc-bubble{padding:10px 14px;border-radius:16px;font-size:.93rem;line-height:1.45;word-break:break-word}
+.gc-msg.me .gc-bubble{background:var(--sakura-gradient);color:#fff;border-bottom-right-radius:4px;box-shadow:0 4px 14px rgba(255,107,157,0.3)}
+.gc-msg.other .gc-bubble{background:var(--bg-card);border:1px solid var(--border-glass);color:var(--text-main);border-bottom-left-radius:4px}
+.gc-meta{font-size:.74rem;color:var(--text-dim);margin-top:4px}
+.gc-msg.me .gc-meta{text-align:right}
+.gc-attach-img{max-width:280px;max-height:220px;border-radius:12px;margin-top:8px;display:block;cursor:pointer;border:1px solid rgba(255,255,255,0.15);transition:transform .2s}
+.gc-attach-img:hover{transform:scale(1.02)}
+.gc-attach-file{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,0.25);padding:8px 12px;border-radius:10px;text-decoration:none;color:inherit;margin-top:8px;font-size:0.86rem;border:1px solid rgba(255,255,255,0.1)}
+.gc-attach-file:hover{background:rgba(0,0,0,0.4)}
+.gc-attach-preview{display:none;padding:8px 14px;background:rgba(255,107,157,0.08);border-top:1px solid var(--border-glass);display:flex;align-items:center;justify-content:space-between;font-size:.85rem}
+.gc-input-bar{padding:12px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-glass);background:var(--bg-card);position:relative}
+.gc-input{flex:1;background:var(--bg-input);border:1px solid var(--border-glass);color:var(--text-main);padding:12px 14px;border-radius:14px;outline:none;font-size:.95rem;transition:border-color .2s}
+.gc-input:focus{border-color:var(--sakura-pink);box-shadow:0 0 10px rgba(255,107,157,0.2)}
+.gc-action-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--border-glass);background:rgba(255,255,255,0.05);color:var(--text-main);font-size:1.15rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.gc-action-btn:hover{background:rgba(255,107,157,0.15);border-color:var(--sakura-pink);transform:translateY(-1px)}
+.gc-send{padding:10px 20px;height:40px;border-radius:12px;border:none;background:var(--sakura-gradient);color:#fff;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .2s;flex-shrink:0;display:flex;align-items:center;gap:6px}
+.gc-send:hover{box-shadow:0 4px 16px rgba(255,107,157,0.4);transform:translateY(-1px)}
+.gc-send:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.gc-login{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--text-muted)}
+
+/* Emoji picker popup */
+.gc-emoji-pop{position:absolute;bottom:70px;left:12px;width:320px;max-height:240px;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.5);display:none;flex-direction:column;z-index:90;overflow:hidden;backdrop-filter:blur(20px)}
+.gc-emoji-head{padding:8px 12px;font-size:.78rem;font-weight:700;color:var(--text-muted);border-bottom:1px solid var(--border-glass);display:flex;justify-content:space-between;align-items:center}
+.gc-emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:10px;overflow-y:auto;max-height:190px}
+.gc-emoji-item{display:flex;align-items:center;justify-content:center;font-size:1.35rem;padding:6px;border-radius:8px;cursor:pointer;transition:transform .1s,background .1s}
+.gc-emoji-item:hover{background:rgba(255,255,255,0.1);transform:scale(1.2)}
+</style>
+</head>
+<body>
+<nav class="account-nav" style="position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+  <a href="/" style="display:flex;gap:10px;align-items:center;text-decoration:none">
+    <img src="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png" style="width:32px;height:32px;border-radius:8px;border:2px solid var(--sakura-pink)">
+    <span style="font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Sakura Bot</span>
+    <span style="color:var(--text-muted)">/ Global Chat</span>
+  </a>
+  <div style="display:flex;gap:8px">
+    <a href="/dashboard" class="btn btn-secondary btn-sm">Dashboard</a>
+    <a href="/" class="btn btn-secondary btn-sm">Trang chủ</a>
+  </div>
+</nav>
+
+<div class="gc-wrap">
+  <div class="gc-header">
+    <div>
+      <h2 style="font-weight:800;margin:0 0 4px 0">💬 Global Chat</h2>
+      <div style="color:var(--text-muted);font-size:.85rem">Phòng trò chuyện toàn cầu kết nối cộng đồng Sakura • <span id="gcStatus" style="color:var(--text-dim)">Đang kết nối...</span> • <span id="gcCount">0 tin</span></div>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="location.href='/login'">🔐 Đăng nhập</button>
+  </div>
+  
+  <div class="gc-box">
+    <!-- Emoji Popover -->
+    <div class="gc-emoji-pop" id="emojiPop">
+      <div class="gc-emoji-head">
+        <span>CHỌN EMOJI</span>
+        <span style="cursor:pointer" onclick="toggleEmojiPop(false)">✖</span>
+      </div>
+      <div class="gc-emoji-grid" id="emojiGrid"></div>
+    </div>
+
+    <div class="gc-messages" id="gcMessages">
+      <div class="gc-login" id="gcLoginHint">Cần đăng nhập để tham gia Global Chat<br><a href="/login" class="btn btn-primary btn-sm" style="margin-top:8px">Đăng nhập ngay</a></div>
+    </div>
+
+    <!-- Preview file đính kèm -->
+    <div class="gc-attach-preview" id="attachPreview" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;overflow:hidden">
+        <span id="attachIcon" style="font-size:1.2rem">📎</span>
+        <span id="attachName" style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:300px;font-weight:600">tên_tệp.png</span>
+        <span id="attachSize" style="color:var(--text-dim);font-size:.75rem"></span>
+      </div>
+      <button style="background:transparent;border:none;color:#ff5555;cursor:pointer;font-size:1rem;font-weight:700" onclick="clearAttachment()" title="Hủy đính kèm">✖</button>
+    </div>
+
+    <div class="gc-input-bar">
+      <!-- File input ẩn -->
+      <input type="file" id="gcFileInput" style="display:none" onchange="handleFileSelect(this)">
+      
+      <button class="gc-action-btn" type="button" title="Đính kèm tệp / ảnh" onclick="document.getElementById('gcFileInput').click()">📎</button>
+      <button class="gc-action-btn" type="button" title="Chèn Emoji" onclick="toggleEmojiPop()">😀</button>
+
+      <input id="gcInput" class="gc-input" placeholder="Nhập tin nhắn... (Enter để gửi)" autocomplete="off" disabled>
+      <button id="gcSend" class="gc-send" disabled>
+        <span>Gửi</span>
+        <span>➤</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/static/js/sakura-fx.js"></script>
+<script>
+const EMOJIS = [
+  '🌸','💖','✨','🔥','👑','🎉','🥰','😂','🤣','😍','😎','🥺','🥳','💯',
+  '👍','👏','🙌','✌️','🚀','⭐','🌟','💎','⚡','🌈','🎮','🎲','🎯','⚔️',
+  '🛡️','🏆','☕','🍕','🍺','🍔','🐱','🐶','🦊','🐼','🤖','💡','❤️','🔥'
+];
+
+let selectedFile = null;
+let ws = null, myName = '';
+
+function getToken(){
+  return localStorage.getItem('sakura_auth_token') || (document.cookie.match(/sakura_token=([^;]+)/)||[])[1] || '';
+}
+
+function showToast(m,t='info'){
+  const c=document.getElementById('toastContainer');
+  const d=document.createElement('div');
+  d.className='toast-message';
+  let i='🌸';
+  if(t==='success') i='✅';
+  if(t==='error') i='❌';
+  if(t==='warning') i='⚠️';
+  d.innerHTML=`<span>${i}</span><span>${m}</span>`;
+  c.appendChild(d);
+  setTimeout(()=>{
+    d.style.opacity='0';
+    d.style.transform='translateY(10px)';
+    d.style.transition='all .3s';
+    setTimeout(()=>d.remove(),300)
+  },4000);
+}
+
+// Build emoji picker
+function initEmojis(){
+  const grid = document.getElementById('emojiGrid');
+  grid.innerHTML = '';
+  EMOJIS.forEach(emo => {
+    const btn = document.createElement('div');
+    btn.className = 'gc-emoji-item';
+    btn.innerText = emo;
+    btn.onclick = () => insertEmoji(emo);
+    grid.appendChild(btn);
+  });
+}
+
+function toggleEmojiPop(force){
+  const pop = document.getElementById('emojiPop');
+  const show = force !== undefined ? force : pop.style.display !== 'flex';
+  pop.style.display = show ? 'flex' : 'none';
+}
+
+function insertEmoji(emo){
+  const inp = document.getElementById('gcInput');
+  const start = inp.selectionStart || inp.value.length;
+  const end = inp.selectionEnd || inp.value.length;
+  inp.value = inp.value.substring(0, start) + emo + inp.value.substring(end);
+  inp.focus();
+  inp.selectionStart = inp.selectionEnd = start + emo.length;
+}
+
+// File attachment handlers
+function handleFileSelect(input){
+  if(!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if(file.size > 15 * 1024 * 1024){
+    showToast('Tệp quá lớn! Tối đa 15MB', 'error');
+    input.value = '';
+    return;
+  }
+  selectedFile = file;
+  const prev = document.getElementById('attachPreview');
+  document.getElementById('attachName').innerText = file.name;
+  document.getElementById('attachSize').innerText = (file.size / 1024).toFixed(1) + ' KB';
+  document.getElementById('attachIcon').innerText = file.type.startsWith('image/') ? '🖼️' : '📎';
+  prev.style.display = 'flex';
+}
+
+function clearAttachment(){
+  selectedFile = null;
+  document.getElementById('gcFileInput').value = '';
+  document.getElementById('attachPreview').style.display = 'none';
+}
+
+async function init(){
+  initEmojis();
+  const t = getToken();
+  if(!t){
+    document.getElementById('gcStatus').innerText = 'Chưa đăng nhập';
+    return;
+  }
+  try{
+    const r = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + t } });
+    const j = await r.json();
+    if(!j.ok) throw 0;
+    myName = j.user.username;
+    document.getElementById('gcStatus').innerText = 'Đã kết nối • ' + myName;
+  }catch{
+    document.getElementById('gcStatus').innerText = 'Chưa đăng nhập';
+    return;
+  }
+
+  document.getElementById('gcLoginHint')?.remove();
+  document.getElementById('gcInput').disabled = false;
+  document.getElementById('gcSend').disabled = false;
+
+  // Load history
+  try{
+    const r = await fetch('/api/global-chat', { headers: { 'Authorization': 'Bearer ' + t } });
+    const j = await r.json();
+    if(j.ok && Array.isArray(j.messages)){
+      j.messages.forEach(m => appendMsg(m));
+      updateCount();
+    }
+  }catch(e){
+    console.error('Failed to load history:', e);
+  }
+
+  connectWS(t);
+}
+
+function appendMsg(m){
+  const box = document.getElementById('gcMessages');
+  const isMe = m.username === myName;
+  const div = document.createElement('div');
+  div.className = 'gc-msg ' + (isMe ? 'me' : 'other');
+
+  let attachHtml = '';
+  if(m.attachment){
+    if(m.is_image){
+      attachHtml = `<a href="${m.attachment}" target="_blank" title="Xem ảnh gốc"><img class="gc-attach-img" src="${m.attachment}" alt="Đính kèm" onerror="this.style.display='none'"></a>`;
+    } else {
+      const fName = escapeHtml(m.attachment_name || 'Tệp đính kèm');
+      attachHtml = `<a class="gc-attach-file" href="${m.attachment}" target="_blank" download="${fName}"><span>📎</span><span>${fName}</span><span>⬇️</span></a>`;
+    }
+  }
+
+  const textHtml = m.message ? `<div style="line-height:1.45">${escapeHtml(m.message)}</div>` : '';
+
+  div.innerHTML = `
+    <img class="gc-avatar" src="${m.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+    <div>
+      <div class="gc-bubble">
+        ${textHtml}
+        ${attachHtml}
+      </div>
+      <div class="gc-meta">${escapeHtml(m.username)} • ${m.time || ''}</div>
+    </div>
+  `;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function escapeHtml(s){
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+function updateCount(){
+  const count = document.getElementById('gcMessages').querySelectorAll('.gc-msg').length;
+  document.getElementById('gcCount').innerText = count + ' tin';
+}
+
+function connectWS(token){
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}/ws/global-chat?token=${token}`);
+  ws.onopen = () => document.getElementById('gcStatus').innerText = 'Đang hoạt động • ' + myName;
+  ws.onmessage = e => {
+    try{
+      const j = JSON.parse(e.data);
+      if(j.type === 'global_chat' && j.data){
+        appendMsg(j.data);
+        updateCount();
+      }
+    }catch(err){}
+  };
+  ws.onclose = () => {
+    document.getElementById('gcStatus').innerText = 'Mất kết nối — tự động kết nối lại sau 3s';
+    setTimeout(() => connectWS(token), 3000);
+  };
+}
+
+async function send(){
+  const inp = document.getElementById('gcInput');
+  const text = inp.value.trim();
+  if(!text && !selectedFile) return;
+
+  const btn = document.getElementById('gcSend');
+  btn.disabled = true;
+
+  let attachmentUrl = null;
+  let attachmentName = null;
+  let isImage = false;
+
+  const t = getToken();
+
+  // Nếu có file, upload trước
+  if(selectedFile){
+    try{
+      const fd = new FormData();
+      fd.append('file', selectedFile);
+      const res = await fetch('/api/global-chat/upload', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + t },
+        body: fd
+      });
+      const data = await res.json();
+      if(!data.ok){
+        showToast(data.error || 'Upload file thất bại', 'error');
+        btn.disabled = false;
+        return;
+      }
+      attachmentUrl = data.url;
+      attachmentName = data.name;
+      isImage = data.is_image;
+    }catch(e){
+      showToast('Lỗi khi tải tệp lên!', 'error');
+      btn.disabled = false;
+      return;
+    }
+  }
+
+  const payload = {
+    type: 'global_chat',
+    message: text,
+    attachment: attachmentUrl,
+    attachment_name: attachmentName,
+    is_image: isImage
+  };
+
+  if(ws && ws.readyState === WebSocket.OPEN){
+    ws.send(JSON.stringify(payload));
+  } else {
+    try{
+      const r = await fetch('/api/global-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t },
+        body: JSON.stringify(payload)
+      });
+      const j = await r.json();
+      if(j.ok && j.message){
+        appendMsg(j.message);
+        updateCount();
+      } else {
+        showToast(j.error || 'Không gửi được tin nhắn', 'error');
+      }
+    }catch(e){
+      showToast('Lỗi gửi tin nhắn', 'error');
+    }
+  }
+
+  inp.value = '';
+  clearAttachment();
+  toggleEmojiPop(false);
+  btn.disabled = false;
+  inp.focus();
+}
+
+document.getElementById('gcSend').addEventListener('click', send);
+document.getElementById('gcInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') send();
+});
+
+// Click ra ngoài tắt popup emoji
+document.addEventListener('click', e => {
+  const pop = document.getElementById('emojiPop');
+  const btn = e.target.closest('.gc-action-btn');
+  if(!pop.contains(e.target) && (!btn || !btn.innerText.includes('😀'))){
+    pop.style.display = 'none';
+  }
+});
+
+init();
+</script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

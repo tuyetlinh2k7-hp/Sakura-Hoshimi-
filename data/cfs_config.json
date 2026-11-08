@@ -1,0 +1,20 @@
+{
+  "1308384120056971284": {
+    "enabled": true,
+    "confession_channel_id": 1517701459872055418,
+    "log_channel_id": 1518545059094466700,
+    "allow_public": true,
+    "allow_anonymous": true,
+    "create_thread": true,
+    "anon_reply": true
+  },
+  "1490702154288332911": {
+    "enabled": true,
+    "confession_channel_id": 1529782523553644625,
+    "log_channel_id": null,
+    "allow_public": true,
+    "allow_anonymous": true,
+    "create_thread": true,
+    "anon_reply": true
+  }
+}

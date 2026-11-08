@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔗 Nối Từ — Sakura Game</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+<style>
+.wc-wrap{max-width:900px;margin:0 auto;padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+.wc-current{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:20px;text-align:center}
+.wc-word{font-size:2rem;font-weight:800;background:var(--sakura-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.wc-hint{color:var(--text-muted);font-size:.9rem;margin-top:6px}
+.wc-history{max-height:240px;overflow-y:auto;background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.wc-row{display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:8px;font-size:.9rem}
+.wc-input-bar{display:flex;gap:8px}
+.wc-input{flex:1;background:var(--bg-input);border:1px solid var(--border-subtle);color:var(--text-main);padding:12px;border-radius:12px;outline:none}
+.wc-input:focus{border-color:var(--sakura-pink)}
+</style>
+</head>
+<body>
+<nav class="account-nav" style="position:sticky;top:0;z-index:100;background:var(--bg-glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+  <a href="/game" style="display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--text-main)"><span>←</span><span style="font-weight:800">Game</span><span style="color:var(--text-muted)">/ Nối Từ</span></a>
+  <div style="display:flex;gap:8px"><select id="wcMode" class="form-control" style="width:auto;padding:6px 10px"><option value="bot" selected>Vs Bot</option><option value="solo">Tự chơi</option></select><button class="btn btn-secondary btn-sm" onclick="newGame()">↻ Mới</button></div>
+</nav>
+<div class="wc-wrap">
+  <div class="wc-current">
+    <div style="font-size:.85rem;color:var(--text-muted)">Từ hiện tại</div>
+    <div class="wc-word" id="wcCurrent">—</div>
+    <div class="wc-hint" id="wcHint">Cần cụm 2 từ, từ sau phải bắt đầu bằng từ cuối của từ trước</div>
+    <div style="margin-top:8px"><span class="badge badge-sakura" id="wcScore">Điểm: 0</span> <span class="badge" id="wcStatus">Sẵn sàng</span></div>
+  </div>
+  <div class="wc-input-bar">
+    <input id="wcInput" class="wc-input" placeholder="Nhập cụm 2 từ, vd: hoa hồng">
+    <button class="btn btn-primary" onclick="submitWord()">Gửi</button>
+  </div>
+  <div class="wc-history" id="wcHistory"><div style="color:var(--text-dim);text-align:center">Lịch sử sẽ hiện ở đây</div></div>
+  <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:16px">
+    <div style="font-weight:800;margin-bottom:8px">🏆 BXH Nối Từ</div>
+    <div id="wcLb" style="font-size:.9rem;color:var(--text-muted)">Đang tải...</div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="/static/js/sakura-fx.js"></script>
+<script>
+let wordList=[], used={}, current='', score=0;
+function showToast(m,t='info'){const c=document.getElementById('toastContainer');const d=document.createElement('div');d.className='toast-message';let i='🌸';if(t==='success')i='✅';if(t==='error')i='❌';d.innerHTML=`<span>${i}</span><span>${m}</span>`;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transform='translateY(10px)';d.style.transition='all .3s';setTimeout(()=>d.remove(),300)},2500)}
+function getToken(){return localStorage.getItem('sakura_auth_token')|| (document.cookie.match(/sakura_token=([^;]+)/)||[])[1]||''}
+async function loadWordList(){
+  try{ const r=await fetch('/api/wordlist'); const j=await r.json(); if(j.ok) wordList=j.words; else wordList=[]; }catch{ wordList=[]; }
+  if(!wordList.length) wordList=['hoa hồng','hồng nhung','nhung nhớ','nhớ nhà','nhà cửa','cửa sổ'];
+}
+function isValidChain(prev, next){
+  if(!prev) return next.split(' ').length===2;
+  const a=prev.split(' '), b=next.split(' ');
+  if(b.length!==2) return false;
+  return a[a.length-1]===b[0];
+}
+function addHistory(who, text){
+  const el=document.getElementById('wcHistory');
+  if(el.children.length===1 && el.children[0].style.textAlign==='center') el.innerHTML='';
+  const row=document.createElement('div'); row.className='wc-row';
+  row.innerHTML=`<span>${who==='bot'?'🤖 Bot':'👤 Bạn'}: <strong>${text}</strong></span><span style="color:var(--text-dim)">${new Date().toLocaleTimeString('vi-VN')}</span>`;
+  el.appendChild(row); el.scrollTop=el.scrollHeight;
+}
+async function submitWord(){
+  const inp=document.getElementById('wcInput'); const raw=inp.value.trim().toLowerCase();
+  if(!raw) return;
+  if(raw.split(' ').length!==2) return showToast('Cần cụm 2 từ','warning');
+  if(!isValidChain(current, raw)) return showToast(`Phải bắt đầu bằng "${current? current.split(' ').pop().toUpperCase():''}"`,'error');
+  if(!wordList.includes(raw)) return showToast(`"${raw}" không có trong từ điển`,'error');
+  if((used[raw]||0)>=3) return showToast('Từ này đã dùng 3 lần','warning');
+  // ok
+  used[raw]=(used[raw]||0)+1;
+  current=raw; document.getElementById('wcCurrent').textContent=raw.toUpperCase();
+  addHistory('user', raw); inp.value=''; score++; document.getElementById('wcScore').textContent='Điểm: '+score;
+  submitScore('win');
+  // bot turn
+  if(document.getElementById('wcMode').value==='bot'){
+    const last=raw.split(' ').pop();
+    const cand=wordList.filter(w=> w.startsWith(last+' ') && (used[w]||0)<3 && w!==raw);
+    if(!cand.length){ showToast('Bạn thắng! Không còn từ nối 👑','success'); submitScore('win'); return; }
+    const botWord=cand[Math.floor(Math.random()*cand.length)];
+    used[botWord]=(used[botWord]||0)+1;
+    setTimeout(()=>{
+      current=botWord; document.getElementById('wcCurrent').textContent=botWord.toUpperCase();
+      addHistory('bot', botWord);
+    }, 600);
+  }
+}
+async function newGame(){
+  used={}; score=0; document.getElementById('wcScore').textContent='Điểm: 0';
+  document.getElementById('wcHistory').innerHTML='<div style="color:var(--text-dim);text-align:center">Lịch sử sẽ hiện ở đây</div>';
+  // random start
+  current=wordList[Math.floor(Math.random()*wordList.length)]||'hoa hồng';
+  used[current]=1; document.getElementById('wcCurrent').textContent=current.toUpperCase();
+  addHistory('bot', current);
+  showToast('Ván mới: '+current,'success');
+}
+async function submitScore(result){
+  try{ const t=getToken(); const h={'Content-Type':'application/json'}; if(t) h['Authorization']='Bearer '+t; await fetch('/api/game/wordchain/score',{method:'POST',headers:h, body:JSON.stringify({result})}); loadLb(); }catch{}
+}
+async function loadLb(){
+  try{ const t=getToken(); const h={}; if(t) h['Authorization']='Bearer '+t; const r=await fetch('/api/game/wordchain/leaderboard',{headers:h}); const j=await r.json(); const el=document.getElementById('wcLb'); if(!j.ok){ el.innerHTML='<span style="color:var(--text-dim)">Cần đăng nhập</span>'; return; } if(!j.leaderboard.length) el.innerHTML='<span style="color:var(--text-dim)">Chưa có dữ liệu</span>'; else el.innerHTML=j.leaderboard.slice(0,10).map((u,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 8px;background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:8px;margin-bottom:6px"><span style="display:flex;gap:6px;align-items:center"><span style="font-weight:800">#${i+1}</span><img src="${u.avatar||'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width:20px;height:20px;border-radius:50%" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><span>${u.username}</span></span><span>${u.wins}W</span></div>`).join(''); }catch{ document.getElementById('wcLb').innerText='Lỗi'; }
+}
+document.getElementById('wcInput').addEventListener('keydown',e=>{ if(e.key==='Enter') submitWord(); });
+(async()=>{ await loadWordList(); newGame(); loadLb(); })();
+</script>
+  <script src="/static/js/i18n.js"></script>
+</body>
+</html>

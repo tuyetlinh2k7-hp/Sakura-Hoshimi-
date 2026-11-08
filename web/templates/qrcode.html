@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸 Sakura QR Code Studio — Tạo & Quét Mã QR Nghệ Thuật</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f338.png">
+  <style>
+    body {
+      background: var(--bg-primary, #07090e);
+      color: var(--text-main, #f0f2f8);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass, rgba(12, 16, 26, 0.85));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass, rgba(255, 121, 198, 0.18));
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tool-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .tool-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--sakura-pink, #ff79c6);
+      box-shadow: 0 0 14px rgba(255, 121, 198, 0.35);
+    }
+
+    .tool-brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff79c6, #8be9fd 50%, #50fa7b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .tool-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 121, 198, 0.12);
+      border: 1px solid rgba(255, 121, 198, 0.35);
+      color: var(--sakura-pink, #ff79c6);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tool-title {
+      font-size: 2.3rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 20%, #ffb8e2 60%, #50fa7b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tool-subtitle {
+      color: var(--text-muted, #94a3b8);
+      font-size: 1rem;
+      max-width: 650px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Mode Navigation Tabs */
+    .qr-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .qr-tab {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted, #94a3b8);
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .qr-tab:hover {
+      background: rgba(255, 121, 198, 0.12);
+      border-color: rgba(255, 121, 198, 0.3);
+      color: #fff;
+    }
+
+    .qr-tab.active {
+      background: linear-gradient(135deg, #ff79c6 0%, #bd93f9 100%);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(255, 121, 198, 0.35);
+    }
+
+    /* Main Grid: Form on Left, Live QR on Right */
+    .qr-workspace {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .qr-workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .qr-card {
+      background: var(--bg-card, rgba(18, 24, 38, 0.75));
+      border: 1px solid var(--border-glass, rgba(255, 121, 198, 0.2));
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(16px);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted, #94a3b8);
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      background: var(--bg-input, rgba(10, 14, 23, 0.85));
+      border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--sakura-pink, #ff79c6);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.5;
+    }
+
+    /* Customization Controls */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .color-picker-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-input {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      width: 44px;
+      height: 44px;
+      background: none;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .color-input::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-input::-webkit-color-swatch {
+      border: none;
+      border-radius: 8px;
+    }
+
+    /* Right Preview Pane */
+    .qr-preview-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .qr-display-frame {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      position: relative;
+      transition: transform 0.3s;
+    }
+
+    .qr-display-frame:hover {
+      transform: scale(1.02);
+    }
+
+    .qr-display-img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      flex: 1;
+      min-width: 140px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 121, 198, 0.2);
+      border-color: var(--sakura-pink, #ff79c6);
+      color: var(--sakura-pink, #ff79c6);
+    }
+
+    .btn-action.primary {
+      background: linear-gradient(135deg, #ff79c6 0%, #bd93f9 100%);
+      border: none;
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(255, 121, 198, 0.35);
+    }
+
+    .btn-action.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 121, 198, 0.5);
+    }
+
+    /* Scanner UI */
+    .scanner-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .scanner-dropzone {
+      width: 100%;
+      max-width: 500px;
+      height: 240px;
+      border: 2px dashed rgba(255, 121, 198, 0.4);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: rgba(10, 14, 23, 0.5);
+      transition: all 0.2s;
+    }
+
+    .scanner-dropzone:hover {
+      border-color: var(--sakura-pink, #ff79c6);
+      background: rgba(255, 121, 198, 0.05);
+    }
+
+    .scanner-result {
+      width: 100%;
+      background: rgba(10, 14, 23, 0.7);
+      border: 1px solid rgba(80, 250, 123, 0.3);
+      padding: 16px;
+      border-radius: 12px;
+      word-break: break-all;
+      text-align: left;
+      display: none;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(18, 24, 38, 0.95);
+      border: 1px solid var(--sakura-pink, #ff79c6);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="tool-nav">
+    <a href="/tools" class="tool-brand">
+      <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot" onerror="this.src='/images/avatar-bot.jpg'">
+      <div>
+        <div class="tool-brand-title">Sakura QR Code Studio</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">Tạo & Quét Mã QR Nghệ Thuật Đa Năng</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="/tools" class="btn btn-secondary btn-sm" style="text-decoration:none">✨ Tất Cả Tiện Ích</a>
+      <a href="/dashboard" class="btn btn-secondary btn-sm" style="text-decoration:none">🌐 Dashboard</a>
+      <a href="/" class="btn btn-secondary btn-sm" style="text-decoration:none">Trang Chủ</a>
+    </div>
+  </nav>
+
+  <div class="tool-wrap">
+    <!-- Header -->
+    <div class="tool-header">
+      <div class="tool-badge">📱 QR Code Studio v3.0</div>
+      <h1 class="tool-title">Trình Tạo & Quét Mã QR</h1>
+      <p class="tool-subtitle">Tạo mã QR tùy biến màu sắc, hỗ trợ logo Sakura ở giữa, xuất file HD PNG / SVG và giải mã nhanh từ camera hoặc hình ảnh.</p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="qr-tabs">
+      <button type="button" class="qr-tab active" data-type="url">🔗 Liên kết (URL)</button>
+      <button type="button" class="qr-tab" data-type="text">📝 Văn bản tự do</button>
+      <button type="button" class="qr-tab" data-type="wifi">📶 Mạng Wi-Fi</button>
+      <button type="button" class="qr-tab" data-type="vcard">👤 Danh bạ (vCard)</button>
+      <button type="button" class="qr-tab" data-type="email">✉️ Email</button>
+      <button type="button" class="qr-tab" data-type="phone">📞 Số điện thoại</button>
+      <button type="button" class="qr-tab" data-type="scan">📷 Quét mã QR</button>
+    </div>
+
+    <!-- Generator Workspace -->
+    <div id="genWorkspace" class="qr-workspace">
+      <!-- Left Configuration Panel -->
+      <div class="qr-card">
+        <div id="dynamicForm">
+          <!-- Populated by JS based on selected tab -->
+        </div>
+
+        <!-- Design Customization -->
+        <div class="controls-grid">
+          <div class="form-group">
+            <label class="form-label">Màu mã QR (Màu chính)</label>
+            <div class="color-picker-box">
+              <input type="color" id="qrColor" class="color-input" value="#000000">
+              <span id="qrColorText" style="font-family:monospace;font-size:0.9rem">#000000</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Màu nền QR</label>
+            <div class="color-picker-box">
+              <input type="color" id="qrBgColor" class="color-input" value="#ffffff">
+              <span id="qrBgColorText" style="font-family:monospace;font-size:0.9rem">#FFFFFF</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Kích thước ảnh QR</label>
+            <select id="qrSize" class="form-select">
+              <option value="250">250 x 250 px (Nhỏ gọn)</option>
+              <option value="400" selected>400 x 400 px (Tiêu chuẩn)</option>
+              <option value="600">600 x 600 px (Độ nét cao HD)</option>
+              <option value="1000">1000 x 1000 px (In ấn Ultra-HD)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Logo ở chính giữa QR</label>
+            <select id="qrLogo" class="form-select">
+              <option value="sakura" selected>🌸 Sakura Bot Avatar</option>
+              <option value="none">Trống (Không logo)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Preview Panel -->
+      <div class="qr-card qr-preview-box">
+        <div class="qr-display-frame" id="qrFrame">
+          <img id="qrImage" class="qr-display-img" alt="QR Code Preview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'></svg>">
+        </div>
+
+        <div class="action-btn-group">
+          <button type="button" id="btnDownloadPng" class="btn-action primary">
+            <span>📥 Tải ảnh PNG</span>
+          </button>
+          <button type="button" id="btnCopyImage" class="btn-action">
+            <span>📋 Sao chép ảnh</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scanner Workspace -->
+    <div id="scanWorkspace" class="qr-card scanner-container">
+      <div class="scanner-dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <span style="font-size:3rem;margin-bottom:12px;">📁</span>
+        <div style="font-weight:700;font-size:1.1rem;margin-bottom:6px;">Chọn hoặc kéo thả ảnh chứa mã QR vào đây</div>
+        <div style="color:var(--text-muted);font-size:0.85rem">Hỗ trợ định dạng PNG, JPG, WebP</div>
+        <input type="file" id="fileInput" accept="image/*" style="display:none">
+      </div>
+
+      <div id="scanResult" class="scanner-result">
+        <div style="color:#50fa7b;font-weight:700;margin-bottom:6px;">✅ Kết quả giải mã:</div>
+        <div id="scanContent" style="font-size:1.05rem;line-height:1.5;"></div>
+        <div style="margin-top:14px;display:flex;gap:10px;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnCopyScan">Sao chép</button>
+          <a href="#" id="btnOpenScan" target="_blank" class="btn btn-primary btn-sm" style="display:none">Mở liên kết</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">
+    <span id="toastIcon">🌸</span>
+    <span id="toastMsg">Thông báo</span>
+  </div>
+
+  <script src="/static/js/i18n.js"></script>
+  <script>
+    let currentType = 'url';
+    const dynamicForm = document.getElementById('dynamicForm');
+    const qrImage = document.getElementById('qrImage');
+    const qrFrame = document.getElementById('qrFrame');
+    const qrColor = document.getElementById('qrColor');
+    const qrBgColor = document.getElementById('qrBgColor');
+    const qrSize = document.getElementById('qrSize');
+    const qrLogo = document.getElementById('qrLogo');
+    let qrDebounce = null;
+
+    function showToast(msg, icon = '🌸') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      document.getElementById('toastIcon').textContent = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    // Forms dictionary for different types
+    const FORMS = {
+      url: `
+        <div class="form-group">
+          <label class="form-label">Đường dẫn Website / Discord URL</label>
+          <input type="url" id="inpUrl" class="form-input" placeholder="https://sakurabot.top hoặc https://discord.gg/..." value="https://sakurabot.top">
+        </div>
+      `,
+      text: `
+        <div class="form-group">
+          <label class="form-label">Nội dung văn bản</label>
+          <textarea id="inpText" class="form-textarea" placeholder="Nhập bất kỳ đoạn văn bản, ghi chú hoặc nội dung nào...">🌸 Chào mừng bạn đến với Sakura Bot!</textarea>
+        </div>
+      `,
+      wifi: `
+        <div class="form-group">
+          <label class="form-label">Tên mạng Wi-Fi (SSID)</label>
+          <input type="text" id="inpWifiSsid" class="form-input" placeholder="Tên mạng Wi-Fi nhà bạn" value="Sakura_WiFi_5G">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu Wi-Fi</label>
+          <input type="text" id="inpWifiPass" class="form-input" placeholder="Mật khẩu Wi-Fi (nếu có)" value="sakura123456">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phương thức bảo mật</label>
+          <select id="inpWifiAuth" class="form-select">
+            <option value="WPA" selected>WPA / WPA2 / WPA3</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">Không có mật khẩu</option>
+          </select>
+        </div>
+      `,
+      vcard: `
+        <div class="form-group">
+          <label class="form-label">Họ và tên</label>
+          <input type="text" id="inpVName" class="form-input" placeholder="Nguyễn Văn A" value="Sakura Bot Admin">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Số điện thoại</label>
+          <input type="tel" id="inpVPhone" class="form-input" placeholder="+84 901 234 567" value="+84901234567">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="inpVEmail" class="form-input" placeholder="contact@example.com" value="support@sakurabot.top">
+        </div>
+      `,
+      email: `
+        <div class="form-group">
+          <label class="form-label">Gửi đến địa chỉ Email</label>
+          <input type="email" id="inpMailTo" class="form-input" placeholder="nguoinhan@gmail.com" value="support@sakurabot.top">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tiêu đề Email</label>
+          <input type="text" id="inpMailSubj" class="form-input" placeholder="Tiêu đề thư" value="Hỗ trợ Sakura Bot">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nội dung thư</label>
+          <textarea id="inpMailBody" class="form-textarea" placeholder="Nội dung cần gửi...">Xin chào Admin, tôi cần hỗ trợ...</textarea>
+        </div>
+      `,
+      phone: `
+        <div class="form-group">
+          <label class="form-label">Số điện thoại cần gọi</label>
+          <input type="tel" id="inpPhone" class="form-input" placeholder="+84 987 654 321" value="+84987654321">
+        </div>
+      `
+    };
+
+    function renderForm(type) {
+      if (type === 'scan') {
+        document.getElementById('genWorkspace').style.display = 'none';
+        document.getElementById('scanWorkspace').style.display = 'flex';
+      } else {
+        document.getElementById('genWorkspace').style.display = 'grid';
+        document.getElementById('scanWorkspace').style.display = 'none';
+        dynamicForm.innerHTML = FORMS[type] || FORMS.url;
+        bindInputEvents();
+        generateQr();
+      }
+    }
+
+    document.querySelectorAll('.qr-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.qr-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentType = tab.getAttribute('data-type');
+        renderForm(currentType);
+      });
+    });
+
+    function getFormattedContent() {
+      if (currentType === 'url') {
+        return (document.getElementById('inpUrl')?.value || '').trim() || 'https://sakurabot.top';
+      } else if (currentType === 'text') {
+        return (document.getElementById('inpText')?.value || '').trim() || 'Sakura Bot';
+      } else if (currentType === 'wifi') {
+        const ssid = document.getElementById('inpWifiSsid')?.value || '';
+        const pass = document.getElementById('inpWifiPass')?.value || '';
+        const auth = document.getElementById('inpWifiAuth')?.value || 'WPA';
+        return `WIFI:T:${auth};S:${ssid};P:${pass};;`;
+      } else if (currentType === 'vcard') {
+        const name = document.getElementById('inpVName')?.value || '';
+        const phone = document.getElementById('inpVPhone')?.value || '';
+        const email = document.getElementById('inpVEmail')?.value || '';
+        return `BEGIN:VCARD\\nVERSION:3.0\\nFN:${name}\\nTEL:${phone}\\nEMAIL:${email}\\nEND:VCARD`;
+      } else if (currentType === 'email') {
+        const to = document.getElementById('inpMailTo')?.value || '';
+        const subj = encodeURIComponent(document.getElementById('inpMailSubj')?.value || '');
+        const body = encodeURIComponent(document.getElementById('inpMailBody')?.value || '');
+        return `mailto:${to}?subject=${subj}&body=${body}`;
+      } else if (currentType === 'phone') {
+        const p = document.getElementById('inpPhone')?.value || '';
+        return `tel:${p}`;
+      }
+      return 'https://sakurabot.top';
+    }
+
+    async function generateQr() {
+      const content = getFormattedContent();
+      const color = qrColor.value;
+      const bgColor = qrBgColor.value;
+      const size = parseInt(qrSize.value, 10) || 400;
+      const logo = qrLogo.value;
+
+      try {
+        const res = await fetch('/api/tools/qrcode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: content,
+            color: color,
+            bg_color: bgColor,
+            size: size,
+            logo: logo
+          })
+        });
+
+        const data = await res.json();
+        if (data.ok && data.data_url) {
+          qrImage.src = data.data_url;
+          qrFrame.style.background = bgColor;
+        }
+      } catch (err) {
+        console.error('Error generating QR:', err);
+      }
+    }
+
+    function bindInputEvents() {
+      dynamicForm.querySelectorAll('input, textarea, select').forEach(el => {
+        el.addEventListener('input', () => {
+          clearTimeout(qrDebounce);
+          qrDebounce = setTimeout(generateQr, 300);
+        });
+      });
+    }
+
+    [qrColor, qrBgColor, qrSize, qrLogo].forEach(el => {
+      el.addEventListener('input', () => {
+        if (el === qrColor) document.getElementById('qrColorText').textContent = qrColor.value.toUpperCase();
+        if (el === qrBgColor) document.getElementById('qrBgColorText').textContent = qrBgColor.value.toUpperCase();
+        generateQr();
+      });
+    });
+
+    // Download PNG
+    document.getElementById('btnDownloadPng').addEventListener('click', () => {
+      if (!qrImage.src || qrImage.src.startsWith('data:image/svg')) return;
+      const a = document.createElement('a');
+      a.href = qrImage.src;
+      a.download = `sakura-qr-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Đang tải ảnh mã QR xuống!', '📥');
+    });
+
+    // Copy Image to clipboard
+    document.getElementById('btnCopyImage').addEventListener('click', async () => {
+      try {
+        const res = await fetch(qrImage.src);
+        const blob = await res.blob();
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type]: blob })
+        ]);
+        showToast('Đã sao chép ảnh mã QR vào Clipboard!', '📋');
+      } catch (err) {
+        showToast('Trình duyệt chưa hỗ trợ copy ảnh trực tiếp!', '⚠️');
+      }
+    });
+
+    // Scanner Logic using Canvas & jsQR / Native BarcodeDetector
+    const fileInput = document.getElementById('fileInput');
+    const scanResult = document.getElementById('scanResult');
+    const scanContent = document.getElementById('scanContent');
+    const btnOpenScan = document.getElementById('btnOpenScan');
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const img = new Image();
+      img.onload = async () => {
+        // Try native BarcodeDetector if available
+        if ('BarcodeDetector' in window) {
+          try {
+            const detector = new BarcodeDetector({ formats: ['qr_code'] });
+            const barcodes = await detector.detect(img);
+            if (barcodes.length > 0) {
+              displayScan(barcodes[0].rawValue);
+              return;
+            }
+          } catch {}
+        }
+
+        // Fallback: send to backend to decode
+        const formData = new FormData();
+        formData.append('image', file);
+        try {
+          const res = await fetch('/api/tools/qrcode/scan', { method: 'POST', body: formData });
+          const data = await res.json();
+          if (data.ok && data.text) {
+            displayScan(data.text);
+          } else {
+            showToast('Không tìm thấy mã QR trong ảnh này!', '❌');
+          }
+        } catch {
+          showToast('Lỗi khi phân tích mã QR!', '❌');
+        }
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    function displayScan(text) {
+      scanContent.textContent = text;
+      scanResult.style.display = 'block';
+      if (text.startsWith('http://') || text.startsWith('https://')) {
+        btnOpenScan.href = text;
+        btnOpenScan.style.display = 'inline-flex';
+      } else {
+        btnOpenScan.style.display = 'none';
+      }
+      showToast('Đã giải mã thành công!', '✅');
+    }
+
+    document.getElementById('btnCopyScan').addEventListener('click', () => {
+      navigator.clipboard.writeText(scanContent.textContent)
+        .then(() => showToast('Đã sao chép nội dung mã QR!', '📋'));
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderForm('url');
+    });
+  </script>
+</body>
+</html>
+
