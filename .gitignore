@@ -11,7 +11,7 @@
 cookies.txt
 vts_token.json
 
-# --- SQLite Databases & State Data ---
+# --- SQLite Databases & Binary Storage ---
 *.db
 *.sqlite
 *.sqlite3
@@ -21,8 +21,14 @@ vts_token.json
 data/*.db
 data/backups/
 data/tts_cache/
-data/web_sessions.json
-data/web_users.json
+
+# --- Dynamic / Sensitive Server & User State JSON Data ---
+data/*.json
+!data/waifu_characters.json
+!data/trieuphu.json
+!data/gi_*.json
+!data/enka_loc_vi.json
+!data/forbidden_words.json
 
 # --- Python Cache & Virtual Environments ---
 __pycache__/

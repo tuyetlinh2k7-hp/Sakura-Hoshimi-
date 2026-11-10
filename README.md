@@ -83,7 +83,7 @@ SakuraBot/
 
 ### Step 1: Clone the repository
 ```bash
-git clone https://github.com/tuyetlinh2k7_hp/Sakura-Hoshimi-.git
+git clone https://github.com/tuyetlinh2k7-hp/Sakura-Hoshimi-.git
 cd Sakura-Hoshimi-
 ```
 

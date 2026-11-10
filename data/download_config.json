@@ -1,9 +1,0 @@
-{
-    "global_enabled": true,
-    "disabled_guilds": [],
-    "disabled_channels": [],
-    "channel_modes": {
-        "1376799037696774204": "image",
-        "1559376274466672680": "audio"
-    }
-}
