@@ -1,7 +1,7 @@
 
 
 import discord
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 
 class ConfirmModerationView(discord.ui.View):

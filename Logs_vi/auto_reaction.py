@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from typing import Literal
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 logger = logging.getLogger(__name__)
 CONFIG_FILE = "data/autoreact_config.json"

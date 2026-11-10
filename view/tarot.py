@@ -6,8 +6,8 @@ import asyncio
 
 from openai import AsyncOpenAI
 from data.data import TAROT_DECK
-from Checks_vi.tarot import save_history, get_history, draw_cards, can_draw_today
-from Checks_vi.i18n import t
+from Check.tarot import save_history, get_history, draw_cards, can_draw_today
+from Check.i18n import t
 
 # --- CẤU HÌNH XKIRO API ---
 API_KEY = None

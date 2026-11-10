@@ -6,11 +6,11 @@ import os
 from datetime import timedelta
 import re
 from typing import Literal
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 # Import các hàm kiểm tra và biến cấu hình cần thiết
 from config import OWNER_ID
-from Checks_vi.mod import admin_roles, has_admin_role, is_owner
+from Check.mod import admin_roles, has_admin_role, is_owner
 
 # --- Quản lý dữ liệu (chia sẻ với link_filter) ---
 LINK_WARNINGS_FILE = "data/link_warnings.json"

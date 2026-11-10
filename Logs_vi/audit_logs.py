@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-from Checks_vi.data import user_log_channels
-from Checks_vi.i18n import t
+from Check.data import user_log_channels
+from Check.i18n import t
 
 
 class AuditLog(commands.Cog):

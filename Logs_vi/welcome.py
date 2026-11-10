@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 import os
-from Checks_vi.server_member import update_stats
-from Checks_vi.data import get_guild_settings
-from Checks_vi.i18n import t
+from Check.server_member import update_stats
+from Check.data import get_guild_settings
+from Check.i18n import t
 
 
 class WelcomeLog(commands.Cog):

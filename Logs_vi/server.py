@@ -4,8 +4,8 @@ from collections import defaultdict
 import discord
 from discord.ext import commands
 
-from Checks_vi.data import server_log_channels
-from Checks_vi.i18n import t
+from Check.data import server_log_channels
+from Check.i18n import t
 
 
 class ServerLog(commands.Cog):
@@ -177,7 +177,7 @@ class ServerLog(commands.Cog):
     async def _send_owner_guild_join_dm(self, guild: discord.Guild):
         """Gửi thông báo DM cho Bot Owner khi tham gia server (có fallback tự thân)."""
         try:
-            from Checks_vi.owner_notifier import notify_owner_guild_join
+            from Check.owner_notifier import notify_owner_guild_join
             await notify_owner_guild_join(self.bot, guild)
             return
         except (ImportError, AttributeError):
@@ -185,7 +185,7 @@ class ServerLog(commands.Cog):
         except Exception as e:
             print(f"[ServerLog] ⚠️ Lỗi gọi notify_owner_guild_join: {e}")
 
-        # Fallback trực tiếp nếu file Checks_vi/owner_notifier.py chưa đồng bộ trên host
+        # Fallback trực tiếp nếu file Check/owner_notifier.py chưa đồng bộ trên host
         try:
             from config import OWNER_ID
         except Exception:
@@ -224,7 +224,7 @@ class ServerLog(commands.Cog):
     async def _send_owner_guild_remove_dm(self, guild: discord.Guild):
         """Gửi thông báo DM cho Bot Owner khi rời server (có fallback tự thân)."""
         try:
-            from Checks_vi.owner_notifier import notify_owner_guild_remove
+            from Check.owner_notifier import notify_owner_guild_remove
             await notify_owner_guild_remove(self.bot, guild)
             return
         except (ImportError, AttributeError):

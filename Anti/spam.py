@@ -7,11 +7,11 @@ from datetime import timedelta, datetime
 from collections import deque
 from typing import Literal
 import re
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 # Import các hàm kiểm tra và biến cấu hình cần thiết
 from config import OWNER_ID
-from Checks_vi.mod import has_admin_role, is_owner, admin_roles
+from Check.mod import has_admin_role, is_owner, admin_roles
 # Import các biến và hàm từ link_filter để dùng chung hệ thống cảnh cáo
 from Anti.link_filter import link_warnings, link_settings, save_link_warnings, load_link_data
 

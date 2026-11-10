@@ -4,10 +4,10 @@ from discord.ext import commands
 import os
 import copy
 from datetime import datetime
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 # Import các hàm và biến quản lý dữ liệu tập trung
-from Checks_vi.data import save_data, guild_settings, get_guild_settings
+from Check.data import save_data, guild_settings, get_guild_settings
 
 class SetupCog(commands.Cog):
     def __init__(self, bot: commands.Bot):

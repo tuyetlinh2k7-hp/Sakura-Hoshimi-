@@ -6,12 +6,12 @@ import os
 from datetime import timedelta
 import re
 from typing import Optional
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 # Import các thành phần dùng chung
 from config import OWNER_ID
-from Checks_vi.mod import has_admin_role, is_owner
-from Checks_vi.data import groq_client
+from Check.mod import has_admin_role, is_owner
+from Check.data import groq_client
 
 # --- Quản lý dữ liệu cho Bộ lọc Xúc phạm ---
 INSULT_SETTINGS_FILE = "data/insult_filter_settings.json"

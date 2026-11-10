@@ -2546,10 +2546,10 @@
     "ja": "クエリは有効ですが、データ行が返されません。",
     "cn": "查询有效，但未返回任何数据行。"
   },
-  "Nạp lại toàn bộ Cogs trong Command_vi, Anti, Logs_vi": {
-    "en": "Reload all Cogs in Command_vi, Anti, Logs_vi",
-    "ja": "Command_vi、Anti、Logs_vi のすべての Cog をリロードします",
-    "cn": "重新加载 Command_vi、Anti、Logs_vi 中的所有 Cogs"
+  "Nạp lại toàn bộ Cogs trong Command, Anti, Logs_vi": {
+    "en": "Reload all Cogs in Command, Anti, Logs_vi",
+    "ja": "Command、Anti、Logs_vi のすべての Cog をリロードします",
+    "cn": "重新加载 Command、Anti、Logs_vi 中的所有 Cogs"
   },
   "Phòng trò chuyện toàn cầu kết nối cộng đồng Sakura •": {
     "en": "Global chat room connecting the Sakura community •",

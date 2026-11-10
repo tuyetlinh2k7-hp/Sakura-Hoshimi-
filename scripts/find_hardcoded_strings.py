@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-FILE_PATH = BASE_DIR / "Command_vi" / "waifu_gacha.py"
+FILE_PATH = BASE_DIR / "Command" / "waifu_gacha.py"
 
 with open(FILE_PATH, "r", encoding="utf-8") as f:
     lines = f.readlines()

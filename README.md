@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌸 SakuraBot - Discord Bot Đa Năng Tiếng Việt & Web Dashboard
+# 🌸 SakuraBot - Modern Multipurpose Discord Bot & Web Dashboard
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![discord.py](https://img.shields.io/badge/discord.py-2.7.1%2B-5865F2.svg?logo=discord&logoColor=white)](https://github.com/Rapptz/discord.py)
@@ -8,179 +8,179 @@
 [![Lavalink](https://img.shields.io/badge/Audio-Lavalink%20v4-red.svg)](https://github.com/lavalink-devs/Lavalink)
 [![AI Powered](https://img.shields.io/badge/AI-Gemini%20%7C%20OpenAI%20%7C%20Groq-orange.svg)](https://ai.google.dev/)
 
-**SakuraBot** là bot Discord mã nguồn mở mạnh mẽ, giao diện tiếng Việt thân thiện, tích hợp **Web Dashboard** thời gian thực, hệ thống phát nhạc đa luồng bot phụ, minigame kinh tế/gacha hấp dẫn, trợ lý AI thông minh và bộ công cụ bảo mật máy chủ Discord chuyên nghiệp.
+**SakuraBot** is a powerful, production-ready open-source Discord bot built with Python. It features a sleek real-time **Web Dashboard**, multi-worker music streaming, an immersive anime **Waifu Gacha & Economy** ecosystem, multi-provider **AI Chatbots**, remote **Minecraft Server Management**, and enterprise-grade server security modules.
 
-[✨ Tính năng](#-tính-năng-nổi-bật) • [🚀 Cài đặt nhanh](#-hướng-dẫn-cài-đặt) • [⚙️ Cấu hình .env](#️-cấu-hình-biến-môi-trường-env) • [📖 Danh sách lệnh](#-danh-sách-lệnh-tiêu-biểu) • [🤝 Đóng góp](#-đóng-góp--bản-quyền)
+[✨ Features](#-key-features) • [📁 Structure](#-project-structure) • [🚀 Quick Start](#-quick-start--installation) • [⚙️ Configuration](#️-environment-variables-env) • [📖 Command Reference](#-command-reference) • [🤝 Contributing](#-contributing--license)
 
 ---
 
 </div>
 
-## ✨ Tính năng nổi bật
+## ✨ Key Features
 
-### 🛡️ 1. Bảo vệ & Quản trị Máy chủ Toàn diện
-- **Unified Anti**: Hệ thống chống phá All-In-One (Anti-Raid, Anti-Nuke, Anti-Spam, Anti-Link, Anti-Invite).
-- **AutoMod thông minh**: Tự động lọc từ ngữ khiếm nhã, ngăn chặn spam tin nhắn liên tục và xúc phạm bot.
-- **Hệ thống Logs chuyên sâu**: Ghi lại lịch sử chỉnh sửa/xóa tin nhắn, hoạt động voice, thành viên ra/vào, audit log, boost server và tự động thả cảm xúc (Auto Reaction).
+### 🛡️ 1. Comprehensive Server Security & Auto-Moderation
+- **Unified Anti-Exploit**: All-in-one server protection against raids, server nuking, chat floods, unauthorized invite links, and phishing URLs.
+- **Intelligent AutoMod**: Real-time profanity and blacklist filters, spam pattern recognition, and anti-toxicity moderation.
+- **Detailed Audit & Logging**: Tracks message edits/deletions, voice channel events, member join/leave, server boosts, audit logs, and automatic emoji reactions.
 
-### 🎵 2. Phát nhạc Đa Luồng (Multi-Bot Wavelink / Lavalink)
-- Tích hợp **Lavalink v4** và **Wavelink** với chất lượng âm thanh 24/7 ổn định cao.
-- **Hỗ trợ Multi-Token**: Cho phép phân bổ danh sách bot phụ (Music Sub-Bots) để phát nhạc độc lập trên nhiều voice channel cùng một lúc mà không bị nghẽn luồng.
+### 🎵 2. Multi-Worker Music Streaming (Wavelink & Lavalink v4)
+- High-fidelity 24/7 audio playback powered by **Lavalink v4** and **Wavelink**.
+- **Multi-Token Worker Architecture**: Distribute audio playback across a pool of secondary music bots, allowing multiple voice channels to stream independently without lag.
 
-### 🤖 3. Trí tuệ Nhân tạo (Multi-LLM AI Assistant)
-- Hỗ trợ đa mô hình AI: **Google Gemini**, **Groq LLaMA**, **OpenAI**.
-- Kênh Chatbot AI thông minh trò chuyện tự nhiên bằng tiếng Việt.
-- Bói bài **Tarot AI** và giải đoán cung hoàng đạo (**Zodiac**) chi tiết theo ngữ cảnh.
+### 🤖 3. Multi-Provider AI Assistant (LLM Integration)
+- Supports top-tier AI providers: **Google Gemini**, **Groq (LLaMA 3)**, and **OpenAI GPT**.
+- Dedicated AI conversation channels with context memory.
+- Contextual **AI Tarot Card Readings** and **Zodiac Horoscope** interpretations.
 
-### 🎮 4. Minigames & Hệ thống Kinh tế Xã hội (Economy System)
-- **Waifu Gacha System**: Thu thập hàng trăm nhân vật Anime/Game độc đáo với tỷ lệ gacha minh bạch, nâng cấp và sưu tầm thẻ bài.
-- **Kinh tế chân thực**: Hệ thống Ngân hàng (gửi tiết kiệm có kỳ hạn, vay vốn), Chợ P2P, Việc làm (`work`), Đào khoáng (`mining`), Câu cá (`fishing`).
-- **Tương tác xã hội**: Kết hôn (`marriage`), Hệ thống Tù tội (`jail`), Điểm danh chuỗi ngày (`streaks`), Thành tựu (`achievements`).
-- **Trò chơi giải trí**: Game nối từ Tiếng Việt (từ điển 900.000+ từ), Cờ caro (XO), Ai là triệu phú, Casino xúc xắc/blackjack.
+### 🎮 4. Minigames & Full-Featured Economy System
+- **Waifu Gacha System**: Collect, level up, and trade hundreds of anime & gaming characters with transparent drop rates.
+- **Realistic Banking & Market**: Savings accounts with customizable terms and interest, loans, P2P player market, jobs (`work`), mining (`mining`), and fishing (`fishing`).
+- **Social Gameplay**: Marriage system (`marriage`), Jail sentence system (`jail`), Daily streak rewards (`streaks`), and unlockable achievements.
+- **Entertaining Minigames**: Word Chain game (900,000+ words dictionary), Tic-Tac-Toe / Gomoku (XO), Trivia (Who Wants to Be a Millionaire), and Casino games (Dice, Blackjack).
 
-### 🌐 5. Web Dashboard Quản trị Hiện đại
-- Đăng nhập bảo mật thông qua **Discord OAuth2**.
-- Tự động lọc danh sách Server theo quyền Quản trị viên của người dùng.
-- Theo dõi thông số tài nguyên máy chủ (CPU, RAM, Uptime), live console log terminal.
-- Quản lý tập tin và cấu hình bot trực tiếp trên trình duyệt.
+### 🌐 5. Modern Web Dashboard
+- Secure login using **Discord OAuth2**.
+- Automatically scopes servers based on the logged-in user's Administrator privileges.
+- Live resource monitoring (CPU, RAM, Uptime) with a live terminal console stream.
+- Web-based bot file manager and remote configuration editor.
 
-### ⛏️ 6. Tích hợp Máy chủ Minecraft & Dịch vụ Game
-- Quản lý trạng thái và console server Minecraft từ xa (hỗ trợ tích hợp Falixnodes API).
-- Hệ thống liên kết tài khoản Discord và tài khoản Minecraft.
-- Tự động điểm danh HoYoLab hàng ngày cho Genshin Impact, Honkai: Star Rail.
+### ⛏️ 6. Minecraft Integration & Gaming Services
+- Remote Minecraft server monitoring and console controls (integrated with Falixnodes API).
+- Secure Discord-to-Minecraft player account verification system.
+- Automated daily HoYoLab check-in for Genshin Impact, Honkai: Star Rail, and Zenless Zone Zero.
 
 ---
 
-## 📁 Cấu trúc Thư mục
+## 📁 Project Structure
 
 ```plaintext
 SakuraBot/
-├── Anti/                 # Module phòng thủ, chống raid, nuke, spam, lọc link
-├── Checks_vi/             # Các bộ kiểm tra quyền hạn, prefix, tiện ích bổ trợ
-├── Command_vi/            # Toàn bộ cogs lệnh tính năng (nhạc, game, kinh tế,...)
-├── Database/              # Class kết nối và khởi tạo cơ sở dữ liệu SQLite
-├── Logs_vi/               # Module ghi nhận log hệ thống và sự kiện server
-├── data/                  # Dữ liệu tĩnh, từ điển, file mẫu cấu hình và logic DB
-├── languages/             # Tập tin đa ngôn ngữ (Tiếng Việt, Tiếng Anh)
-├── view/                  # Giao diện Discord UI (Buttons, Modals, Selects)
-├── web/                   # Web Dashboard (Flask/aiohttp backend, HTML templates, CSS/JS)
-├── scripts/               # Các công cụ và script hỗ trợ
-├── config.py              # File nạp cấu hình tập trung từ biến môi trường
-├── .env.example           # File mẫu biến môi trường cần thiết
-├── .gitignore             # Danh sách loại trừ các file bí mật và dữ liệu nhạy cảm
-├── requirements.txt       # Danh sách thư viện Python phụ thuộc
-└── run.py                 # File khởi động chính của Bot
+├── Anti/                 # Defense modules: anti-raid, anti-nuke, anti-spam, link filters
+├── Check/                # Helper utilities, permissions, prefix handlers, and decorators
+├── Command/              # Discord command cogs (music, economy, gacha, games, admin, etc.)
+├── Database/             # SQLite connection class and database schema initializers
+├── Logs_vi/              # Event logging and audit tracking cogs
+├── data/                 # Dictionaries, game assets, template configs, and database scripts
+├── languages/            # Multi-language localization files (vi, en, ja, cn)
+├── view/                 # Interactive Discord UI Components (Buttons, Selects, Modals)
+├── web/                  # Web Dashboard (FastAPI/aiohttp backend, HTML templates, CSS/JS)
+├── scripts/              # Helper and maintenance scripts
+├── config.py             # Centralized environment variable loader
+├── .env.example          # Sample environment variables template
+├── .gitignore            # Git exclusion rules for secrets, databases, and temporary files
+├── requirements.txt      # Python dependencies list
+└── run.py                # Main bot startup entrypoint
 ```
 
 ---
 
-## 🚀 Hướng dẫn Cài đặt
+## 🚀 Quick Start & Installation
 
-### Yêu cầu Hệ thống
-- **Python**: Phiên bản `3.10` trở lên (Khuyến nghị 3.11 hoặc 3.12).
-- **Git**: Đã cài đặt trên máy.
-- **Java**: Phiên bản `17` trở lên (nếu tự host server Lavalink phát nhạc).
+### Prerequisites
+- **Python**: Version `3.10` or higher (Recommended: 3.11 or 3.12).
+- **Git**: Installed on your system.
+- **Java**: Version `17` or higher (only required if self-hosting a Lavalink server).
 
-### Bước 1: Tải mã nguồn về máy
+### Step 1: Clone the repository
 ```bash
-git clone https://github.com/<tai-khoan-cua-ban>/SakuraBot.git
-cd SakuraBot
+git clone https://github.com/<your-username>/Sakura-Hoshimi-.git
+cd Sakura-Hoshimi-
 ```
 
-### Bước 2: Tạo môi trường ảo và cài đặt thư viện
+### Step 2: Create a virtual environment & install dependencies
 ```bash
-# Tạo môi trường ảo Python
+# Create a virtual environment
 python -m venv venv
 
-# Kích hoạt môi trường ảo:
-# Trên Windows:
+# Activate the virtual environment:
+# On Windows:
 venv\Scripts\activate
-# Trên Linux/macOS:
+# On Linux/macOS:
 source venv/bin/activate
 
-# Cài đặt toàn bộ dependencies
+# Install all required dependencies
 pip install -r requirements.txt
 ```
 
-### Bước 3: Cấu hình biến môi trường
-Sao chép file `.env.example` thành file `.env`:
+### Step 3: Configure Environment Variables
+Copy the sample `.env.example` file to `.env`:
 ```bash
-# Trên Windows CMD/PowerShell:
+# On Windows CMD/PowerShell:
 copy .env.example .env
-# Trên Linux/macOS:
+# On Linux/macOS:
 cp .env.example .env
 ```
-Mở file `.env` bằng trình soạn thảo (VSCode, Notepad, Nano) và điền đầy đủ các thông tin:
-- `DISCORD_TOKEN`: Token bot lấy từ [Discord Developer Portal](https://discord.com/developers/applications).
-- `PREFIX`: Prefix lệnh mặc định (ví dụ: `s!`).
-- `OWNER_ID`: Discord User ID của bạn.
-- `GEMINI_API_KEY` / `OPENAI_API_KEY`: API Key để dùng các tính năng AI.
-- `LAVALINK_HOST`, `LAVALINK_PASSWORD`: Thông tin kết nối máy chủ Lavalink.
+Open `.env` in your preferred editor (VSCode, Notepad, Nano) and provide your configuration:
+- `DISCORD_TOKEN`: Your bot token from the [Discord Developer Portal](https://discord.com/developers/applications).
+- `PREFIX`: Default bot command prefix (e.g. `s!`).
+- `OWNER_ID`: Your Discord User ID.
+- `GEMINI_API_KEY` / `OPENAI_API_KEY`: API keys for AI chat and Tarot readings.
+- `LAVALINK_HOST`, `LAVALINK_PASSWORD`: Connection details for your Lavalink audio server.
 
-### Bước 4: Khởi động Bot
+### Step 4: Run the Bot
 ```bash
 python run.py
 ```
 > [!TIP]
-> Khi bot khởi động thành công, Web Dashboard sẽ tự động khả dụng tại địa chỉ `http://localhost:10272` (hoặc cổng được cấu hình trong `.env`).
+> Once the bot connects successfully, the Web Dashboard will be available at `http://localhost:10272` (or the port defined in your `.env`).
 
 ---
 
-## ⚙️ Cấu hình Biến môi trường (.env)
+## ⚙️ Environment Variables (.env)
 
-| Biến môi trường | Bắt buộc | Mô tả |
+| Variable | Required | Description |
 | :--- | :---: | :--- |
-| `DISCORD_TOKEN` | **Có** | Token bot chính lấy từ Discord Developer Portal. |
-| `PREFIX` | Không | Tiền tố lệnh bot (Mặc định: `s!`). |
-| `OWNER_ID` | **Có** | Discord ID của người sở hữu bot (dùng cho lệnh độc quyền). |
-| `GEMINI_API_KEY` | Không | API Key của Google Gemini (miễn phí tại Google AI Studio). |
-| `GROQ_API_KEY` | Không | API Key từ Groq Cloud để tăng tốc suy luận AI. |
-| `OPENAI_API_KEY` | Không | API Key từ OpenAI (nếu dùng GPT-4o / GPT-3.5). |
-| `LAVALINK_HOST` | Không | Địa chỉ máy chủ Lavalink (Mặc định: `127.0.0.1`). |
-| `LAVALINK_PORT` | Không | Cổng kết nối Lavalink (Mặc định: `2334`). |
-| `LAVALINK_PASSWORD` | Không | Mật khẩu xác thực Lavalink. |
-| `WEB_PORT` | Không | Cổng chạy Web Dashboard (Mặc định: `10272`). |
-| `DISCORD_CLIENT_ID` | Không | Client ID ứng dụng Discord (dùng cho đăng nhập Web OAuth2). |
-| `DISCORD_CLIENT_SECRET` | Không | Client Secret ứng dụng Discord. |
+| `DISCORD_TOKEN` | **Yes** | Primary Discord bot token from Developer Portal. |
+| `PREFIX` | No | Command prefix for text commands (Default: `s!`). |
+| `OWNER_ID` | **Yes** | Discord User ID of the bot owner for privileged commands. |
+| `GEMINI_API_KEY` | No | Google Gemini API Key (available free at Google AI Studio). |
+| `GROQ_API_KEY` | No | Groq Cloud API Key for ultra-fast LLaMA inference. |
+| `OPENAI_API_KEY` | No | OpenAI API Key for GPT-4o / GPT-3.5 models. |
+| `LAVALINK_HOST` | No | Lavalink server host IP (Default: `127.0.0.1`). |
+| `LAVALINK_PORT` | No | Lavalink server port (Default: `2334`). |
+| `LAVALINK_PASSWORD` | No | Lavalink server authentication password. |
+| `WEB_PORT` | No | Web Dashboard listening port (Default: `10272`). |
+| `DISCORD_CLIENT_ID` | No | Application Client ID for Discord OAuth2 web login. |
+| `DISCORD_CLIENT_SECRET` | No | Application Client Secret for Discord OAuth2 web login. |
 
 ---
 
-## 📖 Danh sách Lệnh tiêu biểu
+## 📖 Command Reference
 
-Dưới đây là một số lệnh phổ biến (giả sử prefix mặc định là `s!`):
+Here are some of the most commonly used commands (assuming the default prefix `s!`):
 
-| Lệnh | Phân loại | Mô tả |
+| Command | Category | Description |
 | :--- | :--- | :--- |
-| `s!help` | Cơ bản | Hiển thị bảng hướng dẫn và danh sách tất cả các lệnh. |
-| `s!ping` | Cơ bản | Kiểm tra độ trễ phản hồi của Bot và Discord API. |
-| `s!play <tên bài hát / link>` | Âm nhạc | Phát nhạc từ YouTube, Spotify, SoundCloud qua Lavalink. |
-| `s!stop` / `s!skip` / `s!queue` | Âm nhạc | Điều khiển bài hát, tạm dừng, bỏ qua hoặc xem hàng đợi. |
-| `s!gacha` | Trò chơi | Mở menu quay thưởng Waifu Gacha anime đặc sắc. |
-| `s!bank` | Kinh tế | Mở tài khoản ngân hàng, gửi tiết kiệm, quản lý số dư. |
-| `s!work` | Kinh tế | Làm việc ngẫu nhiên nhận coins theo thời gian thực. |
-| `s!fish` / `s!mine` | Kinh tế | Đi câu cá hoặc khai thác khoáng sản để bán lấy tiền. |
-| `s!anti` | Bảo mật | Bảng thiết lập hệ thống bảo vệ máy chủ (Admin only). |
-| `s!setlog` | Quản trị | Cấu hình kênh ghi log cho từng loại sự kiện máy chủ. |
-| `s!ai <câu hỏi>` | AI | Trò chuyện trực tiếp cùng trợ lý AI tiếng Việt. |
-| `s!tarot` | Tâm linh | Rút một lá bài Tarot và nhận luận giải chi tiết từ AI. |
+| `s!help` | General | Displays the interactive help menu and full command list. |
+| `s!ping` | General | Checks bot latency and Discord gateway ping. |
+| `s!play <song name / URL>` | Music | Plays music from YouTube, Spotify, or SoundCloud via Lavalink. |
+| `s!stop` / `s!skip` / `s!queue` | Music | Controls audio playback, skips tracks, or views the queue. |
+| `s!gacha` | Games | Opens the Waifu Gacha interactive anime banner menu. |
+| `s!bank` | Economy | Manages personal bank accounts, savings terms, and loans. |
+| `s!work` | Economy | Complete daily shifts to earn in-game currency. |
+| `s!fish` / `s!mine` | Economy | Fish in waters or mine caves for valuable resources. |
+| `s!anti` | Moderation | Configures server defense and anti-exploit rules (Admin only). |
+| `s!setlog` | Moderation | Sets up designated log channels for various server events. |
+| `s!ai <prompt>` | AI | Direct conversation with the multilingual AI assistant. |
+| `s!tarot` | AI / Fun | Draws a Tarot card with AI-generated spiritual interpretation. |
 
 ---
 
-## 🔒 Bảo mật & Lưu ý quan trọng
+## 🔒 Security & Best Practices
 
 > [!WARNING]
-> - **Tuyệt đối không đẩy file `.env` lên GitHub**: File này chứa các Token và API Key bí mật. File `.gitignore` đã được cấu hình sẵn để bỏ qua file này.
-> - **Cơ sở dữ liệu cá nhân**: Các file SQLite (`*.db`) và dữ liệu người dùng thực tế sẽ không được đưa vào repository mã nguồn mở để bảo vệ quyền riêng tư người dùng. Khi bot khởi chạy lần đầu, cơ sở dữ liệu sẽ tự động được khởi tạo sạch sẽ.
+> - **Never commit your `.env` file**: It contains sensitive credentials. The `.gitignore` is configured by default to ignore `.env` and `cookies.txt`.
+> - **Database Privacy**: Production SQLite databases (`*.db`) and user data are intentionally omitted from public release. Upon initial startup, the bot creates fresh databases automatically.
 
 ---
 
-## 🤝 Đóng góp & Bản quyền
+## 🤝 Contributing & License
 
-- Xem chi tiết tại [CONTRIBUTING.md](CONTRIBUTING.md) nếu bạn muốn đóng góp tính năng hoặc sửa lỗi.
-- Dự án được phân phối dưới giấy phép **MIT License**. Xem chi tiết tại [LICENSE](LICENSE).
+- Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting feature proposals or Pull Requests.
+- This project is open-source software licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
 
 ---
 
 <div align="center">
-  <sub>Được phát triển với tất cả tình yêu thương dành cho cộng đồng Discord Việt Nam 🌸</sub>
+  <sub>Crafted with passion for the global Discord developer community 🌸</sub>
 </div>

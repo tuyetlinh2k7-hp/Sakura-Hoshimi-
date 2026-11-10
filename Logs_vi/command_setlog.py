@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-from Checks_vi.i18n import t
-from Checks_vi.data import (
+from Check.i18n import t
+from Check.data import (
     chat_log_channels, edit_log_channels, delete_log_channels, voice_log_channels,
     server_log_channels, user_log_channels, member_log_channels,
     automod_log_channels, invite_log_channels, command_log_channels,

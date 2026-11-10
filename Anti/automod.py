@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from Checks_vi.i18n import t
+from Check.i18n import t
 import json, os, re, asyncio
 from datetime import datetime, timedelta
 from collections import deque, defaultdict
@@ -240,7 +240,7 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
                 pass
         # ignore owner/admin? we respect same as other anti: skip if has admin role
         try:
-            from Checks_vi.mod import admin_roles
+            from Check.mod import admin_roles
             from config import OWNER_ID
             if message.author.id==OWNER_ID: return
             gid=str(message.guild.id)

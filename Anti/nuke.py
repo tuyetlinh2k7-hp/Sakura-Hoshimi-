@@ -6,7 +6,7 @@ import os
 import time
 from collections import defaultdict, deque
 from typing import Literal, Optional
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 # --- Quản lý dữ liệu ---
 NUKE_SETTINGS_FILE = "data/nuke_settings.json"

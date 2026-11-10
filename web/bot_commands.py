@@ -830,7 +830,7 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "syntax": "/owner reload <tên_cog>",
         "description": "Nạp lại nóng module tính năng (Hot-reload) mà không làm gián đoạn bot.",
         "aliases": [],
-        "example": "/owner reload cog:Command_vi.music",
+        "example": "/owner reload cog:Command.music",
         "permissions": "👑 Owner (@linhxinh_dev)"
     },
     {

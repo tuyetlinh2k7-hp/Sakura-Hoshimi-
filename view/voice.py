@@ -1,5 +1,5 @@
 import discord
-from Checks_vi.voice import check_owner, temp_channels, banned_members
+from Check.voice import check_owner, temp_channels, banned_members
 
 
 def apply_owner_permissions(overwrite: discord.PermissionOverwrite) -> discord.PermissionOverwrite:

@@ -1,7 +1,7 @@
 import discord
 
 from data.data import ZODIAC_DATA
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 def get_zodiac(day: int, month: int):
     # Quy đổi ngày tháng nhập vào thành 1 mã số nguyên duy nhất để so sánh

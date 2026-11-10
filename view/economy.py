@@ -2,7 +2,7 @@ import discord
 import random
 import time
 from Checks.data import save_data
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 class LeaderboardView(discord.ui.View):
     def __init__(self, author: discord.Member, level_pages: list, coin_pages: list):

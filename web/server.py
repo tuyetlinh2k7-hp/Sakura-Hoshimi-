@@ -259,16 +259,16 @@ def _save_audit_config(gid: str, cfg: dict):
             data[key][str(gid)] = int(val) if str(val).isdigit() else val
     # Giữ tương thích: join cũng ghi vào member nếu chưa có? không, để riêng
     save_json(DATA_DIR / "data.json", data)
-    # Cập nhật Checks_vi.data memory nếu đang chạy embedded
+    # Cập nhật Check.data memory nếu đang chạy embedded
     try:
-        from Checks_vi.data import join_log_channels, delete_log_channels, member_log_channels, voice_log_channels, server_log_channels
+        from Check.data import join_log_channels, delete_log_channels, member_log_channels, voice_log_channels, server_log_channels
         # patch in-memory
         for k,key in sync_map:
             if key=="delete_log_channels": target=delete_log_channels
             elif key=="member_log_channels": target=member_log_channels
             elif key=="join_log_channels": 
-                # nếu Checks_vi chưa có join_log_channels thì tạo động
-                import Checks_vi.data as dmod
+                # nếu Check chưa có join_log_channels thì tạo động
+                import Check.data as dmod
                 if not hasattr(dmod, "join_log_channels"):
                     dmod.join_log_channels={}
                 target=dmod.join_log_channels
@@ -1920,7 +1920,7 @@ async def handle_account_info(request: web.Request):
     marriage_info = {"is_married": False}
     if discord_id:
         try:
-            from Command_vi.command_fishing import fishing_state, UTILITY_ITEMS
+            from Command.command_fishing import fishing_state, UTILITY_ITEMS
             couples = fishing_state.get("couples", {}) if fishing_state else {}
             did_int = int(discord_id)
             for k, c in couples.items():
@@ -2035,7 +2035,7 @@ async def handle_account_achievements(request: web.Request):
     if not discord_id and str(sess.get("username", "")).isdigit():
         discord_id = sess.get("username")
     try:
-        from Command_vi.achievement_system import ACHIEVEMENTS_CATALOG, load_user_achievements
+        from Command.achievement_system import ACHIEVEMENTS_CATALOG, load_user_achievements
         all_user_ach = load_user_achievements()
         uid_key = str(discord_id) if discord_id else ""
         u_data = all_user_ach.get(uid_key, {}) if uid_key else {}
@@ -2069,7 +2069,7 @@ async def handle_account_achievements(request: web.Request):
 
 async def handle_get_achievements_leaderboard(request: web.Request):
     try:
-        from Command_vi.achievement_system import ACHIEVEMENTS_CATALOG, load_user_achievements
+        from Command.achievement_system import ACHIEVEMENTS_CATALOG, load_user_achievements
         custom_ach_file = DATA_DIR / "custom_achievements.json"
         custom_ach = load_json(custom_ach_file, {})
         for cid, cval in custom_ach.items():
@@ -2148,7 +2148,7 @@ async def handle_get_admin_achievements_list(request: web.Request):
     if not sess:
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin"}, status=403)
     try:
-        from Command_vi.achievement_system import ACHIEVEMENTS_CATALOG
+        from Command.achievement_system import ACHIEVEMENTS_CATALOG
         custom_ach_file = DATA_DIR / "custom_achievements.json"
         custom_ach = load_json(custom_ach_file, {})
         for cid, cval in custom_ach.items():
@@ -2188,7 +2188,7 @@ async def handle_add_admin_achievement(request: web.Request):
             "icon": icon
         }
 
-        from Command_vi.achievement_system import ACHIEVEMENTS_CATALOG
+        from Command.achievement_system import ACHIEVEMENTS_CATALOG
         ACHIEVEMENTS_CATALOG[ach_id] = entry
 
         custom_ach_file = DATA_DIR / "custom_achievements.json"
@@ -2212,7 +2212,7 @@ async def handle_admin_user_achievement_action(request: web.Request):
         if not user_id or not ach_id:
             return web.json_response({"ok": False, "error": "Thiếu User ID hoặc Achievement ID"}, status=400)
 
-        from Command_vi.achievement_system import ACHIEVEMENTS_CATALOG, load_user_achievements, save_user_achievements
+        from Command.achievement_system import ACHIEVEMENTS_CATALOG, load_user_achievements, save_user_achievements
         custom_ach_file = DATA_DIR / "custom_achievements.json"
         custom_ach = load_json(custom_ach_file, {})
         for cid, cval in custom_ach.items():
@@ -3762,7 +3762,7 @@ def _save_blacklist_raw(obj):
     # nếu bot đang chạy embedded, reload memory
     try:
         import importlib
-        bl_mod=importlib.import_module("Command_vi.command_blacklist")
+        bl_mod=importlib.import_module("Command.command_blacklist")
         bl_mod.load_blacklist()
     except: pass
     return out
@@ -3972,7 +3972,7 @@ async def handle_post_confession_panel(request: web.Request):
             except: return web.json_response({"ok":False,"error":"Không tìm thấy kênh"},status=404)
         # xóa panel cũ (20 tin gần nhất) nếu trùng title
         try:
-            from Checks_vi.i18n import t
+            from Check.i18n import t
             # need guild for t
             guild=BOT_INSTANCE.get_guild(int(gid))
             async for msg in ch.history(limit=20):
@@ -3981,7 +3981,7 @@ async def handle_post_confession_panel(request: web.Request):
                     except: pass
         except: pass
         # gửi panel mới, tôn trọng allow_public/anonymous để ẩn nút
-        from Command_vi.confession import create_panel_embed, CreateConfessionView
+        from Command.confession import create_panel_embed, CreateConfessionView
         import discord
         view=CreateConfessionView(BOT_INSTANCE)
         # filter buttons theo config
@@ -4091,7 +4091,7 @@ async def handle_get_level_roles(request: web.Request):
     gid=request.match_info.get("id")
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
-        from Checks_vi.level_handler import get_guild_level_roles
+        from Check.level_handler import get_guild_level_roles
         roles = get_guild_level_roles(gid)
         bot = request.app.get("bot")
         g = bot.get_guild(int(gid)) if bot else None
@@ -4115,7 +4115,7 @@ async def handle_save_level_role(request: web.Request):
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
         body = await request.json()
-        from Checks_vi.level_handler import get_guild_level_roles, save_guild_level_roles
+        from Check.level_handler import get_guild_level_roles, save_guild_level_roles
         current_roles = get_guild_level_roles(gid)
         if "roles" in body and isinstance(body["roles"], dict):
             current_roles = body["roles"]
@@ -4137,7 +4137,7 @@ async def handle_delete_level_role(request: web.Request):
     lvl=request.match_info.get("level")
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
-        from Checks_vi.level_handler import get_guild_level_roles, save_guild_level_roles
+        from Check.level_handler import get_guild_level_roles, save_guild_level_roles
         current_roles = get_guild_level_roles(gid)
         if str(lvl) in current_roles:
             del current_roles[str(lvl)]
@@ -4153,7 +4153,7 @@ async def handle_get_fishing_config(request: web.Request):
     gid=request.match_info.get("id")
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
-        from Command_vi.command_fishing import fishing_state
+        from Command.command_fishing import fishing_state
         channels = fishing_state.get("fishing_channels", {}).get(str(gid), [])
         code_cfg = fishing_state.get("code_channels", {}).get(str(gid), {})
         allow_outside = bool(fishing_state.get("allow_outside", {}).get(str(gid), False))
@@ -4175,7 +4175,7 @@ async def handle_save_fishing_config(request: web.Request):
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
         body = await request.json()
-        from Command_vi.command_fishing import fishing_state, save_fishing_data
+        from Command.command_fishing import fishing_state, save_fishing_data
         gid_str = str(gid)
         f_channels = body.get("fishing_channels")
         if f_channels is not None:
@@ -4213,7 +4213,7 @@ async def handle_get_custom_keys(request: web.Request):
     gid=request.match_info.get("id")
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
-        from Command_vi.custom_keys import get_guild_custom_keys
+        from Command.custom_keys import get_guild_custom_keys
         keys = get_guild_custom_keys(gid)
         return web.json_response({"ok": True, "keys": keys})
     except Exception as e:
@@ -4225,7 +4225,7 @@ async def handle_save_custom_key(request: web.Request):
     gid=request.match_info.get("id")
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
-        from Command_vi.custom_keys import add_or_update_custom_key, CUSTOM_KEYS_FILES_DIR
+        from Command.custom_keys import add_or_update_custom_key, CUSTOM_KEYS_FILES_DIR
         keyword = ""
         response_text = ""
         match_type = "exact"
@@ -4292,7 +4292,7 @@ async def handle_delete_custom_key(request: web.Request):
     kid=request.match_info.get("key_id")
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
-        from Command_vi.custom_keys import delete_guild_custom_key
+        from Command.custom_keys import delete_guild_custom_key
         ok = delete_guild_custom_key(gid, kid)
         return web.json_response({"ok": ok, "message": "Đã xóa Custom Key" if ok else "Không tìm thấy key"})
     except Exception as e:
@@ -4640,7 +4640,7 @@ async def handle_create_reaction_role(request: web.Request):
             "roles": roles_data_clean
         }
 
-        from Command_vi.reaction_role import build_panel_embed, RolePanelView, resolve_emoji
+        from Command.reaction_role import build_panel_embed, RolePanelView, resolve_emoji
         embed = build_panel_embed(title, desc, color_hex, image_url, panel_type, mode, roles_data_clean, guild)
 
         cog = BOT_INSTANCE.get_cog("RolePanel") or BOT_INSTANCE.get_cog("RolePanelCog")
@@ -4809,7 +4809,7 @@ async def handle_post_hoyo_code(request: web.Request):
         if not channel:
             return web.json_response({"ok": False, "error": "Không tìm thấy kênh thông báo trong server"}, status=404)
 
-        from Command_vi.code_gamegacha import GAMES
+        from Command.code_gamegacha import GAMES
         ginfo = GAMES.get(game_key, {"name": game_key.upper(), "color": 0x4B69FF})
 
         ping_str = f"<@&{role_id}> " if role_id else ""
@@ -4837,7 +4837,7 @@ async def handle_get_streak(request: web.Request):
     gid=request.match_info.get("id")
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
-        from Command_vi.streaks import load_data
+        from Command.streaks import load_data
         data = load_data()
         ginfo = data.get(f"guild_{gid}", {})
         ch_id = ginfo.get("channel_id")
@@ -4854,7 +4854,7 @@ async def handle_save_streak(request: web.Request):
     try:
         body = await request.json()
         ch_id = int(body.get("channel_id")) if body.get("channel_id") else None
-        from Command_vi.streaks import load_data, save_data
+        from Command.streaks import load_data, save_data
         data = load_data()
         gkey = f"guild_{gid}"
         if gkey not in data: data[gkey] = {"users": {}, "channel_id": ch_id}
@@ -4872,7 +4872,7 @@ async def handle_get_rule_config(request: web.Request):
     gid=request.match_info.get("id")
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     try:
-        from Command_vi.rule import load_config
+        from Command.rule import load_config
         cfg = load_config().get(str(gid), {})
         return web.json_response({
             "ok": True,
@@ -4891,7 +4891,7 @@ async def handle_save_rule_config(request: web.Request):
         body = await request.json()
         ch_id = int(body.get("channel_id")) if body.get("channel_id") else None
         r_id = int(body.get("role_id")) if body.get("role_id") else None
-        from Command_vi.rule import load_config, save_config
+        from Command.rule import load_config, save_config
         all_cfg = load_config()
         all_cfg[str(gid)] = {"channel_id": ch_id, "role_id": r_id}
         save_config(all_cfg)
@@ -4908,7 +4908,7 @@ async def handle_publish_rule(request: web.Request):
     if not BOT_INSTANCE or not getattr(BOT_INSTANCE, "is_ready", lambda: False)():
         return web.json_response({"ok": False, "error": "Bot chưa kết nối"}, status=503)
     try:
-        from Command_vi.rule import load_config, RuleVerificationView
+        from Command.rule import load_config, RuleVerificationView
         cfg = load_config().get(str(gid), {})
         ch_id = cfg.get("channel_id")
         if not ch_id: return web.json_response({"ok": False, "error": "Chưa chọn kênh Nội quy"}, status=400)
@@ -5054,10 +5054,10 @@ async def handle_bot_action(request: web.Request):
             errors = []
             for ext in EXTENSIONS:
                 try:
-                    await BOT_INSTANCE.reload_extension(f"Command_vi.{ext}")
+                    await BOT_INSTANCE.reload_extension(f"Command.{ext}")
                     reloaded += 1
                 except Exception as e:
-                    errors.append(f"Command_vi.{ext}: {e}")
+                    errors.append(f"Command.{ext}: {e}")
             for ext in EXTENSION_LOGS:
                 try:
                     await BOT_INSTANCE.reload_extension(f"Logs_vi.{ext}")
@@ -5112,7 +5112,7 @@ async def handle_mc_status(request: web.Request):
     rcon_ok = False
     rcon_msg = "Chưa kết nối"
     try:
-        from Command_vi.minecraft import send_rcon_command_sync
+        from Command.minecraft import send_rcon_command_sync
         rcon_ok, rcon_msg = send_rcon_command_sync("list")
     except Exception as e:
         rcon_msg = str(e)
@@ -5148,12 +5148,12 @@ async def handle_mc_control(request: web.Request):
             else:
                 return web.json_response({"ok": False, "error": "Không tìm thấy file start.bat"}, status=404)
         elif action == "stop":
-            from Command_vi.minecraft import send_rcon_command_sync
+            from Command.minecraft import send_rcon_command_sync
             ok, res = await asyncio.to_thread(send_rcon_command_sync, "stop")
             add_log("INFO", f"Admin {sess.get('username')} dừng Minecraft Server: {res}")
             return web.json_response({"ok": True, "message": f"Đã gửi lệnh dừng server: {res}"})
         elif action == "restart":
-            from Command_vi.minecraft import send_rcon_command_sync
+            from Command.minecraft import send_rcon_command_sync
             ok, res = await asyncio.to_thread(send_rcon_command_sync, "restart")
             add_log("INFO", f"Admin {sess.get('username')} khởi động lại Minecraft Server: {res}")
             return web.json_response({"ok": True, "message": f"Đã gửi lệnh restart: {res}"})
@@ -5253,7 +5253,7 @@ async def handle_api_mc_hosting_server_power(request: web.Request):
             props, _ = parse_properties_file(srv_dir / "server.properties")
             rcon_port = int(props.get("rcon.port", 25575))
             rcon_pass = props.get("rcon.password", "")
-            from Command_vi.minecraft import send_rcon_command_sync
+            from Command.minecraft import send_rcon_command_sync
             ok, res = await asyncio.to_thread(send_rcon_command_sync, "stop", host="127.0.0.1", port=rcon_port, password=rcon_pass)
             add_log("INFO", f"Admin {sess.get('username')} dừng máy chủ [{server_id}]: {res}")
             return web.json_response({"ok": True, "message": f"Đã gửi lệnh dừng máy chủ: {res}"})
@@ -5262,7 +5262,7 @@ async def handle_api_mc_hosting_server_power(request: web.Request):
             props, _ = parse_properties_file(srv_dir / "server.properties")
             rcon_port = int(props.get("rcon.port", 25575))
             rcon_pass = props.get("rcon.password", "")
-            from Command_vi.minecraft import send_rcon_command_sync
+            from Command.minecraft import send_rcon_command_sync
             ok, res = await asyncio.to_thread(send_rcon_command_sync, "restart", host="127.0.0.1", port=rcon_port, password=rcon_pass)
             add_log("INFO", f"Admin {sess.get('username')} khởi động lại máy chủ [{server_id}]: {res}")
             return web.json_response({"ok": True, "message": f"Đã gửi lệnh restart máy chủ: {res}"})
@@ -5313,7 +5313,7 @@ async def handle_api_mc_hosting_server_command(request: web.Request):
         props, _ = parse_properties_file(srv_dir / "server.properties")
         rcon_port = int(props.get("rcon.port", 25575))
         rcon_pass = props.get("rcon.password", "")
-        from Command_vi.minecraft import send_rcon_command_sync, clean_minecraft_text_static
+        from Command.minecraft import send_rcon_command_sync, clean_minecraft_text_static
         ok, res = await asyncio.to_thread(send_rcon_command_sync, cmd, host="127.0.0.1", port=rcon_port, password=rcon_pass)
         clean_res = clean_minecraft_text_static(res) if res else "Lệnh đã được thực thi"
         add_log("CMD", f"Admin {sess.get('username')} chạy lệnh trên [{server_id}]: {cmd}")
@@ -5382,7 +5382,7 @@ async def handle_api_mc_hosting_send_chat(request: web.Request):
         props, _ = parse_properties_file(srv_dir / "server.properties")
         rcon_port = int(props.get("rcon.port", 25575))
         rcon_pass = props.get("rcon.password", "")
-        from Command_vi.minecraft import send_rcon_command_sync
+        from Command.minecraft import send_rcon_command_sync
         await asyncio.to_thread(send_rcon_command_sync, cmd, host="127.0.0.1", port=rcon_port, password=rcon_pass)
 
         # Gửi đồng bộ sang kênh chat Discord nếu có
@@ -6088,7 +6088,7 @@ async def handle_get_admin_fishing_fish_list(request: web.Request):
     try:
         from data.data import fish_list, event_fish, mutations
         try:
-            from Command_vi.command_fishing import (
+            from Command.command_fishing import (
                 RODS_CATALOG, BAITS_CATALOG, CHESTS_DATA, PETS_CATALOG, UTILITY_ITEMS
             )
         except Exception:
@@ -6246,7 +6246,7 @@ async def handle_admin_fishing_add_rod(request: web.Request):
             "desc": desc or f"Cần câu {rarity.upper()}: Độ bền {durability}, May mắn +{luck}."
         }
 
-        from Command_vi.command_fishing import add_custom_item
+        from Command.command_fishing import add_custom_item
         add_custom_item("rod", item_id, rod_data)
 
         add_log("SUCCESS", f"Admin {sess.get('username')} đã thêm cần câu mới: {name} ({price:,} {currency})")
@@ -6308,7 +6308,7 @@ async def handle_admin_fishing_add_bait(request: web.Request):
             "desc": desc or f"Mồi câu đại dương: May mắn +{luck}."
         }
 
-        from Command_vi.command_fishing import add_custom_item
+        from Command.command_fishing import add_custom_item
         add_custom_item("bait", item_id, bait_data)
 
         add_log("SUCCESS", f"Admin {sess.get('username')} đã thêm mồi câu mới: {name} ({price:,} {currency})")
@@ -6369,7 +6369,7 @@ async def handle_admin_fishing_add_bag(request: web.Request):
             "desc": desc or f"Nâng cấp giỏ cá: +{extra_slots:,} ô chứa."
         }
 
-        from Command_vi.command_fishing import add_custom_item
+        from Command.command_fishing import add_custom_item
         add_custom_item("bag", item_id, bag_data)
 
         add_log("SUCCESS", f"Admin {sess.get('username')} đã thêm túi cá mới: {name} (+{extra_slots:,} ô)")
@@ -6434,7 +6434,7 @@ async def handle_admin_fishing_add_pet(request: web.Request):
             "desc": desc or f"Thú cưng đồng hành: +{luck_bonus} May Mắn, x{price_multi} Giá bán."
         }
 
-        from Command_vi.command_fishing import add_custom_item
+        from Command.command_fishing import add_custom_item
         add_custom_item("pet", item_id, pet_data)
 
         add_log("SUCCESS", f"Admin {sess.get('username')} đã thêm thú cưng mới: {name} ({price:,} {currency})")
@@ -6495,7 +6495,7 @@ async def handle_admin_fishing_add_troll_item(request: web.Request):
             "renew_currency": renew_currency
         }
 
-        from Command_vi.command_fishing import add_custom_item
+        from Command.command_fishing import add_custom_item
         add_custom_item("item", item_id, item_data)
 
         add_log("SUCCESS", f"Admin {sess.get('username')} đã thêm vật phẩm troll mới: {name} (Key: {action_key})")
@@ -6554,7 +6554,7 @@ async def handle_admin_fishing_add_chest(request: web.Request):
             "desc": desc or f"Rương báu chứa phần thưởng {min_coin:,} - {max_coin:,} coin và báu vật."
         }
 
-        from Command_vi.command_fishing import add_custom_item
+        from Command.command_fishing import add_custom_item
         add_custom_item("chest", item_id, chest_data)
 
         add_log("SUCCESS", f"Admin {sess.get('username')} đã thêm rương báu mới: {name} (ID: {item_id})")
@@ -6637,7 +6637,7 @@ async def handle_get_admin_fishing_user(request: web.Request):
         udata = users.get(user_id)
 
         if not udata:
-            from Command_vi.command_fishing import get_user_fishing
+            from Command.command_fishing import get_user_fishing
             if get_user_fishing and user_id.isdigit():
                 udata = get_user_fishing(int(user_id))
             else:
@@ -6709,7 +6709,7 @@ async def handle_admin_fishing_user_action(request: web.Request):
         fdata = load_json(fishing_file, {})
         users = fdata.setdefault("users", {})
 
-        from Command_vi.command_fishing import get_user_fishing, fishing_state, save_fishing_data, RODS_CATALOG, PETS_CATALOG, UTILITY_ITEMS
+        from Command.command_fishing import get_user_fishing, fishing_state, save_fishing_data, RODS_CATALOG, PETS_CATALOG, UTILITY_ITEMS
         if user_id not in users:
             if user_id.isdigit():
                 users[user_id] = get_user_fishing(int(user_id))
@@ -6751,7 +6751,7 @@ async def handle_admin_fishing_user_action(request: web.Request):
             mut_multi = 1.0
             if mutation:
                 try:
-                    from Command_vi.command_fishing import mutations
+                    from Command.command_fishing import mutations
                     for m in mutations:
                         if m.get("name") == mutation or mutation in m.get("name", ""):
                             mut_multi = float(m.get("price_multi", 1.0))
@@ -6760,7 +6760,7 @@ async def handle_admin_fishing_user_action(request: web.Request):
                     mut_multi = 1.0
 
             try:
-                from Command_vi.command_fishing import fish_list
+                from Command.command_fishing import fish_list
                 base_p = 100
                 for f in fish_list:
                     if f.get("name") == fish_name:
@@ -6995,7 +6995,7 @@ async def handle_admin_fishing_user_action(request: web.Request):
 
         elif action == "renew_item":
             item_id = str(body.get("item_id", "")).strip()
-            from Command_vi.command_fishing import renew_user_item
+            from Command.command_fishing import renew_user_item
             ok, renew_msg = await renew_user_item(int(user_id) if user_id.isdigit() else 0, item_id, 0)
             if not ok:
                 return web.json_response({"ok": False, "error": renew_msg}, status=400)
@@ -7106,7 +7106,7 @@ async def handle_admin_fishing_create_giftcode(request: web.Request):
         }
         save_json(fishing_file, fdata)
 
-        from Command_vi.command_fishing import fishing_state, save_fishing_data
+        from Command.command_fishing import fishing_state, save_fishing_data
         if fishing_state is not None:
             fishing_state.setdefault("giftcodes", {})[code] = codes[code]
             try:
@@ -7205,7 +7205,7 @@ async def handle_admin_fishing_delete_giftcode(request: web.Request):
             del codes[code]
             save_json(fishing_file, fdata)
 
-            from Command_vi.command_fishing import fishing_state, save_fishing_data
+            from Command.command_fishing import fishing_state, save_fishing_data
             if fishing_state is not None and code in fishing_state.get("giftcodes", {}):
                 del fishing_state["giftcodes"][code]
                 try:
@@ -7225,7 +7225,7 @@ async def handle_get_daily_giftcode(request: web.Request):
     if not sess:
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin"}, status=403)
     try:
-        from Command_vi.command_fishing import fishing_state, VN_TZ
+        from Command.command_fishing import fishing_state, VN_TZ
         now_vn = datetime.datetime.now(VN_TZ)
         date_str = now_vn.strftime("%Y%m%d")
         code_name = f"DAILY_{date_str}"
@@ -7264,7 +7264,7 @@ async def handle_generate_daily_giftcode(request: web.Request):
         force = bool(data.get("force", False))
         broadcast = bool(data.get("broadcast", True))
 
-        from Command_vi.command_fishing import generate_daily_giftcode, fishing_state
+        from Command.command_fishing import generate_daily_giftcode, fishing_state
         ok, msg, cdata = generate_daily_giftcode(force=force)
 
         announced_count = 0
@@ -7313,7 +7313,7 @@ async def handle_get_admin_shop_items(request: web.Request):
     if not sess:
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin"}, status=403)
     try:
-        from Command_vi.command_fishing import MASTER_SHOP_ITEMS, rebuild_master_shop_items
+        from Command.command_fishing import MASTER_SHOP_ITEMS, rebuild_master_shop_items
         rebuild_master_shop_items()
         return web.json_response({"ok": True, "items": MASTER_SHOP_ITEMS, "total": len(MASTER_SHOP_ITEMS)})
     except Exception as e:
@@ -7350,7 +7350,7 @@ async def handle_admin_shop_update(request: web.Request):
 
         save_json(shop_file, overrides)
 
-        from Command_vi.command_fishing import rebuild_master_shop_items
+        from Command.command_fishing import rebuild_master_shop_items
         rebuild_master_shop_items()
 
         add_log("SUCCESS", f"Admin {sess.get('username')} đã cập nhật vật phẩm shop [{item_id}]")
@@ -7376,7 +7376,7 @@ async def handle_admin_shop_toggle_hide(request: web.Request):
         entry["is_hidden"] = new_state
         save_json(shop_file, overrides)
 
-        from Command_vi.command_fishing import rebuild_master_shop_items
+        from Command.command_fishing import rebuild_master_shop_items
         rebuild_master_shop_items()
 
         state_text = "ẨN khỏi Shop" if new_state else "HIỂN THỊ lại trong Shop"
@@ -7393,7 +7393,7 @@ async def handle_get_admin_marriages(request: web.Request):
     if not sess:
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin"}, status=403)
     try:
-        from Command_vi.command_fishing import fishing_state, UTILITY_ITEMS
+        from Command.command_fishing import fishing_state, UTILITY_ITEMS
         couples = fishing_state.get("couples", {}) if fishing_state else {}
         now = time.time()
         result = []
@@ -7446,7 +7446,7 @@ async def handle_admin_marriage_action(request: web.Request):
         if not couple_key:
             return web.json_response({"ok": False, "error": "Thiếu mã cặp đôi (couple_key)"}, status=400)
 
-        from Command_vi.command_fishing import fishing_state, save_fishing_data
+        from Command.command_fishing import fishing_state, save_fishing_data
         couples = fishing_state.setdefault("couples", {})
         marriages = fishing_state.setdefault("marriages", {})
 
@@ -7491,7 +7491,7 @@ async def handle_get_admin_farm_catalogs(request: web.Request):
     if not sess:
         return web.json_response({"ok": False, "error": "Vui lòng đăng nhập"}, status=401)
     try:
-        from Command_vi.farm_system import (
+        from Command.farm_system import (
             SEEDS_CATALOG, CROPS_CATALOG, PESTS_CATALOG, FARM_TOOLS_CATALOG,
             DISEASES_CATALOG, SEASONS_INFO, FARM_WEATHER_CYCLE, CROP_MUTATIONS,
             get_current_season_and_weather, _FARM_OVERRIDE, load_custom_farm_items
@@ -7536,8 +7536,8 @@ async def handle_get_admin_farm_user(request: web.Request):
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin hoặc chủ tài khoản"}, status=403)
 
     try:
-        from Command_vi.command_fishing import get_user_fishing
-        from Command_vi.farm_system import get_user_farm, get_plot_growth_progress, get_current_season_and_weather
+        from Command.command_fishing import get_user_fishing
+        from Command.farm_system import get_user_farm, get_plot_growth_progress, get_current_season_and_weather
 
         uid = int(user_id)
         u_fish = get_user_fishing(uid)
@@ -7593,8 +7593,8 @@ async def handle_admin_farm_user_action(request: web.Request):
         if not user_id or not user_id.isdigit():
             return web.json_response({"ok": False, "error": "Thiếu hoặc sai User ID"}, status=400)
 
-        from Command_vi.command_fishing import get_user_fishing, save_fishing_data
-        from Command_vi.farm_system import get_user_farm, SEEDS_CATALOG, CROPS_CATALOG, PESTS_CATALOG, FARM_TOOLS_CATALOG, CROP_MUTATIONS
+        from Command.command_fishing import get_user_fishing, save_fishing_data
+        from Command.farm_system import get_user_farm, SEEDS_CATALOG, CROPS_CATALOG, PESTS_CATALOG, FARM_TOOLS_CATALOG, CROP_MUTATIONS
 
         uid = int(user_id)
         u_fish = get_user_fishing(uid)
@@ -7726,7 +7726,7 @@ async def handle_admin_farm_set_environment(request: web.Request):
         weather_id = body.get("weather_id") or None
         duration_minutes = max(5, min(int(body.get("duration_minutes", 120)), 1440))
 
-        from Command_vi.farm_system import set_farm_environment_override, get_current_season_and_weather
+        from Command.farm_system import set_farm_environment_override, get_current_season_and_weather
         set_farm_environment_override(season_id, weather_id, duration_minutes * 60)
         cur_season, cur_weather = get_current_season_and_weather()
 
@@ -7761,7 +7761,7 @@ async def handle_admin_farm_create_item(request: web.Request):
         if not item_id:
             return web.json_response({"ok": False, "error": "ID vật phẩm không hợp lệ"}, status=400)
 
-        from Command_vi.farm_system import load_custom_farm_items, save_custom_farm_items
+        from Command.farm_system import load_custom_farm_items, save_custom_farm_items
         data = load_custom_farm_items()
 
         if category == "seed":
@@ -7848,7 +7848,7 @@ async def handle_admin_farm_delete_item(request: web.Request):
         }
         key = cat_map.get(category, category)
 
-        from Command_vi.farm_system import load_custom_farm_items, save_custom_farm_items
+        from Command.farm_system import load_custom_farm_items, save_custom_farm_items
         data = load_custom_farm_items()
         if key in data and item_id in data[key]:
             del data[key][item_id]
@@ -7868,17 +7868,17 @@ async def handle_get_admin_mining_catalogs(request: web.Request):
     if not sess:
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin"}, status=403)
     try:
-        from Command_vi.command_mining import PICKS_CATALOG, ORES_CATALOG, MINING_ZONES, MINING_SUPPLIES, MINING_MUTATIONS
+        from Command.command_mining import PICKS_CATALOG, ORES_CATALOG, MINING_ZONES, MINING_SUPPLIES, MINING_MUTATIONS
         try:
-            from Command_vi.command_mining import load_custom_mining_items
+            from Command.command_mining import load_custom_mining_items
             load_custom_mining_items()
         except Exception:
             pass
         try:
-            from Command_vi.command_mining import ENCHANT_AFFIXES
+            from Command.command_mining import ENCHANT_AFFIXES
         except Exception:
             try:
-                from Command_vi.command_fishing import ENCHANT_AFFIXES
+                from Command.command_fishing import ENCHANT_AFFIXES
             except Exception:
                 ENCHANT_AFFIXES = []
         cat_dict = {
@@ -8007,7 +8007,7 @@ async def handle_get_admin_mining_users(request: web.Request):
     if not sess:
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin"}, status=403)
     try:
-        from Command_vi.command_mining import load_mining_data, mining_state, PICKS_CATALOG
+        from Command.command_mining import load_mining_data, mining_state, PICKS_CATALOG
         load_mining_data()
         users_dict = mining_state.get("users", {})
         res_list = []
@@ -8065,7 +8065,7 @@ async def handle_get_admin_mining_user(request: web.Request):
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin"}, status=403)
     try:
         user_id_raw = request.query.get("user_id", "").strip()
-        from Command_vi.command_mining import load_mining_data, get_user_mining, mining_state
+        from Command.command_mining import load_mining_data, get_user_mining, mining_state
         load_mining_data()
 
         # Nếu user_id_raw trống hoặc là 'auto', fallback đến thợ mỏ đầu tiên hoặc tài khoản đang đăng nhập
@@ -8133,7 +8133,7 @@ async def handle_admin_mining_user_action(request: web.Request):
             return web.json_response({"ok": False, "error": f"Không tìm thấy thợ mỏ: {user_id_raw}"}, status=400)
         user_id = target_id
 
-        from Command_vi.command_mining import load_mining_data, get_user_mining, save_mining_data, PICKS_CATALOG, ORES_CATALOG, MINING_SUPPLIES
+        from Command.command_mining import load_mining_data, get_user_mining, save_mining_data, PICKS_CATALOG, ORES_CATALOG, MINING_SUPPLIES
         load_mining_data()
         udata = get_user_mining(int(user_id) if user_id.isdigit() else 0)
         msg = "Thực hiện thành công"
@@ -8249,7 +8249,7 @@ async def handle_admin_mining_create_item(request: web.Request):
         custom_file = DATA_DIR / "custom_mining_items.json"
         cdata = load_json(custom_file, {"picks": {}, "ores": {}})
 
-        from Command_vi.command_mining import PICKS_CATALOG, ORES_CATALOG
+        from Command.command_mining import PICKS_CATALOG, ORES_CATALOG
 
         if item_type in ("pick", "pickaxe"):
             new_item = {
@@ -8788,7 +8788,7 @@ async def handle_test_guild_mc_connection(request: web.Request):
         if r_pass:
             try:
                 from mctools import RCONClient
-                from Command_vi.minecraft import clean_minecraft_text_static
+                from Command.minecraft import clean_minecraft_text_static
                 def _do_rcon_test():
                     rc = RCONClient(r_host, port=r_port)
                     if rc.login(r_pass):
@@ -8867,7 +8867,7 @@ async def handle_command_guild_mc_connection(request: web.Request):
         # Ưu tiên RCON nếu có mật khẩu
         if (mode == "rcon" or not gcfg.get("api_key")) and r_pass:
             from mctools import RCONClient
-            from Command_vi.minecraft import clean_minecraft_text_static
+            from Command.minecraft import clean_minecraft_text_static
             def _exec():
                 try:
                     rc = RCONClient(r_host, port=r_port)
@@ -8965,7 +8965,7 @@ async def handle_test_hoyo_code(request: web.Request):
         if not channel:
             return web.json_response({"ok": False, "error": "Không tìm thấy kênh trong server Discord"}, status=404)
 
-        from Command_vi.code_gamegacha import GAMES
+        from Command.code_gamegacha import GAMES
         ginfo = GAMES.get(game_key, {"name": game_key.upper(), "color": 0x4B69FF})
         ping_str = f"<@&{role_id}> " if role_id else ""
 
@@ -9860,7 +9860,7 @@ async def handle_mc_admin_server_test(request: web.Request):
 
         rcon_status = {"connected": False, "message": "Chưa cấu hình RCON"}
         try:
-            from Command_vi.minecraft import send_rcon_command_sync
+            from Command.minecraft import send_rcon_command_sync
             ok, r_msg = await asyncio.to_thread(send_rcon_command_sync, "list", host=host, guild_id=guild_id)
             rcon_status = {"connected": ok, "message": r_msg}
         except Exception as re:
@@ -9922,7 +9922,7 @@ async def handle_mc_admin_server_command(request: web.Request):
 
             if r_pass:
                 from mctools import RCONClient
-                from Command_vi.minecraft import clean_minecraft_text_static
+                from Command.minecraft import clean_minecraft_text_static
                 def _exec():
                     try:
                         rc = RCONClient(r_host, port=r_port)
@@ -10104,11 +10104,11 @@ async def handle_create_guild_giveaway(request: web.Request):
         )
         embed.set_footer(text="Sakura Giveaway System")
 
-        from Command_vi.giveaway import Database
+        from Command.giveaway import Database
         try:
-            from Command_vi.giveaway import GiveawayView
+            from Command.giveaway import GiveawayView
         except ImportError:
-            from Command_vi.giveaway import PersistentGiveawayView as GiveawayView
+            from Command.giveaway import PersistentGiveawayView as GiveawayView
         view = GiveawayView()
         msg = await channel.send(embed=embed, view=view)
 
@@ -10141,7 +10141,7 @@ async def handle_end_guild_giveaway(request: web.Request):
     if not can_access_guild(sess, guild_id):
         return web.json_response({"ok": False, "error": "Không có quyền quản lý server này"}, status=403)
     try:
-        from Command_vi.giveaway import Database
+        from Command.giveaway import Database
         gw = Database.get_giveaway(int(msg_id))
         if not gw:
             return web.json_response({"ok": False, "error": "Không tìm thấy giveaway"}, status=404)
@@ -10299,7 +10299,7 @@ async def handle_save_panel_config(request: web.Request):
             if not panel_channel_id:
                 return web.json_response({"ok": False, "error": "Chưa chọn kênh panel Role"}, status=400)
             if BOT_INSTANCE is not None:
-                from Command_vi.request_role import RequestRoleView
+                from Command.request_role import RequestRoleView
                 channel = BOT_INSTANCE.get_channel(int(panel_channel_id))
                 if not channel:
                     return web.json_response({"ok": False, "error": "Không tìm thấy kênh panel Role trong bot"}, status=404)
@@ -10321,7 +10321,7 @@ async def handle_save_panel_config(request: web.Request):
             if not panel_channel_id:
                 return web.json_response({"ok": False, "error": "Chưa chọn kênh panel Ticket"}, status=400)
             if BOT_INSTANCE is not None:
-                from Command_vi.ticket import TicketPanelView
+                from Command.ticket import TicketPanelView
                 channel = BOT_INSTANCE.get_channel(int(panel_channel_id))
                 if not channel:
                     return web.json_response({"ok": False, "error": "Không tìm thấy kênh panel Ticket trong bot"}, status=404)
@@ -10729,10 +10729,10 @@ async def handle_ws_mc(request: web.Request):
                             add_mc_log("CMD", f"> {cmd_text}")
                             # Thử gửi qua RCON nếu cấu hình; fallback chỉ log
                             try:
-                                # Cố gắng dùng mc rcon từ Command_vi/minecraft.py nếu có
+                                # Cố gắng dùng mc rcon từ Command/minecraft.py nếu có
                                 import importlib
                                 mc_mod=None
-                                for name in ["Command_vi.minecraft","Command.minecraft","minecraft"]:
+                                for name in ["Command.minecraft","Command.minecraft","minecraft"]:
                                     try:
                                         mc_mod=importlib.import_module(name)
                                         break
@@ -11159,7 +11159,7 @@ async def handle_topgg_webhook(request: web.Request):
         user_id = str(data.get("user") or data.get("userId") or data.get("id") or "").strip()
         vote_type = str(data.get("type", "upvote"))
         if user_id:
-            from Command_vi.vote import record_vote, send_vote_success_dm
+            from Command.vote import record_vote, send_vote_success_dm
             record_vote(user_id)
             # Thưởng Coin và XP vào DB
             try:
@@ -11192,12 +11192,12 @@ async def handle_topgg_webhook(request: web.Request):
 
 async def handle_get_vote_status(request: web.Request):
     user_id = request.match_info.get("user_id", "").strip()
-    from Command_vi.vote import get_vote_status
+    from Command.vote import get_vote_status
     status = get_vote_status(user_id)
     return web.json_response({"ok": True, "status": status})
 
 async def handle_get_vote_toggle(request: web.Request):
-    from Command_vi.vote import is_vote_required_enabled
+    from Command.vote import is_vote_required_enabled
     return web.json_response({"ok": True, "enabled": is_vote_required_enabled()})
 
 async def handle_post_vote_toggle(request: web.Request):
@@ -11206,7 +11206,7 @@ async def handle_post_vote_toggle(request: web.Request):
         return web.json_response({"ok": False, "error": "Chỉ Admin Web mới có quyền bật/tắt yêu cầu Vote"}, status=403)
     try:
         body = await request.json()
-        from Command_vi.vote import is_vote_required_enabled, set_vote_required_enabled
+        from Command.vote import is_vote_required_enabled, set_vote_required_enabled
         if "enabled" in body:
             new_state = bool(body["enabled"])
         else:
@@ -11258,7 +11258,7 @@ async def handle_ws_logs(request: web.Request):
                         cmd_text = data.get("cmd", "").strip()
                         add_log("INFO", f"Console Command từ Web: {cmd_text}")
                         try:
-                            from Checks_vi.owner_notifier import process_live_console_command
+                            from Check.owner_notifier import process_live_console_command
                             asyncio.create_task(process_live_console_command(cmd_text, BOT_INSTANCE))
                         except Exception as e_cmd:
                             add_log("ERROR", f"Lỗi thực thi lệnh console: {e_cmd}")
@@ -11936,7 +11936,7 @@ async def handle_api_hoyo_captcha_info(request: web.Request):
     if not session_id:
         return web.json_response({"success": False, "error": "Thiếu session ID"}, status=400)
     try:
-        from Checks_vi.hoyo_captcha_session import get_captcha_session
+        from Check.hoyo_captcha_session import get_captcha_session
         sess = get_captcha_session(session_id)
         if not sess:
             return web.json_response({"success": False, "error": "Phiên xác thực đã hết hạn hoặc không tồn tại. Vui lòng mở lại từ Discord!"}, status=404)
@@ -11997,7 +11997,7 @@ async def handle_api_hoyo_captcha_status(request: web.Request):
     if not session_id:
         return web.json_response({"success": False, "error": "Thiếu session ID"}, status=400)
     try:
-        from Checks_vi.hoyo_captcha_session import get_captcha_session
+        from Check.hoyo_captcha_session import get_captcha_session
         sess = get_captcha_session(session_id)
         if not sess:
             return web.json_response({"success": False, "error": "Phiên xác thực đã hết hạn hoặc không tồn tại."}, status=404)
@@ -12016,7 +12016,7 @@ async def handle_api_hoyo_captcha_verify(request: web.Request):
         session_id = payload.get("session", "").strip()
         if not session_id:
             return web.json_response({"success": False, "error": "Thiếu session ID"}, status=400)
-        from Checks_vi.hoyo_captcha_session import resolve_captcha_session
+        from Check.hoyo_captcha_session import resolve_captcha_session
         resolved = resolve_captcha_session(session_id, payload)
         if resolved:
             return web.json_response({"success": True, "message": "Đã gửi kết quả giải Captcha tới SakuraBot thành công!"})
@@ -12033,7 +12033,7 @@ async def handle_api_hoyo_otp_verify(request: web.Request):
         code = payload.get("code", "").strip()
         if not session_id or not code:
             return web.json_response({"success": False, "error": "Thiếu session ID hoặc mã xác thực"}, status=400)
-        from Checks_vi.hoyo_captcha_session import resolve_otp_session
+        from Check.hoyo_captcha_session import resolve_otp_session
         resolved = resolve_otp_session(session_id, code)
         if resolved:
             return web.json_response({"success": True, "message": "Đã chuyển mã xác nhận OTP tới SakuraBot thành công!"})
@@ -12077,7 +12077,7 @@ async def handle_api_hoyo_direct_cookie(request: web.Request):
         if not cookie_raw:
             return web.json_response({"success": False, "error": "Vui lòng dán chuỗi Cookie!"}, status=400)
 
-        from Command_vi.hoyolab_checkin import extract_hoyolab_cookies, load_cookies, save_cookies
+        from Command.hoyolab_checkin import extract_hoyolab_cookies, load_cookies, save_cookies
         cookie_dict = extract_hoyolab_cookies(cookie_raw)
 
         ltuid = cookie_dict.get("ltuid_v2") or cookie_dict.get("ltuid") or cookie_dict.get("account_id_v2") or cookie_dict.get("account_id")
@@ -12156,7 +12156,7 @@ async def handle_api_hoyo_web_login(request: web.Request):
 
         import uuid
         import genshin
-        from Checks_vi.hoyo_captcha_session import create_captcha_session, get_captcha_session
+        from Check.hoyo_captcha_session import create_captcha_session, get_captcha_session
 
         session_id = uuid.uuid4().hex[:16]
         device_id = str(uuid.uuid4())
@@ -12194,7 +12194,7 @@ async def handle_api_hoyo_web_login(request: web.Request):
             except Exception as mail_err:
                 return web.json_response({"success": False, "error": f"Không thể gửi mã Email: {mail_err}"}, status=400)
 
-            from Checks_vi.hoyo_captcha_session import create_otp_session
+            from Check.hoyo_captcha_session import create_otp_session
             loop = asyncio.get_running_loop()
             otp_future = loop.create_future()
             create_otp_session(session_id, {

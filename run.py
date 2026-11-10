@@ -1,10 +1,10 @@
 import traceback
 from config import OWNER_ID
 import discord
-import Checks_vi.dave_patch  # Kích hoạt bản vá DAVE E2EE 0.2.0 cho discord.py 2.7.1
+import Check.dave_patch  # Kích hoạt bản vá DAVE E2EE 0.2.0 cho discord.py 2.7.1
 from discord.ext import commands
-from Checks_vi.prefix_handler import get_prefix, load_prefixes
-from Checks_vi.server_member import update_stats
+from Check.prefix_handler import get_prefix, load_prefixes
+from Check.server_member import update_stats
 from discord.ext import tasks
 from config import TOKEN
 from file1 import EXTENSIONS
@@ -14,7 +14,7 @@ import asyncio, json, os, sys
 
 from Database.database import Database
 from data.database import init_db
-from Checks_vi.owner_notifier import install_live_console_tee, notify_owner_bot_online, notify_owner_bot_error
+from Check.owner_notifier import install_live_console_tee, notify_owner_bot_online, notify_owner_bot_error
 
 # Kích hoạt Live Console Stream để chuyển tiếp toàn bộ terminal sang Web Dashboard
 install_live_console_tee()
@@ -49,7 +49,7 @@ async def _server_config_check(ctx):
     # Admin-Only Mode per-guild (Cài đặt chung) — giữ tương thích, chỉ chặn khi bật
     try:
         if ctx.guild:
-            from Checks_vi.server_config import is_admin_only
+            from Check.server_config import is_admin_only
             if is_admin_only(ctx.guild.id):
                 # chỉ cho Administrator
                 if ctx.author.guild_permissions.administrator or ctx.author.id == OWNER_ID:
@@ -106,7 +106,7 @@ async def setup_hook():
     except Exception as e:
         print(f"{Colors.WARNING}⚠️ Không thể khởi động API liên kết Minecraft: {e}{Colors.ENDC}")
 
-    await load_extensions(EXTENSIONS, "Command_vi")
+    await load_extensions(EXTENSIONS, "Command")
     await load_extensions(EXTENSION_LOGS, "Logs_vi")
     await load_extensions(EXTENSION_ANTIS, "Anti")
 
@@ -158,7 +158,7 @@ async def setup_hook():
 @discord.app_commands.describe(lang="Language / Ngôn ngữ: vi or en")
 async def setlang(ctx: commands.Context, lang: str):
     """Đổi ngôn ngữ per-guild. Mặc định tự động theo Discord server language nếu chưa set."""
-    from Checks_vi.i18n import set_guild_language, get_guild_language, t
+    from Check.i18n import set_guild_language, get_guild_language, t
     # Kiểm tra quyền: cần Manage Server hoặc là Owner bot
     from config import OWNER_ID
     is_owner = ctx.author.id == OWNER_ID
@@ -195,7 +195,7 @@ async def setlang(ctx: commands.Context, lang: str):
 
 @bot.hybrid_command(name="lang", description="View current server language / Xem ngôn ngữ hiện tại")
 async def lang_info(ctx: commands.Context):
-    from Checks_vi.i18n import get_guild_language, t
+    from Check.i18n import get_guild_language, t
     if ctx.guild is None:
         return await ctx.send("DM default: vi", ephemeral=True)
     cur = get_guild_language(ctx.guild)

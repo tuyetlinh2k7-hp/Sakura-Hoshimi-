@@ -2,10 +2,10 @@ import asyncio
 import time
 import discord
 from discord.ext import commands
-from Checks_vi.data import voice_log_channels, voice_stats, CREATE_CHANNEL_ID
+from Check.data import voice_log_channels, voice_stats, CREATE_CHANNEL_ID
 from view.voice import VoicePanel
-from Checks_vi.voice import temp_channels
-from Checks_vi.i18n import t
+from Check.voice import temp_channels
+from Check.i18n import t
 
 
 class VoiceLog(commands.Cog):

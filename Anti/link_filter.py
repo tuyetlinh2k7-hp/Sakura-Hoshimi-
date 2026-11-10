@@ -7,12 +7,12 @@ from datetime import timedelta
 import re
 from urllib.parse import urlparse
 from typing import Literal
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 
 # Import các hàm kiểm tra và biến cấu hình cần thiết
 from config import OWNER_ID
-from Checks_vi.mod import has_admin_role, admin_roles, is_owner
+from Check.mod import has_admin_role, admin_roles, is_owner
 
 # --- Quản lý dữ liệu ---
 ALLOWED_LINKS_FILE = "data/allowed_links.json"

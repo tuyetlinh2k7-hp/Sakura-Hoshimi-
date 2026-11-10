@@ -11,7 +11,7 @@ from typing import Literal, Optional
 import discord
 from discord import app_commands
 from discord.ext import commands
-from Checks_vi.i18n import t, is_vietnamese
+from Check.i18n import t, is_vietnamese
 
 CONFIG_PATH = "data/anti_system_config.json"
 STRIKES_PATH = "data/anti_strikes.json"

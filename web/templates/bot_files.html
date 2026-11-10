@@ -771,7 +771,7 @@
         <span>🧩</span> Danh Sách Cogs (<span id="loadedCogsCount">0</span>)
       </button>
 
-      <button class="bf-btn bf-btn-success" onclick="reloadAllCogs()" title="Nạp lại toàn bộ Cogs trong Command_vi, Anti, Logs_vi">
+      <button class="bf-btn bf-btn-success" onclick="reloadAllCogs()" title="Nạp lại toàn bộ Cogs trong Command, Anti, Logs_vi">
         <span>⚡</span> Nạp Lại Toàn Bộ Cogs
       </button>
 
@@ -798,10 +798,10 @@
       <!-- Quick Folder Filter Tabs -->
       <div class="bf-quick-tabs">
         <button class="bf-tab-btn active" onclick="navigatePath('')">📁 Tất Cả</button>
-        <button class="bf-tab-btn" onclick="navigatePath('Command_vi')">🤖 Command_vi</button>
+        <button class="bf-tab-btn" onclick="navigatePath('Command')">🤖 Command</button>
         <button class="bf-tab-btn" onclick="navigatePath('Anti')">🛡️ Anti</button>
         <button class="bf-tab-btn" onclick="navigatePath('Logs_vi')">📜 Logs_vi</button>
-        <button class="bf-tab-btn" onclick="navigatePath('Checks_vi')">⚙️ Checks_vi</button>
+        <button class="bf-tab-btn" onclick="navigatePath('Check')">⚙️ Check</button>
         <button class="bf-tab-btn" onclick="navigatePath('languages')">🌐 languages</button>
         <button class="bf-tab-btn" onclick="navigatePath('web')">💻 web</button>
         <button class="bf-tab-btn" onclick="navigatePath('data')">🗄️ data</button>
@@ -881,7 +881,7 @@
         <div id="cogBanner" class="bf-cog-alert-banner" style="display: none;">
           <div>
             <span>⚡ Tệp này là một Extension Cog của SakuraBot: </span>
-            <strong id="cogModuleName" style="color: #ff79c6;">Command_vi.bank</strong>
+            <strong id="cogModuleName" style="color: #ff79c6;">Command.bank</strong>
           </div>
           <button class="bf-btn bf-btn-success" style="padding: 4px 10px; font-size: 0.8rem;" onclick="reloadCurrentCog()">
             <span>🔄</span> Nạp Lại Cog Này Ngay

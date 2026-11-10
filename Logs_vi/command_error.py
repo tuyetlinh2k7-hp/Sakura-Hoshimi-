@@ -3,7 +3,7 @@ from discord.ext import commands
 import traceback
 import sys
 import difflib
-from Checks_vi.i18n import t
+from Check.i18n import t
 
 class CommandError(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -117,7 +117,7 @@ class CommandError(commands.Cog):
 
             # Gửi thông báo DM tới Owner kèm Embed đẹp mắt
             try:
-                from Checks_vi.owner_notifier import notify_owner_bot_error
+                from Check.owner_notifier import notify_owner_bot_error
                 await notify_owner_bot_error(self.bot, error=error, source=f"Lệnh: {ctx.command}", ctx=ctx)
             except Exception as e_notify:
                 print(f"[CommandError] Lỗi khi gửi DM cho Owner: {e_notify}", file=sys.stderr)

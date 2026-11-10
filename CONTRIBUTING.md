@@ -1,46 +1,46 @@
-# 🌸 Hướng dẫn Đóng góp (Contributing Guidelines)
+# 🌸 Contributing Guidelines
 
-Cảm ơn bạn đã quan tâm và muốn đóng góp cho dự án **SakuraBot**! Mọi sự đóng góp của bạn, dù là báo lỗi, đề xuất tính năng mới hay gửi Pull Request, đều rất được hoan nghênh.
-
----
-
-## 🛠️ Quy trình Đóng góp
-
-### 1. Báo cáo lỗi (Bug Reports)
-Nếu bạn phát hiện lỗi trong quá trình sử dụng:
-1. Kiểm tra mục **Issues** trên GitHub để xem lỗi đã được báo cáo chưa.
-2. Nếu chưa, tạo một **New Issue** với tiêu đề rõ ràng.
-3. Cung cấp:
-   - Mô tả chi tiết về lỗi gặp phải.
-   - Các bước để tái hiện lỗi.
-   - Ảnh chụp màn hình hoặc log lỗi trong terminal (lưu ý che token/thông tin cá nhân).
-   - Phiên bản Python và hệ điều hành bạn đang sử dụng.
-
-### 2. Đề xuất tính năng mới (Feature Requests)
-Bạn có ý tưởng hay để SakuraBot thông minh và phong phú hơn?
-- Hãy mở một **Issue** với nhãn `enhancement`.
-- Trình bày rõ tính năng cần thêm và lợi ích mang lại cho người dùng.
-
-### 3. Gửi Pull Request (PR)
-1. **Fork** repository này về tài khoản GitHub của bạn.
-2. Tạo branch mới cho tính năng của bạn:
-   ```bash
-   git checkout -b feature/ten-tinh-nang
-   ```
-3. Thực hiện thay đổi, tuân thủ phong cách code:
-   - Đặt tên biến và hàm có ý nghĩa, dễ đọc.
-   - Giữ lại hoặc bổ sung các chú thích (docstring/comments) khi cần.
-   - Không commit các file chứa token cá nhân, file `.env`, database `.db`.
-4. Commit thay đổi:
-   ```bash
-   git commit -m "feat: thêm tính năng mới cho SakuraBot"
-   ```
-5. Đẩy lên repository của bạn:
-   ```bash
-   git push origin feature/ten-tinh-nang
-   ```
-6. Mở **Pull Request** về nhánh `main` của repository chính và mô tả ngắn gọn nội dung đã làm.
+Thank you for your interest in contributing to **SakuraBot**! Every contribution—whether reporting bugs, suggesting new features, or submitting Pull Requests—is highly appreciated.
 
 ---
 
-🌸 Chúc bạn có trải nghiệm tuyệt vời khi phát triển cùng cộng đồng **SakuraBot**!
+## 🛠️ Contribution Workflow
+
+### 1. Reporting Bugs
+If you encounter a bug or unexpected behavior:
+1. Check existing **Issues** on GitHub to see if it has already been reported.
+2. If not, open a **New Issue** with a clear and descriptive title.
+3. Please provide:
+   - A detailed description of the issue.
+   - Steps to reproduce the bug.
+   - Terminal error traces or screenshots (make sure to blur/remove any bot tokens or personal information).
+   - Your Python version and Operating System.
+
+### 2. Suggesting Enhancements
+Have ideas to make SakuraBot smarter, faster, or more fun?
+- Open an **Issue** with the `enhancement` label.
+- Clearly describe the proposed feature and how it benefits users or server administrators.
+
+### 3. Submitting Pull Requests (PR)
+1. **Fork** this repository to your GitHub account.
+2. Create a new branch for your feature or fix:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. Make your changes adhering to clean coding standards:
+   - Use meaningful variable, function, and class names.
+   - Preserve or add docstrings/comments where appropriate.
+   - **Never** commit sensitive credentials, `.env` files, or production `.db` database files.
+4. Commit your changes:
+   ```bash
+   git commit -m "feat: add your feature description"
+   ```
+5. Push to your branch:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+6. Open a **Pull Request** targeting the `main` branch with a concise summary of what you implemented or resolved.
+
+---
+
+🌸 Have a wonderful time coding and contributing to the **SakuraBot** community!

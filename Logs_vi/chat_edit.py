@@ -4,8 +4,8 @@ import difflib
 from collections import OrderedDict
 import discord
 from discord.ext import commands
-from Checks_vi.data import edit_log_channels
-from Checks_vi.i18n import t
+from Check.data import edit_log_channels
+from Check.i18n import t
 
 
 class JumpToMessageView(discord.ui.View):

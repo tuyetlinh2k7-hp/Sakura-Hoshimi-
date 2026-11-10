@@ -43,7 +43,7 @@ def get_extension_from_path(rel_path: str) -> Optional[str]:
     if norm.endswith(".py"):
         norm = norm[:-3]
     parts = norm.split("/")
-    if len(parts) == 2 and parts[0] in ("Command_vi", "Anti", "Logs_vi"):
+    if len(parts) == 2 and parts[0] in ("Command", "Anti", "Logs_vi"):
         return f"{parts[0]}.{parts[1]}"
     return None
 
@@ -236,7 +236,7 @@ def get_registered_extensions(bot=None) -> List[Dict[str, Any]]:
     try:
         import file1
         for e in getattr(file1, "EXTENSIONS", ()):
-            defined_exts.add(f"Command_vi.{e}")
+            defined_exts.add(f"Command.{e}")
     except Exception:
         pass
 
@@ -494,7 +494,7 @@ async def handle_api_bot_files_delete(request: web.Request):
             return web.json_response({"ok": False, "error": "Không thể xóa thư mục gốc của Bot!"}, status=400)
 
         # Chặn xóa các thư mục cốt lõi trực tiếp
-        if target.parent.resolve() == BASE_DIR.resolve() and target.name in ("Command_vi", "Anti", "Logs_vi", "Checks_vi", "web", "data"):
+        if target.parent.resolve() == BASE_DIR.resolve() and target.name in ("Command", "Anti", "Logs_vi", "Check", "web", "data"):
             return web.json_response({"ok": False, "error": f"Không được phép xóa thư mục cốt lõi `{target.name}`!"}, status=400)
 
         if target.is_dir():
@@ -636,7 +636,7 @@ async def handle_api_admin_cogs_reload(request: web.Request):
         if not extension:
             return web.json_response({"ok": False, "error": "Vui lòng chọn extension hoặc chọn 'all' để nạp lại"}, status=400)
 
-        # Nếu user truyền đường dẫn tệp (vd: "Command_vi/bank.py"), chuyển đổi sang tên extension
+        # Nếu user truyền đường dẫn tệp (vd: "Command/bank.py"), chuyển đổi sang tên extension
         converted = get_extension_from_path(extension)
         if converted:
             extension = converted

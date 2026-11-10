@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-from Checks_vi.data import get_guild_settings
-from Checks_vi.i18n import t
+from Check.data import get_guild_settings
+from Check.i18n import t
 
 class BoostLog(commands.Cog):
     def __init__(self, bot: commands.Bot):
