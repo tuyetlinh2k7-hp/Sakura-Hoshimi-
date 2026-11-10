@@ -70,7 +70,7 @@
     <button class="tab" data-pane="achievements" onclick="switchPane('achievements')">🏆 Thành Tựu & Danh Hiệu</button>
   </div>
 
-  <!-- View -->
+  
   <div id="pane-view" class="pane active">
     <div class="info-card">
       <div style="display:flex;gap:18px;align-items:center">
@@ -90,7 +90,7 @@
         <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)"><div style="color:var(--text-muted);font-size:.8rem">Loại tài khoản</div><div id="accType" style="font-weight:600;margin-top:2px">—</div></div>
       </div>
 
-      <!-- Financial Info Section -->
+      
       <h3 style="margin-top:24px;font-size:1.1rem;display:flex;align-items:center;gap:8px">💳 Thông tin tài chính</h3>
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:14px;margin-top:12px">
         <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid var(--border-subtle)">
@@ -111,10 +111,10 @@
         </div>
       </div>
 
-      <!-- Trạng thái liên kết Minecraft & Hôn nhân -->
+      
       <h3 style="margin-top:24px;font-size:1.1rem;display:flex;align-items:center;gap:8px">✨ Trạng thái kết nối & Xã hội</h3>
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px;margin-top:12px">
-        <!-- Minecraft Card -->
+        
         <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:16px;border:1px solid var(--border-subtle);display:flex;gap:14px;align-items:center;">
           <img id="accMcAvatar" src="https://mc-heads.net/avatar/Steve/64" alt="MC Avatar" style="width:52px;height:52px;border-radius:10px;border:1px solid var(--border-subtle);background:#222;">
           <div style="flex:1;">
@@ -127,7 +127,7 @@
           </div>
         </div>
 
-        <!-- Marriage Card -->
+        
         <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:16px;border:1px solid var(--border-subtle);display:flex;gap:14px;align-items:center;">
           <div style="font-size:2.5rem;line-height:1;">💍</div>
           <div style="flex:1;">
@@ -143,7 +143,7 @@
     </div>
   </div>
 
-  <!-- Change info -->
+  
   <div id="pane-change" class="pane">
     <div class="info-card">
       <h3 style="font-size:1.2rem;margin-bottom:6px">🖼️ Đổi avatar</h3>
@@ -167,7 +167,7 @@
     </div>
   </div>
 
-  <!-- Pane Achievements -->
+  
   <div id="pane-achievements" class="pane">
     <div class="info-card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -182,12 +182,12 @@
         <button class="btn btn-secondary btn-sm" onclick="loadAchievements()">🔄 Làm mới</button>
       </div>
 
-      <!-- Discord Link Alert -->
+      
       <div id="achDiscordNotice" style="display:none; margin-top:16px; background:rgba(255, 183, 77, 0.12); border:1px solid rgba(255, 183, 77, 0.35); border-radius:10px; padding:12px 16px; font-size:0.88rem; color:#ffd777;">
         ℹ️ <i>Tài khoản hiện chưa liên kết Discord. Hãy liên kết tài khoản Discord ở tab <strong>Hồ Sơ</strong> để đồng bộ tiến độ và tự động nhận thưởng Coins / Xu khi chơi minigame! Dưới đây là danh mục toàn bộ thành tựu của bot:</i>
       </div>
 
-      <!-- Progress bar -->
+      
       <div style="margin-top:20px; background:rgba(255,255,255,0.04); border-radius:14px; padding:18px; border:1px solid var(--border-subtle);">
         <div style="display:flex; justify-content:space-between; font-weight:700; font-size:.95rem;">
           <span>Tiến độ hoàn thành: <strong id="achProgressText" style="color:var(--sakura-pink);">0 / 0</strong></span>
@@ -203,13 +203,13 @@
         </div>
       </div>
 
-      <!-- Titles Section -->
+      
       <div id="achTitlesSection" style="margin-top:20px; display:none;">
         <h4 style="font-size:1rem; margin-bottom:10px;">🏷️ Danh Hiệu Đã Mở Khóa</h4>
         <div id="achTitlesList" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
       </div>
 
-      <!-- Categories Filter -->
+      
       <div style="margin-top:24px; display:flex; gap:8px; flex-wrap:wrap;" id="achCatPills">
         <button class="btn btn-secondary btn-sm" data-cat="all" onclick="filterAchCategory('all')" style="background:var(--sakura-gradient); color:#fff;">🌟 Tất Cả</button>
         <button class="btn btn-secondary btn-sm" data-cat="fishing" onclick="filterAchCategory('fishing')">🎣 Câu Cá</button>
@@ -220,9 +220,9 @@
         <button class="btn btn-secondary btn-sm" data-cat="social_level" onclick="filterAchCategory('social_level')">💖 Xã Hội & Cấp Độ</button>
       </div>
 
-      <!-- Achievement Cards Grid -->
+      
       <div id="achCardsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px; margin-top:18px;">
-        <!-- Populated by JS -->
+        
       </div>
     </div>
   </div>
@@ -231,7 +231,7 @@
 
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- Sakura FX Engine (Petals + Swaying Branches + Theme) -->
+
 <script src="/static/js/sakura-fx.js"></script>
     <script src="/static/js/i18n.js"></script>
 

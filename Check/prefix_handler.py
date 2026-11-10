@@ -24,13 +24,11 @@ def save_prefixes():
 def get_prefix(bot, message):
     """Hàm callable để bot lấy prefix động cho từng server."""
     if not message.guild:
-        return DEFAULT_PREFIX  # Dùng prefix mặc định trong tin nhắn riêng
+        return DEFAULT_PREFIX
 
     guild_prefix = prefixes.get(str(message.guild.id))
 
-    # Nếu server có prefix riêng và nó khác với prefix mặc định, trả về cả hai
     if guild_prefix and guild_prefix != DEFAULT_PREFIX:
         return (guild_prefix, DEFAULT_PREFIX)
 
-    # Nếu không, chỉ trả về prefix mặc định
     return DEFAULT_PREFIX

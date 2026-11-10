@@ -27,7 +27,6 @@ def cleanup_expired_sessions():
             if sess and sess.get("future") and not sess["future"].done():
                 sess["future"].cancel()
 
-    # Dọn map user
     for uid in list(USER_CAPTCHA_MAP.keys()):
         if USER_CAPTCHA_MAP[uid] not in ACTIVE_CAPTCHA_SESSIONS:
             USER_CAPTCHA_MAP.pop(uid, None)
@@ -40,7 +39,7 @@ def create_captcha_session(session_id: str, data: Dict[str, Any]) -> None:
     """Tạo mới một phiên chờ giải Captcha trên Web."""
     cleanup_expired_sessions()
     data["created_at"] = time.time()
-    data.setdefault("expires_at", time.time() + 300)  # Hạn 5 phút
+    data.setdefault("expires_at", time.time() + 300)
     data.setdefault("stage", "login_captcha")
     ACTIVE_CAPTCHA_SESSIONS[session_id] = data
     if "user_id" in data:

@@ -9,7 +9,6 @@ DATA_DIR = BASE_DIR / "data"
 DATA_FILE = DATA_DIR / "data.json"
 _data_mtime = None
 
-# --- KHỞI TẠO CÁC BIẾN TOÀN CỤC (ĐÃ LỌC BỎ BIẾN DƯ THỪA) ---
 levels = {}
 gain = {}
 user_coins = {}
@@ -34,7 +33,6 @@ CREATE_CHANNEL_ID = {}
 voice_stats = {}
 guild_settings = {}
 
-# Ánh xạ giữa khóa trong JSON và biến dict trong Python để code gọn gàng, dễ bảo trì
 _STATE_MAP = {
     "xp": gain,
     "level": levels,
@@ -126,7 +124,6 @@ def get_guild_settings(guild_id: int | str) -> dict:
     return settings
 
 
-# Tải dữ liệu lần đầu khi khởi động
 load_data()
 
 groq_client = Groq(api_key=GROQ_API_KEY)

@@ -32,7 +32,6 @@ def apply_dave_patch():
 
     print("[DAVE Patch] ✅ Đã kích hoạt bản vá DAVE E2EE 0.2.0 cho discord.py 2.7.1 (PR #10548).")
 
-    # 1. Patch VoiceConnectionState
     orig_init = d_vs.VoiceConnectionState.__init__
 
     def patched_init(self, voice_client, *, hook=None):
@@ -116,7 +115,6 @@ def apply_dave_patch():
 
     d_vs.VoiceConnectionState._connect_websocket = patched_connect_ws
 
-    # 2. Patch DiscordVoiceWebSocket.received_message
     orig_received_message = d_gw.DiscordVoiceWebSocket.received_message
 
     async def patched_received_message(self, msg: Dict[str, Any]) -> None:
@@ -124,14 +122,14 @@ def apply_dave_patch():
         data = msg.get('d')
         state = self._connection
 
-        if op == 11:  # CLIENTS_CONNECT
+        if op == 11:
             if not hasattr(state, "connected_user_ids"):
                 state.connected_user_ids = set()
             if isinstance(data, dict) and 'user_ids' in data:
                 state.connected_user_ids.update(int(uid) for uid in data['user_ids'])
             return await orig_received_message(self, msg)
 
-        if op == 13:  # CLIENT_DISCONNECT
+        if op == 13:
             if not hasattr(state, "connected_user_ids"):
                 state.connected_user_ids = set()
             if isinstance(data, dict) and 'user_id' in data:
@@ -163,7 +161,6 @@ def apply_dave_patch():
 
     d_gw.DiscordVoiceWebSocket.received_message = patched_received_message
 
-    # 3. Patch DiscordVoiceWebSocket.received_binary_message
     orig_received_binary = d_gw.DiscordVoiceWebSocket.received_binary_message
 
     async def patched_received_binary_message(self, msg: bytes) -> None:
@@ -224,7 +221,6 @@ def apply_dave_patch():
 
     d_gw.DiscordVoiceWebSocket.received_binary_message = patched_received_binary_message
 
-    # 4. Patch VoiceClient._get_voice_packet & send_audio_packet
     def patched_get_voice_packet(self, data: bytes):
         if self._connection.dave_session and self._connection.can_encrypt:
             if not self._connection.dave_session.can_encrypt:
@@ -263,6 +259,5 @@ def apply_dave_patch():
     d_vc.VoiceClient.send_audio_packet = patched_send_audio_packet
 
 
-# Tự động kích hoạt khi import
 apply_dave_patch()
 

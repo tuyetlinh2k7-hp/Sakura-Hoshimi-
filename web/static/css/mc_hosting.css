@@ -1,7 +1,4 @@
-/* ==============================================================================
-   🌸 SAKURA MINECRAFT WEB HOSTING DASHBOARD — STYLESHEET
-   Apex/Pterodactyl/FalixNodes inspired high-tech glassmorphism theme
-   ============================================================================== */
+
 
 :root {
   --mc-bg: #090b10;
@@ -33,13 +30,13 @@ body.mc-hosting-body {
   overflow-x: hidden;
 }
 
-/* --- Layout --- */
+
 .mc-layout {
   display: flex;
   min-height: 100vh;
 }
 
-/* --- Sidebar --- */
+
 .mc-sidebar {
   width: 270px;
   background: var(--mc-sidebar-bg);
@@ -148,7 +145,7 @@ body.mc-hosting-body {
   color: var(--mc-text-muted);
 }
 
-/* --- Main Content Area --- */
+
 .mc-main {
   flex: 1;
   display: flex;
@@ -158,7 +155,7 @@ body.mc-hosting-body {
   height: 100vh;
 }
 
-/* --- Topbar --- */
+
 .mc-topbar {
   background: rgba(13, 16, 23, 0.7);
   backdrop-filter: blur(15px);
@@ -227,13 +224,13 @@ body.mc-hosting-body {
   gap: 12px;
 }
 
-/* --- Content Container --- */
+
 .mc-container {
   padding: 28px;
   flex: 1;
 }
 
-/* --- Metric Cards (KPI) --- */
+
 .mc-kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -308,7 +305,7 @@ body.mc-hosting-body {
   text-transform: uppercase;
 }
 
-/* --- Action Buttons --- */
+
 .mc-btn {
   display: inline-flex;
   align-items: center;
@@ -377,7 +374,7 @@ body.mc-hosting-body {
   background: rgba(241, 196, 15, 0.3);
 }
 
-/* --- Server Cards Grid --- */
+
 .mc-servers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -476,7 +473,7 @@ body.mc-hosting-body {
   gap: 8px;
 }
 
-/* --- Empty State --- */
+
 .mc-empty-box {
   background: var(--mc-card-bg);
   border: 1px dashed rgba(255, 255, 255, 0.15);
@@ -507,7 +504,7 @@ body.mc-hosting-body {
   margin-bottom: 24px;
 }
 
-/* --- Terminal Console Window --- */
+
 .mc-terminal-container {
   display: flex;
   flex-direction: column;
@@ -629,7 +626,7 @@ body.mc-hosting-body {
   box-shadow: 0 0 10px rgba(255, 121, 198, 0.2);
 }
 
-/* --- Storage Breakdown Bar --- */
+
 .mc-storage-bar-multi {
   height: 12px;
   background: rgba(255, 255, 255, 0.08);
@@ -644,7 +641,7 @@ body.mc-hosting-body {
   transition: width 0.3s ease;
 }
 
-/* --- File Manager Table --- */
+
 .mc-file-table {
   width: 100%;
   border-collapse: collapse;
@@ -685,7 +682,7 @@ body.mc-hosting-body {
   color: var(--mc-accent);
 }
 
-/* --- Toast --- */
+
 .mc-toast-container {
   position: fixed;
   bottom: 24px;
@@ -722,7 +719,7 @@ body.mc-hosting-body {
   }
 }
 
-/* --- Mobile Responsiveness --- */
+
 @media (max-width: 900px) {
   .mc-sidebar {
     position: fixed;

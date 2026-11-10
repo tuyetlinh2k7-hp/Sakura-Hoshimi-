@@ -1,4 +1,4 @@
-/* Sakura floating chat widget — 2 tab: Sakura AI + Global (cần login) */
+
 (function(){
   function getToken(){return localStorage.getItem('sakura_auth_token')|| (document.cookie.match(/sakura_token=([^;]+)/)||[])[1]||''}
   function createWidget(){
@@ -54,7 +54,7 @@
       const div=document.createElement('div'); div.className='chat-bubble '+who;
       const time=new Date().toLocaleTimeString('vi-VN');
       if(who==='global'){
-        // text đã là HTML an toàn từ server (username + message)
+        
         div.innerHTML=text+`<div class="chat-time">${meta}</div>`;
       } else {
         div.innerHTML=`${escapeHtml(text)}<div class="chat-time">${meta||time}</div>`;

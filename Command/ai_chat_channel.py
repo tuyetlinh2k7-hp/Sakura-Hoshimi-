@@ -12,7 +12,6 @@ from openai import AsyncOpenAI
 from Check.i18n import t
 from Check.mod import has_admin_role, is_owner
 
-# --- CẤU HÌNH XKIRO API ---
 API_KEY = None
 try:
     from config import XKIRO_API_KEY as API_KEY
@@ -27,13 +26,11 @@ xkiro_client = AsyncOpenAI(
     api_key=API_KEY or "missing-api-key",
 )
 
-# Sử dụng model qua xKiro
 try:
     from config import AI_MODEL as MODEL_NAME
 except ImportError:
     MODEL_NAME = "sensenova/sensenova-6.8-flash-lite"
 
-# --- CẤU HÌNH & QUẢN LÝ TRẠNG THÁI ---
 GEMINI_SETTINGS_FILE = "data/gemini_settings.json"
 active_ai_channels = set()
 disabled_guilds = set()  
@@ -280,7 +277,6 @@ class AIChatChannelCog(commands.Cog, name="AI Channel Chat"):
                     await ctx.send("😅 *Tớ đang hơi quá tải một xíu, lát nữa thử lại nha!*")
             return
 
-        # Bảng trạng thái khi chỉ gõ `!gemini`
         is_active = ctx.channel.id in active_ai_channels
         server_disabled = ctx.guild.id in disabled_guilds
         

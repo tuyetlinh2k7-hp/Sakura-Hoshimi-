@@ -1,8 +1,6 @@
-/**
- * 🌸 SAKURA BOT WEB DASHBOARD - CLIENT APPLICATION
- */
 
-// State
+
+
 const state = {
     token: localStorage.getItem('sakura_auth_token') || '',
     activeTab: 'dashboard',
@@ -27,7 +25,7 @@ const state = {
     adminMinecraft: { servers: [], currentServer: null, activeSubTab: 'terminal', ws: null }
 };
 
-// --- Auth helpers ---
+
 async function checkAuthAndApplyRole() {
     if (!state.token) {
         const cookieMatch = document.cookie.match(/sakura_token=([^;]+)/);
@@ -57,7 +55,7 @@ async function checkAuthAndApplyRole() {
         return true;
     } catch (e) {
         console.error('Auth check failed', e);
-        return true; // allow UI to continue but API will redirect
+        return true; 
     }
 }
 function applyRoleUI() {
@@ -69,7 +67,7 @@ function applyRoleUI() {
     state.isOwner = isOwner;
     state.isRealAdmin = isRealAdmin;
 
-    // Chế độ xem trước góc nhìn Người Dùng Thường (User View Preview)
+    
     const isPreview = isRealAdmin && state.previewAsUser;
     const effectiveAdmin = isRealAdmin && !isPreview;
 
@@ -83,7 +81,7 @@ function applyRoleUI() {
     const btnPreview = document.getElementById('btnToggleUserPreview');
     const previewBanner = document.getElementById('userPreviewStickyBanner');
 
-    // Nút chuyển đổi góc nhìn User/Admin ở Header
+    
     if (btnPreview) {
         if (isRealAdmin) {
             btnPreview.style.display = 'inline-flex';
@@ -142,7 +140,7 @@ function applyRoleUI() {
     }
     if (banner) banner.style.display = effectiveAdmin ? 'none' : 'block';
 
-    // Ẩn/hiện các phần tử admin-only
+    
     document.querySelectorAll('[data-admin-only="true"]').forEach(el => {
         el.style.display = effectiveAdmin ? '' : 'none';
     });
@@ -150,12 +148,12 @@ function applyRoleUI() {
         el.style.display = effectiveAdmin ? '' : 'none';
     });
 
-    // Ẩn/hiện các phần tử owner-only (Quản trị Admin Web)
+    
     document.querySelectorAll('.owner-only, [data-owner-only="true"]').forEach(el => {
         el.style.display = (isOwner && !isPreview) ? '' : 'none';
     });
 
-    // Nếu đang ở góc nhìn thường và đang chọn tab admin, tự chuyển về guilds
+    
     if (!effectiveAdmin) {
         const adminTabs = ['anti', 'add_economy', 'admin_fishing', 'admin_shop', 'admin_marriage', 'admin_farm', 'admin_mining', 'admin_minecraft', 'admin_achievements', 'wordchain', 'giveaways', 'console', 'settings', 'admin_users'];
         if (adminTabs.includes(state.activeTab)) {
@@ -176,7 +174,7 @@ async function doLogout() {
     location.href = '/login';
 }
 
-// --- Toast Notification ---
+
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
@@ -199,7 +197,7 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
-// --- API Helper ---
+
 async function apiRequest(endpoint, method = 'GET', body = null) {
     let actualMethod = 'GET';
     let actualBody = null;
@@ -230,7 +228,7 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
     try {
         const response = await fetch(endpoint, options);
         if (response.status === 401) {
-            // Token hết hạn hoặc chưa đăng nhập
+            
             if (!window._authRedirecting) {
                 window._authRedirecting = true;
                 showToast('Phiên hết hạn, chuyển về đăng nhập...', 'warning');
@@ -243,17 +241,17 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
             showToast(data.error || 'Bạn không có quyền thực hiện thao tác này', 'error');
             return { ok: false, error: data.error || 'Forbidden', status: 403 };
         }
-        // Parse JSON an toàn – nếu server trả HTML/lỗi thì không throw "Unexpected non-whitespace..."
+        
         let data;
         try {
             data = await response.json();
         } catch (err) {
             const text = await response.text().catch(()=> '');
             console.warn(`Non-JSON response ${endpoint} [${response.status}]:`, text.slice(0,500));
-            // Thử lấy message từ HTML title nếu có
+            
             const m = text.match(/<title[^>]*>([^<]+)<\/title>/i);
             const hint = m ? m[1].trim() : text.trim().slice(0,120);
-            // Giữ nguyên error gốc để debug nhưng trả lỗi thân thiện
+            
             return { ok: false, error: hint || err.message || `Lỗi ${response.status}`, status: response.status };
         }
         return data;
@@ -263,7 +261,7 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
     }
 }
 
-// --- Mobile menu ---
+
 function toggleMobileMenu(force) {
     const sb = document.querySelector('.sidebar');
     const ov = document.getElementById('mobileOverlay');
@@ -273,7 +271,7 @@ function toggleMobileMenu(force) {
     if (ov) ov.classList.toggle('active', open);
     document.body.style.overflow = open ? 'hidden' : '';
 }
-// --- Navigation / Tabs ---
+
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
@@ -282,7 +280,7 @@ function setupNavigation() {
             if (!tabName) return;
             e.preventDefault();
             switchTab(tabName);
-            // auto close mobile menu after tap
+            
             if (window.innerWidth <= 992) toggleMobileMenu(false);
         });
     });
@@ -297,7 +295,7 @@ function switchTab(tabName) {
     }
     state.activeTab = tabName;
 
-    // Update nav classes
+    
     document.querySelectorAll('.nav-item').forEach(item => {
         if (item.getAttribute('data-tab') === tabName) {
             item.classList.add('active');
@@ -306,7 +304,7 @@ function switchTab(tabName) {
         }
     });
 
-    // Update tab content
+    
     document.querySelectorAll('.tab-content').forEach(tab => {
         if (tab.id === `tab-${tabName}`) {
             tab.classList.add('active');
@@ -315,7 +313,7 @@ function switchTab(tabName) {
         }
     });
 
-    // Cập nhật tiêu đề trang
+    
     const titleMap = {
         dashboard: '📊 Tổng Quan Hệ Thống',
         guilds: '🏰 Quản Lý Máy Chủ Discord',
@@ -345,7 +343,7 @@ function switchTab(tabName) {
     const titleEl = document.getElementById('pageTitle');
     if (titleEl) titleEl.innerText = titleMap[tabName] || 'Sakura Bot Dashboard';
 
-    // Lazy load data cho tab tương ứng
+    
     if (tabName === 'guilds') loadGuilds();
     if (tabName === 'commands') loadBotCommands();
     if (tabName === 'anti') loadAntiSettings();
@@ -369,7 +367,7 @@ function switchTab(tabName) {
     if (tabName === 'settings') loadSystemSettings();
 }
 
-// --- Realtime Status & Charts ---
+
 async function fetchStatus() {
     const res = await apiRequest('/api/status');
     if (!res.ok) return;
@@ -377,7 +375,7 @@ async function fetchStatus() {
     state.botStatus = res.bot;
     const sys = res.system;
 
-    // Cập nhật avatar bot mới (fallback về /images/avatar-bot.jpg nếu tải lỗi)
+    
     if (res.bot && res.bot.avatar) {
         document.querySelectorAll('.brand-logo, .bot-avatar-animated, .brand-logo-img').forEach(img => {
             if (img.tagName === 'IMG' && img.src !== res.bot.avatar) {
@@ -390,7 +388,7 @@ async function fetchStatus() {
         });
     }
 
-    // Cập nhật badge & stats
+    
     const presenceDot = document.getElementById('presenceDot');
     const botStatusText = document.getElementById('botStatusText');
     const botUserTag = document.getElementById('botUserTag');
@@ -420,7 +418,7 @@ async function fetchStatus() {
         if (mobileUptime) mobileUptime.innerText = `${uptimeMin} `;
     }
 
-    // Dashboard metrics
+    
     const statGuilds = document.getElementById('statGuilds');
     const statUsers = document.getElementById('statUsers');
     const statChannels = document.getElementById('statChannels');
@@ -431,7 +429,7 @@ async function fetchStatus() {
     if (statChannels) statChannels.innerText = res.bot.channels_count;
     if (statCogs) statCogs.innerText = res.bot.cogs_count;
 
-    // Charts update
+    
     state.cpuHistory.push(sys.cpu_percent);
     state.cpuHistory.shift();
     state.ramHistory.push(sys.ram_percent);
@@ -443,18 +441,18 @@ async function fetchStatus() {
         state.chartInstance.update('none');
     }
 
-    // Cập nhật thông tin chẩn đoán kỹ thuật Bot & Lavalink & APIs (Admin Only)
+    
     if (res.admin_details) {
         renderAdminDiagnostics(res.admin_details);
     }
 }
 
-// ================= ADMIN SYSTEM DIAGNOSTICS =================
+
 function renderAdminDiagnostics(data) {
     if (!data) return;
     state.adminDiagnostics = data;
 
-    // 1. Máy chủ Lavalink (Các trạng thái: ổn / tắt / sự cố)
+    
     const l = data.lavalink;
     if (l) {
         const badge = document.getElementById('lavalinkStatusBadge');
@@ -489,7 +487,7 @@ function renderAdminDiagnostics(data) {
                 stateText.innerHTML = '<span style="color:#a1a1aa;font-weight:700">Đã tắt (Offline)</span>';
             }
         } else {
-            // sự cố
+            
             if (badge) {
                 badge.innerText = '🔴 Gặp sự cố (sự cố)';
                 badge.style.background = 'rgba(255, 85, 85, 0.15)';
@@ -511,7 +509,7 @@ function renderAdminDiagnostics(data) {
         }
     }
 
-    // 2. Trạng thái APIs tích hợp
+    
     const apis = data.apis || [];
     const apisList = document.getElementById('apisStatusList');
     const summaryBadge = document.getElementById('apisHealthSummaryBadge');
@@ -566,7 +564,7 @@ function renderAdminDiagnostics(data) {
         }
     }
 
-    // 3. Thông tin chi tiết kỹ thuật Bot
+    
     const b = data.bot_details;
     if (b) {
         const setVal = (id, val) => {
@@ -675,7 +673,7 @@ function initPerformanceChart() {
     });
 }
 
-// --- Guilds Management ---
+
 async function loadGuilds() {
     const container = document.getElementById('guildsList');
     if (!container) return;
@@ -1219,7 +1217,7 @@ async function loadAutomod(guildId){
     populateAmChannelSelects();
 }
 function escapeHtmlAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-// Nhóm kênh theo category để hiển thị optgroup dễ nhìn
+
 function buildGroupedChannelHTML(channels, emptyLabel){
     if(!channels || !channels.length) return emptyLabel ? `<option>${emptyLabel}</option>` : '';
     const groups={};
@@ -1228,7 +1226,7 @@ function buildGroupedChannelHTML(channels, emptyLabel){
         if(!groups[cat]) groups[cat]=[];
         groups[cat].push(c);
     });
-    // sort categories, đưa "Không phân loại" xuống cuối
+    
     const cats=Object.keys(groups).sort((a,b)=>{
         if(a.includes('Không phân loại')) return 1;
         if(b.includes('Không phân loại')) return -1;
@@ -1279,23 +1277,23 @@ function renderAutomod(cfg){
     setSw('amAntiEmoji', cfg.advanced?.anti_emoji);
     setSw('amAntiDuplicate', cfg.advanced?.anti_duplicate);
     setSw('amAntiZalgo', cfg.advanced?.anti_zalgo);
-    // inputs
+    
     const vw=document.getElementById('amWordsWarn'); if(vw) vw.value=cfg.words_violation?.warns||5;
     const vt=document.getElementById('amWordsTimeout'); if(vt) vt.value=cfg.words_violation?.timeout||5;
     const st=document.getElementById('amSpamThreshold'); if(st) st.value=cfg.spam?.threshold||5;
     const sw=document.getElementById('amSpamWindow'); if(sw) sw.value=cfg.spam?.window||5;
     const spw=document.getElementById('amSpamWarn'); if(spw) spw.value=cfg.spam?.violation?.warns||5;
     const spt=document.getElementById('amSpamTimeout'); if(spt) spt.value=cfg.spam?.violation?.timeout||5;
-    // global off notice
+    
     const notice=document.getElementById('amGlobalOffNotice');
     if(notice) notice.style.display = cfg.global_enabled===false ? 'block' : 'none';
-    // words list
+    
     renderAmWords(cfg.words||[]);
-    // channel pickers
+    
     renderAmChannels('amExemptChannels', cfg.exempt_channels||[], 'exempt');
     renderAmChannels('amWordsExemptChannels', cfg.words_bypass_channels||[], 'words');
     renderAmChannels('amSpamExemptChannels', cfg.spam?.bypass_channels||[], 'spam');
-    // advanced_settings
+    
     const advs=cfg.advanced_settings||{};
     const setVal=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
     const setChk=(id,v)=>{ const el=document.getElementById(id); if(el) el.checked=!!v; };
@@ -1338,7 +1336,7 @@ function addAmWord(){
     if(_amConfig.words.length>=200) return showToast('Tối đa 200 từ','warning');
     _amConfig.words.push({word:'', type:'contains'});
     renderAmWords(_amConfig.words);
-    // focus last input
+    
     setTimeout(()=>{ const inputs=document.querySelectorAll('#amWordsList .am-word-input'); if(inputs.length) inputs[inputs.length-1].focus(); },50);
 }
 function removeAmWord(idx){
@@ -1398,7 +1396,7 @@ function removeAmChannel(type, id){
 }
 async function saveAutomod(){
     if(!_amGuildId || !_amConfig) return showToast('Chưa tải cấu hình','warning');
-    // collect UI values into config
+    
     _amConfig.exempt_enabled = document.getElementById('amExemptToggle')?.classList.contains('on');
     _amConfig.words_violation = {
         warn_enabled: document.getElementById('amWordsWarnToggle')?.classList.contains('on'),
@@ -1436,11 +1434,11 @@ async function saveAutomod(){
         link_whitelist: (document.getElementById('amLinkWhitelist')?.value || '').split(/[\n,]+/).map(s=>s.trim()).filter(Boolean),
         invite_allow_own: !!document.getElementById('amInviteAllowOwn')?.checked
     };
-    // sanitize words (remove empty)
+    
     _amConfig.words = (_amConfig.words||[]).filter(w=> (w.word||w.text||'').trim() );
-    // map text->word compat if needed but backend expects word
+    
     _amConfig.words = _amConfig.words.map(w=>({word: String(w.word||w.text||'').trim().slice(0,80), type: ['contains','exact','regex'].includes(w.type)? w.type:'contains'}));
-    // validate regex
+    
     for(const w of _amConfig.words){
         if(w.type==='regex'){
             try{ new RegExp(w.word); }catch(e){ return showToast('Regex lỗi: '+w.word+' — '+e.message,'error'); }
@@ -1624,7 +1622,7 @@ async function loadWelcome(guildId){
         const boostEnabled = !!w.boost_message;
         document.getElementById('switchBoostMessage').classList.toggle('on', boostEnabled);
     }
-    // Welcome fields
+    
     if(document.getElementById('welcomeTitle')) document.getElementById('welcomeTitle').value=w.welcome_title||'';
     if(document.getElementById('welcomeColor')) document.getElementById('welcomeColor').value=w.welcome_color||'#FF79C6';
     if(document.getElementById('welcomeMsg')) document.getElementById('welcomeMsg').value=w.message||'';
@@ -1632,7 +1630,7 @@ async function loadWelcome(guildId){
     if(document.getElementById('welcomeImage')) document.getElementById('welcomeImage').value=w.welcome_image||'';
     if(document.getElementById('welcomeThumb')) document.getElementById('welcomeThumb').value=w.welcome_thumb||'';
 
-    // Goodbye fields
+    
     if(document.getElementById('goodbyeTitle')) document.getElementById('goodbyeTitle').value=w.goodbye_title||'';
     if(document.getElementById('goodbyeColor')) document.getElementById('goodbyeColor').value=w.goodbye_color||'#FF5555';
     if(document.getElementById('goodbyeMsg')) document.getElementById('goodbyeMsg').value=w.goodbye_message||'';
@@ -1640,7 +1638,7 @@ async function loadWelcome(guildId){
     if(document.getElementById('goodbyeImage')) document.getElementById('goodbyeImage').value=w.goodbye_image||'';
     if(document.getElementById('goodbyeThumb')) document.getElementById('goodbyeThumb').value=w.goodbye_thumb||'';
 
-    // Boost fields
+    
     if(document.getElementById('boostTitle')) document.getElementById('boostTitle').value=w.boost_title||'';
     if(document.getElementById('boostColor')) document.getElementById('boostColor').value=w.boost_color||'#FF79C6';
     if(document.getElementById('boostMsg')) document.getElementById('boostMsg').value=w.boost_message_text||'';
@@ -1694,12 +1692,12 @@ async function saveWelcome(){
 }
 async function testWelcome(kind){
     const gid=document.getElementById('drawerGuildId').value;
-    // lưu trước khi test để đảm bảo kênh/message mới nhất được dùng
+    
     await saveWelcome();
     const res=await apiRequest(`/api/guilds/${gid}/welcome/test`,'POST',{kind});
     if(res.ok) showToast(res.message||'Đã gửi test','success'); else showToast(res.error||'Lỗi test','error');
 }
-// --- TempVoice (Join to Create) ---
+
 async function loadTempVoice(guildId){
     const sel=document.getElementById('tempVoiceChannel');
     const status=document.getElementById('tempVoiceStatus');
@@ -1719,7 +1717,7 @@ async function loadTempVoice(guildId){
     if(preview){
         if(isOn){
             const ch=_amChannels.find(c=> String(c.id)===String(cid)) || _amChannels.find(c=> String(c.id)===String(cid));
-            // fallback find in guild channels global
+            
             const name = ch ? ch.name : cid;
             preview.innerHTML=`Kênh Join to Create: <b>🔊 ${escapeHtml(name)}</b> • Khi thành viên vào sẽ tạo kênh cùng category, rời thì tự xóa.`;
         } else {
@@ -1730,13 +1728,13 @@ async function loadTempVoice(guildId){
 async function saveTempVoice(){
     const gid=document.getElementById('drawerGuildId').value;
     const cid=document.getElementById('tempVoiceChannel')?.value || null;
-    // if value is "", means off
+    
     const body={channel_id: cid ? String(cid) : null};
     const res=await apiRequest(`/api/guilds/${gid}/tempvoice`,'POST',body);
     if(res.ok){ showToast(res.message||'Đã lưu TempVoice','success'); loadTempVoice(gid); }
     else showToast(res.error||'Lỗi','error');
 }
-// --- Confession ---
+
 async function loadConfession(guildId){
     const res=await apiRequest(`/api/guilds/${guildId}/confession`);
     if(!res.ok) return;
@@ -1749,9 +1747,9 @@ async function loadConfession(guildId){
     setSw('cfsAnonReply', c.anon_reply);
     if(document.getElementById('cfsChannel')) document.getElementById('cfsChannel').value = c.confession_channel_id ? String(c.confession_channel_id) : '';
     if(document.getElementById('cfsLogChannel')) document.getElementById('cfsLogChannel').value = c.log_channel_id ? String(c.log_channel_id) : '';
-    // post channel mặc định theo cfsChannel
+    
     if(document.getElementById('cfsPostChannel') && !document.getElementById('cfsPostChannel').value){
-        // giữ nguyên nếu user đã chọn khác
+        
     }
 }
 async function saveConfession(){
@@ -1783,7 +1781,7 @@ async function postConfessionPanel(){
     if(res.ok){ showToast(res.message,'success'); if(st) st.textContent='✅ '+res.message; }
     else { showToast(res.error||'Lỗi','error'); if(st) st.textContent='❌ '+(res.error||'Lỗi'); }
 }
-// --- Audit Logs ---
+
 async function loadAuditLogs(guildId){
     const res=await apiRequest(`/api/guilds/${guildId}/audit`);
     if(!res.ok) return;
@@ -1811,7 +1809,7 @@ async function saveAuditLogs(){
     if(res.ok) showToast(res.message||'Đã lưu Audit Logs','success');
     else showToast(res.error||'Lỗi','error');
 }
-// --- Blacklist (server + global cho admin) ---
+
 let _blMembersCache=[], _blSelectedIds=new Set(), _blGuildCache=[], _blGlobalCache=[];
 async function loadBlacklist(guildId){
     const res=await apiRequest(`/api/guilds/${guildId}/blacklist`);
@@ -1822,12 +1820,12 @@ async function loadBlacklist(guildId){
     }
     _blGuildCache=res.guild_blacklist||[];
     _blGlobalCache=res.global_blacklist||[];
-    // member picker: reuse _modMembersCache if available, else fetch via guild members API already cached in _modMembersCache
-    // đảm bảo _blMembersCache có dữ liệu thành viên để chọn
+    
+    
     if(_modMembersCache && _modMembersCache.length){
         _blMembersCache=_modMembersCache.slice();
     } else if(_blMembersCache.length===0){
-        // thử lấy từ API nếu chưa có
+        
         try{
             const mres=await apiRequest(`/api/guilds/${guildId}/members`);
             if(mres.ok) _blMembersCache=mres.members||[];
@@ -1843,7 +1841,7 @@ async function loadBlacklist(guildId){
     renderBlacklistMembers(_blMembersCache);
     renderGuildBlacklist(_blGuildCache);
     renderGlobalBlacklist(_blGlobalCache);
-    // global section chỉ admin mới hiện
+    
     const gsec=document.getElementById('blGlobalSection');
     if(gsec) gsec.style.display = res.is_admin ? 'block' : 'none';
     if(document.getElementById('blServerCount')) document.getElementById('blServerCount').textContent=_blGuildCache.length;
@@ -1997,18 +1995,18 @@ async function sendAnnounceFromDrawer() {
     else showToast(res.error || 'Lỗi', 'error');
 }
 
-// === Mod Web (đã phân loại, loại trừ MC) ===
+
 async function loadModCommands(guildId) {
     const box = document.getElementById('modCommandsList');
     if (!box) return;
     box.innerHTML = '<div style="color:var(--text-muted)">Đang tải...</div>';
     const res = await apiRequest(`/api/mod/commands?guild_id=${guildId}`);
     if (!res.ok) { box.innerHTML = `<div style="color:var(--accent-red)">${res.error || 'Lỗi tải'}</div>`; return; }
-    // group by category
+    
     const cats = res.categories || {};
     const cmds = res.commands || [];
     let html = '';
-    // categories order
+    
     const order = ['member', 'voice', 'utility'];
     for (const cat of order) {
         const catInfo = cats[cat] || { label: cat };
@@ -2030,7 +2028,7 @@ async function loadModCommands(guildId) {
 }
 async function toggleModCmd(guildId, cmdId, el) {
     const enabled = !el.classList.contains('on');
-    // optimistic
+    
     el.classList.toggle('on');
     const res = await apiRequest('/api/mod/commands', 'POST', { guild_id: guildId, cmd_id: cmdId, enabled });
     if (res.ok) showToast(`${enabled ? 'Bật' : 'Tắt'} ${cmdId} thành công`, 'success');
@@ -2082,7 +2080,7 @@ function selectModMember(id, e){
     document.getElementById('modTargetId').value=Array.from(_selectedMemberIds).join(',');
     document.getElementById('modTargetIdCustom').value='';
     updateSelectedInfo();
-    // re-render để cập nhật checkbox mà không mất filter
+    
     const q=(document.getElementById('modMemberSearch2')?.value||'').toLowerCase();
     const list=q? _modMembersCache.filter(x=> x.name.toLowerCase().includes(q)||x.username.toLowerCase().includes(q)||x.id.includes(q)) : _modMembersCache;
     renderModMembers(list);
@@ -2102,7 +2100,7 @@ function selectAllModMembers(){
     document.getElementById('modTargetId').value=Array.from(_selectedMemberIds).join(',');
     updateSelectedInfo(); renderModMembers(list);
 }
-// giữ hàm cũ cho tương thích
+
 function filterModMembers(){ filterModMembers2(); }
 async function executeModAction() {
     const guildId = document.getElementById('drawerGuildId').value;
@@ -2110,7 +2108,7 @@ async function executeModAction() {
     const customRaw = document.getElementById('modTargetIdCustom')?.value.trim();
     const selVal = document.getElementById('modTargetId')?.value.trim();
     const raw = customRaw || selVal || '';
-    // hỗ trợ hàng loạt: tách dấu phẩy, khoảng trắng
+    
     const ids = raw.split(/[,\s]+/).map(s=>s.trim()).filter(Boolean);
     const targetSingle = ids[0]||'';
     const reason = document.getElementById('modReason').value.trim() || 'Từ Web';
@@ -2119,7 +2117,7 @@ async function executeModAction() {
     const channel_id = document.getElementById('modChannelId').value;
     if (action !== 'clear' && !ids.length) return showToast('Chọn 1 hoặc nhiều thành viên', 'warning');
     if (action === 'clear' && !channel_id) return showToast('Chọn kênh để clear', 'warning');
-    // hàng loạt: lặp từng ID
+    
     if(ids.length > 1 && action !== 'clear'){
         if(!confirm(`Thực thi ${action} cho ${ids.length} thành viên?`)) return;
         let ok=0, fail=0;
@@ -2231,7 +2229,7 @@ async function sendChannelMessage() {
     }
 }
 
-// --- Bot Actions ---
+
 async function triggerBotAction(action, payload = {}) {
     const res = await apiRequest('/api/bot/action', 'POST', { action, ...payload });
     if (res.ok) {
@@ -2247,7 +2245,7 @@ async function refreshBotConnection() {
     const pid = document.getElementById('botPidInfo');
     const detail = document.getElementById('botConnDetail');
     if (badge) badge.innerText = 'Đang kiểm tra...';
-    // timeout 2.5s để không treo khi không có bot
+    
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 2500);
     let res;
@@ -2283,7 +2281,7 @@ async function refreshBotConnection() {
 }
 
 
-// --- Bot Commands Handlers (Đồng bộ theo thời gian thực từ bot) ---
+
 async function loadBotCommands() {
     const grid = document.getElementById('commandsGrid');
     if (!grid) return;
@@ -2415,7 +2413,7 @@ function copyCommandCode(text, el) {
     });
 }
 
-// --- Anti & Security Settings ---
+
 async function loadAntiSettings() {
     const res = await apiRequest('/api/anti/settings');
     if (!res.ok) return;
@@ -2439,7 +2437,7 @@ async function loadAntiSettings() {
         }
     }
 
-    // Words list
+    
     const wordsContainer = document.getElementById('forbiddenWordsList');
     if (wordsContainer && res.forbidden_words) {
         wordsContainer.innerHTML = res.forbidden_words.map(w => `
@@ -2498,7 +2496,7 @@ async function removeForbiddenWord(word) {
     }
 }
 
-// --- Add Economy Management ---
+
 function initAddEconomyForm() {
     const sel = document.getElementById('econGuildSelect');
     if (!sel) return;
@@ -2540,7 +2538,7 @@ async function submitEconomyAdjustment() {
     }
 }
 
-// --- Levels & Leaderboard ---
+
 async function loadLevels() {
     const tbody = document.getElementById('levelsTableBody');
     if (!tbody) return;
@@ -2632,7 +2630,7 @@ async function saveUserLevel() {
     }
 }
 
-// --- Fishing Leaderboard (Global & Local) ---
+
 state.fishingLbType = 'global';
 
 function setFishingLbType(type) {
@@ -2719,7 +2717,7 @@ async function loadFishingLeaderboard() {
     }).join('');
 }
 
-// --- Giveaway Management per Server ---
+
 function initGiveawaysTab() {
     const sel = document.getElementById('gwGuildSelect');
     if (!sel) return;
@@ -2847,7 +2845,7 @@ async function deleteGiveaway(guildId, msgId) {
     }
 }
 
-// --- System Settings & Config ---
+
 async function loadSystemSettings() {
     await loadConfigSettings();
     await loadRawConfigFile();
@@ -2909,7 +2907,7 @@ async function loadConfigSettings() {
     if (document.getElementById('cfgClientSecret')) document.getElementById('cfgClientSecret').value = c.DISCORD_CLIENT_SECRET || '';
     if (document.getElementById('cfgRedirectUri')) document.getElementById('cfgRedirectUri').value = c.DISCORD_REDIRECT_URI || '';
 
-    // AI & TTS
+    
     if (document.getElementById('cfgAiModel')) document.getElementById('cfgAiModel').value = c.AI_MODEL || 'sensenova/sensenova-6.8-flash-lite';
     if (document.getElementById('cfgGeminiKey')) document.getElementById('cfgGeminiKey').value = c.GEMINI_API_KEY || '';
     if (document.getElementById('cfgGroqKey')) document.getElementById('cfgGroqKey').value = c.GROQ_API_KEY || '';
@@ -2917,7 +2915,7 @@ async function loadConfigSettings() {
     if (document.getElementById('cfgXkiroKey')) document.getElementById('cfgXkiroKey').value = c.XKIRO_API_KEY || '';
     if (document.getElementById('cfgPkmcKey')) document.getElementById('cfgPkmcKey').value = c.PKMC_API_KEY || '';
 
-    // Music & Lavalink
+    
     if (document.getElementById('cfgLavalinkHost')) document.getElementById('cfgLavalinkHost').value = c.LAVALINK_HOST || '';
     if (document.getElementById('cfgLavalinkPort')) document.getElementById('cfgLavalinkPort').value = c.LAVALINK_PORT || 2334;
     if (document.getElementById('cfgLavalinkPassword')) document.getElementById('cfgLavalinkPassword').value = c.LAVALINK_PASSWORD || '';
@@ -3005,7 +3003,7 @@ async function saveRawConfigFile() {
     }
 }
 
-// --- Live Console & WebSocket ---
+
 function setupLogsWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     let wsUrl = `${protocol}//${window.location.host}/ws/logs`;
@@ -3043,7 +3041,7 @@ function appendLogEntry(log) {
     `;
     logsContainer.appendChild(row);
 
-    // Auto-scroll nếu đang ở gần đáy
+    
     logsContainer.scrollTop = logsContainer.scrollHeight;
 }
 
@@ -3077,9 +3075,9 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// --- Login Modal (legacy, now redirects) ---
+
 function openLoginModal() {
-    // Redirect to new login page instead of old modal
+    
     if (!window._authRedirecting) {
         window._authRedirecting = true;
         location.href = '/login';
@@ -3103,7 +3101,7 @@ async function performLogin() {
     }
 }
 
-// Modal helper close
+
 function setupModals() {
     document.querySelectorAll('.modal-overlay').forEach(modal => {
         modal.addEventListener('click', (e) => {
@@ -3119,7 +3117,7 @@ function closeModal(modalId) {
     if (el) el.classList.remove('active');
 }
 
-// --- Initialize App ---
+
 document.addEventListener('DOMContentLoaded', async () => {
     setupNavigation();
     setupModals();
@@ -3131,19 +3129,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(fetchStatus, 3000);
     refreshBotConnection();
     setInterval(refreshBotConnection, 10000);
-    // Deep link /dashboard/{guild_id}
+    
     if (window.location.pathname.match(/^\/dashboard\/\d+$/)) {
-        // cần load guilds trước
+        
         await loadGuilds();
         handleDashboardDeepLink();
     }
-    // handle browser back/forward
+    
     window.addEventListener('popstate', () => {
         const mm = window.location.pathname.match(/^\/dashboard\/(\d+)$/);
         if (mm) openGuildDrawer(mm[1], false);
         else closeGuildDrawer();
     });
-    // Listen for theme change to update Chart.js colors
+    
     window.addEventListener('sakuraThemeChange', (e) => {
         const isLight = e.detail && e.detail.theme === 'light';
         if (state.chartInstance) {
@@ -3158,9 +3156,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// ==============================================================================
-// 🎣 ADMIN FISHING MANAGEMENT SYSTEM (QUẢN TRỊ CÂU CÁ)
-// ==============================================================================
+
+
+
 state.adminFishing = {
     activeSubTab: 'user',
     activeDexCat: 'all',
@@ -3224,7 +3222,7 @@ async function loadAdminFishList() {
     state.adminFishing.catalogs = res.catalogs || {};
     state.adminFishing.mutations = res.mutations || [];
 
-    // Populate Add Fish to User select
+    
     const fishSel = document.getElementById('afAddFishSelect');
     if (fishSel) {
         fishSel.innerHTML = state.adminFishing.fishList.map(f => {
@@ -3232,7 +3230,7 @@ async function loadAdminFishList() {
         }).join('');
     }
 
-    // Populate Mutations
+    
     const mutSel = document.getElementById('afAddMutationSelect');
     if (mutSel) {
         mutSel.innerHTML = '<option value="" data-multi="1.0">(Không có đột biến)</option>' +
@@ -3241,7 +3239,7 @@ async function loadAdminFishList() {
 
     afRecalculateFishPrice();
 
-    // Populate Rods Catalog
+    
     const rodSel = document.getElementById('afAddRodSelect');
     const gcRodSel = document.getElementById('afGcRodSelect');
     const rods = res.catalogs?.rods || {};
@@ -3251,7 +3249,7 @@ async function loadAdminFishList() {
     if (rodSel) rodSel.innerHTML = rodOptions;
     if (gcRodSel) gcRodSel.innerHTML = '<option value="">(Không tặng cần)</option>' + rodOptions;
 
-    // Populate Baits Catalog for Giftcodes
+    
     const baits = res.catalogs?.baits || {};
     const gcBaitSel = document.getElementById('afGcBaitSelect');
     if (gcBaitSel) {
@@ -3259,7 +3257,7 @@ async function loadAdminFishList() {
             Object.entries(baits).map(([id, b]) => `<option value="${id}">${escapeHtml(b.name || id)} (+${b.luck} may mắn)</option>`).join('');
     }
 
-    // Populate Chests Catalog for Giftcodes
+    
     const chests = res.catalogs?.chests || {};
     const gcChestSel = document.getElementById('afGcChestSelect');
     if (gcChestSel) {
@@ -3267,7 +3265,7 @@ async function loadAdminFishList() {
             Object.entries(chests).map(([id, c]) => `<option value="${id}">${escapeHtml(c.name || id)}</option>`).join('');
     }
 
-    // Populate Pets Catalog for Giftcodes
+    
     const pets = res.catalogs?.pets || {};
     const gcPetSel = document.getElementById('afGcPetSelect');
     if (gcPetSel) {
@@ -3388,7 +3386,7 @@ function afOnCategoryChange() {
     }).join('');
 }
 
-// --- User Management Logic ---
+
 async function loadAdminFishUser() {
     const input = document.getElementById('afSearchUserId');
     const uid = input ? input.value.trim() : '';
@@ -3433,7 +3431,7 @@ async function loadAdminFishUser() {
     const bagCountText = document.getElementById('afBagCountText');
     if (bagCountText) bagCountText.innerText = bagCount;
 
-    // Render Fish Bag
+    
     const tbody = document.getElementById('afFishBagTableBody');
     if (tbody) {
         if (!res.fish_bag || res.fish_bag.length === 0) {
@@ -3465,7 +3463,7 @@ async function loadAdminFishUser() {
         }
     }
 
-    // Render Aquarium (Thủy Cung)
+    
     const aqCountEl = document.getElementById('afAquariumCountText');
     const aqMaxEl = document.getElementById('afAquariumMaxSlots');
     const aqLikesEl = document.getElementById('afAquariumLikesBadge');
@@ -3524,7 +3522,7 @@ async function loadAdminFishUser() {
         }
     }
 
-    // Render Rods Table
+    
     const rodsBody = document.getElementById('afRodsTableBody');
     if (rodsBody) {
         const rodsObj = res.rods || {};
@@ -3557,7 +3555,7 @@ async function loadAdminFishUser() {
         }
     }
 
-    // Render Baits & Chests Pills
+    
     const invPills = document.getElementById('afInventoryPills');
     if (invPills) {
         let html = '';
@@ -3628,7 +3626,7 @@ async function afSubmitAddFish() {
     const priceInput = document.getElementById('afAddFishPrice');
     let price = (priceInput && parseInt(priceInput.value) > 0) ? parseInt(priceInput.value) : 0;
     if (price <= 0) {
-        // Fallback to recalculate locally if price input is empty
+        
         let sizeMulti = 1.0;
         if (weight < 1.5) sizeMulti = 0.75;
         else if (weight < 6.0) sizeMulti = 1.0;
@@ -3692,7 +3690,7 @@ async function afRemoveUserFish(idx) {
     }
 }
 
-// --- Admin Fishing Aquarium Actions ---
+
 async function afMoveAquariumFishToBag(idx) {
     if (!state.adminFishing.currentUser) return;
     const uid = state.adminFishing.currentUser.user_id;
@@ -3872,7 +3870,7 @@ async function afClearUserTrash() {
     }
 }
 
-// --- Giftcode Management Logic ---
+
 async function loadAdminFishGiftcodes() {
     const res = await apiRequest('/api/fishing/admin/giftcodes');
     if (!res.ok) return;
@@ -3975,7 +3973,7 @@ async function loadAdminFishGiftcodes() {
 }
 
 const GIFTCODE_ITEMS_CATALOG = {
-    // ⚔️ VẬT PHẨM TRANG BỊ (CHỌN RIÊNG)
+    
     rods: [
         { id: 'rod_wood', name: '🎣 Cần Câu Gỗ (Cơ bản)' },
         { id: 'rod_bamboo', name: '🎋 Cần Câu Tre Dẻo (+8 Luck)' },
@@ -4003,7 +4001,7 @@ const GIFTCODE_ITEMS_CATALOG = {
         { id: 'pick_cosmic', name: '🌌 Cuốc Thần Thoại Khởi Nguyên (+1200 Luck)' }
     ],
 
-    // 🐾 THÚ CƯNG (PETS)
+    
     pets: [
         { id: 'cat_pet', name: '🐱 Mèo Biển (+8 Luck, +10% Mồi)' },
         { id: 'otter_pet', name: '🦦 Rái Cá Lặn (+15 Luck, +15% Mồi)' },
@@ -4016,7 +4014,7 @@ const GIFTCODE_ITEMS_CATALOG = {
         { id: 'pet_celestial_fox', name: '🦊 Hồ Ly Cửu Vĩ Tinh Tú (+150 Luck, x2 Giá)' }
     ],
 
-    // 📦 TIÊU HAO & TÀI NGUYÊN (RESOURCES & CONSUMABLES)
+    
     baits: [
         { id: 'bait_normal', name: '🪱 Mồi Thường (+3 Luck)' },
         { id: 'bait_rare', name: '🪱 Mồi Hiếm (+10 Luck)' },
@@ -4071,7 +4069,7 @@ const GIFTCODE_ITEMS_CATALOG = {
         { id: 'drill_fuel', name: '🧪 Dầu Bôi Trơn Mũi Khoan (CD 4s)' }
     ],
 
-    // 🌾 NÔNG TRẠI (FARM SYSTEM)
+    
     farm_seeds: [
         { id: 'seed_wheat', name: '🌾 Hạt Giống Lúa Mì' },
         { id: 'seed_carrot', name: '🥕 Hạt Giống Cà Rốt' },
@@ -4171,7 +4169,7 @@ function afOnGiftcodeCategoryChange() {
     const gearExtra = document.getElementById('afGcGearExtraOptions');
     const amtInput = document.getElementById('afGcAmtInput');
 
-    // Toggle custom ID input vs select dropdown
+    
     if (cat === 'custom_id') {
         if (itemGroup) itemGroup.style.display = 'none';
         if (customGroup) customGroup.style.display = 'block';
@@ -4180,7 +4178,7 @@ function afOnGiftcodeCategoryChange() {
         if (customGroup) customGroup.style.display = 'none';
     }
 
-    // Toggle Gear Refine & Stars options
+    
     const isGear = (cat === 'rods' || cat === 'picks' || cat === 'pets' || cat === 'custom_id');
     if (gearExtra) {
         gearExtra.style.display = isGear ? 'flex' : 'none';
@@ -4190,7 +4188,7 @@ function afOnGiftcodeCategoryChange() {
 
     let items = GIFTCODE_ITEMS_CATALOG[cat] ? [...GIFTCODE_ITEMS_CATALOG[cat]] : [];
 
-    // Tích hợp danh mục động nếu đã tải
+    
     const dynFishing = state.adminFishing?.catalogs || {};
     if (cat === 'rods' && dynFishing.rods) {
         const existingIds = new Set(items.map(it => it.id));
@@ -4216,7 +4214,7 @@ function afOnGiftcodeCategoryChange() {
 
     itemSel.innerHTML = items.map(it => `<option value="${it.id}">${escapeHtml(it.name)}</option>`).join('');
 
-    // Nếu chọn mục Trang Bị (Cần câu / Cuốc mỏ / Pet), mặc định số lượng là 1
+    
     if ((cat === 'rods' || cat === 'picks' || cat === 'pets') && amtInput) {
         amtInput.value = '1';
     }
@@ -4514,7 +4512,7 @@ async function generateDailyGiftcodeNow() {
     }
 }
 
-// --- Fish & General Encyclopedia & Management Logic ---
+
 function afToggleHiddenBox(prefix) {
     const chk = document.getElementById(`${prefix}Hidden`);
     const box = document.getElementById(`${prefix}SourceBox`);
@@ -4583,10 +4581,10 @@ function afFilterFishList() {
     const originFilter = document.getElementById('afDexOriginFilter')?.value || 'all';
     const cat = state.adminFishing.activeDexCat || 'all';
 
-    // Aggregate all items into a unified encyclopedia catalog
+    
     const allItems = [];
 
-    // 1. Sea Fish
+    
     fishList.forEach(f => {
         allItems.push({
             type: 'fish',
@@ -4604,7 +4602,7 @@ function afFilterFishList() {
         });
     });
 
-    // 2. Rods
+    
     Object.entries(catalogs.rods || {}).forEach(([id, r]) => {
         allItems.push({
             type: 'rod',
@@ -4623,7 +4621,7 @@ function afFilterFishList() {
         });
     });
 
-    // 3. Baits
+    
     Object.entries(catalogs.baits || {}).forEach(([id, b]) => {
         allItems.push({
             type: 'bait',
@@ -4642,7 +4640,7 @@ function afFilterFishList() {
         });
     });
 
-    // 4. Pets
+    
     Object.entries(catalogs.pets || {}).forEach(([id, p]) => {
         allItems.push({
             type: 'pet',
@@ -4661,7 +4659,7 @@ function afFilterFishList() {
         });
     });
 
-    // 5. Chests
+    
     Object.entries(catalogs.chests || {}).forEach(([id, c]) => {
         allItems.push({
             type: 'chest',
@@ -4679,7 +4677,7 @@ function afFilterFishList() {
         });
     });
 
-    // 6. Troll & Utility Items
+    
     Object.entries(catalogs.items || {}).forEach(([id, it]) => {
         allItems.push({
             type: (it.action_key || id.includes('troll') || id.includes('frog') || id.includes('slap')) ? 'troll' : 'item',
@@ -4698,24 +4696,24 @@ function afFilterFishList() {
         });
     });
 
-    // Filter Items
+    
     const filtered = allItems.filter(item => {
-        // Category filter
+        
         if (cat !== 'all') {
             if (cat === 'troll' && item.type !== 'troll') return false;
             if (cat === 'item' && item.type !== 'item') return false;
             if (cat !== 'troll' && cat !== 'item' && item.type !== cat) return false;
         }
 
-        // Rarity filter
+        
         if (rarityFilter !== 'all' && item.rarity !== rarityFilter) return false;
 
-        // Origin filter
+        
         if (originFilter === 'hidden' && !item.is_hidden) return false;
         if (originFilter === 'shop' && item.is_hidden) return false;
         if (originFilter === 'drop' && !item.obtain_source.toLowerCase().includes('câu') && !item.obtain_source.toLowerCase().includes('rơi') && !item.obtain_source.toLowerCase().includes('rương')) return false;
 
-        // Search text
+        
         if (search) {
             const str = `${item.name} ${item.desc} ${item.id} ${item.obtain_source}`.toLowerCase();
             if (!str.includes(search)) return false;
@@ -4772,7 +4770,7 @@ function afFilterFishList() {
     }).join('');
 }
 
-// Live Preview Rương Báu Mới
+
 function afUpdateNewChestPreview() {
     const name = document.getElementById('afNewChestName')?.value.trim() || '💎 Rương Kho Báu Mẫu';
     const id = document.getElementById('afNewChestId')?.value.trim() || 'chest_custom';
@@ -4816,11 +4814,11 @@ function afUpdateNewChestPreview() {
     }
 }
 
-// Populate Checkboxes cho Bể phần thưởng của Rương
+
 function afPopulateChestPools() {
     const catalogs = state.adminFishing.catalogs || {};
 
-    // Baits
+    
     const baitBox = document.getElementById('afChestPoolBaits');
     if (baitBox) {
         const baits = catalogs.baits || {};
@@ -4837,7 +4835,7 @@ function afPopulateChestPools() {
         }
     }
 
-    // Pets
+    
     const petBox = document.getElementById('afChestPoolPets');
     if (petBox) {
         const pets = catalogs.pets || {};
@@ -4854,7 +4852,7 @@ function afPopulateChestPools() {
         }
     }
 
-    // Rods
+    
     const rodBox = document.getElementById('afChestPoolRods');
     if (rodBox) {
         const rods = catalogs.rods || {};
@@ -4871,7 +4869,7 @@ function afPopulateChestPools() {
         }
     }
 
-    // Items
+    
     const itemBox = document.getElementById('afChestPoolItems');
     if (itemBox) {
         const items = catalogs.items || {};
@@ -4953,7 +4951,7 @@ async function afSubmitAddNewFish() {
     }
 }
 
-// 1. Thêm Cần Câu
+
 async function afSubmitAddNewRod() {
     const name = document.getElementById('afNewRodName')?.value.trim();
     if (!name) return showToast('Vui lòng nhập tên cần câu', 'warning');
@@ -4986,7 +4984,7 @@ async function afSubmitAddNewRod() {
     }
 }
 
-// 2. Thêm Mồi Câu
+
 async function afSubmitAddNewBait() {
     const name = document.getElementById('afNewBaitName')?.value.trim();
     if (!name) return showToast('Vui lòng nhập tên mồi câu', 'warning');
@@ -5016,7 +5014,7 @@ async function afSubmitAddNewBait() {
     }
 }
 
-// 3. Thêm Túi Chứa Cá
+
 async function afSubmitAddNewBag() {
     const name = document.getElementById('afNewBagName')?.value.trim();
     if (!name) return showToast('Vui lòng nhập tên túi cá', 'warning');
@@ -5046,7 +5044,7 @@ async function afSubmitAddNewBag() {
     }
 }
 
-// 4. Thêm Thú Cưng (Pet)
+
 async function afSubmitAddNewPet() {
     const name = document.getElementById('afNewPetName')?.value.trim();
     if (!name) return showToast('Vui lòng nhập tên thú cưng', 'warning');
@@ -5079,7 +5077,7 @@ async function afSubmitAddNewPet() {
     }
 }
 
-// 5. Thêm Vật Phẩm Troll & Tiện Ích
+
 async function afSubmitAddNewTrollItem() {
     const name = document.getElementById('afNewTrollName')?.value.trim();
     if (!name) return showToast('Vui lòng nhập tên vật phẩm troll', 'warning');
@@ -5111,7 +5109,7 @@ async function afSubmitAddNewTrollItem() {
     }
 }
 
-// 6. Thêm Rương Báu Mới
+
 async function afSubmitAddNewChest() {
     const name = document.getElementById('afNewChestName')?.value.trim();
     if (!name) return showToast('Vui lòng nhập tên rương báu', 'warning');
@@ -5125,7 +5123,7 @@ async function afSubmitAddNewChest() {
     const is_hidden = !!document.getElementById('afNewChestHidden')?.checked;
     const obtain_source = document.getElementById('afNewChestSource')?.value.trim();
 
-    // Lấy danh sách items được tích chọn
+    
     const baits = Array.from(document.querySelectorAll('input[name="afChestBaitChoice"]:checked')).map(el => el.value);
     const pets = Array.from(document.querySelectorAll('input[name="afChestPetChoice"]:checked')).map(el => el.value);
     const rods = Array.from(document.querySelectorAll('input[name="afChestRodChoice"]:checked')).map(el => el.value);
@@ -5145,9 +5143,9 @@ async function afSubmitAddNewChest() {
     }
 }
 
-// ==============================================================================
-// 🚜 QUẢN TRỊ NÔNG TRẠI (SAKURA FARM ADMIN CLIENT LOGIC)
-// ==============================================================================
+
+
+
 function initAdminFarmTab() {
     loadAdminFarmCatalogs();
     if (state.adminFarm && state.adminFarm.currentUser) {
@@ -5177,7 +5175,7 @@ async function loadAdminFarmCatalogs() {
 
     state.adminFarm.catalogs = res;
 
-    // Populate Add Seed Select
+    
     const seedSel = document.getElementById('farmAddSeedSelect');
     if (seedSel && res.seeds) {
         seedSel.innerHTML = Object.entries(res.seeds).map(([id, s]) => {
@@ -5185,7 +5183,7 @@ async function loadAdminFarmCatalogs() {
         }).join('');
     }
 
-    // Populate Add Crop Select
+    
     const cropSel = document.getElementById('farmAddCropSelect');
     const mutCropSel = document.getElementById('farmAddMutCropSelect');
     if (cropSel && res.crops) {
@@ -5196,7 +5194,7 @@ async function loadAdminFarmCatalogs() {
         if (mutCropSel) mutCropSel.innerHTML = cropOpts;
     }
 
-    // Populate Mutation Select
+    
     const mutSel = document.getElementById('farmAddMutSelect');
     if (mutSel && res.mutations) {
         mutSel.innerHTML = res.mutations.map(m => {
@@ -5204,7 +5202,7 @@ async function loadAdminFarmCatalogs() {
         }).join('');
     }
 
-    // Populate Tools & Pests Selects
+    
     const toolSel = document.getElementById('farmAddToolSelect');
     if (toolSel && res.tools) {
         toolSel.innerHTML = Object.entries(res.tools).map(([id, t]) => {
@@ -5219,7 +5217,7 @@ async function loadAdminFarmCatalogs() {
         }).join('');
     }
 
-    // Update Environment Cards
+    
     const env = res.current_env;
     if (env) {
         const s = env.season || {};
@@ -5276,7 +5274,7 @@ async function loadAdminFarmUser() {
     if (name) name.innerText = res.username;
     if (discId) discId.innerText = res.user_id;
 
-    // Counts
+    
     const plotsCount = document.getElementById('farmUserPlotsCount');
     const cropsCount = document.getElementById('farmUserCropsCount');
     const mutCount = document.getElementById('farmUserMutationsCount');
@@ -5708,7 +5706,7 @@ function renderCatalogTable(catType) {
     }
 }
 
-// Custom Farm Items Creation & Deletion
+
 function adminFarmOpenCreateItemModal() {
     const modal = document.getElementById('modalCreateFarmItem');
     if (!modal) return;
@@ -5867,8 +5865,8 @@ async function adminFarmDeleteCustomItem(category, itemId) {
     }
 }
 
-// Bot Server Profile (Nickname, Banner & Bio display)
-// ==========================================
+
+
 function updateBotProfileLivePreview() {
     const nickVal = document.getElementById('botProfileNick')?.value.trim() || 'Sakura Bot';
     const avVal = document.getElementById('botProfileAvatarUrl')?.value.trim();
@@ -5950,9 +5948,9 @@ async function saveBotProfile() {
     }
 }
 
-// ==========================================
-// Level Roles Rewards Management
-// ==========================================
+
+
+
 async function loadLevelRoles(guildId) {
     const gid = guildId || document.getElementById('drawerGuildId')?.value;
     if (!gid) return;
@@ -6015,8 +6013,8 @@ async function deleteLevelRole(level) {
     }
 }
 
-// ==========================================
-// Fishing System Configuration
+
+
 let currentFishingChannels = [];
 
 function renderFishingChannelsTags() {
@@ -6071,7 +6069,7 @@ async function loadFishingConfig(guildId) {
     if (!res.ok) return;
     const cfg = res.config || res;
     
-    // Đọc danh sách các kênh câu cá
+    
     if (Array.isArray(cfg.fishing_channels)) {
         currentFishingChannels = cfg.fishing_channels.map(String);
     } else if (cfg.fishing_channel_id) {
@@ -6112,9 +6110,9 @@ async function saveFishingConfig() {
     }
 }
 
-// ==========================================
-// Custom Keys Auto-Reply
-// ==========================================
+
+
+
 async function loadCustomKeys(guildId) {
     const gid = guildId || document.getElementById('drawerGuildId')?.value;
     if (!gid) return;
@@ -6205,9 +6203,9 @@ async function deleteCustomKey(keyId) {
     }
 }
 
-// ==========================================
-// Server Backups & Restore
-// ==========================================
+
+
+
 async function loadBackups(guildId) {
     const gid = guildId || document.getElementById('drawerGuildId')?.value;
     if (!gid) return;
@@ -6289,9 +6287,9 @@ async function deleteBackup(filename) {
     }
 }
 
-// ==========================================
-// Auto Role Configuration
-// ==========================================
+
+
+
 async function loadAutoRole(guildId) {
     const gid = guildId || document.getElementById('drawerGuildId')?.value;
     if (!gid) return;
@@ -6320,9 +6318,9 @@ async function saveAutoRole() {
     }
 }
 
-// ==========================================
-// Channel Streak Configuration
-// ==========================================
+
+
+
 async function loadStreakConfig(guildId) {
     const gid = guildId || document.getElementById('drawerGuildId')?.value;
     if (!gid) return;
@@ -6348,9 +6346,9 @@ async function saveStreakConfig() {
     }
 }
 
-// ==========================================
-// Giveaway Configuration
-// ==========================================
+
+
+
 async function loadGiveawayConfig(guildId) {
     const gid = guildId || document.getElementById('drawerGuildId')?.value;
     if (!gid) return;
@@ -6417,9 +6415,9 @@ async function endGuildGiveaway(msgId) {
     }
 }
 
-// ==========================================
-// Rule Channel & Member Verification
-// ==========================================
+
+
+
 async function loadRuleConfig(guildId) {
     const gid = guildId || document.getElementById('drawerGuildId')?.value;
     if (!gid) return;
@@ -6463,9 +6461,9 @@ async function publishRuleEmbed() {
     }
 }
 
-// ==========================================
-// Reaction Role Management
-// ==========================================
+
+
+
 let currentRrRoles = [];
 
 function renderRrRolesTags() {
@@ -6577,9 +6575,9 @@ async function deleteReactionRole(msgId) {
     }
 }
 
-// ==========================================
-// Hoyo Codes & Gacha Notifications
-// ==========================================
+
+
+
 const HOYO_GAMES = ['genshin', 'hsr', 'zzz', 'nte', 'endfield'];
 
 async function loadHoyoConfig(guildId) {
@@ -6668,9 +6666,9 @@ async function testHoyoDemoCode(gameKey) {
     }
 }
 
-// ==============================================================================
-// ⛏️ QUẢN TRỊ MINECRAFT SERVER & PLUGIN (MINECRAFT ADMIN CLIENT LOGIC)
-// ==============================================================================
+
+
+
 
 async function initAdminMinecraftTab() {
     await loadAdminMcGuildOptions();
@@ -6919,7 +6917,7 @@ async function openMcServerDetail(serverKey) {
     if (pingEl) pingEl.innerText = server.ping != null ? `${server.ping} ms` : '-- ms';
     if (verEl) verEl.innerText = server.version || 'Paper 1.20+';
 
-    // Populate guild select
+    
     const guildSel = document.getElementById('mcDetailGuildSelect');
     if (guildSel) {
         if (!state.guilds || !state.guilds.length) {
@@ -6928,7 +6926,7 @@ async function openMcServerDetail(serverKey) {
         guildSel.value = server.guild_id ? String(server.guild_id) : '';
     }
 
-    // Populate console address and console code
+    
     const consoleAddrEl = document.getElementById('mcDetailConsoleAddress');
     const consoleCodeEl = document.getElementById('mcDetailConsoleCode');
     if (consoleAddrEl) {
@@ -6938,13 +6936,13 @@ async function openMcServerDetail(serverKey) {
         consoleCodeEl.innerText = server.console_code || server.rcon_password || server.server_key || '••••••••';
     }
 
-    // Reset console output box
+    
     const consoleOutEl = document.getElementById('mcDetailConsoleOutput');
     if (consoleOutEl) {
         consoleOutEl.innerHTML = `[Console sẵn sàng cho ${escapeHtml(server.server_name || server.server_key)}. Nhập lệnh bên dưới để điều khiển máy chủ...]`;
     }
 
-    // Populate channel selects
+    
     await loadChannelsForAdminMc(server.guild_id, server.chat_channel_id, server.log_channel_id, 'mcDetailChatSelect', 'mcDetailLogSelect');
 
     modal.style.display = 'flex';
@@ -7130,7 +7128,7 @@ async function unlinkSelectedMcServer() {
     }
 }
 
-// Backwards compatibility helpers
+
 function selectAdminMinecraftServer(serverKey) {
     openMcServerDetail(serverKey);
 }
@@ -7157,9 +7155,9 @@ function setupMcWebSocket() {
     }
 }
 
-// ==========================================
-// 🎮 HOYO TEST CODE & NOTIFICATION
-// ==========================================
+
+
+
 async function testHoyoCode(gameKey) {
     const input = document.getElementById(`hoyoTestCode_${gameKey}`);
     const resBox = document.getElementById(`hoyoTestResult_${gameKey}`);
@@ -7192,9 +7190,9 @@ async function testHoyoCode(gameKey) {
     }
 }
 
-// ==========================================
-// ⛏️ QUẢN TRỊ KHOÁNG SẢN (ADMIN MINING)
-// ==========================================
+
+
+
 state.adminMining = {
     activeSubTab: 'user',
     catalogs: {},
@@ -7310,7 +7308,7 @@ async function loadAdminMiningUsersList() {
             sel.innerHTML = '<option value="">-- Chọn nhanh thợ mỏ (' + res.users.length + ') --</option>' +
                 res.users.map(u => `<option value="${escapeHtml(u.user_id)}">${escapeHtml(u.username)} (${Number(u.total_mined || 0).toLocaleString()} quặng)</option>`).join('');
             
-            // Nếu chưa có user nào được chọn hoặc đang hiển thị, tự động chọn thợ mỏ đầu tiên
+            
             if (!state.adminMining.currentUser && res.users.length > 0) {
                 const firstUser = res.users[0];
                 const input = document.getElementById('amSearchUserId');
@@ -7367,7 +7365,7 @@ async function amSearchUser(targetUid = null) {
     }
     if (input) input.value = uid;
 
-    // Trích xuất ID số chuẩn nếu có (dãy 6-22 chữ số)
+    
     const match = uid.match(/\b\d{6,22}\b/);
     const cleanId = match ? match[0] : uid.replace(/[<@!#>\s]/g, '').trim();
 
@@ -7419,7 +7417,7 @@ function renderMiningUserProfile(res) {
     const museumEl = document.getElementById('amUserMuseumCount');
     if (museumEl) museumEl.innerText = `${museumCount} mẫu vật`;
 
-    // Cuốc đang trang bị
+    
     const eqPickId = data.equipped_pick || 'pick_wooden';
     const pick = data.picks?.[eqPickId] || { name: eqPickId, refine: 0, stars: 0, durability: 60, max_durability: 60 };
 
@@ -7449,7 +7447,7 @@ function renderMiningUserProfile(res) {
         enchantEl.innerText = pick.enchant ? `✨ Dòng Enchant: ${pick.enchant}` : '✨ Dòng Enchant: Chưa có';
     }
 
-    // Túi quặng
+    
     const oreBag = data.ore_bag || [];
     const bagCountEl = document.getElementById('amBagCount');
     if (bagCountEl) bagCountEl.innerText = `${oreBag.length}/${data.max_bag || 30} viên`;
@@ -7472,7 +7470,7 @@ function renderMiningUserProfile(res) {
         }
     }
 
-    // Vật tư
+    
     const supplies = data.supplies || {};
     const suppliesContainer = document.getElementById('amSuppliesContainer');
     if (suppliesContainer) {
@@ -7628,9 +7626,9 @@ async function amSubmitCreateItem() {
     }
 }
 
-// ==========================================
-// 🎛️ GAME RATES & GOD MODE MANIPULATION
-// ==========================================
+
+
+
 function updateRateSliderLabel(sliderId) {
     const slider = document.getElementById(sliderId);
     if (!slider) return;
@@ -7777,9 +7775,9 @@ function applyRatePreset(preset) {
     saveGameRates();
 }
 
-// ==========================================
-// 🔌 MINECRAFT SERVER CONNECTION PER GUILD
-// ==========================================
+
+
+
 function switchGuildMcSubTab(sub) {
     const btnRcon = document.getElementById('btnGmcTabRcon') || document.getElementById('btnGuildMcRcon');
     const btnPlugin = document.getElementById('btnGmcTabPlugin') || document.getElementById('btnGuildMcPlugin');
@@ -7813,7 +7811,7 @@ async function loadGuildMcConnection(guildId) {
     setVal('gmcQueryPort', data.query_port || 25565);
     setVal('gmcApiKey', plugin.api_key || '');
 
-    // Đảm bảo kênh text đã được nạp vào select
+    
     const mcChatSel = document.getElementById('gmcChatChannel');
     const mcLogSel = document.getElementById('gmcLogChannel');
     if (mcChatSel && mcChatSel.options.length <= 1) {
@@ -7846,7 +7844,7 @@ async function loadGuildMcConnection(guildId) {
         autoSyncSwitch.classList.toggle('on', data.auto_sync_chat !== false);
     }
 
-    // Hiển thị thẻ đã kết nối qua plugin nếu có
+    
     const connectedCard = document.getElementById('gmcPluginConnectedCard');
     const connectedName = document.getElementById('gmcPluginServerName');
     try {
@@ -8050,9 +8048,9 @@ async function unlinkGuildMcPlugin() {
     }
 }
 
-// ==========================================
-// 📜 PLUGIN COMMANDS & CONNECTION GUIDE
-// ==========================================
+
+
+
 state.pluginCommands = [];
 state.pluginCategories = [];
 
@@ -8118,7 +8116,7 @@ function renderPluginCommandsTable(commands) {
         return;
     }
 
-    // Nhóm lệnh theo categories nếu có, hoặc hiển thị phẳng
+    
     const catTitles = {
         economy: '💰 Kinh Tế & Tiền Tệ',
         teleport: '🚀 Dịch Chuyển & Nhà Cửa',
@@ -8193,9 +8191,9 @@ function renderPluginCommandsTable(commands) {
     container.innerHTML = html;
 }
 
-// ==========================================
-// 🔤 QUẢN LÝ MINIGAME NỐI CHỮ (WORD CHAIN)
-// ==========================================
+
+
+
 state.wordChain = {
     page: 1,
     limit: 30,
@@ -8243,7 +8241,7 @@ async function loadWordChainWords(page = 1, query = '') {
     state.wordChain.total = res.total || 0;
     state.wordChain.pages = res.pages || 1;
 
-    // Cập nhật phân trang
+    
     const pInfo = document.getElementById('wcPaginationInfo');
     if (pInfo) {
         pInfo.innerText = `Trang ${page} / ${state.wordChain.pages} (${state.wordChain.total.toLocaleString()} từ)`;
@@ -8406,9 +8404,9 @@ async function promptAdjustWcScore(userId, defaultDelta) {
 
 
 
-// ==========================================
-// 🐠 AQUARIUM ADMIN VIEWER & MANAGEMENT
-// ==========================================
+
+
+
 state.adminFishing.currentAquariumUser = null;
 
 async function loadAdminAquariumList() {
@@ -8463,7 +8461,7 @@ async function afInspectAquarium(userId) {
     const input = document.getElementById('afAqSearchUserId');
     if (input) input.value = userId;
     await afSearchAquarium();
-    // Cuộn lên phần chi tiết bể
+    
     const container = document.getElementById('afAqDetailContainer');
     if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -8531,7 +8529,7 @@ function renderAquariumView(res) {
         mascotBadge.style.color = mascotName ? '#fde047' : '#94a3b8';
     }
 
-    // Render Ocean Tank Fish Grid
+    
     const grid = document.getElementById('afAqFishGrid');
     if (!grid) return;
 
@@ -8660,9 +8658,9 @@ async function afAddFishToAquariumModal() {
 }
 
 
-// ==========================================
-// 👁️ GÓC NHÌN NGƯỜI DÙNG THƯỜNG CHO ADMIN
-// ==========================================
+
+
+
 function toggleUserViewPreview() {
     if (!state.isRealAdmin) return;
     state.previewAsUser = !state.previewAsUser;
@@ -8675,9 +8673,9 @@ function toggleUserViewPreview() {
     }
 }
 
-// ==========================================
-// 👥 QUẢN TRỊ ADMIN WEB (OWNER ONLY)
-// ==========================================
+
+
+
 async function loadAdminUsersList() {
     const tbody = document.getElementById('adminUsersTableBody');
     if (!tbody) return;
@@ -8814,9 +8812,9 @@ async function submitRemoveAdminWeb(target) {
 }
 
 
-// ==============================================================================
-// FISHING ROD DIRECT EDIT & ACHIEVEMENTS MANAGEMENT
-// ==============================================================================
+
+
+
 
 function afEditUserRod(rodId) {
     if (!state.adminFishing.currentUser) return showToast('Chưa chọn cần thủ', 'warning');
@@ -8881,7 +8879,7 @@ async function afSubmitEditRod() {
     }
 }
 
-// Achievements Admin Logic
+
 state.adminFishing.achievements = [];
 
 async function afLoadAchievementsCatalog() {
@@ -8891,7 +8889,7 @@ async function afLoadAchievementsCatalog() {
     const countEl = document.getElementById('afAchTotalCount');
     if (countEl) countEl.textContent = state.adminFishing.achievements.length;
 
-    // Populate target select dropdown
+    
     const targetSel = document.getElementById('afAchSelectTarget');
     if (targetSel) {
         targetSel.innerHTML = state.adminFishing.achievements.map(a => {
@@ -9021,9 +9019,9 @@ async function afSubmitUserAchievementAction(action) {
 }
 
 
-// ==========================================
-// 🛒 QUẢN TRỊ CỬA HÀNG (SHOP MANAGEMENT)
-// ==========================================
+
+
+
 state.adminFishing.shopItems = [];
 
 function switchShopSubTab(subTab) {
@@ -9226,9 +9224,9 @@ async function afSubmitEditShopItem() {
 }
 
 
-// ==========================================
-// 💍 QUẢN TRỊ HÔN LỄ (MARRIAGE MANAGEMENT)
-// ==========================================
+
+
+
 state.adminFishing.marriages = [];
 
 async function loadAdminMarriages() {
@@ -9410,9 +9408,9 @@ async function afDivorceMarriage(coupleKey) {
 }
 
 
-// ==========================================
-// 🏆 BẢNG XẾP HẠNG THÀNH TỰU (ACHIEVEMENTS LEADERBOARD)
-// ==========================================
+
+
+
 state.achievementsLeaderboard = [];
 
 async function loadAchievementsLeaderboard() {
@@ -9467,7 +9465,7 @@ function renderAchievementsLeaderboard(list) {
         return;
     }
 
-    // Bỏ qua owner khỏi hiển thị leaderboard
+    
     list = (list || []).filter(u => String(u.user_id) !== '1144785664458637394');
 
     tbody.innerHTML = list.map((u, idx) => {
@@ -9527,7 +9525,7 @@ function renderAchievementsLeaderboard(list) {
     }).join('');
 }
 
-// Switch between Rank and Catalog in Achievements Leaderboard
+
 state.achCatalogCache = [];
 
 function switchAchLbTab(subTab) {
@@ -9628,7 +9626,7 @@ function renderAchCatalogList() {
     }).join('');
 }
 
-// User detail modal popup
+
 async function viewUserAchievementsModal(userId, username) {
     const modal = document.getElementById('userAchDetailModal');
     if (!modal) return;
@@ -9705,9 +9703,9 @@ function closeUserAchDetailModal() {
     }
 }
 
-// ==============================================================================
-// 🏆 UNIFIED LEADERBOARDS (WAIFU, LEVELS, VOICE, FISHING, ACHIEVEMENTS, MINIGAMES)
-// ==============================================================================
+
+
+
 state.activeLeaderboardSub = 'waifu';
 state.gachaCharCache = [];
 
@@ -9743,7 +9741,7 @@ function capitalize(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// 💖 WAIFU LEADERBOARD
+
 async function loadWaifuLeaderboard() {
     const tbody = document.getElementById('waifuLbTableBody');
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-dim);">⏳ Đang tải Bảng Xếp Hạng Waifu...</td></tr>';
@@ -9831,7 +9829,7 @@ async function loadWaifuLeaderboard() {
     }
 }
 
-// 🎙️ VOICE LEADERBOARD
+
 async function loadVoiceLeaderboard() {
     const tbody = document.getElementById('voiceLbTableBody');
     if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-dim);">⏳ Đang tải BXH Voice...</td></tr>';
@@ -9839,7 +9837,7 @@ async function loadVoiceLeaderboard() {
     const guildSelect = document.getElementById('voiceLbGuildSelect');
     const gid = guildSelect ? guildSelect.value : 'all';
 
-    // Populate guild select once if needed
+    
     if (guildSelect && guildSelect.options.length <= 1 && state.guilds && state.guilds.length > 0) {
         state.guilds.forEach(g => {
             const opt = document.createElement('option');
@@ -9907,7 +9905,7 @@ async function loadVoiceLeaderboard() {
     }
 }
 
-// 🎮 MINIGAMES LEADERBOARD
+
 async function loadMinigamesLeaderboard() {
     const xoTbody = document.getElementById('minigameXoTableBody');
     const chessTbody = document.getElementById('minigameChessTableBody');
@@ -9978,9 +9976,9 @@ async function loadMinigamesLeaderboard() {
 }
 
 
-// ==============================================================================
-// 🌸 ADMIN WAIFU GACHA MANAGEMENT
-// ==============================================================================
+
+
+
 state.currentAdminGachaUser = null;
 
 async function initAdminGachaTab() {
@@ -10140,7 +10138,7 @@ async function submitAdminGrantCard() {
     const charVal = searchInput ? searchInput.value.trim() : '';
     if (!charVal) return showToast('Vui lòng chọn nhân vật anime', 'warning');
 
-    // Parse ID from value format "Name (ID: 12345)" or match from cache
+    
     let charId = null;
     const match = charVal.match(/ID:\s*(\d+)/i);
     if (match) {

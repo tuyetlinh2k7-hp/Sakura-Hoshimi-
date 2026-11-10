@@ -14,7 +14,6 @@ class AutoRole(commands.GroupCog, group_name="autorole"):
         self.bot = bot
         self.db = bot.db
 
-    # --- HÀM HỖ TRỢ GÁN ROLE ---
 
     async def _assign_autorole(self, member: discord.Member):
         config = await self.db.get_config(member.guild.id)
@@ -26,7 +25,6 @@ class AutoRole(commands.GroupCog, group_name="autorole"):
             return
 
         role = member.guild.get_role(target_role_id)
-        # is_assignable() kiểm tra tự động: không phải @everyone, không phải managed role, và thấp hơn top_role của Bot
         if not role or not role.is_assignable():
             return
 
@@ -38,7 +36,6 @@ class AutoRole(commands.GroupCog, group_name="autorole"):
         except (discord.Forbidden, discord.HTTPException) as e:
             logger.warning(f"Không thể gán auto-role tại guild {member.guild.id}: {e}")
 
-    # --- LỆNH SLASH COMMANDS ---
 
     @app_commands.command(name="set", description="Cài đặt role tự động khi thành viên mới tham gia")
     @app_commands.describe(
@@ -51,7 +48,6 @@ class AutoRole(commands.GroupCog, group_name="autorole"):
     ])
     @app_commands.checks.has_permissions(manage_roles=True)
     async def set_role(self, interaction: discord.Interaction, target: app_commands.Choice[str], role: discord.Role):
-        # 1. Kiểm tra role mặc định (@everyone) hoặc role tích hợp của hệ thống/bot
         if role.is_default() or role.managed:
             await interaction.response.send_message(
                 f"❌ Không thể chọn role {role.mention} vì đây là role mặc định hoặc được quản lý bởi hệ thống/tích hợp.",
@@ -59,7 +55,6 @@ class AutoRole(commands.GroupCog, group_name="autorole"):
             )
             return
 
-        # 2. Kiểm tra thứ bậc role so với người dùng thực hiện lệnh (trừ chủ server)
         if interaction.user.id != interaction.guild.owner_id and role >= interaction.user.top_role:
             await interaction.response.send_message(
                 f"❌ Lỗi thứ bậc: Bạn không thể thiết lập role {role.mention} cao hơn hoặc bằng role cao nhất của bạn.",
@@ -67,7 +62,6 @@ class AutoRole(commands.GroupCog, group_name="autorole"):
             )
             return
 
-        # 3. Kiểm tra thứ bậc role so với Bot
         if role >= interaction.guild.me.top_role:
             await interaction.response.send_message(
                 f"❌ Lỗi thứ bậc: Role {role.mention} cao hơn hoặc bằng role cao nhất của Bot.",
@@ -115,22 +109,18 @@ class AutoRole(commands.GroupCog, group_name="autorole"):
         await self.db.set_role(interaction.guild_id, target.value, None)
         await interaction.response.send_message(f"🗑️ Đã hủy tự động gán role cho **{target.name}**.")
 
-    # --- SỰ KIỆN THÀNH VIÊN THAM GIA & XÁC MINH ---
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        # Nếu thành viên đang chờ đồng ý quy tắc (Membership Screening), chưa gán role ngay
         if member.pending:
             return
         await self._assign_autorole(member)
 
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
-        # Gán role ngay khi thành viên vừa hoàn tất bước đồng ý quy tắc
         if before.pending and not after.pending:
             await self._assign_autorole(after)
 
-    # --- XỬ LÝ LỖI PHÂN QUYỀN TRONG COG ---
 
     async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.errors.MissingPermissions):

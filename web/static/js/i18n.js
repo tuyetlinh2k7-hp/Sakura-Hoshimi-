@@ -1,16 +1,4 @@
-/**
- * 🌸 SAKURA BOT - GLOBAL INTERNATIONALIZATION (i18n) ENGINE v2.5
- * Complete multi-language system for SakuraBot Web Dashboard & Tools:
- * - Languages: vi (Tiếng Việt 🇻🇳), en (English 🇬🇧), ja (日本語 🇯🇵), cn (中文 🇨🇳)
- * - Zero Untranslated Content:
- *     1. Deep TreeWalker with text-node whitespace normalization & punctuation/emoji preservation.
- *     2. Comprehensive pre-bundled dictionary covering all 31 templates and dynamic AJAX/WS DOM.
- *     3. Dynamic MutationObserver: seamlessly translates dynamic cards, tables, logs, modals.
- *     4. Toast & Alert Interceptor: auto-translates window.showToast messages.
- *     5. Element attribute translator: placeholder, title, aria-label, input buttons, data-i18n.
- *     6. Universal language switcher injected on every single page.
- *     7. 100% reversible back to Vietnamese without text drift (_sakuraOrig caching).
- */
+
 
 (function () {
   'use strict';
@@ -24,7 +12,7 @@
     cn: { name: 'Chinese', native: '中文', flag: '🇨🇳', code: 'CN' }
   };
 
-  // Comprehensive phrase dictionary (Keyed by exact Vietnamese phrase)
+  
   const PHRASES = {
   "Sakura Bot": {
     "en": "Sakura Bot",
@@ -25023,19 +25011,19 @@
   }
 };
 
-  // Lowercase lookup table for case-insensitive matching
+  
   const LOWER_PHRASES = {};
   for (const k in PHRASES) {
     LOWER_PHRASES[k.toLowerCase()] = PHRASES[k];
   }
 
-  // Unicode emoji matchers
+  
   const EMOJI_PREFIX_REGEX = /^([\p{Extended_Pictographic}\u200d\uFE0F\u20E3\u2600-\u2B55\u2300-\u23FF]|\s)+/u;
   const EMOJI_SUFFIX_REGEX = /([\p{Extended_Pictographic}\u200d\uFE0F\u20E3\u2600-\u2B55\u2300-\u23FF]|\s)+$/u;
   const TRAILING_PUNCT_REGEX = /([:!?.,…]+)$/;
   const TRAILING_COUNT_REGEX = /(\s*[\(\[]\d+.*?[\)\]])$/;
 
-  // Common compound prefix patterns
+  
   const COMPOUND_PATTERNS = [
     { vi: /^Thời gian hoạt động:\s*/i, en: "Active Uptime: ", ja: "稼働時間: ", cn: "运行时间: " },
     { vi: /^Thời gian hoạt động\s*:\s*/i, en: "Active Uptime: ", ja: "稼働時間: ", cn: "运行时间: " },
@@ -25069,11 +25057,11 @@
 
   function getPhrase(text, targetLang) {
     if (!text || targetLang === 'vi') return text;
-    // 1. Direct match
+    
     if (PHRASES[text] && PHRASES[text][targetLang]) {
       return PHRASES[text][targetLang];
     }
-    // 2. Lowercase match
+    
     const lower = text.toLowerCase();
     if (LOWER_PHRASES[lower] && LOWER_PHRASES[lower][targetLang]) {
       return LOWER_PHRASES[lower][targetLang];
@@ -25081,7 +25069,7 @@
     return null;
   }
 
-  // Translates a single string with prefix/suffix preservation
+  
   function translateString(str, targetLang) {
     if (!str || typeof str !== 'string') return str;
     if (targetLang === 'vi') return str;
@@ -25092,16 +25080,16 @@
     const leadingWs = str.match(/^\s*/)[0];
     const trailingWs = str.match(/\s*$/)[0];
 
-    // Whitespace normalization (replaces internal tabs, newlines, multiple spaces)
+    
     const normalized = trimmed.replace(/\s+/g, ' ');
 
-    // 1. Direct match on normalized
+    
     let direct = getPhrase(normalized, targetLang);
     if (direct) {
       return leadingWs + direct + trailingWs;
     }
 
-    // 2. Strip leading & trailing emojis, trailing count, trailing punctuation
+    
     let clean = normalized;
     let prefixEmoji = '';
     let suffixEmoji = '';
@@ -25137,7 +25125,7 @@
       return leadingWs + prefixEmoji + matchStripped + suffixPunct + suffixCount + suffixEmoji + trailingWs;
     }
 
-    // 3. Common compound prefix patterns
+    
     for (const p of COMPOUND_PATTERNS) {
       if (p.vi.test(normalized)) {
         const prefix = p[targetLang] || p.en;
@@ -25149,14 +25137,14 @@
     return str;
   }
 
-  // Recursive TreeWalker to translate all DOM text nodes across the whole page
+  
   let isTranslating = false;
   function translateDOM(root, targetLang) {
     if (!root || isTranslating || typeof document === 'undefined') return;
     isTranslating = true;
 
     try {
-      // 1. Walk Text Nodes
+      
       if (typeof document.createTreeWalker === 'function') {
         const walker = document.createTreeWalker(
           root,
@@ -25200,14 +25188,14 @@
         }
       }
 
-      // 2. Walk Attributes (placeholder, title, aria-label, input buttons)
+      
       if (typeof root.querySelectorAll === 'function') {
         const elementsWithAttrs = (root === document.body ? document : root).querySelectorAll(
           '[placeholder], [title], [aria-label], input[type="button"], input[type="submit"], input[type="reset"], [data-i18n], [data-i18n-placeholder], [data-i18n-title], [data-i18n-html]'
         );
 
         elementsWithAttrs.forEach(el => {
-          // data-i18n tags
+          
           if (el.hasAttribute('data-i18n')) {
             const k = el.getAttribute('data-i18n');
             const phrase = getPhrase(k, targetLang) || getPhrase(el.textContent.trim(), targetLang);
@@ -25219,7 +25207,7 @@
             if (phrase) el.innerHTML = phrase;
           }
 
-          // placeholder
+          
           const placeholder = el.getAttribute('placeholder');
           if (placeholder) {
             if (el._sakuraOrigPlaceholder === undefined) {
@@ -25232,7 +25220,7 @@
             }
           }
 
-          // title
+          
           const title = el.getAttribute('title');
           if (title && !el.classList.contains('lang-switch-btn')) {
             if (el._sakuraOrigTitle === undefined) {
@@ -25245,7 +25233,7 @@
             }
           }
 
-          // aria-label
+          
           const ariaLabel = el.getAttribute('aria-label');
           if (ariaLabel && !el.classList.contains('lang-switch-btn')) {
             if (el._sakuraOrigAria === undefined) {
@@ -25258,7 +25246,7 @@
             }
           }
 
-          // Input buttons value
+          
           if (el.tagName === 'INPUT' && (el.type === 'button' || el.type === 'submit' || el.type === 'reset')) {
             if (el._sakuraOrigValue === undefined) {
               el._sakuraOrigValue = el.value;
@@ -25276,7 +25264,7 @@
     }
   }
 
-  // Apply language across whole application
+  
   function applyLanguage(lang, showToast = false) {
     if (!LANGUAGES[lang]) lang = 'vi';
     try {
@@ -25289,7 +25277,7 @@
 
     const langMeta = LANGUAGES[lang];
 
-    // 1. Update all language switcher buttons on the page
+    
     if (typeof document !== 'undefined' && document.querySelectorAll) {
       document.querySelectorAll('.lang-switch-dropdown').forEach(dropdown => {
         const flagEl = dropdown.querySelector('.lang-flag');
@@ -25309,12 +25297,12 @@
       });
     }
 
-    // 2. Perform deep DOM translation
+    
     if (typeof document !== 'undefined' && document.body) {
       translateDOM(document.body, lang);
     }
 
-    // 3. Emit change event for any custom listeners
+    
     if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function' && typeof CustomEvent === 'function') {
       window.dispatchEvent(new CustomEvent('sakuraLanguageChange', { detail: { lang, meta: langMeta } }));
     }
@@ -25325,7 +25313,7 @@
     }
   }
 
-  // Create language switcher dropdown DOM element
+  
   function createLanguageDropdownElement(isFloating = false) {
     const currentLang = getStoredLanguage();
     const meta = LANGUAGES[currentLang] || LANGUAGES['vi'];
@@ -25389,14 +25377,14 @@
   function setupLanguageSwitchers() {
     if (typeof document === 'undefined' || !document.querySelectorAll) return;
 
-    // 1. Bind to existing dropdowns in HTML
+    
     document.querySelectorAll('.lang-switch-dropdown').forEach(dropdown => {
       bindDropdownEvents(dropdown);
     });
 
     let switcherCount = document.querySelectorAll('.lang-switch-dropdown').length;
 
-    // 2. Attach next to .theme-toggle-btn
+    
     document.querySelectorAll('.theme-toggle-btn').forEach(themeBtn => {
       const parent = themeBtn.parentElement;
       if (!parent) return;
@@ -25411,7 +25399,7 @@
       }
     });
 
-    // 3. Fallback: If page has NO language switcher at all, attach to top nav or floating pill
+    
     if (switcherCount === 0) {
       const navTarget = document.querySelector('nav, .navbar, .top-header, .header-right, .account-nav, .tk-nav');
       if (navTarget) {
@@ -25423,7 +25411,7 @@
       }
     }
 
-    // Close menu when clicking outside
+    
     document.addEventListener('click', () => {
       document.querySelectorAll('.lang-switch-dropdown.open').forEach(d => {
         d.classList.remove('open');
@@ -25431,7 +25419,7 @@
     });
   }
 
-  // Setup MutationObserver to automatically translate newly added DOM nodes (AJAX/WebSocket rendering)
+  
   let observerTimeout = null;
   function setupMutationObserver() {
     if (typeof window === 'undefined' || !window.MutationObserver || typeof document === 'undefined' || !document.body) return;
@@ -25449,7 +25437,7 @@
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  // Intercept window.showToast to auto-translate toast alerts
+  
   function setupToastInterceptor() {
     if (typeof window !== 'undefined' && typeof window.showToast === 'function') {
       const originalShowToast = window.showToast;
@@ -25461,13 +25449,13 @@
     }
   }
 
-  // Early setup html lang attribute
+  
   const initialLang = getStoredLanguage();
   if (typeof document !== 'undefined' && document.documentElement) {
     document.documentElement.setAttribute('lang', initialLang);
   }
 
-  // Global APIs
+  
   if (typeof window !== 'undefined') {
     window.sakuraT = function (keyOrText) {
       const lang = (typeof document !== 'undefined' && document.documentElement && document.documentElement.getAttribute('lang')) || getStoredLanguage();
@@ -25480,7 +25468,7 @@
     window.SAKURA_PHRASES = PHRASES;
   }
 
-  // Background sync for any new translations.json updates
+  
   function loadAsyncTranslations() {
     if (typeof fetch !== 'function') return;
     fetch('/static/js/translations.json')
@@ -25500,7 +25488,7 @@
       .catch(() => {});
   }
 
-  // Initialize on DOM ready
+  
   function init() {
     setupLanguageSwitchers();
     applyLanguage(initialLang, false);

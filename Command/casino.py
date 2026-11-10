@@ -19,10 +19,8 @@ from data.database import (
     update_user_xu,
 )
 
-# --- LOCK CHỐNG SPAM CLICK TRÙNG VÁN ---
 _active_game_users = set()
 
-# --- CARDS & SUITS CHO BLACKJACK ---
 CARD_VALUES = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10, "J": 10, "Q": 10, "K": 10, "A": 11}
 SUITS = ["♠", "♥", "♦", "♣"]
 
@@ -59,7 +57,6 @@ def cur_badge(currency: str) -> str:
     return "🪙" if currency == "coins" else "💎"
 
 
-# ================= VIEW: BLACKJACK =================
 class BlackjackView(discord.ui.View):
     def __init__(self, author: discord.Member, bet: int, currency: str = "coins"):
         super().__init__(timeout=60)
@@ -161,7 +158,6 @@ class BlackjackView(discord.ui.View):
         self.stop()
 
 
-# ================= METADATA CÁC TRÒ CHƠI CASINO =================
 GAME_INFO = {
     "taixiu": {
         "name_vi": "Tài Xỉu",
@@ -278,7 +274,6 @@ GAME_INFO = {
 }
 
 
-# ================= MODAL NHẬP TIỀN CƯỢC TÙY CHỈNH =================
 class CustomBetModal(discord.ui.Modal):
     def __init__(self, parent_view: "CasinoBetView"):
         vi = is_vietnamese(parent_view.guild_id)
@@ -321,7 +316,6 @@ class CustomBetModal(discord.ui.Modal):
             await interaction.response.send_message("❌ Số tiền nhập không hợp lệ! Vui lòng nhập số hợp lệ.", ephemeral=True)
 
 
-# ================= VIEW ĐẶT CƯỢC CASINO TOÀN DIỆN =================
 class CasinoBetView(discord.ui.View):
     def __init__(
         self,
@@ -367,7 +361,6 @@ class CasinoBetView(discord.ui.View):
         self.clear_items()
         vi = is_vietnamese(self.guild_id)
 
-        # Row 0: Các mốc cược cố định & nút tùy chỉnh
         btn_1k = discord.ui.Button(label="+1k", style=discord.ButtonStyle.secondary, row=0)
         btn_1k.callback = self.make_add_callback(1_000)
         self.add_item(btn_1k)
@@ -388,7 +381,6 @@ class CasinoBetView(discord.ui.View):
         btn_custom.callback = self.btn_custom_callback
         self.add_item(btn_custom)
 
-        # Row 1: Thao tác cược nhanh & Chọn loại tiền
         btn_double = discord.ui.Button(label="✖️2 Gấp Đôi" if vi else "✖️2 Double", style=discord.ButtonStyle.secondary, row=1)
         btn_double.callback = self.btn_double_callback
         self.add_item(btn_double)
@@ -410,7 +402,6 @@ class CasinoBetView(discord.ui.View):
         btn_currency.callback = self.btn_currency_callback
         self.add_item(btn_currency)
 
-        # Row 2: Chọn cửa đặt cho game hiện tại
         g_info = GAME_INFO.get(self.game, GAME_INFO["taixiu"])
         if self.game == "baucua":
             options = [
@@ -444,7 +435,6 @@ class CasinoBetView(discord.ui.View):
                 btn_choice.callback = self.make_choice_btn_callback(c_id)
                 self.add_item(btn_choice)
 
-        # Row 3: Menu chọn trò chơi khác
         if vi:
             game_options = [
                 discord.SelectOption(label="🎲 Tài Xỉu (3 Xúc Xắc)", value="taixiu", description="Xỉu (4-10), Tài (11-17), Bão", default=(self.game == "taixiu")),
@@ -471,7 +461,6 @@ class CasinoBetView(discord.ui.View):
         select_game.callback = self.select_game_callback
         self.add_item(select_game)
 
-        # Row 4: Đặt cược & Hủy
         btn_submit = discord.ui.Button(label="✅ ĐẶT CƯỢC NGAY" if vi else "✅ BET NOW", style=discord.ButtonStyle.success, row=4)
         btn_submit.callback = self.btn_submit_callback
         self.add_item(btn_submit)
@@ -642,7 +631,6 @@ class CasinoBetView(discord.ui.View):
             await self.cog.run_blackjack(interaction, self.author, self.guild_id, self.amount, self.currency, is_interaction=True)
 
 
-# ================= CASINO COG =================
 class CasinoCog(commands.Cog, name="Casino"):
     """Sòng Bạc Mini-Games Cao Cấp với Hoạt Ảnh Chuyển Động & Tiêu Coins/Xu."""
 
@@ -653,7 +641,6 @@ class CasinoCog(commands.Cog, name="Casino"):
     def cog_unload(self):
         self.lottery_draw_task.cancel()
 
-    # ================= RUNNER METHODS DÙNG CHUNG =================
     async def run_doden(self, target, user, guild_id, amount, choice, currency, is_interaction=False):
         if amount <= 0:
             err = "❌ Số tiền cược phải lớn hơn 0!"
@@ -673,7 +660,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         c_badge = cur_badge(currency)
         choice_str = "🔴 ĐỎ" if choice == "red" else ("⚫ ĐEN" if choice == "black" else "🟢 HOÀNG KIM (Số 0)")
 
-        # FRAME 1: Bắt đầu quay
         embed = discord.Embed(
             title="🎡 VÒNG QUAY ĐỎ ĐEN — ĐANG QUAY TỐC ĐỘ CAO...",
             description=(
@@ -693,7 +679,6 @@ class CasinoCog(commands.Cog, name="Casino"):
             msg = await target.send(embed=embed)
         await asyncio.sleep(1.0)
 
-        # FRAME 2: Bánh xe chậm dần
         embed.title = "🎡 VÒNG QUAY ĐỎ ĐEN — BÁNH XE ĐANG CHẬM LẠI..."
         embed.description = (
             f"👤 **Người chơi:** {user.mention}\n"
@@ -707,7 +692,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(1.0)
 
-        # FRAME 3: Viên bi chuẩn bị dừng
         embed.title = "🎡 VÒNG QUAY ĐỎ ĐEN — VIÊN BI ĐANG RƠI VÀO RÃNH..."
         embed.description = (
             f"👤 **Người chơi:** {user.mention}\n"
@@ -721,7 +705,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(1.0)
 
-        # FRAME 4: KẾT QUẢ
         _active_game_users.discard(user.id)
         landed_number = random.randint(0, 36)
         if landed_number == 0:
@@ -784,7 +767,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         c_badge = cur_badge(currency)
         choice_str = "🔵 CHẴN" if choice == "chan" else "🔴 LẺ"
 
-        # FRAME 1: Úp bát
         embed = discord.Embed(
             title="🥣 BÀN XÓC ĐĨA CHẴN LẺ — ĐANG ÚP BÁT LẮC...",
             description=(
@@ -804,7 +786,6 @@ class CasinoCog(commands.Cog, name="Casino"):
             msg = await target.send(embed=embed)
         await asyncio.sleep(0.9)
 
-        # FRAME 2: Rung lắc mạnh
         embed.title = "🥣 BÀN XÓC ĐĨA CHẴN LẺ — BÁT ĐANG RUNG LÊN BẦN BẬT..."
         embed.description = (
             f"👤 **Người chơi:** {user.mention}\n"
@@ -817,7 +798,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(0.9)
 
-        # FRAME 3: Đặt xuống chờ mở
         embed.title = "🥣 BÀN XÓC ĐĨA CHẴN LẺ — CHUẨN BỊ MỞ BÁT!"
         embed.description = (
             f"👤 **Người chơi:** {user.mention}\n"
@@ -830,7 +810,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(0.9)
 
-        # FRAME 4: KẾT QUẢ
         _active_game_users.discard(user.id)
         d1 = random.randint(1, 6)
         d2 = random.randint(1, 6)
@@ -888,7 +867,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         c_badge = cur_badge(currency)
         choice_str = "🔴 TÀI (11 - 17)" if choice == "tai" else ("🔵 XỈU (4 - 10)" if choice == "xiu" else "👑 BÃO (3 MẶT GIỐNG NHAU x30)")
 
-        # FRAME 1: Lắc hộp xúc xắc
         embed = discord.Embed(
             title="🎲 TÀI XỈU SIC BO — ĐANG LẮC HỘP XÍ NGẦU...",
             description=(
@@ -908,7 +886,6 @@ class CasinoCog(commands.Cog, name="Casino"):
             msg = await target.send(embed=embed)
         await asyncio.sleep(1.0)
 
-        # FRAME 2: Lăn trên bàn
         embed.title = "🎲 TÀI XỈU SIC BO — XÚC XẮC LĂN LÔNG LỐC TRÊN BÀN..."
         embed.description = (
             f"👤 **Người chơi:** {user.mention}\n"
@@ -921,7 +898,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(1.0)
 
-        # FRAME 3: Kết quả
         _active_game_users.discard(user.id)
         d1 = random.randint(1, 6)
         d2 = random.randint(1, 6)
@@ -989,7 +965,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         _active_game_users.add(user.id)
         c_badge = cur_badge(currency)
 
-        # FRAME 1: Cần gạt kéo, 3 guồng quay
         embed = discord.Embed(
             title="🎰 MÁY XÈNG SAKURA SLOTS — CẦN GẠT ĐÃ KÉO!",
             description=(
@@ -1011,7 +986,6 @@ class CasinoCog(commands.Cog, name="Casino"):
             msg = await target.send(embed=embed)
         await asyncio.sleep(0.9)
 
-        # FRAME 2: Guồng 1 dừng
         s1 = random.choice(SLOT_SYMBOLS)
         embed.title = "🎰 MÁY XÈNG SAKURA SLOTS — GUỒNG 1 ĐÃ DỪNG!"
         embed.description = (
@@ -1027,7 +1001,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(0.9)
 
-        # FRAME 3: Guồng 2 dừng
         s2 = random.choice(SLOT_SYMBOLS)
         embed.title = "🎰 MÁY XÈNG SAKURA SLOTS — GUỒNG 2 ĐÃ DỪNG!"
         embed.description = (
@@ -1043,11 +1016,9 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(0.9)
 
-        # FRAME 4: Guồng 3 dừng & Kết quả
         _active_game_users.discard(user.id)
         s3 = random.choice(SLOT_SYMBOLS)
 
-        # Multipliers
         multiplier = 0
         payout_name = ""
         if s1 == s2 == s3:
@@ -1126,7 +1097,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         chosen_info = BAUCUA_ITEMS.get(choice, {"name": choice, "emoji": "🎲"})
         choice_str = f"{chosen_info['emoji']} {chosen_info['name']}"
 
-        # FRAME 1: Úp đĩa lắc
         embed = discord.Embed(
             title="🎋 BẦU CUA TÔM CÁ — ĐANG ÚP ĐĨA LẮC HỘT...",
             description=(
@@ -1146,7 +1116,6 @@ class CasinoCog(commands.Cog, name="Casino"):
             msg = await target.send(embed=embed)
         await asyncio.sleep(1.0)
 
-        # FRAME 2: Rung lắc đĩa
         embed.title = "🎋 BẦU CUA TÔM CÁ — ĐANG RUNG LẮC MẠNH TAY..."
         embed.description = (
             f"👤 **Người chơi:** {user.mention}\n"
@@ -1159,7 +1128,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(1.0)
 
-        # FRAME 3: Mở đĩa & Kết quả
         _active_game_users.discard(user.id)
         keys = list(BAUCUA_ITEMS.keys())
         r1, r2, r3 = random.choice(keys), random.choice(keys), random.choice(keys)
@@ -1217,7 +1185,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         c_badge = cur_badge(currency)
         choice_str = "🪙 NGỬA (Heads)" if choice == "heads" else "🪙 SẤP (Tails)"
 
-        # FRAME 1: Búng đồng xu
         embed = discord.Embed(
             title="🪙 TUNG ĐỒNG XU — ĐANG BÚNG LÊN KHÔNG TRUNG...",
             description=(
@@ -1237,7 +1204,6 @@ class CasinoCog(commands.Cog, name="Casino"):
             msg = await target.send(embed=embed)
         await asyncio.sleep(0.9)
 
-        # FRAME 2: Rơi xuống tay
         embed.title = "🪙 TUNG ĐỒNG XU — ĐỒNG XU RƠI XUỐNG..."
         embed.description = (
             f"👤 **Người chơi:** {user.mention}\n"
@@ -1250,7 +1216,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         await msg.edit(embed=embed)
         await asyncio.sleep(0.9)
 
-        # FRAME 3: Kết quả
         _active_game_users.discard(user.id)
         result = random.choice(["heads", "tails"])
         res_str = "🪙 NGỬA (Heads)" if result == "heads" else "🪙 SẤP (Tails)"
@@ -1306,7 +1271,6 @@ class CasinoCog(commands.Cog, name="Casino"):
         else:
             await target.send(embed=embed, view=view)
 
-    # ================= GAME 1: ĐỎ ĐEN (ROULETTE WHEEL) =================
     @commands.command(name="doden", aliases=["redblack", "roulette"], description="🎡 Đặt cược Đỏ Đen vòng quay Roulette hoạt ảnh sống động.")
     @commands.guild_only()
     async def doden(
@@ -1326,7 +1290,6 @@ class CasinoCog(commands.Cog, name="Casino"):
 
         await self.run_doden(ctx, ctx.author, ctx.guild.id, amount, choice, currency, is_interaction=False)
 
-    # ================= GAME 2: XÓC ĐĨA CHẴN LẺ =================
     @commands.command(name="chanle", aliases=["cl", "xocdia"], description="🥣 Lắc đĩa Chẵn Lẻ hoạt ảnh mở bát giật gân.")
     @commands.guild_only()
     async def chanle(
@@ -1346,7 +1309,6 @@ class CasinoCog(commands.Cog, name="Casino"):
 
         await self.run_chanle(ctx, ctx.author, ctx.guild.id, amount, choice, currency, is_interaction=False)
 
-    # ================= GAME 3: TÀI XỈU (SIC BO) =================
     @commands.command(name="taixiu", aliases=["tx", "sicbo"], description="⚖️ Chơi Tài Xỉu 3 viên xúc xắc chuyển động hồi hộp kịch tính.")
     @commands.guild_only()
     async def taixiu(
@@ -1366,7 +1328,6 @@ class CasinoCog(commands.Cog, name="Casino"):
 
         await self.run_taixiu(ctx, ctx.author, ctx.guild.id, amount, choice, currency, is_interaction=False)
 
-    # ================= GAME 4: MÁY XÈNG SLOTS (777 / NỔ HŨ) =================
     @commands.command(name="slots", aliases=["slot", "jackpot"], description="🎰 Quay máy xèng Slots 777 với hoạt ảnh guồng quay nổ hũ sống động.")
     @commands.guild_only()
     async def slots(
@@ -1385,7 +1346,6 @@ class CasinoCog(commands.Cog, name="Casino"):
 
         await self.run_slots(ctx, ctx.author, ctx.guild.id, amount, currency, is_interaction=False)
 
-    # ================= GAME 5: BẦU CUA TÔM CÁ =================
     @commands.command(name="baucua", description="🦀 Lắc Bầu Cua Tôm Cá dân gian với hoạt ảnh mở đĩa hồi hộp.")
     @commands.guild_only()
     async def baucua(
@@ -1405,7 +1365,6 @@ class CasinoCog(commands.Cog, name="Casino"):
 
         await self.run_baucua(ctx, ctx.author, ctx.guild.id, amount, choice, currency, is_interaction=False)
 
-    # ================= GAME 6: TUNG ĐỒNG XU (COINFLIP) =================
     @commands.command(name="coinflip", aliases=["cf"], description="🎲 Thử vận may tung đồng xu 50/50 hoạt ảnh chuyển động.")
     @commands.guild_only()
     async def coinflip(
@@ -1425,7 +1384,6 @@ class CasinoCog(commands.Cog, name="Casino"):
 
         await self.run_coinflip(ctx, ctx.author, ctx.guild.id, amount, choice, currency, is_interaction=False)
 
-    # ================= GAME 7: BLACKJACK (XÌ DÁCH) =================
     @commands.command(name="blackjack", aliases=["bj"], description="🃏 Chơi bài Xì Dách 21 điểm với Nhà Cái (hỗ trợ Coins hoặc Xu).")
     @commands.guild_only()
     async def blackjack(
@@ -1444,7 +1402,6 @@ class CasinoCog(commands.Cog, name="Casino"):
 
         await self.run_blackjack(ctx, ctx.author, ctx.guild.id, amount, currency, is_interaction=False)
 
-    # ================= GAME 8: XỔ SỐ JACKPOT =================
     @commands.hybrid_group(name="lottery", fallback="view", description="🎟️ Mua vé số và tham gia giải Jackpot máy chủ.")
     @commands.guild_only()
     async def lottery(self, ctx: commands.Context):
@@ -1517,7 +1474,6 @@ class CasinoCog(commands.Cog, name="Casino"):
                     except Exception:
                         pass
 
-    # ================= GAME HUB: MENU TỔNG HỢP /MINIGAME =================
     @commands.hybrid_command(name="minigame", aliases=["game", "casino"], description="🎰 Mở Trung Tâm Mini-Games Sòng Bạc Sakura với đầy đủ game và hiệu ứng.")
     @commands.guild_only()
     async def minigame_hub(self, ctx: commands.Context):

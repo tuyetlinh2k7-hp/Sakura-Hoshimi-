@@ -19,7 +19,6 @@ class LeaveLog(commands.Cog):
     async def handle_goodbye(self, member: discord.Member):
         settings = get_guild_settings(member.guild.id)
 
-        # nếu chưa đặt kênh tạm biệt thì tắt (Reine chọn Không đặt)
         if not settings or not settings.get("leave_channel"):
             return
         channel_id = settings.get("leave_channel")

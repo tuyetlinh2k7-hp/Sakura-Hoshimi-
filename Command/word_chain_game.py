@@ -10,7 +10,6 @@ from datetime import datetime, time, timezone, timedelta
 from typing import Optional, Dict, Set, List
 from Check.i18n import t, is_vietnamese
 
-# --- CẤU HÌNH ĐƯỜNG DẪN ---
 WORD_CHAIN_CONFIG_FILE = "data/word_chain_config.json"
 WORD_CHAIN_ACTIVE_GAMES_FILE = "data/word_chain_active_games.json"
 WORD_CHAIN_SCORES_FILE = "data/word_chain_scores.json"
@@ -18,7 +17,6 @@ WORD_CHAIN_WEEKLY_SCORES_FILE = "data/word_chain_weekly_scores.json"
 WORD_CHAIN_STATS_FILE = "data/word_chain_stats.json"
 WORD_LIST_FILE = "data/vietnamese-words.txt"
 
-# --- CẤU HÌNH XKIRO API (OpenAI-compatible) ---
 from config import XKIRO_API_KEY
 try:
     from config import AI_MODEL as XKIRO_MODEL
@@ -26,10 +24,8 @@ except ImportError:
     XKIRO_MODEL = "sensenova/sensenova-6.8-flash-lite"
 XKIRO_API_URL = "https://api.xkiro.com/v1/chat/completions"
 
-# Múi giờ Việt Nam (UTC+7)
 VN_TZ = timezone(timedelta(hours=7))
 
-# --- DANH SÁCH DANH HIỆU & THÀNH TỰU ---
 ACHIEVEMENTS = {
     "vua_khoa_mom": {
         "name": "👑 Vua Khóa Mõm",
@@ -78,7 +74,6 @@ def is_valid_chain(prev_phrase: str, new_phrase: str) -> bool:
     return prev_words[-1] == new_words[0]
 
 
-# --- 1. GIAO DIỆN EMBED HƯỚNG DẪN TƯƠNG TÁC ---
 class HelpSelect(discord.ui.Select):
     def __init__(self, prefix: str):
         self.prefix = prefix
@@ -153,7 +148,6 @@ class HelpView(discord.ui.View):
         self.add_item(HelpSelect(prefix))
 
 
-# --- 2. GIAO DIỆN ĐỀ XUẤT & DUYỆT TỪ MỚI ---
 class WordContributeView(discord.ui.View):
     def __init__(self, cog: "WordChainGame", word: str, author_id: int, guild_id_str: str):
         super().__init__(timeout=600)
@@ -184,7 +178,6 @@ class WordContributeView(discord.ui.View):
                 return await inter.response.send_message("❌ Chỉ Admin mới có quyền duyệt từ!", ephemeral=True)
 
             self.cog.add_new_word_to_dict(self.word)
-            # Cộng chỉ số đóng góp từ cho người đề xuất
             p_stats = self.cog.get_player_stats(self.guild_id_str, str(self.author_id))
             p_stats["contributed"] += 1
             unlocked = self.cog.check_achievements(p_stats)
@@ -218,7 +211,6 @@ class WordContributeView(discord.ui.View):
         )
 
 
-# --- 3. GIAO DIỆN PHÒNG CHỜ BATTLE ROYALE ---
 class BRLobbyView(discord.ui.View):
     def __init__(self, host: discord.Member):
         super().__init__(timeout=45)
@@ -257,7 +249,6 @@ class BRLobbyView(discord.ui.View):
         await interaction.followup.send(leave_msg, ephemeral=True)
 
 
-# --- COG CHÍNH ---
 class WordChainGame(commands.Cog, name="Word Chain Game"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -266,7 +257,7 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         self.weekly_scores: Dict[str, Dict[str, int]] = {}
         self.player_stats: Dict[str, Dict[str, dict]] = {}
         self.active_games: Dict[str, dict] = {}
-        self.br_games: Dict[str, dict] = {}  # Lưu trạng thái Battle Royale theo guild_id
+        self.br_games: Dict[str, dict] = {}
 
         self.word_set: Set[str] = set()
         self.word_index: Dict[str, List[str]] = {}
@@ -293,7 +284,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         if self.dirty_data:
             self.save_all_state()
 
-    # --- QUẢN LÝ DỮ LIỆU & THỐNG KÊ HỒ SƠ ---
     def _load_json(self, path: str) -> dict:
         if os.path.exists(path):
             with open(path, 'r', encoding='utf-8') as f:
@@ -472,7 +462,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         self.dirty_data = True
         return new_start_word
 
-    # --- LOGIC ĐẤU TRƯỜNG SINH TỬ (BATTLE ROYALE) ---
     async def _advance_br_turn(self, guild_id_str: str, channel: discord.TextChannel):
         br = self.br_games.get(guild_id_str)
         if not br or not br.get("active"):
@@ -481,7 +470,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         if br.get("timer_task"):
             br["timer_task"].cancel()
 
-        # Kiểm tra nếu chỉ còn 1 người sống sót -> Chiến thắng!
         if len(br["players"]) == 1:
             winner_id = br["players"][0]
             w_str = str(winner_id)
@@ -552,7 +540,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
             return
 
         current_player_id = br["players"][br["turn_idx"]]
-        # Chỉ xử lý tin nhắn của người đang đến lượt
         if message.author.id != current_player_id:
             return
 
@@ -584,12 +571,10 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
             await self._advance_br_turn(guild_id_str, message.channel)
             return
 
-        # Nối đúng trong chế độ Sinh Tử
         await self._safe_add_reaction(message, "⚔️")
         used_words.add(new_phrase)
         br["current_word"] = new_phrase
 
-        # Nếu từ vừa nối làm bí từ hoàn toàn, đổi từ ngẫu nhiên mới cho người kế tiếp để vòng đấu không bị kẹt
         if not self.has_next_word(new_phrase, {w: 3 for w in used_words}):
             new_w = self.get_random_valid_start_word()
             br["current_word"] = new_w
@@ -599,7 +584,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         br["turn_idx"] = (br["turn_idx"] + 1) % len(br["players"])
         await self._advance_br_turn(guild_id_str, message.channel)
 
-    # --- CÁC TÁC VỤ CHẠY NGẦM ---
     @tasks.loop(minutes=2)
     async def auto_save_task(self):
         if self.dirty_data:
@@ -644,7 +628,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         self.weekly_scores.clear()
         self._save_json(WORD_CHAIN_WEEKLY_SCORES_FILE, self.weekly_scores)
 
-    # --- CÁC LỆNH ĐIỀU KHIỂN ---
     @commands.hybrid_group(name="wordchain", aliases=["wc"], description="Game nối chữ 2 từ tiếng Việt.")
     async def wordchain(self, ctx: commands.Context):
         if ctx.invoked_subcommand is None:
@@ -688,12 +671,10 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         total_score = self.scores.get(guild_id_str, {}).get(user_id_str, 0)
         weekly_score = self.weekly_scores.get(guild_id_str, {}).get(user_id_str, 0)
 
-        # Tính thứ hạng hiện tại trong server
         guild_scores = self.scores.get(guild_id_str, {})
         sorted_ids = [k for k, _ in sorted(guild_scores.items(), key=lambda item: item[1], reverse=True)]
         rank_str = f"#{sorted_ids.index(user_id_str) + 1}/{len(sorted_ids)}" if user_id_str in sorted_ids else "Chưa xếp hạng"
 
-        # Tính tỷ lệ chính xác & thanh tiến trình
         correct = p_stats["correct_words"]
         wrong = p_stats["wrong_words"]
         total_attempts = correct + wrong
@@ -701,7 +682,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         filled_bars = int(round(acc / 10))
         acc_bar = "🟩" * filled_bars + "⬛" * (10 - filled_bars)
 
-        # Tìm từ yêu thích nhất
         word_freq = p_stats.get("word_freq", {})
         if word_freq:
             fav_word, fav_count = max(word_freq.items(), key=lambda x: x[1])
@@ -709,7 +689,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         else:
             fav_str = "Chưa có dữ liệu"
 
-        # Hiển thị danh hiệu
         badges = p_stats.get("badges", [])
         if badges:
             badge_display = "\n".join([f"• **{ACHIEVEMENTS[b]['name']}** — *{ACHIEVEMENTS[b]['desc']}*" for b in badges if b in ACHIEVEMENTS])
@@ -1031,7 +1010,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         for i, (user_id, score) in enumerate(sorted_players[:10]):
             p_stats = self.get_player_stats(guild_id_str, user_id)
             badges = p_stats.get("badges", [])
-            # Hiển thị icon của danh hiệu nổi bật nhất bên cạnh tên
             badge_icons = "".join([ACHIEVEMENTS[b]["name"].split()[0] for b in badges if b in ACHIEVEMENTS])
             badge_str = f" {badge_icons}" if badge_icons else ""
             description += f"**#{i+1}**: <@{user_id}>{badge_str} — `{score}` điểm\n"
@@ -1040,7 +1018,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         embed = discord.Embed(title=title, description=description, color=discord.Color.gold())
         await ctx.send(embed=embed)
 
-    # --- XỬ LÝ LƯỢT CHƠI ---
     @commands.Cog.listener("on_message")
     async def on_message_game_turn(self, message: discord.Message):
         if message.author.bot or not message.guild:
@@ -1048,7 +1025,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
 
         guild_id_str = str(message.guild.id)
 
-        # Ưu tiên kiểm tra nếu kênh đang diễn ra trận Đấu Trường Sinh Tử (Battle Royale)
         br = self.br_games.get(guild_id_str)
         if br and br.get("active") and message.channel.id == br.get("channel_id"):
             await self._handle_br_message(message, guild_id_str, br)
@@ -1098,7 +1074,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
                 error_reason = t(message.guild, "WC_ERROR_NOT_IN_DICT", word=new_phrase)
                 is_not_in_dict = True
 
-        # --- XỬ LÝ KHI NỐI SAI ---
         if error_reason:
             p_stats["wrong_words"] += 1
             shields = game_state.get("shields", 0)
@@ -1116,7 +1091,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
                 )
                 return
 
-            # Ghi nhận nếu làm đứt chuỗi >= 25 từ
             if game_state.get("streak", 1) >= 25:
                 p_stats["long_streaks_broken"] += 1
             unlocked = self.check_achievements(p_stats)
@@ -1141,13 +1115,11 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
             await message.channel.send(embed=embed_new)
             return
 
-        # --- XỬ LÝ KHI NỐI ĐÚNG ---
         await self._safe_add_reaction(message, "<:Like:1519266417994764400>")
 
         streak = game_state.get("streak", 1) + 1
         game_state["streak"] = streak
 
-        # Cập nhật thống kê cá nhân
         p_stats["correct_words"] += 1
         if streak > p_stats["max_streak"]:
             p_stats["max_streak"] = streak
@@ -1180,7 +1152,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
 
         next_target_syllable = words[-1]
 
-        # Kiểm tra chiến thắng (Khóa mõm / Bí từ)
         if not self.has_next_word(new_phrase, word_counts):
             await self._safe_add_reaction(message, "👑")
             self.scores[guild_id_str][user_id_str] += 3
@@ -1216,7 +1187,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
         if streak_bonus > 0:
             await message.channel.send(f"🔥 Chuỗi **{streak} từ** liên tiếp! {message.author.mention} nhận thêm `+{streak_bonus}` điểm thưởng{shield_reward_msg}!")
 
-        # --- CHẾ ĐỘ ĐẤU VỚI BOT (PvE MODE) ---
         if game_state.get("pve_mode", False):
             await asyncio.sleep(1.2)
             if game_state.get("current_word") != new_phrase:
@@ -1250,7 +1220,6 @@ class WordChainGame(commands.Cog, name="Word Chain Game"):
             await message.channel.send(f"🤖 Bot nối: **`{bot_word}`** *(Tiếp theo: **`{bot_next_syllable.upper()}`**)*")
             next_target_syllable = bot_next_syllable
 
-        # --- KÍCH HOẠT SỰ KIỆN "TỪ KHÓA VÀNG" ---
         if game_state["streak"] % 8 == 0:
             available_next = [w for w in self.word_index.get(next_target_syllable, []) if word_counts.get(w, 0) < 3]
             possible_letters = list({w.split()[1][0] for w in available_next if len(w.split()) == 2})

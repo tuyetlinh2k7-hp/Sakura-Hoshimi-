@@ -115,7 +115,6 @@ class CommandError(commands.Cog):
             print(f'Bỏ qua lỗi trong lệnh {ctx.command}:', file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
-            # Gửi thông báo DM tới Owner kèm Embed đẹp mắt
             try:
                 from Check.owner_notifier import notify_owner_bot_error
                 await notify_owner_bot_error(self.bot, error=error, source=f"Lệnh: {ctx.command}", ctx=ctx)

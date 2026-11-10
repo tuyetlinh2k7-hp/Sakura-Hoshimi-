@@ -38,14 +38,11 @@ def _generate_rank_card_sync(
 ) -> io.BytesIO:
     width, height = 960, 310
 
-    # 1. Background hiện đại dạng Cyberpunk/Modern Dark (nền tối mượt, bo góc)
     card = Image.new("RGBA", (width, height), (15, 17, 24, 255))
     draw = ImageDraw.Draw(card)
 
-    # Thẻ chính có viền neon nhẹ
     draw.rounded_rectangle([(0, 0), (width, height)], radius=28, fill=(16, 18, 27, 255), outline=(55, 62, 85, 255), width=2)
 
-    # 2. Hiệu ứng hình ảnh nền sống động (Ambient glow)
     glow_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     glow_draw = ImageDraw.Draw(glow_layer)
     glow_draw.ellipse((20, 20, 320, 280), fill=(138, 43, 226, 75))
@@ -53,7 +50,6 @@ def _generate_rank_card_sync(
     glow_layer = glow_layer.filter(ImageFilter.GaussianBlur(55))
     card.alpha_composite(glow_layer)
 
-    # Khung nền nội dung Glassmorphism
     inner_card = Image.new("RGBA", (width - 32, height - 32), (25, 28, 40, 195))
     inner_mask = Image.new("L", (width - 32, height - 32), 0)
     inner_draw = ImageDraw.Draw(inner_mask)
@@ -63,7 +59,6 @@ def _generate_rank_card_sync(
     draw = ImageDraw.Draw(card)
     draw.rounded_rectangle([(16, 16), (width - 16, height - 16)], radius=22, outline=(60, 68, 95, 130), width=1)
 
-    # 3. Avatar với viền sáng kép rực rỡ
     avatar_size = 175
     avatar_x, avatar_y = 48, 65
 
@@ -78,7 +73,6 @@ def _generate_rank_card_sync(
         draw.ellipse((avatar_x, avatar_y, avatar_x + avatar_size, avatar_y + avatar_size), fill=(45, 52, 70, 255))
         draw.ellipse((avatar_x + 50, avatar_y + 40, avatar_x + 120, avatar_y + 110), fill=(140, 150, 175, 255))
 
-    # Huy hiệu chấm trạng thái online
     draw.ellipse(
         (avatar_x + avatar_size - 32, avatar_y + avatar_size - 32, avatar_x + avatar_size - 4, avatar_y + avatar_size - 4),
         fill=(34, 197, 94, 255),
@@ -86,7 +80,6 @@ def _generate_rank_card_sync(
         width=3
     )
 
-    # 4. Phông chữ
     font_names = ["arialbd.ttf", "arial.ttf", "seguiui.ttf", "DejaVuSans-Bold.ttf", "DejaVuSans.ttf"]
     font_name = None
     for name in font_names:
@@ -110,11 +103,9 @@ def _generate_rank_card_sync(
     content_x = 252
     right_edge = width - 48
 
-    # 5. Thông tin Tên & Rank
     display_name = username if len(username) <= 15 else username[:13] + "..."
     draw.text((content_x, 48), display_name, fill=(255, 255, 255), font=font_name_user)
 
-    # Tag Rank góc trên bên phải
     rank_val = f"#{rank_num}"
     rank_label = "RANK "
     try:
@@ -127,15 +118,12 @@ def _generate_rank_card_sync(
     draw.text((right_edge - rank_val_w, 46), rank_val, fill=(250, 204, 21), font=font_rank_num)
     draw.text((right_edge - rank_val_w - rank_lbl_w - 4, 66), rank_label, fill=(156, 163, 175), font=font_badge)
 
-    # 6. Thông tin Level (Badged Pill), XP & Extra Info (Coins, Voice)
-    # Badge Level
     lvl_tag = f"LVL {level}"
     badge_w = 100
     badge_h = 32
     draw.rounded_rectangle([(content_x, 108), (content_x + badge_w, 108 + badge_h)], radius=10, fill=(126, 34, 206, 220), outline=(168, 85, 247, 255), width=1)
     draw.text((content_x + 14, 112), lvl_tag, fill=(255, 255, 255), font=font_badge)
 
-    # Thông tin bổ sung: Coins & Voice Time (gắn bên cạnh badge level)
     extra_x = content_x + badge_w + 16
     extra_items = []
     if coins is not None:
@@ -147,7 +135,6 @@ def _generate_rank_card_sync(
         extra_text = "  •  ".join(extra_items)
         draw.text((extra_x, 113), extra_text, fill=(209, 213, 225), font=font_meta)
 
-    # XP chi tiết của cấp hiện tại
     xp_text = f"{current_xp:,} / {next_xp:,} XP"
     try:
         xp_w = draw.textlength(xp_text, font=font_sub)
@@ -155,16 +142,13 @@ def _generate_rank_card_sync(
         xp_w = len(xp_text) * 13
     draw.text((right_edge - xp_w, 112), xp_text, fill=(209, 213, 219), font=font_sub)
 
-    # 7. Thanh tiến trình XP (Progress Bar) Gradient
     bar_x = content_x
     bar_y = 165
     bar_w = width - content_x - 48
     bar_h = 36
 
-    # Nền thanh progress
     draw.rounded_rectangle([(bar_x, bar_y), (bar_x + bar_w, bar_y + bar_h)], radius=18, fill=(30, 35, 48, 255), outline=(50, 58, 80, 255), width=1)
 
-    # Tính tỷ lệ % (dựa trên XP tích lũy trong cấp hiện tại / mốc cần đạt của cấp đó)
     percent = min(1.0, max(0.0, current_xp / max(1, next_xp)))
     fill_w = max(36, int(bar_w * percent)) if percent > 0 else 0
 
@@ -175,7 +159,6 @@ def _generate_rank_card_sync(
         mask_draw.rounded_rectangle([(0, 0), (fill_w, bar_h)], radius=18, fill=255)
         card.paste(grad_bar, (bar_x, bar_y), mask=mask_bar)
 
-    # Chữ % XP ở chính giữa thanh tiến trình
     pct_str = f"{int(percent * 100)}%"
     try:
         pct_w = draw.textlength(pct_str, font=font_bar)

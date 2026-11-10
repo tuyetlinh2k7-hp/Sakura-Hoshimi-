@@ -62,14 +62,12 @@ class RollClaimButton(discord.ui.Button):
                 ephemeral=True
             )
 
-        # Check 60-second expiration
         if time.time() - self.roll_time > 60:
             return await interaction.response.send_message(
                 t(lang, "GACHA_CLAIM_EXPIRED", default="⌛ Thẻ đã hết hạn 60 giây, không thể claim nữa!"),
                 ephemeral=True
             )
 
-        # Attempt to consume 1 claim token
         success, profile = await consume_claim(user.id)
         if not success:
             return await interaction.response.send_message(
@@ -77,23 +75,19 @@ class RollClaimButton(discord.ui.Button):
                 ephemeral=True
             )
 
-        # Mark as claimed
         self.is_claimed = True
         self.claimed_by = user.id
         self.disabled = True
         self.label = t(lang, "GACHA_BTN_CLAIMED", default="Đã claim")
         self.style = discord.ButtonStyle.secondary
 
-        # Mint card to database
         card = await mint_card(user.id, self.character["id"])
 
-        # Update button view on original message
         try:
             await interaction.message.edit(view=self.view)
         except Exception:
             pass
 
-        # Send celebration message in channel
         claim_msg = t(
             lang,
             "GACHA_CLAIM_SUCCESS",
@@ -152,7 +146,6 @@ class CollectionPaginationView(discord.ui.View):
         end_idx = start_idx + self.per_page
         page_cards = self.cards[start_idx:end_idx]
 
-        # Calculate rarity stats
         rarity_counts = {"legendary": 0, "epic": 0, "rare": 0, "common": 0}
         total_points = sum(c["points"] for c in self.cards)
         for c in self.cards:
@@ -164,11 +157,9 @@ class CollectionPaginationView(discord.ui.View):
             color=discord.Color.from_rgb(43, 45, 49)
         )
 
-        # Set thumbnail to top waifu image
         if self.cards and self.cards[0].get("image_url"):
             embed.set_thumbnail(url=self.cards[0]["image_url"])
 
-        # Summary line
         if rarity_counts["legendary"] > 0:
             summary = t(
                 self.lang,
@@ -332,9 +323,7 @@ class BuyRollsView(discord.ui.View):
                 )
                 return await interaction.response.send_message(err, ephemeral=True)
 
-            # Deduct coins
             await deduct_user_currency(self.guild_id, interaction.user.id, "coins", cost)
-            # Add bonus rolls
             total = await add_bonus_rolls(interaction.user.id, amount)
 
             succ = t(
@@ -382,9 +371,7 @@ class BuyClaimsView(discord.ui.View):
                 )
                 return await interaction.response.send_message(err, ephemeral=True)
 
-            # Deduct coins
             await deduct_user_currency(self.guild_id, interaction.user.id, "coins", cost)
-            # Add bonus claims
             total = await add_bonus_claims(interaction.user.id, amount)
 
             succ = t(
@@ -432,7 +419,6 @@ class MarketBuySelect(discord.ui.Select):
             return await interaction.response.send_message(t(self.lang, "COMMON_ERROR_NO_PERM", default="❌ Bạn không thể thao tác thay người khác."), ephemeral=True)
 
         lid = int(self.values[0])
-        # Use buy_market_listing
         success, status, result = await buy_market_listing(lid, interaction.user.id)
         if not success:
             if status == "NOT_FOUND":
@@ -445,15 +431,12 @@ class MarketBuySelect(discord.ui.Select):
         seller_id = result["seller_id"]
         card = result["card"]
 
-        # Deduct coins from buyer
         user_coins = await get_user_currency(self.guild_id, interaction.user.id, "coins")
         if user_coins < price:
-            # Revert listing
             await list_card_for_sale(card["code"], seller_id, price)
             return await interaction.response.send_message(t(self.lang, "GACHA_MARKET_ERR_NO_COINS", default=f"❌ Bạn không đủ coin! Cần **{price:,}🪙**.", price=f"{price:,}"), ephemeral=True)
 
         await deduct_user_currency(self.guild_id, interaction.user.id, "coins", price)
-        # Give coins to seller
         await update_user_coins(self.guild_id, seller_id, price)
 
         succ = t(self.lang, "GACHA_MARKET_BUY_SUCCESS", default=f"🎉 Chúc mừng! Bạn đã mua thành công **{card['name']} {card['stars']}⭐** với giá **{price:,}🪙**!", character=card['name'], stars=card['stars'], price=f"{price:,}")
@@ -485,7 +468,6 @@ class GachaMenuView(discord.ui.View):
         self.cog = cog
         self.lang = lang
 
-        # Row 0
         btn_roll = discord.ui.Button(
             label=t(lang, "GACHA_BTN_ROLL", default="Roll"),
             style=discord.ButtonStyle.success,
@@ -507,7 +489,6 @@ class GachaMenuView(discord.ui.View):
         )
         btn_market.callback = self.on_market
 
-        # Row 1
         btn_merge = discord.ui.Button(
             label=t(lang, "GACHA_BTN_MERGE", default="Gộp sao"),
             style=discord.ButtonStyle.primary,
@@ -529,7 +510,6 @@ class GachaMenuView(discord.ui.View):
         )
         btn_leaderboard.callback = self.on_leaderboard
 
-        # Row 2
         btn_buy_roll = discord.ui.Button(
             label=t(lang, "GACHA_BTN_BUY_ROLL", default="Mua roll"),
             style=discord.ButtonStyle.secondary,
@@ -607,7 +587,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         await init_waifu_db()
         self._db_initialized = True
 
-    # ------------------ CORE ROLL HANDLER ------------------
 
     async def handle_roll(self, interaction_or_ctx):
         is_inter = isinstance(interaction_or_ctx, discord.Interaction)
@@ -617,7 +596,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         channel = getattr(interaction_or_ctx, "channel", None)
         lang = get_guild_language(guild)
 
-        # Kiểm tra trước quyền của bot trong kênh (tránh lỗi 403 Forbidden / Missing Access)
         if guild and channel and hasattr(channel, "permissions_for"):
             me = guild.me or (guild.get_member(self.bot.user.id) if self.bot.user else None)
             if me:
@@ -639,7 +617,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
                         except Exception:
                             return
 
-        # Check and consume roll
         success, profile = await consume_roll(user.id)
         if not success:
             msg = t(lang, "GACHA_ROLL_OUT_OF_ROLLS", default="❌ Bạn đã hết lượt roll! Vui lòng chờ hồi lượt (1 lượt/5 phút) hoặc bấm **Mua roll** trong menu.")
@@ -651,10 +628,8 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
             else:
                 return await interaction_or_ctx.send(msg)
 
-        # Pick random character
         char = await get_random_character()
         if not char:
-            # Hoàn trả lượt roll nếu không tải được nhân vật
             await add_bonus_rolls(user.id, 1)
             err = t(lang, "GACHA_ERR_NO_CHAR", default="❌ Không tìm thấy dữ liệu nhân vật. Vui lòng thử lại sau ít phút!")
             if inter:
@@ -665,7 +640,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
             else:
                 return await interaction_or_ctx.send(err)
 
-        # Send ephemeral notice to user (Image 2 top prompt)
         ephemeral_text = t(
             lang,
             "GACHA_ROLL_EPHEMERAL",
@@ -677,7 +651,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
             except Exception:
                 pass
 
-        # Build Card Embed matching Image 2
         r_name, r_indicator, r_color = get_rarity_display(char["rarity"], lang)
         favs = char["favourites"]
         bar = make_fav_bar(favs, char["rarity"])
@@ -696,7 +669,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         )
         embed.set_author(name=author_text, icon_url=user.display_avatar.url)
 
-        # Format description matching Image 2
         claim_prompt = t(lang, "GACHA_ROLL_CLAIM_PROMPT", default="Bấm Claim trong 60 giây để sở hữu!")
         field_rarity = t(lang, "GACHA_FIELD_RARITY", default="Độ hiếm")
         field_fav = t(lang, "GACHA_FIELD_FAVOURITES", default="Yêu thích")
@@ -725,7 +697,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         if char.get("image_url"):
             embed.set_image(url=char["image_url"])
 
-        # Footer matching Image 2
         remaining_rolls = profile["rolls"]
         max_rolls = profile["max_rolls"]
         footer_text = t(
@@ -737,12 +708,10 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         )
         embed.set_footer(text=footer_text)
 
-        # View with Claim Button
         view = RollCardView(self, char, time.time(), user.id, lang)
         try:
             sent_msg = await channel.send(embed=embed, view=view)
         except discord.Forbidden:
-            # Hoàn trả lượt roll và thông báo lỗi quyền
             await add_bonus_rolls(user.id, 1)
             err_fb = "❌ Bot không có quyền gửi tin nhắn hoặc Embed thẻ trong kênh này (403 Forbidden / Missing Access). Lượt roll đã được hoàn trả lại cho bạn!"
             if inter:
@@ -762,7 +731,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
             await add_bonus_rolls(user.id, 1)
             raise e
 
-        # Check wishlist notify
         try:
             wishlist_users = await get_wishlist_users(char["id"])
             if wishlist_users:
@@ -783,7 +751,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         except Exception:
             pass
 
-    # ------------------ COLLECTION HANDLER ------------------
 
     async def handle_collection(self, interaction_or_ctx, target_user: Optional[discord.User] = None):
         is_inter = isinstance(interaction_or_ctx, discord.Interaction)
@@ -811,7 +778,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         else:
             await interaction_or_ctx.send(embed=embed, view=view)
 
-    # ------------------ MERGE (GỘP SAO) HANDLER ------------------
 
     async def handle_merge(self, interaction_or_ctx):
         is_inter = isinstance(interaction_or_ctx, discord.Interaction)
@@ -842,7 +808,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         else:
             await interaction_or_ctx.send(embed=embed, view=view)
 
-    # ------------------ BUY ROLLS & CLAIMS HANDLERS ------------------
 
     async def handle_buy_roll(self, interaction_or_ctx):
         is_inter = isinstance(interaction_or_ctx, discord.Interaction)
@@ -897,7 +862,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         else:
             await interaction_or_ctx.send(embed=embed, view=view)
 
-    # ------------------ MARKETPLACE HANDLER ------------------
 
     async def handle_market(self, interaction_or_ctx):
         is_inter = isinstance(interaction_or_ctx, discord.Interaction)
@@ -935,7 +899,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         else:
             await interaction_or_ctx.send(embed=embed, view=view)
 
-    # ------------------ WISHLIST HANDLER ------------------
 
     async def handle_wishlist(self, interaction_or_ctx):
         is_inter = isinstance(interaction_or_ctx, discord.Interaction)
@@ -973,7 +936,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         else:
             await interaction_or_ctx.send(embed=embed)
 
-    # ------------------ LEADERBOARD HANDLER ------------------
 
     async def handle_leaderboard(self, interaction_or_ctx):
         is_inter = isinstance(interaction_or_ctx, discord.Interaction)
@@ -1010,7 +972,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         else:
             await interaction_or_ctx.send(embed=embed)
 
-    # ------------------ HELP HANDLER ------------------
 
     async def handle_help(self, interaction_or_ctx):
         is_inter = isinstance(interaction_or_ctx, discord.Interaction)
@@ -1052,9 +1013,7 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         else:
             await interaction_or_ctx.send(embed=embed)
 
-    # ------------------ COMMAND REGISTRATION ------------------
 
-    # pyrefly: ignore[unexpected-keyword]
     @commands.hybrid_group(name="gacha", aliases=["g"], fallback="menu", invoke_without_command=True, description="Open Waifu Gacha interactive menu / Mở menu Gacha Waifu")
     async def gacha(self, ctx: commands.Context):
         """Mở menu điều khiển chính của Gacha Waifu với đầy đủ các nút bấm y hệt hình ảnh."""
@@ -1104,7 +1063,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
             )
             return await ctx.send(err)
 
-        # Award coins to user
         await update_user_coins(guild_id, ctx.author.id, coins)
 
         msg = t(
@@ -1195,7 +1153,6 @@ class WaifuGachaCog(commands.Cog, name="WaifuGacha"):
         """Xem hướng dẫn luật chơi."""
         await self.handle_help(ctx)
 
-    # ------------------ SHORTCUT PREFIX COMMANDS ------------------
 
     @commands.command(name="roll", description="Quick roll a waifu card / Roll thẻ waifu nhanh")
     async def quick_roll(self, ctx: commands.Context):

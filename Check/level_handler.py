@@ -363,7 +363,6 @@ async def add_xp(user_id: int, guild_id: int, channel):
 load_leveling_data()
 
 
-# --- Extended leveling: ignored users, period activity and voice time ---
 _EXTENDED_TABLES_READY = False
 
 

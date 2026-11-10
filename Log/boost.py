@@ -48,7 +48,6 @@ class BoostLog(commands.Cog):
                 embed.set_footer(text=t(after.guild, "LOG_BOOST_FOOTER"))
             embed.timestamp = discord.utils.utcnow()
 
-            # Kiểm tra quyền hạn bot
             bot_member = after.guild.me
             if bot_member:
                 perms = channel.permissions_for(bot_member)

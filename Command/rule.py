@@ -19,7 +19,6 @@ def load_config() -> dict:
 
 
 def save_config(data: dict):
-    # Đảm bảo thư mục 'data' luôn tồn tại trước khi ghi file
     os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
@@ -65,7 +64,6 @@ class RuleVerificationView(discord.ui.View):
             )
             return
 
-        # Kiểm tra nếu thành viên đã có role từ trước
         if role in member.roles:
             await interaction.followup.send(
                 "ℹ️ Bạn đã xác nhận nội quy và mở khóa server trước đó rồi!",
@@ -73,7 +71,6 @@ class RuleVerificationView(discord.ui.View):
             )
             return
 
-        # Cấp role thành viên (chỉ tốn 1 API call duy nhất)
         try:
             await member.add_roles(role, reason="Đồng ý với nội quy server")
             await interaction.followup.send(
@@ -193,7 +190,6 @@ class RulesCog(commands.Cog, name="Rules"):
         await interaction.response.defer(ephemeral=True)
         guild = interaction.guild
 
-        # 1. Kiểm tra quyền của Bot
         if not guild.me.guild_permissions.manage_channels or not guild.me.guild_permissions.manage_roles:
             await interaction.followup.send(
                 "❌ Bot cần cả hai quyền **Quản lý kênh (Manage Channels)** và **Quản lý vai trò (Manage Roles)** để thiết lập!",
@@ -201,7 +197,6 @@ class RulesCog(commands.Cog, name="Rules"):
             )
             return
 
-        # 2. Xử lý Role xác nhận
         if role is None:
             try:
                 role = await guild.create_role(
@@ -220,7 +215,6 @@ class RulesCog(commands.Cog, name="Rules"):
                 )
                 return
 
-        # 3. Cấu hình quyền cho kênh Rules (Ai cũng thấy, nhưng không được chat)
         try:
             await kenh.set_permissions(
                 guild.default_role,
@@ -239,14 +233,12 @@ class RulesCog(commands.Cog, name="Rules"):
             )
             return
 
-        # 4. Đồng bộ ẩn các kênh khác với @everyone và mở cho Role thành viên (Nếu bật)
         synced_count = 0
         if dong_bo_kenh:
             for channel in guild.channels:
                 if channel.id == kenh.id:
                     continue
                 
-                # Bỏ qua các kênh hoặc danh mục vốn là kênh kín của Admin (đã ẩn với @everyone từ trước)
                 default_ov = channel.overwrites_for(guild.default_role)
                 if default_ov.view_channel is False:
                     continue
@@ -258,7 +250,6 @@ class RulesCog(commands.Cog, name="Rules"):
                 except (discord.Forbidden, discord.HTTPException):
                     continue
 
-        # 5. Lưu cấu hình
         config = load_config()
         config[str(guild.id)] = {
             "channel_id": kenh.id,
@@ -266,7 +257,6 @@ class RulesCog(commands.Cog, name="Rules"):
         }
         save_config(config)
 
-        # 6. Gửi bảng nội quy
         embed = self.build_rules_embed(guild)
         view = RuleVerificationView(self.bot, guild=guild)
         await kenh.send(embed=embed, view=view)

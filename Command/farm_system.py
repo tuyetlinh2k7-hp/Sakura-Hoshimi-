@@ -42,7 +42,6 @@ def safe_add_field(
     if len(embed.fields) >= 25:
         return
 
-    # Tính tổng ký tự hiện tại để tránh tràn 6000
     current_total = len(embed.title or "") + len(embed.description or "")
     if embed.footer and embed.footer.text:
         current_total += len(embed.footer.text)
@@ -96,18 +95,14 @@ def safe_add_field(
         embed.add_field(name=chunk_name, value=chunk or "*Không có*", inline=inline)
 
 
-# ==============================================================================
-# 1. CATALOG HẠT GIỐNG & NÔNG SẢN (SEEDS & CROPS)
-# ==============================================================================
 SEEDS_CATALOG = {
-    # Hoa màu & Lương thực cơ bản
     "seed_wheat": {
         "id": "seed_wheat",
         "name": "🌾 Hạt Giống Lúa Mì",
         "crop_id": "crop_wheat",
         "crop_name": "🌾 Bó Lúa Mì Vàng",
         "price": 500,
-        "grow_seconds": 180,  # 3 phút
+        "grow_seconds": 180,
         "yield_min": 2,
         "yield_max": 5,
         "sell_price": 450,
@@ -119,7 +114,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_carrot",
         "crop_name": "🥕 Cà Rốt Giòn Ngọt",
         "price": 1000,
-        "grow_seconds": 300,  # 5 phút
+        "grow_seconds": 300,
         "yield_min": 2,
         "yield_max": 5,
         "sell_price": 750,
@@ -131,7 +126,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_bokchoy",
         "crop_name": "🥬 Cây Cải Thìa Xanh",
         "price": 1500,
-        "grow_seconds": 420,  # 7 phút
+        "grow_seconds": 420,
         "yield_min": 2,
         "yield_max": 6,
         "sell_price": 950,
@@ -143,7 +138,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_tomato",
         "crop_name": "🍅 Cà Chua Mọng Đỏ",
         "price": 2500,
-        "grow_seconds": 600,  # 10 phút
+        "grow_seconds": 600,
         "yield_min": 3,
         "yield_max": 6,
         "sell_price": 1400,
@@ -155,7 +150,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_onion",
         "crop_name": "🧅 Củ Hành Tây Ngọt",
         "price": 3200,
-        "grow_seconds": 720,  # 12 phút
+        "grow_seconds": 720,
         "yield_min": 3,
         "yield_max": 6,
         "sell_price": 1700,
@@ -167,7 +162,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_garlic",
         "crop_name": "🧄 Củ Tỏi Tía Thơm",
         "price": 4000,
-        "grow_seconds": 840,  # 14 phút
+        "grow_seconds": 840,
         "yield_min": 3,
         "yield_max": 7,
         "sell_price": 2000,
@@ -179,7 +174,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_corn",
         "crop_name": "🌽 Bắp Ngô Vàng Óng",
         "price": 5000,
-        "grow_seconds": 960,  # 16 phút
+        "grow_seconds": 960,
         "yield_min": 3,
         "yield_max": 7,
         "sell_price": 2600,
@@ -191,20 +186,19 @@ SEEDS_CATALOG = {
         "crop_id": "crop_chili",
         "crop_name": "🌶️ Ớt Chỉ Thiên Đỏ",
         "price": 6500,
-        "grow_seconds": 1100, # 18 phút
+        "grow_seconds": 1100,
         "yield_min": 4,
         "yield_max": 8,
         "sell_price": 2800,
         "desc": "Ớt đỏ cay xé lưỡi, nấu món Cá Nướng Ớt kích hoạt tỉ lệ cá đột biến."
     },
-    # Trái cây ngọt ngào
     "seed_strawberry": {
         "id": "seed_strawberry",
         "name": "🍓 Hạt Giống Dâu Tây",
         "crop_id": "crop_strawberry",
         "crop_name": "🍓 Dâu Tây Đà Lạt",
         "price": 8500,
-        "grow_seconds": 1200, # 20 phút
+        "grow_seconds": 1200,
         "yield_min": 3,
         "yield_max": 7,
         "sell_price": 4200,
@@ -216,7 +210,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_watermelon",
         "crop_name": "🍉 Quả Dưa Hấu Khổng Lồ",
         "price": 15000,
-        "grow_seconds": 1800, # 30 phút
+        "grow_seconds": 1800,
         "yield_min": 2,
         "yield_max": 4,
         "sell_price": 11000,
@@ -228,7 +222,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_mushroom",
         "crop_name": "🍄 Nấm Hương Rừng Sâu",
         "price": 22000,
-        "grow_seconds": 1500, # 25 phút
+        "grow_seconds": 1500,
         "yield_min": 2,
         "yield_max": 5,
         "sell_price": 14000,
@@ -240,20 +234,19 @@ SEEDS_CATALOG = {
         "crop_id": "crop_grape",
         "crop_name": "🍇 Chùm Nho Tím Mộng",
         "price": 30000,
-        "grow_seconds": 2400, # 40 phút
+        "grow_seconds": 2400,
         "yield_min": 3,
         "yield_max": 6,
         "sell_price": 18000,
         "desc": "Nho tím ngọt thanh, nguyên liệu ủ rượu vang và nấu tiệc cung đình."
     },
-    # Hoa cảnh & Thảo mộc quý
     "seed_sunflower": {
         "id": "seed_sunflower",
         "name": "🌻 Hạt Giống Hướng Dương",
         "crop_id": "crop_sunflower",
         "crop_name": "🌻 Hoa Hướng Dương Rạng Rỡ",
         "price": 25000,
-        "grow_seconds": 1800, # 30 phút
+        "grow_seconds": 1800,
         "yield_min": 2,
         "yield_max": 5,
         "sell_price": 16000,
@@ -265,20 +258,19 @@ SEEDS_CATALOG = {
         "crop_id": "crop_rose",
         "crop_name": "🌹 Hoa Hồng Tình Yêu",
         "price": 35000,
-        "grow_seconds": 2100, # 35 phút
+        "grow_seconds": 2100,
         "yield_min": 2,
         "yield_max": 5,
         "sell_price": 22000,
         "desc": "Hoa hồng rực rỡ tượng trưng tình yêu, có thể tặng người thương hoặc bán giá cao."
     },
-    # Thần quả cao cấp
     "seed_golden_apple": {
         "id": "seed_golden_apple",
         "name": "🍏 Hạt Giống Táo Vàng",
         "crop_id": "crop_golden_apple",
         "crop_name": "🍏 Táo Vàng Hoàng Gia",
         "price": 120000,
-        "grow_seconds": 3600, # 60 phút
+        "grow_seconds": 3600,
         "yield_min": 2,
         "yield_max": 4,
         "sell_price": 85000,
@@ -290,7 +282,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_peach",
         "crop_name": "🍑 Đào Tiên Bồng Lai",
         "price": 250000,
-        "grow_seconds": 5400, # 90 phút
+        "grow_seconds": 5400,
         "yield_min": 2,
         "yield_max": 4,
         "sell_price": 180000,
@@ -302,7 +294,7 @@ SEEDS_CATALOG = {
         "crop_id": "crop_snow_lotus",
         "crop_name": "🪷 Tuyết Liên Vạn Năm",
         "price": 500000,
-        "grow_seconds": 7200, # 120 phút
+        "grow_seconds": 7200,
         "yield_min": 1,
         "yield_max": 3,
         "sell_price": 420000,
@@ -310,9 +302,6 @@ SEEDS_CATALOG = {
     }
 }
 
-# ==============================================================================
-# 2. CATALOG SÂU BỌ (PESTS & INSECTS)
-# ==============================================================================
 PESTS_CATALOG = {
     "caterpillar": {
         "id": "caterpillar",
@@ -351,9 +340,6 @@ PESTS_CATALOG = {
     }
 }
 
-# ==============================================================================
-# 2.1 CATALOG MẦM BỆNH NÔNG TRẠI (DISEASES & PATHOGENS)
-# ==============================================================================
 DISEASES_CATALOG = {
     "root_rot": {
         "id": "root_rot",
@@ -390,9 +376,6 @@ DISEASES_CATALOG = {
 }
 
 
-# ==============================================================================
-# CATALOG ĐỘT BIẾN HOA MÀU & NÔNG SẢN (CROP MUTATIONS)
-# ==============================================================================
 CROP_MUTATIONS = [
     {
         "id": "golden",
@@ -456,16 +439,13 @@ CROP_MUTATIONS = [
     }
 ]
 
-# ==============================================================================
-# 3. CATALOG DỤNG CỤ & PHÂN BÓN NÔNG TRẠI
-# ==============================================================================
 FARM_TOOLS_CATALOG = {
     "fertilizer_organic": {
         "id": "fertilizer_organic",
         "name": "🌿 Phân Hữu Cơ Vi Sinh",
         "price": 3000,
         "type": "fertilizer",
-        "speed_bonus": 0.30, # tăng 30% tốc độ lớn
+        "speed_bonus": 0.30,
         "yield_bonus": 0,
         "desc": "Tăng 30% tốc độ sinh trưởng của cây trồng trong ô đất."
     },
@@ -474,7 +454,7 @@ FARM_TOOLS_CATALOG = {
         "name": "⚡ Phân Bón Siêu Tốc",
         "price": 12000,
         "type": "fertilizer",
-        "speed_bonus": 0.50, # giảm 50% thời gian chín
+        "speed_bonus": 0.50,
         "yield_bonus": 0,
         "desc": "Kích thích cây lớn siêu tốc, rút ngắn 50% thời gian thu hoạch."
     },
@@ -484,7 +464,7 @@ FARM_TOOLS_CATALOG = {
         "price": 25000,
         "type": "fertilizer",
         "speed_bonus": 0,
-        "yield_bonus": 1.0, # x2 sản lượng thu hoạch
+        "yield_bonus": 1.0,
         "desc": "Cung cấp dinh dưỡng dồi dào, nhân đôi (x2) sản lượng nông sản thu hoạch."
     },
     "fertilizer_revive": {
@@ -501,7 +481,7 @@ FARM_TOOLS_CATALOG = {
         "name": "🪣 Bình Tưới Đồng",
         "price": 50000,
         "type": "tool",
-        "water_duration": 14400, # 4 giờ giữ ẩm
+        "water_duration": 14400,
         "desc": "Bình tưới bền bỉ, 1 lần tưới giữ đất ẩm suốt 4 tiếng."
     },
     "watering_can_silver": {
@@ -509,7 +489,7 @@ FARM_TOOLS_CATALOG = {
         "name": "🥈 Bình Tưới Bạc",
         "price": 250000,
         "type": "tool",
-        "water_duration": 28800, # 8 giờ giữ ẩm
+        "water_duration": 28800,
         "desc": "Bình tưới bạc sang trọng, giữ ẩm cho đất suốt 8 tiếng."
     },
     "watering_can_mythic": {
@@ -517,7 +497,7 @@ FARM_TOOLS_CATALOG = {
         "name": "🌟 Bình Tưới Thần Thoại",
         "price": 1500000,
         "type": "tool",
-        "water_duration": 86400, # 24 giờ giữ ẩm
+        "water_duration": 86400,
         "desc": "Bình tưới thần ban, tưới 1 lần đất giữ ẩm nguyên 1 ngày không sợ khô."
     },
     "farmer_gloves": {
@@ -525,7 +505,7 @@ FARM_TOOLS_CATALOG = {
         "name": "🧤 Bao Tay Nhà Nông",
         "price": 100000,
         "type": "tool",
-        "pest_catch_bonus": 0.50, # +50% bắt sâu quý
+        "pest_catch_bonus": 0.50,
         "desc": "Bảo vệ đôi bàn tay, tăng 50% tỉ lệ bắt được sâu bọ quý hiếm."
     },
     "greenhouse_cover": {
@@ -551,9 +531,6 @@ FARM_TOOLS_CATALOG = {
     }
 }
 
-# ==============================================================================
-# 4. MÙA MÀNG & THỜI TIẾT (SEASONS & WEATHER)
-# ==============================================================================
 SEASONS_INFO = {
     "spring": {
         "id": "spring",
@@ -585,7 +562,6 @@ SEASONS_INFO = {
     }
 }
 
-# Enrich SEEDS_CATALOG with backwards-compatible aliases (harvest_yield, crop_sell_price, etc.)
 for sk, sv in SEEDS_CATALOG.items():
     sv.setdefault("seed_price", sv.get("price", 1000))
     sv.setdefault("crop_sell_price", sv.get("sell_price", 500))
@@ -597,9 +573,6 @@ for sk, sv in SEEDS_CATALOG.items():
             preferred.append(s_data.get("name", s_id))
     sv.setdefault("preferred_seasons", preferred if preferred else ["Bốn mùa"])
 
-# ==============================================================================
-# CATALOG NÔNG SẢN THU HOẠCH (CROPS CATALOG)
-# ==============================================================================
 CROPS_CATALOG = {}
 for sk, sv in SEEDS_CATALOG.items():
     c_id = sv["crop_id"]
@@ -614,9 +587,6 @@ for sk, sv in SEEDS_CATALOG.items():
     }
 
 
-# ==============================================================================
-# HỆ THỐNG VẬT PHẨM TÙY CHỈNH ADMIN (CUSTOM FARM ITEMS)
-# ==============================================================================
 CUSTOM_FARM_FILE = Path(__file__).resolve().parent.parent / "data" / "custom_farm_items.json"
 
 def load_custom_farm_items() -> dict:
@@ -629,7 +599,6 @@ def load_custom_farm_items() -> dict:
     except Exception:
         return {"seeds": {}, "crops": {}, "fertilizers": {}, "tools": {}, "pests": {}, "diseases": {}}
 
-    # Gộp seeds & crops
     for sid, sdata in data.get("seeds", {}).items():
         sdata.setdefault("seed_price", sdata.get("price", 1000))
         sdata.setdefault("crop_sell_price", sdata.get("sell_price", 500))
@@ -649,7 +618,6 @@ def load_custom_farm_items() -> dict:
             "preferred_seasons": sdata.get("preferred_seasons", ["Bốn mùa"])
         }
 
-    # Gộp fertilizers & tools
     for tid, tdata in data.get("fertilizers", {}).items():
         tdata.setdefault("type", "fertilizer")
         FARM_TOOLS_CATALOG[tid] = tdata
@@ -658,7 +626,6 @@ def load_custom_farm_items() -> dict:
         tdata.setdefault("type", tdata.get("type", "tool"))
         FARM_TOOLS_CATALOG[tid] = tdata
 
-    # Gộp pests & diseases
     for pid, pdata in data.get("pests", {}).items():
         PESTS_CATALOG[pid] = pdata
 
@@ -782,9 +749,6 @@ def get_current_season_and_weather() -> Tuple[Dict[str, Any], Dict[str, Any]]:
     weather = override_weather or FARM_WEATHER_CYCLE[weather_idx]
     return season, weather
 
-# ==============================================================================
-# 5. CÔNG THỨC NẤU ĂN HẢI SẢN & NÔNG SẢN (COOKING RECIPES)
-# ==============================================================================
 FARM_COOK_RECIPES = {
     "canh_ca_ca_chua": {
         "name": "🍲 Canh Cá Cà Chua Tươi",
@@ -842,9 +806,6 @@ FARM_COOK_RECIPES = {
     }
 }
 
-# ==============================================================================
-# 6. LOGIC XỬ LÝ NÔNG TRẠI (FARM LOGIC HELPERS)
-# ==============================================================================
 def get_user_farm(u_fish: Dict[str, Any]) -> Dict[str, Any]:
     """Khởi tạo và lấy dữ liệu trang trại của người dùng."""
     farm = u_fish.setdefault("farm", {})
@@ -895,7 +856,7 @@ def update_farm_state(farm: Dict[str, Any]) -> Tuple[List[str], bool]:
     has_changes = False
 
     tools = farm.get("tools", {})
-    water_dur = 7200 # 2 giờ
+    water_dur = 7200
     if tools.get("watering_can_mythic", 0) > 0:
         water_dur = 86400
     elif tools.get("watering_can_silver", 0) > 0:
@@ -909,13 +870,11 @@ def update_farm_state(farm: Dict[str, Any]) -> Tuple[List[str], bool]:
         if not p.get("seed"):
             continue
         
-        # Mưa rào tự động tưới nước
         if is_rainy and not p.get("watered"):
             p["watered"] = True
             p["watered_at"] = now
             has_changes = True
 
-        # Độ ẩm đất
         if p.get("watered"):
             dry_rate = 2.0 if weather.get("effect") == "fast_dry" else 1.0
             actual_dur = water_dur / dry_rate
@@ -923,7 +882,6 @@ def update_farm_state(farm: Dict[str, Any]) -> Tuple[List[str], bool]:
                 p["watered"] = False
                 has_changes = True
 
-        # Héo úa do thiếu nước
         if not p.get("watered") and not p.get("wilted"):
             time_since_water = now - p.get("watered_at", 0)
             if time_since_water > (water_dur * 1.5):
@@ -931,14 +889,12 @@ def update_farm_state(farm: Dict[str, Any]) -> Tuple[List[str], bool]:
                 has_changes = True
                 logs.append(f"⚠️ Ô đất #{p['id']} cây bị héo do thiếu nước quá lâu!")
 
-        # Bão giông quật cây nếu không có lồng kính
         if weather.get("effect") == "storm_damage" and not p.get("greenhouse") and not p.get("wilted"):
             if random.random() < 0.15:
                 p["wilted"] = True
                 has_changes = True
                 logs.append(f"⛈️ Giông bão quật ngã cây ở ô đất #{p['id']}!")
 
-        # Xuất hiện sâu bọ ngẫu nhiên
         if not p.get("wilted") and not p.get("pests") and p.get("watered"):
             if random.random() < 0.12:
                 p["pests"] = True
@@ -958,31 +914,26 @@ def get_plot_growth_progress(plot: Dict[str, Any], season: Dict[str, Any], weath
     if not plot.get("seed"):
         return 0.0, False
     if plot.get("wilted"):
-        return 0.0, False # Cây bị héo úa ngừng lớn
+        return 0.0, False
 
     now = time.time()
     s_info = SEEDS_CATALOG.get(plot["seed"], {})
     base_sec = s_info.get("grow_seconds", 300)
 
-    # Hiệu ứng phân bón
     speed_factor = 1.0
     fert_id = plot.get("fertilizer")
     if fert_id and fert_id in FARM_TOOLS_CATALOG:
         speed_factor += FARM_TOOLS_CATALOG[fert_id].get("speed_bonus", 0.0)
 
-    # Hiệu ứng mùa màng
     crop_id = s_info.get("crop_id")
     if crop_id in season.get("favored_crops", []):
         speed_factor += 0.25
 
-    # Hiệu ứng thời tiết
     speed_factor *= weather.get("speed_multi", 1.0)
 
-    # Bị sâu bọ làm chậm 50%
     if plot.get("pests"):
         speed_factor *= 0.5
 
-    # Thiếu nước làm chậm 50%
     if not plot.get("watered"):
         speed_factor *= 0.5
 
@@ -992,9 +943,6 @@ def get_plot_growth_progress(plot: Dict[str, Any], season: Dict[str, Any], weath
     is_ready = (pct >= 100.0)
     return pct, is_ready
 
-# ==============================================================================
-# 7. GIAO DIỆN NÔNG TRẠI TƯƠNG TÁC (FARM VIEW)
-# ==============================================================================
 class FarmView(discord.ui.View):
     def __init__(self, author: discord.Member, guild_id: int):
         super().__init__(timeout=240)
@@ -1022,7 +970,6 @@ class FarmView(discord.ui.View):
         plots = farm.get("plots", [])
         season, weather = get_current_season_and_weather()
 
-        # Row 0: Chọn ô đất
         plot_options = []
         for p in plots:
             pct, ready = get_plot_growth_progress(p, season, weather)
@@ -1056,7 +1003,6 @@ class FarmView(discord.ui.View):
             sel.callback = self._select_plot_callback
             self.add_item(sel)
 
-        # Row 1: Gieo hạt (chọn hạt giống nếu ô trống)
         cur_plot = next((p for p in plots if p["id"] == self.selected_plot_id), None)
         seeds_inv = farm.get("seeds", {})
 
@@ -1081,7 +1027,6 @@ class FarmView(discord.ui.View):
                 seed_select.callback = self._plant_seed_callback
                 self.add_item(seed_select)
 
-        # Row 2: Các nút hành động chính
         water_btn = discord.ui.Button(label="Tưới Nước Toàn Bộ" if self.vi else "Water All", style=discord.ButtonStyle.primary, emoji="💧", row=2)
         water_btn.callback = self._water_all_callback
         self.add_item(water_btn)
@@ -1098,7 +1043,6 @@ class FarmView(discord.ui.View):
         revive_btn.callback = self._revive_callback
         self.add_item(revive_btn)
 
-        # Row 3: Bón phân, Shop Nông trại, Túi Farmer
         fert_btn = discord.ui.Button(label="Bón Phân" if self.vi else "Fertilize", style=discord.ButtonStyle.secondary, emoji="🧪", row=3)
         fert_btn.callback = self._open_fertilize_modal
         self.add_item(fert_btn)
@@ -1178,7 +1122,6 @@ class FarmView(discord.ui.View):
                 plot_prefix = f"**Ô #{pid}:**" if self.vi else f"**Plot #{pid}:**"
                 plot_lines.append(f"{plot_prefix} {s_name} — {status}{extra_str}")
 
-        # Chia các ô đất hợp lý để không vượt quá 1024 ký tự
         plots_field_name = f"🪴 Ô Đất Canh Tác ({len(plots)}/{farm.get('plots_count', 4)} ô)" if self.vi else f"🪴 Farming Plots ({len(plots)}/{farm.get('plots_count', 4)} plots)"
         if len(plot_lines) > 8:
             part1 = plot_lines[:8]
@@ -1190,7 +1133,6 @@ class FarmView(discord.ui.View):
         else:
             safe_add_field(embed, plots_field_name, "\n".join(plot_lines) if plot_lines else ("*Chưa có ô đất nào.*" if self.vi else "*No farming plots available.*"), inline=False)
 
-        # Thông tin kho nhanh
         crops = farm.get("crops", {})
         crop_summary = [f"{SEEDS_CATALOG.get(f'seed_{k[5:]}', {}).get('crop_name', k)}: `x{cnt}`" for k, cnt in crops.items() if cnt > 0]
         seeds = farm.get("seeds", {})
@@ -1260,7 +1202,6 @@ class FarmView(discord.ui.View):
         cur_plot["seed"] = seed_id
         cur_plot["planted_at"] = time.time()
 
-        # Kiểm tra dòng Enchant Farmer Tinh Nhuệ (farm_speed) từ cần câu đang trang bị
         from Command.command_fishing import get_rod_enchant_stats
         equipped_rod_id = u_fish.get("equipped_rod")
         cur_rod = u_fish.get("rods", {}).get(equipped_rod_id, {}) if equipped_rod_id else {}
@@ -1269,7 +1210,7 @@ class FarmView(discord.ui.View):
         speed_factor = 1.0 - (min(farm_speed_bonus, 50) / 100.0)
         cur_plot["grow_seconds"] = max(30, int(s_info["grow_seconds"] * speed_factor))
 
-        cur_plot["watered"] = True # Vừa gieo tự động có độ ẩm ban đầu
+        cur_plot["watered"] = True
         cur_plot["watered_at"] = time.time()
         cur_plot["fertilizer"] = None
         cur_plot["pests"] = False
@@ -1332,15 +1273,12 @@ class FarmView(discord.ui.View):
                 yield_cnt = random.randint(s_info["yield_min"], s_info["yield_max"])
 
                 plot_fert = p.get("fertilizer")
-                # Phân bội thu
                 if plot_fert == "fertilizer_yield":
                     yield_cnt = int(yield_cnt * 2)
 
-                # Mùa màng ưu đãi
                 if crop_id in season.get("favored_crops", []):
                     yield_cnt = int(yield_cnt * 1.3)
 
-                # Kiểm tra ĐỘT BIẾN NÔNG SẢN
                 mut_chance = base_mutation_chance
                 if plot_fert == "fertilizer_mythic":
                     mut_chance += 0.25
@@ -1373,7 +1311,6 @@ class FarmView(discord.ui.View):
                 crops_inv[crop_id] = crops_inv.get(crop_id, 0) + yield_cnt
                 harvested[s_info["crop_name"]] = harvested.get(s_info["crop_name"], 0) + yield_cnt
 
-                # Reset ô đất
                 p["seed"] = None
                 p["planted_at"] = 0
                 p["watered"] = False
@@ -1433,7 +1370,6 @@ class FarmView(discord.ui.View):
         if not cur_plot or not cur_plot.get("wilted"):
             return await interaction.response.send_message("🌿 Cây ở ô đất này vẫn đang xanh tốt, không bị héo úa!" if self.vi else "🌿 Crops in this plot are healthy and thriving!", ephemeral=True)
 
-        # Cần Phân Hồi Sinh hoặc Nước + Coins
         if ferts.get("fertilizer_revive", 0) > 0:
             ferts["fertilizer_revive"] -= 1
             cur_plot["wilted"] = False
@@ -1508,7 +1444,7 @@ class FarmView(discord.ui.View):
     async def _goto_farm_bag(self, interaction: discord.Interaction):
         from Command.command_fishing import FishingInventoryView
         inv_view = FishingInventoryView(self.author, self.guild_id)
-        inv_view.inv_page = 2 # Trang 3 (Farmer)
+        inv_view.inv_page = 2
         inv_view._build_components()
         u_data = await get_user_data(self.guild_id, self.author.id)
         await interaction.response.edit_message(embed=inv_view.build_embed(u_data.get("coins", 0), u_data.get("xu", 0)), view=inv_view)
@@ -1527,7 +1463,6 @@ class FarmView(discord.ui.View):
         if cur_plots >= 16:
             return await interaction.response.send_message("👑 Trang trại của bạn đã mở rộng tối đa (16 ô đất)!" if self.vi else "👑 Your farm is already at maximum capacity (16 plots)!", ephemeral=True)
 
-        # Bảng giá mở rộng
         costs = {4: 100000, 6: 500000, 8: 2000000, 10: 5000000, 12: 12000000, 14: 25000000}
         cost = costs.get(cur_plots, 5000000)
         u_data = await get_user_data(self.guild_id, self.author.id)
@@ -1537,7 +1472,6 @@ class FarmView(discord.ui.View):
 
         await update_user_coins(self.guild_id, self.author.id, -cost)
         farm["plots_count"] = cur_plots + 2
-        # Cập nhật thêm các ô mới vào list
         plots = farm.setdefault("plots", [])
         while len(plots) < farm["plots_count"]:
             plots.append({

@@ -8,17 +8,15 @@ import re
 from typing import Literal
 from Check.i18n import t
 
-# Import các hàm kiểm tra và biến cấu hình cần thiết
 from config import OWNER_ID
 from Check.mod import admin_roles, has_admin_role, is_owner
 
-# --- Quản lý dữ liệu (chia sẻ với link_filter) ---
 LINK_WARNINGS_FILE = "data/link_warnings.json"
 LINK_SETTINGS_FILE = "data/link_filter_settings.json"
 
 link_warnings = {}
 link_settings = {}
-global_invite_filter_enabled = False # Trạng thái toàn cục (Owner)
+global_invite_filter_enabled = False
 
 def load_invite_data():
     """Tải dữ liệu cảnh cáo và cài đặt."""
@@ -34,7 +32,6 @@ def load_invite_data():
             try: link_settings = json.load(f)
             except json.JSONDecodeError: link_settings = {}
 
-    # Tải trạng thái bật/tắt, mặc định là False (tắt)
     global_invite_filter_enabled = link_settings.get("__global__", {}).get("invite_enabled", False)
 
 def save_link_warnings():
@@ -53,7 +50,6 @@ def save_settings():
     with open(LINK_SETTINGS_FILE, 'w') as f:
         json.dump(link_settings, f, indent=4)
 
-# --- VIEW ĐIỀU KHIỂN ---
 class AntiInviteControlView(discord.ui.View):
     """View chứa các nút bật/tắt cho bộ lọc link mời."""
     def __init__(self, author_id: int, guild_id: int, guild=None):
@@ -105,7 +101,6 @@ class InviteFilterCog(commands.Cog, name="Invite Filter"):
 
         await message.delete()
 
-        # Xử lý hệ thống cảnh cáo và mute
         warning_limit = link_settings.get(guild_id_str, {}).get("warning_limit", 5)
         if guild_id_str not in link_warnings: link_warnings[guild_id_str] = {}
         user_warnings = link_warnings[guild_id_str].get(user_id_str, 0)
@@ -117,7 +112,7 @@ class InviteFilterCog(commands.Cog, name="Invite Filter"):
                 await message.author.timeout(duration, reason=f"Vi phạm quy định về link ({reason}) quá nhiều lần.")
                 mute_embed = discord.Embed(title=t(message.guild, "ANTI_INVITE_AUTOMUTE_TITLE"), description=t(message.guild, "ANTI_INVITE_AUTOMUTE_DESC", mention=message.author.mention, limit=warning_limit), color=discord.Color.dark_red())
                 await message.channel.send(embed=mute_embed)
-                link_warnings[guild_id_str][user_id_str] = 0 # Reset cảnh cáo
+                link_warnings[guild_id_str][user_id_str] = 0
             except discord.Forbidden:
                 await message.channel.send(t(message.guild, "ANTI_INVITE_MUTE_FORBIDDEN", mention=message.author.mention), delete_after=10)
         else:
@@ -136,10 +131,8 @@ class InviteFilterCog(commands.Cog, name="Invite Filter"):
         if not message.guild or message.author.bot or not message.content:
             return
 
-        # 1. Kiểm tra Global Toggle (Owner)
         if not global_invite_filter_enabled:
             return
-        # 2. Kiểm tra Server Toggle (Admin), mặc định là Tắt nếu chưa cài đặt
         guild_setting = link_settings.get(str(message.guild.id), {}).get("invite_enabled_guild", False)
         if not guild_setting:
             return
@@ -152,7 +145,6 @@ class InviteFilterCog(commands.Cog, name="Invite Filter"):
         if any(admin_role_id in user_role_ids for admin_role_id in guild_admin_roles):
             return
 
-        # Xử lý link mời Discord
         invite_pattern = re.compile(r"(?:discord(?:app)?\.com/invite/|discord\.gg/)([a-zA-Z0-9-]+)")
         invites_found = invite_pattern.findall(message.content)
 
@@ -165,7 +157,7 @@ class InviteFilterCog(commands.Cog, name="Invite Filter"):
                         is_foreign_invite = True
                         break
                 except discord.NotFound:
-                    is_foreign_invite = True # Coi link không hợp lệ là vi phạm
+                    is_foreign_invite = True
                     break
                 except Exception as e:
                     print(f"[Invite Filter] Lỗi khi fetch invite '{code}': {e}")
@@ -180,9 +172,7 @@ class InviteFilterCog(commands.Cog, name="Invite Filter"):
     async def antiinvite(self, ctx: commands.Context):
         """Lệnh gốc cho nhóm quản lý chống link mời."""
         if ctx.invoked_subcommand is None:
-            # Trạng thái toàn cục
             global_status_text = t(ctx.guild, "ANTI_LINK_STATUS_ON") if global_invite_filter_enabled else t(ctx.guild, "ANTI_LINK_STATUS_OFF")
-            # Trạng thái server
             guild_setting = link_settings.get(str(ctx.guild.id), {}).get("invite_enabled_guild", False)
             guild_status_text = t(ctx.guild, "ANTI_LINK_STATUS_ON") if guild_setting else t(ctx.guild, "ANTI_LINK_STATUS_OFF")
             

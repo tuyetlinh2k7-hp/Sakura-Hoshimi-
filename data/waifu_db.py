@@ -13,7 +13,6 @@ DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "waifu_gacha.db"
 CHARACTERS_JSON = DATA_DIR / "waifu_characters.json"
 
-# Rarity configurations & burn values
 RARITY_CONFIG = {
     "common": {
         "name_vi": "Thường",
@@ -22,7 +21,7 @@ RARITY_CONFIG = {
         "name_cn": "普通",
         "burn_coins": 15,
         "indicator": "🔷 ◽ ◽ ◽",
-        "color": 0x95a5a6,  # Slate Grey
+        "color": 0x95a5a6,
         "max_favs": 2000,
         "drop_weight": 50,
     },
@@ -33,7 +32,7 @@ RARITY_CONFIG = {
         "name_cn": "稀有",
         "burn_coins": 50,
         "indicator": "🔷 🔷 ◽ ◽",
-        "color": 0x3498db,  # Blue
+        "color": 0x3498db,
         "max_favs": 8000,
         "drop_weight": 30,
     },
@@ -44,7 +43,7 @@ RARITY_CONFIG = {
         "name_cn": "史诗",
         "burn_coins": 150,
         "indicator": "🔷 🔷 🔷 ◽",
-        "color": 0x9b59b6,  # Purple
+        "color": 0x9b59b6,
         "max_favs": 20000,
         "drop_weight": 15,
     },
@@ -55,15 +54,15 @@ RARITY_CONFIG = {
         "name_cn": "传说",
         "burn_coins": 500,
         "indicator": "🔷 🔷 🔷 🔷",
-        "color": 0xf1c40f,  # Gold
+        "color": 0xf1c40f,
         "max_favs": 50000,
         "drop_weight": 5,
     },
 }
 
-ROLL_REGEN_SECONDS = 300   # 1 roll per 5 minutes
+ROLL_REGEN_SECONDS = 300
 DEFAULT_MAX_ROLLS = 15
-CLAIM_REGEN_SECONDS = 7200 # 1 claim per 2 hours
+CLAIM_REGEN_SECONDS = 7200
 DEFAULT_MAX_CLAIMS = 1
 
 
@@ -154,7 +153,6 @@ async def init_waifu_db():
 
         await db.commit()
 
-    # Load characters if table is empty or update
     await sync_characters_from_json()
 
 
@@ -197,7 +195,6 @@ async def sync_characters_from_json():
         print(f"Error syncing characters: {e}")
 
 
-# ===================== USER PROFILE & TIMERS =====================
 
 async def get_or_create_profile(user_id: int) -> dict:
     now = time.time()
@@ -206,7 +203,6 @@ async def get_or_create_profile(user_id: int) -> dict:
             row = await cur.fetchone()
 
         if not row:
-            # Create fresh profile
             await db.execute("""
                 INSERT INTO user_profiles (user_id, rolls, max_rolls, last_roll_regen, claims, max_claims, last_claim_regen)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -239,7 +235,6 @@ async def get_or_create_profile(user_id: int) -> dict:
 
         updated = False
 
-        # Regen rolls if below max_rolls
         if rolls < max_rolls:
             elapsed_roll = now - last_roll_regen
             added_rolls = int(elapsed_roll // ROLL_REGEN_SECONDS)
@@ -250,7 +245,6 @@ async def get_or_create_profile(user_id: int) -> dict:
         else:
             last_roll_regen = now
 
-        # Regen claims if below max_claims
         if claims < max_claims:
             elapsed_claim = now - last_claim_regen
             added_claims = int(elapsed_claim // CLAIM_REGEN_SECONDS)
@@ -274,7 +268,6 @@ async def get_or_create_profile(user_id: int) -> dict:
         profile["claims"] = claims
         profile["last_claim_regen"] = last_claim_regen
 
-        # Compute remaining seconds until next regen
         if rolls < max_rolls:
             profile["next_roll_in"] = max(0, int(ROLL_REGEN_SECONDS - (now - last_roll_regen)))
         else:
@@ -360,10 +353,8 @@ async def add_bonus_claims(user_id: int, count: int) -> int:
     return new_claims
 
 
-# ===================== CHARACTER SELECTION =====================
 
 async def get_random_character() -> Optional[dict]:
-    # Weighted choice by rarity
     rarities = list(RARITY_CONFIG.keys())
     weights = [RARITY_CONFIG[r]["drop_weight"] for r in rarities]
     chosen_rarity = random.choices(rarities, weights=weights, k=1)[0]
@@ -375,7 +366,6 @@ async def get_random_character() -> Optional[dict]:
             row = await cur.fetchone()
 
         if not row:
-            # Fallback to any character if that rarity has no rows
             async with db.execute("SELECT * FROM characters ORDER BY RANDOM() LIMIT 1") as cur2:
                 row = await cur2.fetchone()
 
@@ -402,7 +392,6 @@ async def search_characters(query: str, limit: int = 15) -> List[dict]:
             return [dict(r) for r in rows]
 
 
-# ===================== CARD MANAGEMENT =====================
 
 def calculate_card_points(base_favourites: int, stars: int) -> int:
     """
@@ -426,14 +415,12 @@ async def mint_card(user_id: int, character_id: int) -> dict:
     code = uuid.uuid4().hex[:6].lower()
 
     async with get_connection() as db:
-        # Check uniqueness of code
         while True:
             async with db.execute("SELECT 1 FROM user_cards WHERE code = ?", (code,)) as c:
                 if not await c.fetchone():
                     break
             code = uuid.uuid4().hex[:6].lower()
 
-        # Update character_stats total_claims to get print_number
         await db.execute("""
             INSERT INTO character_stats (character_id, total_claims)
             VALUES (?, 1)
@@ -505,7 +492,6 @@ async def burn_card(code: str, user_id: int) -> Tuple[bool, int, Optional[dict]]
     if not card or card["user_id"] != user_id:
         return False, 0, None
 
-    # Check if card is currently listed on market
     async with get_connection() as db:
         async with db.execute("SELECT 1 FROM market_listings WHERE card_code = ?", (code,)) as cur:
             if await cur.fetchone():
@@ -514,7 +500,6 @@ async def burn_card(code: str, user_id: int) -> Tuple[bool, int, Optional[dict]]
         rarity = card["rarity"]
         burn_coins = RARITY_CONFIG.get(rarity, {}).get("burn_coins", 15)
 
-        # Delete card
         await db.execute("DELETE FROM user_cards WHERE code = ?", (code,))
         await db.commit()
 
@@ -547,7 +532,6 @@ async def merge_star(user_id: int, character_id: int) -> Tuple[bool, str, Option
     Upgrades 1 card by +1 star (max 5⭐), consumes (deletes) 2 other cards.
     """
     async with get_connection() as db:
-        # Find eligible cards not on marketplace
         async with db.execute("""
             SELECT c.code, c.stars, c.base_favourites
             FROM user_cards c
@@ -560,7 +544,6 @@ async def merge_star(user_id: int, character_id: int) -> Tuple[bool, str, Option
         if len(rows) < 3:
             return False, "NEED_3_CARDS", None
 
-        # Select target card (highest star one that is < 5)
         target = None
         others = []
         for r in rows:
@@ -572,23 +555,19 @@ async def merge_star(user_id: int, character_id: int) -> Tuple[bool, str, Option
         if not target or len(others) < 2:
             return False, "MAX_STARS_REACHED", None
 
-        # Take 2 cards to consume
         consume_codes = [others[0]["code"], others[1]["code"]]
         new_stars = target["stars"] + 1
         new_points = calculate_card_points(target["base_favourites"], new_stars)
         target_code = target["code"]
 
-        # Delete the 2 consumed cards
         await db.execute("DELETE FROM user_cards WHERE code IN (?, ?)", (consume_codes[0], consume_codes[1]))
 
-        # Upgrade target card
         await db.execute("""
             UPDATE user_cards
             SET stars = ?, points = ?
             WHERE code = ?
         """, (new_stars, new_points, target_code))
 
-        # Update profile merge counter
         await db.execute("UPDATE user_profiles SET total_merges = total_merges + 1 WHERE user_id = ?", (user_id,))
         await db.commit()
 
@@ -596,7 +575,6 @@ async def merge_star(user_id: int, character_id: int) -> Tuple[bool, str, Option
     return True, "SUCCESS", upgraded_card
 
 
-# ===================== MARKETPLACE =====================
 
 async def list_card_for_sale(card_code: str, seller_id: int, price_coins: int) -> Tuple[bool, str]:
     card = await get_user_card(card_code)
@@ -607,7 +585,6 @@ async def list_card_for_sale(card_code: str, seller_id: int, price_coins: int) -
 
     now = time.time()
     async with get_connection() as db:
-        # Check if already listed
         async with db.execute("SELECT 1 FROM market_listings WHERE card_code = ?", (card_code,)) as cur:
             if await cur.fetchone():
                 return False, "ALREADY_LISTED"
@@ -671,9 +648,7 @@ async def buy_market_listing(listing_id: int, buyer_id: int) -> Tuple[bool, str,
         seller_id = listing["seller_id"]
         price = listing["price_coins"]
 
-        # Transfer card ownership
         await db.execute("UPDATE user_cards SET user_id = ? WHERE code = ?", (buyer_id, card_code))
-        # Remove listing
         await db.execute("DELETE FROM market_listings WHERE listing_id = ?", (listing_id,))
         await db.commit()
 
@@ -685,7 +660,6 @@ async def buy_market_listing(listing_id: int, buyer_id: int) -> Tuple[bool, str,
     }
 
 
-# ===================== WISHLIST =====================
 
 async def add_wishlist(user_id: int, character_id: int) -> Tuple[bool, str]:
     now = time.time()
@@ -737,7 +711,6 @@ async def get_wishlist_users(character_id: int) -> List[int]:
             return [r["user_id"] for r in rows]
 
 
-# ===================== LEADERBOARD =====================
 
 async def get_top_collectors(limit: int = 10) -> List[dict]:
     async with get_connection() as db:
@@ -757,7 +730,6 @@ async def get_top_collectors(limit: int = 10) -> List[dict]:
             return [dict(r) for r in rows]
 
 
-# ===================== ADMIN & EXTENDED STATS =====================
 
 async def get_gacha_global_stats() -> dict:
     async with get_connection() as db:
@@ -828,7 +800,6 @@ async def admin_grant_card(user_id: int, character_id: int, stars: int = 1, prin
     code = uuid.uuid4().hex[:6].lower()
 
     async with get_connection() as db:
-        # Check uniqueness of code
         while True:
             async with db.execute("SELECT 1 FROM user_cards WHERE code = ?", (code,)) as c:
                 if not await c.fetchone():
@@ -899,7 +870,6 @@ async def get_waifu_leaderboard_extended(limit: int = 100) -> List[dict]:
         result = []
         for r in rows:
             entry = dict(r)
-            # Find the user's top card
             async with db.execute("""
                 SELECT c.code, c.stars, c.points, ch.name, ch.image_url, ch.rarity
                 FROM user_cards c

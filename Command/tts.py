@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 import discord
-import Check.dave_patch  # Kích hoạt bản vá DAVE E2EE 0.2.0 cho discord.py 2.7.1
+import Check.dave_patch
 from discord import app_commands
 from discord.ext import commands
 
@@ -246,7 +246,6 @@ class TextToSpeechCog(commands.Cog, name="Text-to-Speech"):
             return
 
         vc = message.guild.voice_client
-        # Không chạy TTS nếu bot chưa vào voice hoặc đang là trình phát nhạc Wavelink
         if not vc or is_wavelink_player(vc):
             return
 
@@ -364,7 +363,6 @@ class TextToSpeechCog(commands.Cog, name="Text-to-Speech"):
         voice_channel = author.voice.channel
         vc = guild.voice_client
 
-        # ƯU TIÊN TTS: Nếu bot đang phát nhạc bằng Wavelink CustomPlayer, tự động dừng nhạc và ngắt Wavelink
         if vc and is_wavelink_player(vc):
             try:
                 if hasattr(vc, "queue"):
@@ -422,16 +420,13 @@ class TextToSpeechCog(commands.Cog, name="Text-to-Speech"):
         embed.set_footer(text=f"Yêu cầu bởi {author.display_name}", icon_url=author.display_avatar.url)
         await reply(embed=embed)
 
-        # Cảnh báo nếu bot bị Server Mute trong phòng thoại
         if guild.me.voice and guild.me.voice.mute:
             await channel.send("⚠️ **Cảnh báo**: Sakura đang bị **Tắt tiếng (Server Mute)** trong kênh thoại. Vui lòng Bỏ Tắt Tiếng (Unmute) cho bot để nghe được âm thanh!", delete_after=15)
 
-        # Cảnh báo nếu bot thiếu quyền Nói (Speak)
         perms = voice_channel.permissions_for(guild.me)
         if not perms.speak:
             await channel.send("⚠️ **Cảnh báo**: Sakura không có quyền **Nói (Speak)** trong kênh thoại này. Vui lòng cấp quyền để bot phát âm thanh!", delete_after=15)
 
-        # Chờ 0.8s để kết nối voice và mã hóa DAVE (E2EE) của Discord hoàn tất bắt tay (handshake)
         await asyncio.sleep(0.8)
         await play_announcement(guild, "Sakura đã tìm thấy kênh thoại, Sakura sẽ đọc chat của các bạn", self.bot)
 

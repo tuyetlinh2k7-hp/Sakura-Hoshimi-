@@ -7,22 +7,19 @@ import hashlib
 from collections import defaultdict
 import typing
 
-# --- CẤU HÌNH HỆ THỐNG ---
 CONFIG_FILE = "antispam_config.json"
-SPAM_THRESHOLD_COUNT = 3       # Số tin nhắn trùng lặp kích hoạt phạt
-SPAM_INTERVAL_SECONDS = 10     # Giới hạn thời gian (giây) theo dõi tin nhắn
-MUTE_DURATION_MINUTES = 5      # Thời gian timeout thành viên (phút)
-MAX_USER_MENTIONS = 4          # Giới hạn số lượng tag user trong 1 tin
+SPAM_THRESHOLD_COUNT = 3
+SPAM_INTERVAL_SECONDS = 10
+MUTE_DURATION_MINUTES = 5
+MAX_USER_MENTIONS = 4
 
 
 class AntiSpam(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # {guild_id: {user_id: [records]}}
         self.user_message_history = defaultdict(lambda: defaultdict(list))
         self.config = self._load_config()
 
-    # --- QUẢN LÝ CẤU HÌNH FILE JSON ---
     def _load_config(self) -> dict:
         if os.path.exists(CONFIG_FILE):
             try:
@@ -74,7 +71,6 @@ class AntiSpam(commands.Cog):
         except (discord.Forbidden, discord.HTTPException):
             pass
 
-    # --- LỆNH SETUP HỆ THỐNG ---
     @commands.command(name="setup_antispam")
     @commands.has_permissions(administrator=True)
     async def setup_antispam(
@@ -93,7 +89,6 @@ class AntiSpam(commands.Cog):
         created_spam = False
         created_log = False
 
-        # 1. Thiết lập kênh cách ly spam
         if not spam_channel:
             spam_channel = discord.utils.get(guild.text_channels, name="canh-bao-spam")
             if not spam_channel:
@@ -113,7 +108,6 @@ class AntiSpam(commands.Cog):
                 )
                 created_spam = True
 
-        # Gửi và ghim bảng quy định vào kênh spam trước khi kích hoạt lưu config
         embed_warning = discord.Embed(
             title="🚫 KHU VỰC CÁCH LY & GIÁM SÁT SPAM",
             description=(
@@ -132,7 +126,6 @@ class AntiSpam(commands.Cog):
             pinned = await spam_channel.send(embed=embed_warning)
             await pinned.pin(reason="Ghim bảng nội quy phòng spam")
 
-            # Xóa thông báo hệ thống báo vừa ghim tin
             async for sys_msg in spam_channel.history(limit=5):
                 if sys_msg.type == discord.MessageType.pins_add:
                     await sys_msg.delete()
@@ -140,7 +133,6 @@ class AntiSpam(commands.Cog):
         except (discord.Forbidden, discord.HTTPException):
             pass
 
-        # 2. Thiết lập kênh log xử phạt
         if not log_channel:
             log_channel = discord.utils.get(guild.text_channels, name="log-xu-phat")
             if not log_channel:
@@ -159,7 +151,6 @@ class AntiSpam(commands.Cog):
                 )
                 created_log = True
 
-        # 3. Cập nhật cấu hình
         self.config[str(guild.id)] = {
             "spam_channel_id": spam_channel.id,
             "log_channel_id": log_channel.id
@@ -181,7 +172,6 @@ class AntiSpam(commands.Cog):
         )
         await ctx.send(embed=embed_success)
 
-    # --- BẮT VÀ XỬ LÝ SỰ KIỆN SPAM ---
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if not message.guild:
@@ -192,9 +182,7 @@ class AntiSpam(commands.Cog):
         now = datetime.datetime.now(datetime.timezone.utc)
         spam_channel_id, log_channel_id = self._get_guild_channels(guild.id)
 
-        # 1. TỰ HỦY TIN NHẮN TẠI KÊNH SPAM (CHO CẢ USER VÀ BOT)
         if spam_channel_id and message.channel.id == spam_channel_id:
-            # Không xóa tin nhắn hệ thống hoặc tin nhắn đã ghim
             if message.is_system() or message.pinned:
                 return
 
@@ -203,15 +191,12 @@ class AntiSpam(commands.Cog):
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 pass
 
-            # Nếu là Bot gửi, chỉ xóa tin sau 30s rồi dừng (không xử phạt bot)
             if member.bot:
                 return
 
-        # 2. Bỏ qua bot ở các kênh thông thường
         if member.bot:
             return
 
-        # 3. THEO DÕI TẦN SUẤT TIN NHẮN
         user_records = self.user_message_history[guild.id][member.id]
         cutoff = now - datetime.timedelta(seconds=SPAM_INTERVAL_SECONDS)
         user_records[:] = [r for r in user_records if r["time"] > cutoff]
@@ -233,11 +218,9 @@ class AntiSpam(commands.Cog):
         match_count = sum(1 for r in user_records if r["sig"] == msg_sig)
         mention_count = sum(1 for r in user_records if r["is_mention"])
 
-        # Điều kiện vi phạm: Trùng lặp >= 3 lần HOẶC spam tag >= 2 lần
         if match_count < SPAM_THRESHOLD_COUNT and mention_count < 2:
             return
 
-        # 4. KÍCH HOẠT XỬ PHẠT
         is_mod = (
             member.guild_permissions.manage_messages
             or member.guild_permissions.kick_members
@@ -253,14 +236,12 @@ class AntiSpam(commands.Cog):
 
         user_records.clear()
 
-        # Dọn dẹp tin nhắn vi phạm
         for msg in violating_messages:
             try:
                 await msg.delete()
             except (discord.NotFound, discord.Forbidden):
                 pass
 
-        # Xác định kênh nhận log (Ưu tiên log_channel, nếu không có sẽ gửi vào spam_channel)
         target_log_channel = (
             guild.get_channel(log_channel_id) if log_channel_id else None
         ) or (
@@ -268,7 +249,6 @@ class AntiSpam(commands.Cog):
         )
 
         if is_mod:
-            # Đối với Quản trị viên: Gửi DM cảnh báo
             await self._send_dm(
                 member,
                 f"⚠️ **[CẢNH BÁO QUẢN TRỊ VIÊN]** Tại server **{guild.name}**:\n"
@@ -280,7 +260,6 @@ class AntiSpam(commands.Cog):
                     f"🛡️ **[Cảnh báo Mod]** Quản trị viên {member.mention} vừa bị dọn dẹp tin nhắn trùng lặp/spam tag."
                 )
         else:
-            # Đối với Thành viên thường: Timeout 5 phút
             timeout_success = False
             try:
                 mute_time = datetime.timedelta(minutes=MUTE_DURATION_MINUTES)
@@ -302,7 +281,6 @@ class AntiSpam(commands.Cog):
                     f"⚠️ **[CẢNH BÁO SPAM]** Tin nhắn spam của bạn tại server **{guild.name}** đã bị xóa tự động."
                 )
 
-            # Gửi thông báo log chi tiết
             if target_log_channel:
                 status_note = f"Đã timeout {MUTE_DURATION_MINUTES} phút" if timeout_success else "Không thể timeout (Bot thiếu quyền hoặc Role thấp hơn)"
                 embed = discord.Embed(
@@ -321,6 +299,5 @@ class AntiSpam(commands.Cog):
                 await target_log_channel.send(embed=embed)
 
 
-# --- NẠP COG VÀO BOT ---
 async def setup(bot: commands.Bot):
     await bot.add_cog(AntiSpam(bot))

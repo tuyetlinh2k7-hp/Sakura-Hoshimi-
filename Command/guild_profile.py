@@ -3,7 +3,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-# Giới hạn dung lượng ảnh (10 MB) và các định dạng cho phép
 MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/gif", "image/webp"}
 
@@ -34,7 +33,6 @@ class GuildProfile(commands.Cog):
 
         return await attachment.read()
 
-    # --- NHÓM LỆNH SLASH /profile (Tối ưu hóa Slash Commands) ---
     profile_group = app_commands.Group(name="profile", description="Quản lý hồ sơ Bot và trang Bio Profile cá nhân")
 
     @profile_group.command(
@@ -45,7 +43,7 @@ class GuildProfile(commands.Cog):
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.checks.bot_has_permissions(change_nickname=True)
-    @app_commands.checks.cooldown(2, 300.0, key=lambda i: i.guild_id)  # Tối đa 2 lần / 5 phút mỗi server
+    @app_commands.checks.cooldown(2, 300.0, key=lambda i: i.guild_id)
     @app_commands.describe(
         ten="Biệt danh mới của bot (1 - 32 ký tự)",
         avatar="Ảnh đại diện mới (PNG, JPG, GIF, WebP - tối đa 10MB)",
@@ -63,7 +61,6 @@ class GuildProfile(commands.Cog):
         if not interaction.guild or not interaction.guild.me:
             return
 
-        # Kiểm tra nếu người dùng không truyền bất kỳ tham số nào
         if all(param is None for param in (ten, avatar, banner, bio)):
             await interaction.response.send_message(
                 "⚠️ Bạn cần cung cấp ít nhất một thông tin (tên, avatar, banner hoặc bio) để cập nhật!",
@@ -78,17 +75,14 @@ class GuildProfile(commands.Cog):
         }
         updated_fields = []
 
-        # 1. Xử lý Tên (Nickname)
         if ten is not None:
             edit_kwargs["nick"] = ten
             updated_fields.append(("🏷️ Tên mới", f"`{ten}`", True))
 
-        # 2. Xử lý Bio
         if bio is not None:
             edit_kwargs["bio"] = bio
             updated_fields.append(("📝 Tiểu sử (Bio)", bio, False))
 
-        # 3. Xử lý Avatar
         if avatar is not None:
             avatar_bytes = await self._validate_and_read_image(interaction, avatar, "Avatar")
             if avatar_bytes is None:
@@ -96,7 +90,6 @@ class GuildProfile(commands.Cog):
             edit_kwargs["avatar"] = avatar_bytes
             updated_fields.append(("🖼️ Avatar", "Đã cập nhật", True))
 
-        # 4. Xử lý Banner
         if banner is not None:
             banner_bytes = await self._validate_and_read_image(interaction, banner, "Banner")
             if banner_bytes is None:
@@ -105,7 +98,6 @@ class GuildProfile(commands.Cog):
             updated_fields.append(("🚩 Banner", "Đã cập nhật", True))
 
         try:
-            # Gọi API cập nhật một lần duy nhất
             await interaction.guild.me.edit(**edit_kwargs)
 
             embed = discord.Embed(
@@ -220,7 +212,6 @@ class GuildProfile(commands.Cog):
             socials_count = len([v for v in prof.get("socials", {}).values() if v])
             embed.add_field(name="🔗 Liên kết & Mạng xã hội", value=f"• **{links_count}** liên kết đính kèm\n• **{socials_count}** tài khoản mạng xã hội", inline=True)
 
-            # Trạng thái Minecraft Plugin & Hôn nhân
             status_lines = []
             target_uid = prof.get("user_id") or prof.get("discord_id") or prof.get("owner_id")
             if not target_uid and slug.isdigit():
@@ -267,7 +258,6 @@ class GuildProfile(commands.Cog):
             view.add_item(discord.ui.Button(label="🌐 Khám Phá Thêm Profiles", url=f"{web_base}/profile", style=discord.ButtonStyle.link))
             return await interaction.response.send_message(embed=embed, view=view)
 
-        # Xem danh mục hồ sơ tổng hợp
         total_count = len(profiles)
         caller_status = []
         try:
@@ -320,7 +310,6 @@ class GuildProfile(commands.Cog):
         view.add_item(discord.ui.Button(label="➕ Tạo Hồ Sơ Của Bạn", url=f"{web_base}/add-profile", style=discord.ButtonStyle.link))
         await interaction.response.send_message(embed=embed, view=view)
 
-    # Xử lý lỗi chung cho các lệnh trong Cog
     async def cog_app_command_error(
         self,
         interaction: discord.Interaction,

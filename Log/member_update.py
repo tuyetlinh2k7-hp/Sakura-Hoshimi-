@@ -49,7 +49,6 @@ class MemberLog(commands.Cog):
 
         embeds_to_send: list[discord.Embed] = []
 
-        # 1. Nickname
         if before.nick != after.nick:
             embed = self._create_base_embed(
                 after, guild, t(guild, "LOG_MEMBER_NICK_TITLE"), discord.Color.orange()
@@ -66,7 +65,6 @@ class MemberLog(commands.Cog):
             )
             embeds_to_send.append(embed)
 
-        # 2. Roles
         if before.roles != after.roles:
             before_set = set(before.roles)
             after_set = set(after.roles)
@@ -93,7 +91,6 @@ class MemberLog(commands.Cog):
                     )
                 embeds_to_send.append(embed)
 
-        # 3. Timeout
         if before.timed_out_until != after.timed_out_until:
             embed = self._create_base_embed(
                 after, guild, t(guild, "LOG_MEMBER_TIMEOUT_TITLE"), discord.Color.red()
@@ -108,7 +105,6 @@ class MemberLog(commands.Cog):
                 embed.description = t(guild, "LOG_MEMBER_TIMEOUT_DESC_REMOVED")
             embeds_to_send.append(embed)
 
-        # 4. Server Avatar
         if before.guild_avatar != after.guild_avatar:
             embed = self._create_base_embed(
                 after, guild, t(guild, "LOG_MEMBER_AVATAR_TITLE"), discord.Color.blurple()
@@ -119,7 +115,6 @@ class MemberLog(commands.Cog):
                 embed.description = t(guild, "LOG_MEMBER_AVATAR_DESC_REMOVED")
             embeds_to_send.append(embed)
 
-        # 5. Membership Screening
         if before.pending != after.pending:
             embed = self._create_base_embed(
                 after, guild, t(guild, "LOG_MEMBER_SCREENING_TITLE"), discord.Color.green()
@@ -136,7 +131,6 @@ class MemberLog(commands.Cog):
             )
             embeds_to_send.append(embed)
 
-        # 6. Boost
         if before.premium_since != after.premium_since:
             if after.premium_since and not before.premium_since:
                 embed = self._create_base_embed(
@@ -151,7 +145,6 @@ class MemberLog(commands.Cog):
                 embed.description = t(guild, "LOG_MEMBER_BOOST_REMOVED_DESC", mention=after.mention)
                 embeds_to_send.append(embed)
 
-        # 7. Badges
         if before.public_flags != after.public_flags:
             embed = self._create_base_embed(
                 after, guild, t(guild, "LOG_MEMBER_BADGES_TITLE"), discord.Color.teal()
@@ -194,7 +187,6 @@ class MemberLog(commands.Cog):
 
             embeds_to_send: list[discord.Embed] = []
 
-            # Đổi Username hoặc Tên hiển thị toàn cục (Global Name)
             if before.name != after.name or before.global_name != after.global_name:
                 embed = self._create_base_embed(
                     after, guild, t(guild, "LOG_USER_NAME_TITLE"), discord.Color.gold()
@@ -214,7 +206,6 @@ class MemberLog(commands.Cog):
                 )
                 embeds_to_send.append(embed)
 
-            # Đổi Avatar tài khoản gốc
             if before.avatar != after.avatar:
                 embed = self._create_base_embed(
                     after, guild, t(guild, "LOG_USER_AVATAR_TITLE"), discord.Color.purple()

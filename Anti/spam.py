@@ -9,17 +9,13 @@ from typing import Literal
 import re
 from Check.i18n import t
 
-# Import các hàm kiểm tra và biến cấu hình cần thiết
 from config import OWNER_ID
 from Check.mod import has_admin_role, is_owner, admin_roles
-# Import các biến và hàm từ link_filter để dùng chung hệ thống cảnh cáo
 from Anti.link_filter import link_warnings, link_settings, save_link_warnings, load_link_data
 
 
-# --- Quản lý dữ liệu ---
 SPAM_SETTINGS_FILE = "data/spam_settings.json"
 
-# Cấu trúc: {guild_id: {user_id: deque([(timestamp, message_id, content), ...])}}
 user_message_history = {}
 spam_settings = {}
 global_spam_filter_enabled = False
@@ -33,9 +29,9 @@ def load_spam_data():
                 spam_settings = json.load(f)
             except json.JSONDecodeError:
                 spam_settings = {}
-    global_spam_filter_enabled = spam_settings.get("__global__", {}).get("enabled", False) # Đọc đúng key 'enabled'
+    global_spam_filter_enabled = spam_settings.get("__global__", {}).get("enabled", False)
 
-    load_link_data() # Tải cả dữ liệu cảnh cáo và cài đặt link để dùng chung
+    load_link_data()
 
 def save_spam_settings():
     """Lưu cài đặt chống spam vào file."""
@@ -72,7 +68,6 @@ class AntiSpamControlView(discord.ui.View):
             spam_settings[guild_id_str] = {}
         spam_settings[guild_id_str]["enabled_guild"] = True
         save_spam_settings()
-        # Cập nhật lại embed
         prefix = (await self.cog.bot.get_prefix(interaction.message))[0] if interaction.message and interaction.guild else "!"
         new_embed = self.cog._create_status_embed(interaction.guild, prefix)
         await interaction.response.edit_message(embed=new_embed, view=self)
@@ -84,7 +79,6 @@ class AntiSpamControlView(discord.ui.View):
             spam_settings[guild_id_str] = {}
         spam_settings[guild_id_str]["enabled_guild"] = False
         save_spam_settings()
-        # Cập nhật lại embed
         prefix = (await self.cog.bot.get_prefix(interaction.message))[0] if interaction.message and interaction.guild else "!"
         new_embed = self.cog._create_status_embed(interaction.guild, prefix)
         await interaction.response.edit_message(embed=new_embed, view=self)
@@ -128,22 +122,18 @@ class SpamFilterCog(commands.Cog, name="Anti-Spam"):
         guild_id_str = str(message.guild.id)
         user_id_str = str(message.author.id)
 
-        # Xóa tin nhắn vi phạm
         try:
-            # Tối ưu hóa: Dùng purge để xóa tin nhắn của người dùng vi phạm
-            # Lấy thời gian bắt đầu của chuỗi spam để xóa chính xác hơn
             history = user_message_history.get(guild_id_str, {}).get(user_id_str, deque())
-            start_time = history[0][0] if history else datetime.now().timestamp() - 5 # Mặc định 5 giây trước
+            start_time = history[0][0] if history else datetime.now().timestamp() - 5
             await message.channel.purge(
-                limit=len(history) + 10, # Xóa nhiều hơn một chút để đảm bảo
+                limit=len(history) + 10,
                 check=lambda m: m.author.id == message.author.id,
-                after=datetime.fromtimestamp(start_time - 1) # Xóa các tin nhắn sau thời điểm bắt đầu spam
+                after=datetime.fromtimestamp(start_time - 1)
             )
         except (discord.NotFound, discord.Forbidden) as e:
             print(f"[Anti-Spam] Không thể xóa tin nhắn spam: {e}")
-            await message.delete() # Nếu lỗi, chỉ xóa tin nhắn hiện tại
+            await message.delete()
 
-        # Xử lý hệ thống cảnh cáo và mute (dùng chung với anti-link)
         warning_limit = link_settings.get(guild_id_str, {}).get("warning_limit", 5)
         if guild_id_str not in link_warnings: link_warnings[guild_id_str] = {}
         user_warnings = link_warnings[guild_id_str].get(user_id_str, 0) + 1
@@ -154,7 +144,7 @@ class SpamFilterCog(commands.Cog, name="Anti-Spam"):
                 await message.author.timeout(duration, reason=f"Vi phạm quy định chống spam quá nhiều lần.")
                 mute_embed = discord.Embed(title=t(message.guild, "ANTI_SPAM_AUTOMUTE_TITLE"), description=t(message.guild, "ANTI_SPAM_AUTOMUTE_DESC", mention=message.author.mention, limit=warning_limit), color=discord.Color.dark_red())
                 await message.channel.send(embed=mute_embed)
-                link_warnings[guild_id_str][user_id_str] = 0 # Reset cảnh cáo
+                link_warnings[guild_id_str][user_id_str] = 0
             except discord.Forbidden:
                 await message.channel.send(t(message.guild, "ANTI_SPAM_MUTE_FORBIDDEN", mention=message.author.mention), delete_after=10)
         else:
@@ -172,17 +162,14 @@ class SpamFilterCog(commands.Cog, name="Anti-Spam"):
         if not message.guild or message.author.bot:
             return
 
-        # 1. Kiểm tra Global Toggle (Owner)
         if not global_spam_filter_enabled:
             return
         
         guild_id_str = str(message.guild.id)
-        # 2. Kiểm tra Server Toggle (Admin), mặc định là Tắt
         guild_setting = spam_settings.get(guild_id_str, {}).get("enabled_guild", False)
         if not guild_setting:
             return
 
-        # 3. Bỏ qua Owner và Admin
         if message.author.id == OWNER_ID:
             return
         guild_admin_roles = admin_roles.get(guild_id_str, [])
@@ -190,28 +177,22 @@ class SpamFilterCog(commands.Cog, name="Anti-Spam"):
         if any(admin_role_id in user_role_ids for admin_role_id in guild_admin_roles):
             return
 
-        # --- Logic phát hiện Spam ---
         now = datetime.now().timestamp()
         user_id_str = str(message.author.id)
 
-        # Lấy cài đặt của server, nếu không có thì dùng mặc định
         settings = spam_settings.get(guild_id_str, {})
         message_limit = settings.get("message_limit", 5)
-        time_period = settings.get("time_period", 3) # giây
-        mute_duration = settings.get("mute_duration", 5) # phút
+        time_period = settings.get("time_period", 3)
+        mute_duration = settings.get("mute_duration", 5)
 
-        # Sử dụng .get() để tránh KeyError và khởi tạo nếu cần
         guild_history = user_message_history.setdefault(guild_id_str, {})
         history = guild_history.setdefault(user_id_str, deque())
 
-        # Thêm tin nhắn hiện tại vào lịch sử
         history.append((now, message.id, message.content))
 
-        # Loại bỏ các tin nhắn cũ hơn time_period
         while history and now - history[0][0] > time_period:
             history.popleft()
 
-        # --- Kiểm tra các loại vi phạm ---
         violation_reason = None
         settings = spam_settings.get(guild_id_str, {})
         message_limit = settings.get("message_limit", 5)
@@ -219,37 +200,30 @@ class SpamFilterCog(commands.Cog, name="Anti-Spam"):
         emoji_limit = settings.get("emoji_limit", 10)
         mention_limit = settings.get("mention_limit", 5)
 
-        # 1. Kiểm tra spam nhanh (nhiều tin nhắn trong thời gian ngắn)
         if len(history) > message_limit:
             violation_reason = t(message.guild, "ANTI_SPAM_REASON_FAST", count=len(history), seconds=time_period)
         
-        # 2. Kiểm tra spam emoji
         elif emoji_limit > 0:
-            # Regex để tìm cả emoji unicode và emoji tùy chỉnh của Discord
             emoji_pattern = re.compile(r'<a?:\w+:\d+>|[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U00002702-\U000027B0\U000024C2-\U0001F251]+')
             emojis_found = emoji_pattern.findall(message.content)
             if len(emojis_found) > emoji_limit:
                 violation_reason = t(message.guild, "ANTI_SPAM_REASON_EMOJI", count=len(emojis_found), limit=emoji_limit)
 
-        # 3. Kiểm tra spam tag
         elif mention_limit > 0:
             total_mentions = len(message.mentions) + len(message.role_mentions)
             if message.mention_everyone:
-                total_mentions += 1 # @everyone và @here được tính là 1
+                total_mentions += 1
             
             if total_mentions > mention_limit:
                 violation_reason = t(message.guild, "ANTI_SPAM_REASON_MENTION", count=total_mentions, limit=mention_limit)
 
-        # 4. Kiểm tra spam lặp lại (nhiều tin nhắn giống hệt nhau)
         elif duplicate_limit > 0:
-            # Đếm số tin nhắn có nội dung giống hệt tin nhắn hiện tại (và không rỗng)
             duplicate_count = sum(1 for _, _, content in history if content and content == message.content)
             if duplicate_count > duplicate_limit:
                 violation_reason = t(message.guild, "ANTI_SPAM_REASON_DUPLICATE", count=duplicate_count)
 
         if violation_reason:
             await self.handle_spam_violation(message, violation_reason)
-            # Xóa lịch sử của người dùng sau khi xử lý
             history.clear()
 
     @commands.group(name="antispam", description="Quản lý hệ thống chống spam tin nhắn.")

@@ -14,7 +14,6 @@ from openai import AsyncOpenAI
 from Check.mod import has_admin_role, is_owner
 from Check.i18n import t
 
-# --- CẤU HÌNH XKIRO API ---
 API_KEY = None
 try:
     from config import XKIRO_API_KEY as API_KEY
@@ -40,7 +39,6 @@ PROXY_SETTINGS_FILE = BASE_DIR / "data" / "proxy_settings.json"
 proxy_settings: dict = {}
 global_proxy_enabled: bool = True
 
-# Danh sách đen: Các lệnh quản trị/nhạy cảm cấm tuyệt đối không cho phép kích hoạt qua Proxy
 BLACKLIST_COMMANDS = {
     "proxy", "eval", "reload", "load", "unload", "shutdown", "restart",
     "owner", "menubot", "botping", "sayto", "mod", "moderator", "admin",
@@ -48,7 +46,6 @@ BLACKLIST_COMMANDS = {
     "timeout", "warn", "unwarn"
 }
 
-# Các từ đệm tùy chọn ở đầu câu (nếu người dùng có thói quen gõ "@Bot dùng/lệnh ...", bot sẽ tự cắt bỏ)
 OPTIONAL_TRIGGER_PREFIXES = ("lệnh ", "lenh ", "cmd ", "run ", "dùng ", "dung ", "hãy ", "hay ")
 
 
@@ -83,7 +80,6 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         load_proxy_settings()
-        # Cooldown chống spam API: Mỗi người dùng cách nhau tối thiểu 4 giây
         self._cd = commands.CooldownMapping.from_cooldown(1, 4.0, commands.BucketType.user)
 
     def get_guild_settings(self, guild_id: int) -> dict:
@@ -102,7 +98,6 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
             desc = cmd.short_doc or (cmd.help.split("\n")[0] if cmd.help else "Thực hiện lệnh này")
             available_cmds.append(f"- `{cmd.name}`: {desc}")
 
-            # Nếu là nhóm lệnh (Group), liệt kê thêm các lệnh con an toàn
             if isinstance(cmd, commands.Group):
                 for sub in cmd.commands:
                     if not sub.hidden and sub.name not in BLACKLIST_COMMANDS:
@@ -163,19 +158,16 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
         if not command_to_run or command_to_run.upper() == "UNKNOWN":
             return
 
-        # 1. Lấy prefix hiện tại của server
         prefix = await self.bot.get_prefix(message)
         if isinstance(prefix, (list, tuple)):
             prefix = prefix[0]
 
-        # Loại bỏ prefix ở đầu nếu AI vô tình thêm vào
         if command_to_run.startswith(prefix):
             command_to_run = command_to_run[len(prefix):].strip()
 
         if not command_to_run:
             return
 
-        # 2. Chặn tuyệt đối các lệnh nằm trong BLACKLIST_COMMANDS
         parts = command_to_run.split()
         cmd_root_name = parts[0].lower()
         cmd_sub_name = parts[1].lower() if len(parts) > 1 else ""
@@ -188,7 +180,6 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
             )
             return
 
-        # 3. Tạo ngữ cảnh (Context) và kiểm tra quyền hạn của người dùng trước khi chạy
         new_message = copy.copy(message)
         new_message.content = f"{prefix}{command_to_run}"
 
@@ -205,7 +196,6 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
             return
 
         try:
-            # Đảm bảo người dùng có đủ quyền chạy lệnh đó (không cho phép mượn tay AI vượt quyền)
             if await ctx.command.can_run(ctx):
                 await self.bot.invoke(ctx)
             else:
@@ -228,7 +218,6 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
         if message.author.bot or not message.guild or not self.bot.user:
             return
 
-        # Kiểm tra tag bot ở đầu tin nhắn
         mention_pattern = rf"^<@!?{self.bot.user.id}>\s*"
         match = re.match(mention_pattern, message.content)
         if not match:
@@ -245,7 +234,6 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
         if not raw_prompt:
             return
 
-        # Cắt bỏ các từ khóa mở đầu tùy chọn ("lệnh ", "cmd ", "dùng "...) nếu người dùng có gõ kèm
         lower_prompt = raw_prompt.lower()
         for kw in OPTIONAL_TRIGGER_PREFIXES:
             if lower_prompt.startswith(kw):
@@ -256,19 +244,12 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
         if not raw_prompt:
             return
 
-        # =====================================================================
-        # BƯỚC 1: FAST-PATH (NẾU NGƯỜI DÙNG GÕ TRỰC TIẾP TÊN LỆNH HỢP LỆ)
-        # Chạy thẳng ngay lập tức mà không cần tốn thời gian gọi AI API
-        # =====================================================================
         first_word = lower_prompt.split()[0]
         direct_cmd = self.bot.get_command(first_word)
         if direct_cmd and not direct_cmd.hidden and direct_cmd.name not in BLACKLIST_COMMANDS:
             await self._execute_resolved_command(message, raw_prompt)
             return
 
-        # =====================================================================
-        # BƯỚC 2: DÙNG AI ĐỂ DỊCH NGÔN NGỮ TỰ NHIÊN THÀNH LỆNH BOT
-        # =====================================================================
         bucket = self._cd.get_bucket(message)
         retry_after = bucket.update_rate_limit()
         if retry_after:
@@ -283,7 +264,6 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
             text_channels = [f"'{ch.name}': <#{ch.id}>" for ch in message.guild.text_channels[:15]]
             channels_info = ", ".join(text_channels)
 
-            # Lọc danh sách người dùng được tag (bỏ qua chính con bot ở đầu câu)
             mentioned_users = [
                 f"'{u.display_name}': <@{u.id}>"
                 for u in message.mentions
@@ -313,9 +293,6 @@ class ProxyCommandCog(commands.Cog, name="Proxy Command"):
 
         await self._execute_resolved_command(message, command_to_run)
 
-    # =====================================================================
-    # NHÓM LỆNH CẤU HÌNH (/proxy)
-    # =====================================================================
 
     @commands.hybrid_group(name="proxy", fallback="status", description="🤖 Thiết lập tính năng tag bot để ra lệnh bằng ngôn ngữ tự nhiên.")
     @commands.guild_only()

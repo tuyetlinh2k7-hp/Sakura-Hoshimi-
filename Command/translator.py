@@ -9,7 +9,6 @@ from discord.ext import commands
 from deep_translator import GoogleTranslator
 from openai import AsyncOpenAI
 
-# --- CẤU HÌNH XKIRO API ---
 API_KEY = None
 try:
     from config import XKIRO_API_KEY as API_KEY
@@ -29,7 +28,6 @@ try:
 except ImportError:
     AI_MODEL = "sensenova/sensenova-6.8-flash-lite"
 
-# Ánh xạ Emoji cờ -> Ngôn ngữ đích
 FLAG_TO_LANG = {
     "🇻🇳": {"name": "Tiếng Việt", "target": "Vietnamese", "iso": "vi"},
     "🇺🇸": {"name": "Tiếng Anh", "target": "English", "iso": "en"},
@@ -68,7 +66,6 @@ class DeleteMessageView(discord.ui.View):
 class AdvancedTranslatorCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Khởi tạo bảng dữ liệu khi load cog
         self.bot.loop.create_task(self.init_database())
 
     async def init_database(self):
@@ -134,12 +131,10 @@ class AdvancedTranslatorCog(commands.Cog):
             return await self.translate_with_ai(text, lang_info["target"], glossary)
         except Exception as e:
             print(f"[Translator] xKiro AI lỗi ({e}), fallback Google...")
-            # Fallback Google Translate trên thread riêng
             return await asyncio.to_thread(
                 lambda: GoogleTranslator(source='auto', target=lang_info["iso"]).translate(text)
             )
 
-    # ================= KHU VỰC REACTION TRANSLATE =================
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         if payload.user_id == self.bot.user.id:
@@ -190,7 +185,6 @@ class AdvancedTranslatorCog(commands.Cog):
         view = DeleteMessageView(requester_id=payload.user_id)
         await target_msg.reply(embed=embed, view=view, mention_author=False)
 
-    # ================= KHU VỰC QUẢN LÝ TỪ ĐIỂN (GLOSSARY) =================
     glossary_group = app_commands.Group(name="glossary", description="Quản lý thuật ngữ dịch thuật riêng của Server")
 
     @glossary_group.command(name="add", description="Thêm hoặc cập nhật thuật ngữ vào từ điển Server")

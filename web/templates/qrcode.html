@@ -375,7 +375,7 @@
 </head>
 <body>
 
-  <!-- Top Navigation -->
+  
   <nav class="tool-nav">
     <a href="/tools" class="tool-brand">
       <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot" onerror="this.src='/images/avatar-bot.jpg'">
@@ -392,14 +392,14 @@
   </nav>
 
   <div class="tool-wrap">
-    <!-- Header -->
+    
     <div class="tool-header">
       <div class="tool-badge">📱 QR Code Studio v3.0</div>
       <h1 class="tool-title">Trình Tạo & Quét Mã QR</h1>
       <p class="tool-subtitle">Tạo mã QR tùy biến màu sắc, hỗ trợ logo Sakura ở giữa, xuất file HD PNG / SVG và giải mã nhanh từ camera hoặc hình ảnh.</p>
     </div>
 
-    <!-- Navigation Tabs -->
+    
     <div class="qr-tabs">
       <button type="button" class="qr-tab active" data-type="url">🔗 Liên kết (URL)</button>
       <button type="button" class="qr-tab" data-type="text">📝 Văn bản tự do</button>
@@ -410,15 +410,15 @@
       <button type="button" class="qr-tab" data-type="scan">📷 Quét mã QR</button>
     </div>
 
-    <!-- Generator Workspace -->
+    
     <div id="genWorkspace" class="qr-workspace">
-      <!-- Left Configuration Panel -->
+      
       <div class="qr-card">
         <div id="dynamicForm">
-          <!-- Populated by JS based on selected tab -->
+          
         </div>
 
-        <!-- Design Customization -->
+        
         <div class="controls-grid">
           <div class="form-group">
             <label class="form-label">Màu mã QR (Màu chính)</label>
@@ -456,7 +456,7 @@
         </div>
       </div>
 
-      <!-- Right Preview Panel -->
+      
       <div class="qr-card qr-preview-box">
         <div class="qr-display-frame" id="qrFrame">
           <img id="qrImage" class="qr-display-img" alt="QR Code Preview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'></svg>">
@@ -473,7 +473,7 @@
       </div>
     </div>
 
-    <!-- Scanner Workspace -->
+    
     <div id="scanWorkspace" class="qr-card scanner-container">
       <div class="scanner-dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
         <span style="font-size:3rem;margin-bottom:12px;">📁</span>
@@ -493,7 +493,7 @@
     </div>
   </div>
 
-  <!-- Toast -->
+  
   <div id="toast" class="toast">
     <span id="toastIcon">🌸</span>
     <span id="toastMsg">Thông báo</span>

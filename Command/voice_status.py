@@ -64,9 +64,8 @@ class VoiceStatusCog(commands.Cog):
             )
             return await ctx.send(embed=embed, ephemeral=True)
 
-        # Tạo các trang Embed
         embeds = []
-        items_per_page = 5  # Hiển thị 5 server mỗi trang
+        items_per_page = 5
         total_pages = math.ceil(len(guilds_with_vc) / items_per_page)
 
         for i in range(total_pages):

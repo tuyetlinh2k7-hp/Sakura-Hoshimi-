@@ -232,7 +232,7 @@
 </head>
 <body class="mc-hosting-body">
   <div class="mc-layout">
-    <!-- Sidebar -->
+    
     <aside class="mc-sidebar" id="mcSidebar">
       <div class="mc-brand">
         <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Logo" class="mc-brand-avatar" onerror="this.onerror=null; this.src='/images/avatar-bot.jpg';">
@@ -281,7 +281,7 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
+    
     <main class="mc-main">
       <header class="mc-topbar">
         <div class="mc-topbar-left">
@@ -301,7 +301,7 @@
 
       <div class="mc-content-body">
         <div class="players-layout">
-          <!-- Cột Trái: Danh sách người chơi -->
+          
           <div>
             <div style="margin-bottom:14px">
               <input type="text" id="playerSearchInput" placeholder="🔍 Tìm kiếm người chơi / UUID..." oninput="filterPlayers(this.value)" class="form-control" style="width:100%;background:#161b22;border:1px solid var(--mc-card-border);color:#fff;padding:10px 14px;border-radius:10px">
@@ -312,7 +312,7 @@
             </div>
           </div>
 
-          <!-- Cột Phải: Bảng soi kho đồ & thông số chi tiết -->
+          
           <div id="playerDetailContainer">
             <div class="mc-inv-container" style="text-align:center;padding:60px 20px;color:var(--mc-text-muted)">
               <div style="font-size:2.8rem;margin-bottom:12px">👤</div>
@@ -325,7 +325,7 @@
     </main>
   </div>
 
-  <!-- Tooltip nổi khi hover vật phẩm -->
+  
   <div class="mc-tooltip-box" id="mcTooltip">
     <div class="mc-tt-name" id="ttName">Kim Cương</div>
     <div class="mc-tt-id" id="ttId">minecraft:diamond</div>
@@ -333,7 +333,7 @@
     <div class="mc-tt-lore" id="ttLore"></div>
   </div>
 
-  <!-- Modal Soi Hộp Shulker Box -->
+  
   <div class="shulker-modal-overlay" id="shulkerModalOverlay" onclick="if(event.target===this) closeShulkerModal()">
     <div class="shulker-modal">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:12px">
@@ -528,7 +528,7 @@
 
       detailContainer.innerHTML = `
         <div class="mc-inv-container">
-          <!-- Header Profile -->
+          
           <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px;flex-wrap:wrap">
             <img src="${p.body_url}" style="height:120px;image-rendering:pixelated" alt="${p.name}">
             <div style="flex:1">
@@ -541,7 +541,7 @@
                 <button class="mc-btn mc-btn-secondary" style="padding:2px 8px;font-size:0.7rem" onclick="copyToClipboard('${p.uuid}')">Sao chép</button>
               </div>
 
-              <!-- Stat pills -->
+              
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <div class="stat-pill"><span style="color:#ff5555">❤️</span> Máu: <b>${p.health} / 20</b></div>
                 <div class="stat-pill"><span style="color:#ffb86c">🍗</span> Đói: <b>${p.food} / 20</b></div>
@@ -551,15 +551,15 @@
             </div>
           </div>
 
-          <!-- Tabs -->
+          
           <div style="display:flex;gap:8px;margin-bottom:18px;border-bottom:1px solid var(--mc-card-border);padding-bottom:10px">
             <button class="tab-nav-btn active" id="tabInvBtn" onclick="switchPlayerTab('inv')">🎒 Túi Đồ & Giáp</button>
             <button class="tab-nav-btn" id="tabEnderBtn" onclick="switchPlayerTab('ender')">🟣 Rương Ender (27 ô)</button>
           </div>
 
-          <!-- Section Túi Đồ -->
+          
           <div id="playerInvSection">
-            <!-- Giáp & Offhand -->
+            
             <div style="display:flex;justify-content:center;gap:12px;margin-bottom:20px;padding:12px;background:rgba(255,255,255,0.02);border-radius:12px">
               <div>${renderSlot(armor.helmet, 'Nón (103)')}</div>
               <div>${renderSlot(armor.chestplate, 'Áo (102)')}</div>
@@ -569,20 +569,20 @@
               <div>${renderSlot(inv.offhand, 'Tay Phụ')}</div>
             </div>
 
-            <!-- Kho Đồ Chính (27 ô) -->
+            
             <div style="font-weight:700;font-size:0.85rem;color:var(--mc-text-muted);margin-bottom:8px;text-align:center">Kho Đồ Chính (Main Inventory)</div>
             <div class="mc-grid mc-grid-9" style="margin-bottom:14px">
               ${main.map(it => renderSlot(it)).join('')}
             </div>
 
-            <!-- Thanh Hotbar (9 ô) -->
+            
             <div style="font-weight:700;font-size:0.85rem;color:var(--mc-text-muted);margin-bottom:8px;text-align:center">Thanh Phím Tắt (Hotbar)</div>
             <div class="mc-grid mc-grid-9">
               ${hotbar.map(it => renderSlot(it)).join('')}
             </div>
           </div>
 
-          <!-- Section Rương Ender -->
+          
           <div id="playerEnderSection" style="display:none">
             <div style="font-weight:700;font-size:0.85rem;color:#bd93f9;margin-bottom:12px;text-align:center">🟣 Kho Chứa Rương Ender (Ender Chest)</div>
             <div class="mc-grid mc-grid-9">

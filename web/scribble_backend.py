@@ -29,7 +29,6 @@ def levenshtein_dist(s1: str, s2: str) -> int:
         previous_row = current_row
     return previous_row[-1]
 
-# KHO TỪ TIẾNG VIỆT
 WORD_CATEGORIES_VI = {
     "Động vật": [
         "Con mèo", "Con chó", "Con cá", "Con chim", "Con voi", "Con hổ", "Con rắn",
@@ -71,27 +70,20 @@ ALL_WORDS_VI = []
 for words in WORD_CATEGORIES_VI.values():
     ALL_WORDS_VI.extend(words)
 
-# KHO TỪ TIẾNG ANH (ENGLISH WORDS)
 ENGLISH_WORDS = [
-    # Animals
     "Cat", "Dog", "Fish", "Bird", "Elephant", "Tiger", "Snake", "Turtle", "Bear", "Monkey",
     "Lion", "Shark", "Rabbit", "Duck", "Butterfly", "Frog", "Cow", "Sheep", "Horse", "Dolphin",
     "Penguin", "Chicken", "Pig", "Giraffe", "Mouse", "Crab", "Shrimp", "Bee", "Eagle", "Fox",
-    # Food
     "Bread", "Pizza", "Hamburger", "Coffee", "Ice cream", "Apple", "Banana", "Watermelon",
     "Egg", "Sausage", "Candy", "Cake", "Cookie", "Sushi", "Mango", "Orange", "Strawberry",
     "Coconut", "Noodles", "Donut", "Popcorn", "Pineapple", "Avocado", "Chocolate", "Cheese",
-    # Objects
     "Table", "Chair", "Clock", "Phone", "Computer", "Pencil", "Book", "Bed", "Scissors",
     "Spoon", "Bowl", "Flashlight", "Umbrella", "Fan", "Fridge", "Television", "Sunglasses",
     "Hat", "Ring", "Guitar", "Broom", "Mirror", "Pillow", "Suitcase", "Cup", "Vase", "Headphones",
-    # Nature
     "Sun", "Moon", "Star", "Rainbow", "Cloud", "Flower", "Tree", "Mountain", "Rain", "Snow",
     "Lightning", "Volcano", "Island", "Beach", "Fire", "Water drop", "Leaf", "Mushroom", "Carrot",
-    # Vehicles & Places
     "Bicycle", "Motorcycle", "Car", "Airplane", "Train", "Boat", "Hot air balloon",
     "Submarine", "House", "Castle", "Bridge", "Hospital", "School", "Windmill", "Pyramid",
-    # Actions & Others
     "Heart", "Crown", "Sword", "Shield", "Diamond", "Gift box", "Shoes", "Shirt", "Jeans",
     "Hand", "Eye", "Smile", "Vampire", "Snowman", "Skeleton", "Music note", "Flag", "Ball",
     "Rocket", "Ghost", "Robot", "Anchor", "Camera", "Key", "Lock"
@@ -99,7 +91,6 @@ ENGLISH_WORDS = [
 
 ALL_WORDS = ALL_WORDS_VI
 
-# Pre-defined vector sketches for Sakura Bot (normalized coords 0..1)
 BOT_SKETCHES: Dict[str, List[Dict[str, Any]]] = {
     "mặt trời": [
         {"tool": "pen", "color": "#ffe400", "size": 6, "points": [[0.5,0.3],[0.55,0.32],[0.6,0.38],[0.62,0.45],[0.6,0.52],[0.55,0.58],[0.5,0.6],[0.45,0.58],[0.4,0.52],[0.38,0.45],[0.4,0.38],[0.45,0.32],[0.5,0.3]]},
@@ -155,7 +146,6 @@ def make_word_hint(word: str, revealed_indices: set, game_mode: str = "classic")
     lengths = [len(w) for w in words]
 
     if game_mode == "mystery":
-        # Chế độ ẩn danh: dấu ?
         hint_parts = ["? " * l for l in lengths]
         return {
             "text": "   ".join([p.strip() for p in hint_parts]),
@@ -210,7 +200,7 @@ class ScribbleRoom:
         self.room_id = room_id
         self.players: Dict[str, Player] = {}
         self.host_id: Optional[str] = None
-        self.state = "waiting"  # waiting, selecting, drawing, round_end, game_over
+        self.state = "waiting"
         self.drawer_id: Optional[str] = None
         self.drawer_order: List[str] = []
         self.drawer_index = -1
@@ -220,14 +210,13 @@ class ScribbleRoom:
         self.hint_data: Dict[str, Any] = {"text": "_ _ _ _", "lengths": [4], "lengths_str": "4"}
         self.timer = 0
 
-        # Room Settings (Có thể tinh chỉnh ở lớp Setting phòng trước khi chơi)
         self.max_players = 8
-        self.language = "vi"  # "vi", "en", "bilingual"
-        self.draw_time = 80   # 30, 45, 60, 80, 100, 120, 150, 180s
-        self.max_rounds = 3   # 1..10 rounds
-        self.game_mode = "classic"  # "classic", "mystery", "speed", "practice"
-        self.word_choices_count = 3 # 2..5 words to pick
-        self.hint_count = -1  # -1 = auto, 0 = none, 1..3
+        self.language = "vi"
+        self.draw_time = 80
+        self.max_rounds = 3
+        self.game_mode = "classic"
+        self.word_choices_count = 3
+        self.hint_count = -1
         self.custom_words: List[str] = []
         self.game_word_pool: List[str] = []
 
@@ -286,7 +275,6 @@ class ScribbleRoom:
             p = Player(pid, name, avatar, avatar_data, ws, is_bot=False)
             self.players[pid] = p
 
-        # Assign host if none exists
         if not self.host_id or self.host_id not in self.players or self.players[self.host_id].is_bot:
             humans = [pl.pid for pl in self.players.values() if not pl.is_bot]
             if humans:
@@ -341,13 +329,10 @@ class ScribbleRoom:
             self.custom_words = raw_list
 
     def prepare_game_word_pool(self):
-        # Tính toán số lượng từ khóa cần thiết theo công thức:
-        # total_words_needed = số từ mỗi lượt * số người chơi * số lượt (round)
         participants = [p for p in self.players.values() if not p.is_bot or self.bot_enabled]
         num_players = max(1, len(participants))
         total_words_needed = self.word_choices_count * num_players * self.max_rounds
 
-        # Chuẩn bị nguồn từ vựng cơ sở dựa trên ngôn ngữ
         base_pool = []
         if self.language == "en":
             base_pool = list(ENGLISH_WORDS)
@@ -360,12 +345,10 @@ class ScribbleRoom:
         clean_custom = [w.strip() for w in self.custom_words if w.strip()]
 
         if len(clean_custom) >= total_words_needed:
-            # Nếu từ custom đủ nhiều thì lấy danh sách từ custom sao cho đủ số lượng cần
             shuffled_custom = list(clean_custom)
             random.shuffle(shuffled_custom)
             self.game_word_pool = shuffled_custom[:total_words_needed]
         else:
-            # Nếu thiếu thì lấy toàn bộ custom và tự thêm từ chuẩn cho đủ
             needed_more = total_words_needed - len(clean_custom)
             custom_lower = {remove_accents(w).lower() for w in clean_custom}
             fillers = [w for w in base_pool if remove_accents(w).lower() not in custom_lower]
@@ -425,7 +408,6 @@ class ScribbleRoom:
         self.round = 1
         for p in self.players.values():
             p.score = 0
-        # Ưu tiên người chơi thực vẽ trước để luôn được tương tác vẽ ngay
         humans = [pid for pid, p in self.players.items() if not p.is_bot]
         random.shuffle(humans)
         self.drawer_order = humans
@@ -466,7 +448,6 @@ class ScribbleRoom:
         self.revealed_indices = set()
         self.hint_data = {"text": "", "lengths": [], "lengths_str": ""}
 
-        # Lấy số từ mỗi lượt theo cài đặt từ game_word_pool
         choices = []
         while len(choices) < self.word_choices_count and self.game_word_pool:
             choices.append(self.game_word_pool.pop(0))
@@ -498,7 +479,6 @@ class ScribbleRoom:
             return
         self.word = word
         self.state = "drawing"
-        # Điều chỉnh thời gian nếu ở chế độ Speed
         if self.game_mode == "speed":
             self.timer = 35
         else:
@@ -578,7 +558,6 @@ class ScribbleRoom:
         self.strokes = []
         await self.broadcast({"type": "clear"})
 
-        # Tính điểm người vẽ
         drawer = self.players.get(self.drawer_id)
         if drawer:
             guesser_count = sum(1 for pid, p in self.players.items() if pid != self.drawer_id and p.has_guessed)
@@ -616,7 +595,6 @@ class ScribbleRoom:
 
         text = text.strip()
 
-        # Người vẽ bị cấm chat hoàn toàn trong lượt vẽ
         if self.drawer_id == pid:
             await self.send_to(pid, {
                 "type": "chat",
@@ -626,7 +604,6 @@ class ScribbleRoom:
             })
             return
 
-        # Người đã đoán đúng: Green chat bảo mật
         if p.has_guessed:
             msg = {
                 "type": "chat",
@@ -651,7 +628,6 @@ class ScribbleRoom:
             })
             return
 
-        # Kiểm tra từ đoán
         clean_guess = remove_accents(text).replace(" ", "").lower()
         clean_word = remove_accents(self.word).replace(" ", "").lower()
 
@@ -661,7 +637,7 @@ class ScribbleRoom:
             ratio = max(0.1, min(1.0, self.timer / float(base_draw_time or 60)))
             earned = 100 + int(ratio * 400)
             if self.game_mode == "speed":
-                earned *= 2  # Gấp đôi điểm chế độ Speed
+                earned *= 2
 
             p.score += earned
             p.round_score = earned
@@ -688,7 +664,6 @@ class ScribbleRoom:
                 await self.end_turn("Tất cả người chơi đều đã đoán đúng!")
             return
 
-        # Kiểm tra gần đúng
         dist = levenshtein_dist(clean_guess, clean_word)
         if dist <= 1 and len(clean_word) >= 3 and self.game_mode != "mystery":
             await self.send_to(pid, {
@@ -741,18 +716,14 @@ class ScribbleRoom:
                     self.timer -= 1
                     await self.broadcast({"type": "timer_tick", "timer": self.timer})
 
-                    # Gợi ý ký tự theo số lượng cài đặt
                     if self.state == "drawing" and self.game_mode != "mystery":
                         curr_draw_time = 35 if self.game_mode == "speed" else self.draw_time
-                        # Xác định số lượng hint cần reveal
                         target_hints = self.hint_count
-                        if target_hints == -1:  # Auto
+                        if target_hints == -1:
                             w_len = len(self.word.replace(" ", ""))
                             target_hints = 0 if w_len <= 3 else (1 if w_len <= 6 else (2 if w_len <= 9 else 3))
 
                         if target_hints > 0:
-                            # Thời điểm reveal tương ứng
-                            # Ví dụ target_hints=2: reveal tại 60% và 30% timer
                             t_milestones = [int(curr_draw_time * (1.0 - (k + 1) / (target_hints + 1))) for k in range(target_hints)]
                             if self.timer in t_milestones:
                                 non_revealed = [i for i, c in enumerate(self.word) if c != ' ' and i not in self.revealed_indices]
@@ -765,7 +736,6 @@ class ScribbleRoom:
                                         "hint": self.hint_data.get("text", "")
                                     })
 
-                    # Bot Sakura đoán từ
                     if self.state == "drawing" and self.drawer_id != "sakura_bot" and self.bot_enabled:
                         bot = self.players.get("sakura_bot")
                         curr_draw_time = 35 if self.game_mode == "speed" else self.draw_time

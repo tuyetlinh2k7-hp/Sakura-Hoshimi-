@@ -8,7 +8,6 @@ from collections import defaultdict, deque
 from typing import Literal, Optional
 from Check.i18n import t
 
-# --- Quản lý dữ liệu ---
 NUKE_SETTINGS_FILE = "data/nuke_settings.json"
 global_nuke_enabled = False
 
@@ -33,7 +32,6 @@ def save_nuke_settings(settings):
     with open(NUKE_SETTINGS_FILE, 'w', encoding='utf-8') as f:
         json.dump(settings, f, indent=4)
 
-# --- Views & Modals ---
 class ThresholdModal(discord.ui.Modal):
     def __init__(self, cog_instance, guild=None):
         super().__init__(title=t(guild, "ANTI_NUKE_MODAL_THRESHOLD_TITLE"))
@@ -142,10 +140,8 @@ class AntiNukeControlView(discord.ui.View):
 
     async def _update_view(self, interaction: discord.Interaction):
         """Hàm helper để cập nhật lại embed và view sau khi có thay đổi."""
-        prefix = "/" # Mặc định cho slash command
-        # Tạo lại embed với thông tin mới nhất
+        prefix = "/"
         new_embed = self.cog._create_status_embed(interaction.guild, prefix)
-        # Cập nhật trạng thái của các nút
         config = self.cog.get_guild_settings(interaction.guild.id)
         self.toggle_on.disabled = config.get("enabled", False)
         self.toggle_off.disabled = not config.get("enabled", False)
@@ -213,12 +209,11 @@ class AntiNukeCog(commands.Cog, name="Anti-Nuke"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.settings = load_nuke_settings()
-        # Cấu trúc: {guild_id: {user_id: {action: deque([timestamps])}}}
         self.action_tracker = defaultdict(lambda: defaultdict(lambda: defaultdict(deque)))
 
     async def cog_load(self):
         """Đăng ký View persistent khi cog được nạp."""
-        self.bot.add_view(AntiNukeActionView(punished_user_id=0)) # Khởi tạo với ID giả
+        self.bot.add_view(AntiNukeActionView(punished_user_id=0))
 
     def _create_status_embed(self, guild: discord.Guild, prefix: str) -> discord.Embed:
         """Hàm tạo embed trạng thái, tách ra để dễ tái sử dụng."""
@@ -255,11 +250,10 @@ class AntiNukeCog(commands.Cog, name="Anti-Nuke"):
                 "kick": 5,
                 "ban": 5
             },
-            "timeframe": 60  # 60 giây
+            "timeframe": 60
         }
         if guild_id_str not in self.settings:
             self.settings[guild_id_str] = defaults
-        # Đảm bảo các key mặc định tồn tại nếu file config cũ
         for key, value in defaults.items():
             self.settings[guild_id_str].setdefault(key, value)
         return self.settings[guild_id_str]
@@ -269,7 +263,6 @@ class AntiNukeCog(commands.Cog, name="Anti-Nuke"):
         if not guild or not member or not getattr(guild, "id", None):
             return
 
-        # Kiểm tra công tắc toàn cục trước
         if not global_nuke_enabled:
             return
 
@@ -279,26 +272,21 @@ class AntiNukeCog(commands.Cog, name="Anti-Nuke"):
         if not config.get("enabled") or member.id == self.bot.user.id or member.id == guild.owner_id or is_admin:
             return
 
-        # Kiểm tra whitelist
         if member.id in config.get("whitelist", []):
             return
 
         current_time = time.time()
         timeframe = config.get("timeframe", 60)
         
-        # Dọn dẹp các hành động cũ
         user_actions = self.action_tracker[guild.id][member.id][action]
         while user_actions and user_actions[0] < current_time - timeframe:
             user_actions.popleft()
 
-        # Ghi nhận hành động mới và kiểm tra
         user_actions.append(current_time)
         threshold = config.get("thresholds", {}).get(action, 5)
 
         if len(user_actions) >= threshold:
-            # Vượt ngưỡng, thực hiện hình phạt
             await self._punish(guild, member, action, len(user_actions), timeframe)
-            # Xóa tracker của user này để tránh phạt liên tục
             self.action_tracker[guild.id][member.id][action].clear()
 
     async def _punish(self, guild: discord.Guild, member: discord.Member, action: str, count: int, timeframe: int):
@@ -326,7 +314,6 @@ class AntiNukeCog(commands.Cog, name="Anti-Nuke"):
         except Exception as e:
             print(f"[Anti-Nuke] Lỗi khi phạt {member}: {e}")
 
-        # Gửi log
         log_channel_id = config.get("log_channel")
         if log_channel_id:
             log_channel = guild.get_channel(log_channel_id)
@@ -370,7 +357,6 @@ class AntiNukeCog(commands.Cog, name="Anti-Nuke"):
             return None
         return None
 
-    # --- Listeners cho các sự kiện ---
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
         guild = getattr(channel, "guild", None)
@@ -412,7 +398,6 @@ class AntiNukeCog(commands.Cog, name="Anti-Nuke"):
         if entry and getattr(entry, "user", None):
             await self._check_actions(guild, entry.user, "role_delete")
 
-    # --- Lệnh quản lý (Prefix) ---
     @commands.group(name="antinuke", description="Quản lý hệ thống chống phá hoại server.")
     @commands.has_permissions(administrator=True)
     async def antinuke(self, ctx: commands.Context):
@@ -507,7 +492,7 @@ class AntiNukeCog(commands.Cog, name="Anti-Nuke"):
                 return await ctx.send(t(ctx.guild, "ANTI_NUKE_WHITELIST_ALREADY", mention=member.mention), ephemeral=True)
             config["whitelist"].append(member.id)
             await ctx.send(t(ctx.guild, "ANTI_NUKE_WHITELIST_ADD_SUCCESS", mention=member.mention), ephemeral=True)
-        else: # remove
+        else:
             if member.id not in config["whitelist"]:
                 return await ctx.send(t(ctx.guild, "ANTI_NUKE_WHITELIST_NOT_IN", mention=member.mention), ephemeral=True)
             config["whitelist"].remove(member.id)

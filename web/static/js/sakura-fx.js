@@ -1,24 +1,15 @@
-/**
- * 🌸 SAKURA BOT - VISUAL EFFECTS & THEME ENGINE
- * Includes:
- * 1. Falling Sakura Petals Particle Canvas
- * 2. Swaying Cherry Blossom Branches (SVG Decor)
- * 3. Animated Bot Avatar Helper
- * 4. Light / Dark Mode Theme Manager with Persistence
- */
+
 
 (function () {
   'use strict';
 
-  /* =========================================================
-     1. THEME MANAGER (Light & Dark Mode)
-     ========================================================= */
+  
   const THEME_KEY = 'sakura_theme';
 
   function getPreferredTheme() {
     const saved = localStorage.getItem(THEME_KEY);
     if (saved === 'light' || saved === 'dark') return saved;
-    // Default to dark mode (standard for gaming/discord bot aesthetic)
+    
     return 'dark';
   }
 
@@ -32,7 +23,7 @@
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem(THEME_KEY, theme);
 
-    // Update all theme toggle buttons on the page (emoji only)
+    
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
       const isDark = theme === 'dark';
       btn.setAttribute('aria-label', isDark ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối');
@@ -51,7 +42,7 @@
       }
     });
 
-    // Notify listeners
+    
     window.dispatchEvent(new CustomEvent('sakuraThemeChange', { detail: { theme } }));
   }
 
@@ -75,15 +66,15 @@
     }
   }
 
-  // Expose global methods
+  
   window.toggleSakuraTheme = toggleTheme;
   window.setSakuraTheme = applyTheme;
 
-  // Apply immediately to avoid FOUC
+  
   const initialTheme = getPreferredTheme();
   document.documentElement.setAttribute('data-theme', initialTheme);
 
-  // Auto load i18n engine if missing
+  
   if (!window.sakuraT && !document.querySelector('script[src*="i18n.js"]')) {
     const s = document.createElement('script');
     s.src = '/static/js/i18n.js';
@@ -91,9 +82,7 @@
     document.head.appendChild(s);
   }
 
-  /* =========================================================
-     2. SWAYING SAKURA BRANCHES (IMAGE ASSET)
-     ========================================================= */
+  
   function createSakuraBranchImage() {
     const img = document.createElement('img');
     img.src = '/images/sakura-branch.png';
@@ -119,9 +108,7 @@
     document.body.appendChild(container);
   }
 
-  /* =========================================================
-     3. FALLING SAKURA PETALS PARTICLE CANVAS
-     ========================================================= */
+  
   class SakuraPetalsCanvas {
     constructor() {
       this.canvas = null;
@@ -174,7 +161,7 @@
 
     createPetals() {
       this.petals = [];
-      // Adjust petal count based on screen size (fewer on mobile for max performance)
+      
       const count = this.width < 768 ? 16 : this.maxPetals;
       for (let i = 0; i < count; i++) {
         this.petals.push(this.newPetal(Math.random() * this.width, Math.random() * this.height));
@@ -182,7 +169,7 @@
     }
 
     newPetal(x = null, y = null) {
-      const size = Math.random() * 9 + 8; // 8 to 17px
+      const size = Math.random() * 9 + 8; 
       return {
         x: x !== null ? x : Math.random() * (this.width + 100) - 50,
         y: y !== null ? y : -20 - Math.random() * 50,
@@ -194,7 +181,7 @@
         angle: Math.random() * Math.PI * 2,
         angleSpeed: (Math.random() - 0.5) * 0.02,
         opacity: Math.random() * 0.45 + 0.55,
-        colorType: Math.floor(Math.random() * 3), // 0: soft pink, 1: vibrant pink, 2: white-pink
+        colorType: Math.floor(Math.random() * 3), 
         swayPhase: Math.random() * Math.PI * 2,
         swaySpeed: Math.random() * 0.02 + 0.01
       };
@@ -219,9 +206,9 @@
         this.trailPetals.push({
           x: x + (Math.random() - 0.5) * 12,
           y: y + (Math.random() - 0.5) * 12,
-          size: Math.random() * 6 + 7, // 7-13px
+          size: Math.random() * 6 + 7, 
           speedX: Math.cos(angle) * speed + (Math.random() - 0.5) * 0.6,
-          speedY: Math.sin(angle) * speed + 0.8, // gentle fall
+          speedY: Math.sin(angle) * speed + 0.8, 
           flip: Math.random() * Math.PI,
           flipSpeed: Math.random() * 0.04 + 0.02,
           angle: Math.random() * Math.PI * 2,
@@ -235,7 +222,7 @@
 
     spawnBurst(x, y) {
       const now = performance.now();
-      if (now - this.lastBurstTime < 80) return; // Debounce rapid spam
+      if (now - this.lastBurstTime < 80) return; 
       this.lastBurstTime = now;
 
       const petalCount = this.width < 768 ? 12 : 18;
@@ -245,9 +232,9 @@
         this.burstPetals.push({
           x: x,
           y: y,
-          size: Math.random() * 8 + 8, // 8-16px
+          size: Math.random() * 8 + 8, 
           speedX: Math.cos(angle) * speed,
-          speedY: Math.sin(angle) * speed - 1.8, // explosive initial upward lift
+          speedY: Math.sin(angle) * speed - 1.8, 
           gravity: 0.12,
           friction: 0.94,
           flip: Math.random() * Math.PI,
@@ -260,7 +247,7 @@
         });
       }
 
-      // Add sparkling glowing blossom dust
+      
       const sparkleCount = this.width < 768 ? 6 : 10;
       for (let i = 0; i < sparkleCount; i++) {
         const sAngle = Math.random() * Math.PI * 2;
@@ -280,7 +267,7 @@
     bindEvents() {
       window.addEventListener('resize', () => this.resize(), { passive: true });
 
-      // Cursor trail on mouse move
+      
       window.addEventListener('mousemove', (e) => {
         const deltaX = (e.clientX - (this.mouseX || e.clientX)) * 0.05;
         this.targetWindForce = Math.max(-2, Math.min(3, deltaX));
@@ -289,7 +276,7 @@
         this.spawnTrailPetal(e.clientX, e.clientY);
       }, { passive: true });
 
-      // Finger trail and swipe on mobile touch
+      
       window.addEventListener('touchmove', (e) => {
         if (e.touches && e.touches[0]) {
           const t = e.touches[0];
@@ -297,13 +284,13 @@
         }
       }, { passive: true });
 
-      // Flower petal burst on click / tap (works on both PC click & phone tap)
+      
       window.addEventListener('pointerdown', (e) => {
-        // e.clientX & e.clientY are supported across mouse, touch, and pen
+        
         this.spawnBurst(e.clientX, e.clientY);
       }, { passive: true });
 
-      // Pause when page is hidden
+      
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
           this.stop();
@@ -318,11 +305,11 @@
       ctx.save();
       ctx.translate(petal.x, petal.y);
       ctx.rotate(petal.angle);
-      // 3D flip effect
+      
       ctx.scale(Math.cos(petal.flip), 1);
       ctx.globalAlpha = Math.max(0, petal.opacity);
 
-      // Color gradients
+      
       const r = petal.size;
       const grad = ctx.createLinearGradient(-r / 2, -r / 2, r / 2, r / 2);
       if (petal.colorType === 0) {
@@ -343,7 +330,7 @@
       ctx.shadowColor = 'rgba(255, 121, 198, 0.4)';
       ctx.shadowBlur = 4;
 
-      // Draw elegant cherry petal shape (curved heart/teardrop notch)
+      
       ctx.beginPath();
       ctx.moveTo(0, -r);
       ctx.bezierCurveTo(r * 0.8, -r * 0.9, r * 1.1, -r * 0.1, r * 0.5, r * 0.8);
@@ -356,11 +343,11 @@
     }
 
     update() {
-      // Wind smoothing
+      
       this.windForce += (this.targetWindForce - this.windForce) * 0.05;
       this.targetWindForce *= 0.96;
 
-      // Background ambient falling petals
+      
       const len = this.petals.length;
       for (let i = 0; i < len; i++) {
         const p = this.petals[i];
@@ -372,13 +359,13 @@
         p.flip += p.flipSpeed;
         p.angle += p.angleSpeed;
 
-        // Reset if off-screen
+        
         if (p.y > this.height + 30 || p.x > this.width + 50 || p.x < -60) {
           this.petals[i] = this.newPetal(Math.random() * (this.width + 60) - 30, -20);
         }
       }
 
-      // Cursor trail petals update
+      
       for (let i = this.trailPetals.length - 1; i >= 0; i--) {
         const p = this.trailPetals[i];
         p.x += p.speedX;
@@ -391,7 +378,7 @@
         }
       }
 
-      // Click / tap burst petals update
+      
       for (let i = this.burstPetals.length - 1; i >= 0; i--) {
         const p = this.burstPetals[i];
         p.x += p.speedX;
@@ -407,7 +394,7 @@
         }
       }
 
-      // Sparkles update
+      
       for (let i = this.sparkles.length - 1; i >= 0; i--) {
         const s = this.sparkles[i];
         s.x += s.vx;
@@ -425,23 +412,23 @@
       if (!this.ctx) return;
       this.ctx.clearRect(0, 0, this.width, this.height);
 
-      // 1. Falling ambient petals
+      
       const len = this.petals.length;
       for (let i = 0; i < len; i++) {
         this.drawPetal(this.petals[i]);
       }
 
-      // 2. Cursor/touch trail petals
+      
       for (let i = 0; i < this.trailPetals.length; i++) {
         this.drawPetal(this.trailPetals[i]);
       }
 
-      // 3. Click/tap burst petals
+      
       for (let i = 0; i < this.burstPetals.length; i++) {
         this.drawPetal(this.burstPetals[i]);
       }
 
-      // 4. Burst sparkling dust
+      
       for (let i = 0; i < this.sparkles.length; i++) {
         const s = this.sparkles[i];
         this.ctx.save();
@@ -475,9 +462,7 @@
     }
   }
 
-  /* =========================================================
-     4. BOT AVATAR ANIMATION ENHANCER
-     ========================================================= */
+  
   function enhanceBotAvatars() {
     const avatarSelectors = [
       '.brand-logo',
@@ -493,7 +478,7 @@
         if (!img.classList.contains('bot-avatar-animated')) {
           img.classList.add('bot-avatar-animated');
 
-          // Wrap in glowing aura container if parent is not already aura
+          
           const parent = img.parentElement;
           if (parent && !parent.classList.contains('avatar-aura-wrapper')) {
             parent.classList.add('avatar-aura-wrapper');
@@ -503,23 +488,21 @@
     });
   }
 
-  /* =========================================================
-     5. INITIALIZATION
-     ========================================================= */
+  
   function init() {
-    // 1. Apply theme
+    
     applyTheme(getPreferredTheme());
 
-    // 2. Initialize swaying branches
+    
     initSakuraBranches();
 
-    // 3. Initialize falling petals
+    
     window.sakuraPetalsEngine = new SakuraPetalsCanvas();
 
-    // 4. Enhance avatars
+    
     enhanceBotAvatars();
 
-    // 5. Setup theme toggle buttons
+    
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -533,7 +516,7 @@
   } else {
     init();
   }
-  // Top marquee running text
+  
   try{
     if(!localStorage.getItem('sakura_marquee_dismissed')){
       const bar=document.createElement('div');
@@ -547,12 +530,12 @@
         '🌸 Chào mừng đến với Sakura — chúc bạn một ngày tuyệt vời!'
       ];
       const row=items.map(t=>`<span class="sakura-marquee-item">${t}</span><span>•</span>`).join('');
-      track.innerHTML=row+row; // duplicate for seamless
+      track.innerHTML=row+row; 
       const close=document.createElement('button'); close.className='sakura-marquee-close'; close.innerHTML='✕'; close.onclick=()=>{ bar.remove(); document.body.classList.remove('has-marquee'); localStorage.setItem('sakura_marquee_dismissed','1'); };
       bar.appendChild(track); bar.appendChild(close); document.body.prepend(bar); document.body.classList.add('has-marquee');
     }
   }catch(e){}
-  // Auto-load floating chat widget (góc dưới)
+  
   try{
     const s=document.createElement('script');
     s.src='/static/js/chat-widget.js'; s.async=true;

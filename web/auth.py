@@ -54,7 +54,6 @@ def save_users(users: Dict[str, Any]) -> bool:
         return False
 
 def ensure_default_admin():
-    # Hệ thống hiện sử dụng xác thực bảo mật Discord OAuth
     return load_users()
 
 def load_sessions() -> Dict[str, Any]:
@@ -105,7 +104,6 @@ def verify_session(token: str) -> Optional[Dict[str, Any]]:
     if not sess:
         return None
     if sess.get("expires_at", 0) < time.time():
-        # expired
         sessions.pop(token, None)
         save_sessions(sessions)
         return None

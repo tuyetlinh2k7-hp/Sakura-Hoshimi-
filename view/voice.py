@@ -57,7 +57,6 @@ class StatusModal(discord.ui.Modal, title="Đặt trạng thái Voice"):
 
         new_status = self.status_text.value.strip() or None
         try:
-            # Cập nhật trạng thái hiển thị của kênh thoại trên Discord
             await channel.edit(status=new_status)
             if new_status:
                 await interaction.response.send_message(
@@ -371,7 +370,6 @@ class VoicePanel(discord.ui.View):
     def _has_human_targets(self, channel: discord.VoiceChannel) -> bool:
         return any(not m.bot for m in channel.members)
 
-    # ===== Hàng 1: Trạng thái phòng =====
 
     @discord.ui.button(label="🔒 Khóa", style=discord.ButtonStyle.red, row=0, custom_id="vc_panel:lock")
     async def lock(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -427,7 +425,6 @@ class VoicePanel(discord.ui.View):
 
         await interaction.response.send_message("👀 Đã hiện phòng.", ephemeral=True)
 
-    # ===== Hàng 2: Cài đặt & Chủ phòng (Đã thêm nút Đổi Trạng Thái) =====
 
     @discord.ui.button(label="✏️ Đổi tên", style=discord.ButtonStyle.primary, row=1, custom_id="vc_panel:rename")
     async def rename(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -474,7 +471,6 @@ class VoicePanel(discord.ui.View):
             ephemeral=True
         )
 
-    # ===== Hàng 3: Quản lý thành viên (Mute / Ban) =====
 
     @discord.ui.button(label="🔇 Mute", style=discord.ButtonStyle.secondary, row=2, custom_id="vc_panel:mute")
     async def mute_all(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -534,7 +530,6 @@ class VoicePanel(discord.ui.View):
             ephemeral=True
         )
 
-    # ===== Hàng 4: Quản lý âm thanh (Deafen / Undeafen) =====
 
     @discord.ui.button(label="🔈 Tắt âm", style=discord.ButtonStyle.secondary, row=3, custom_id="vc_panel:deafen")
     async def deafen(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -564,7 +559,6 @@ class VoicePanel(discord.ui.View):
             ephemeral=True
         )
 
-    # ===== Hàng 5: Nhận phòng, Đặt lại & Xóa =====
 
     @discord.ui.button(label="🙋 Nhận phòng", style=discord.ButtonStyle.secondary, row=4, custom_id="vc_panel:claim")
     async def claim(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -626,7 +620,6 @@ class VoicePanel(discord.ui.View):
             interaction.user: apply_owner_permissions(discord.PermissionOverwrite())
         }
 
-        # Xóa luôn status và user_limit khi reset
         await channel.edit(overwrites=overwrites, user_limit=0, status=None)
         await interaction.response.send_message(
             "✅ Đã đặt lại toàn bộ quyền, trạng thái, danh sách cấm và giới hạn phòng về mặc định.",

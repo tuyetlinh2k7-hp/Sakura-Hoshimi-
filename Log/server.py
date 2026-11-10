@@ -11,25 +11,18 @@ from Check.i18n import t
 class ServerLog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Hàng đợi chống spam khi chỉnh sửa kênh liên tiếp: {channel_id: dict_info}
         self.channel_update_queues: dict[int, dict] = {}
         self.channel_update_tasks: dict[int, asyncio.Task] = {}
         self.UPDATE_DELAY = 3.5
 
-        # Theo dõi xóa kênh hàng loạt (Anti-Nuke): {guild_id: list[timestamp]}
         self.delete_tracker: dict[int, list[float]] = defaultdict(list)
 
-        # Danh sách ID danh mục muốn bỏ qua log tạo/xóa kênh tự động (Ticket / Temp Voice)
-        # Bạn có thể thêm ID category vào tập hợp này nếu cần
         self.ignored_category_ids: set[int] = set()
 
     def cog_unload(self):
         for task in self.channel_update_tasks.values():
             task.cancel()
 
-    # =========================================================================
-    # CÁC HÀM PHỤ TRỢ (HELPER FUNCTIONS)
-    # =========================================================================
 
     @staticmethod
     def _format_duration(seconds: int) -> str:
@@ -170,9 +163,6 @@ class ServerLog(commands.Cog):
             filename=f"channel_blueprint_{channel.id}.txt"
         )
 
-    # =========================================================================
-    # 1. SỰ KIỆN THÊM / GỠ BOT KHỎI SERVER
-    # =========================================================================
 
     async def _send_owner_guild_join_dm(self, guild: discord.Guild):
         """Gửi thông báo DM cho Bot Owner khi tham gia server (có fallback tự thân)."""
@@ -185,7 +175,6 @@ class ServerLog(commands.Cog):
         except Exception as e:
             print(f"[ServerLog] ⚠️ Lỗi gọi notify_owner_guild_join: {e}")
 
-        # Fallback trực tiếp nếu file Check/owner_notifier.py chưa đồng bộ trên host
         try:
             from config import OWNER_ID
         except Exception:
@@ -232,7 +221,6 @@ class ServerLog(commands.Cog):
         except Exception as e:
             print(f"[ServerLog] ⚠️ Lỗi gọi notify_owner_guild_remove: {e}")
 
-        # Fallback trực tiếp
         try:
             from config import OWNER_ID
         except Exception:
@@ -264,7 +252,6 @@ class ServerLog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
-        # Gửi thông báo DM chi tiết tới Bot Owner
         await self._send_owner_guild_join_dm(guild)
         print(
             f"[+] Bot đã được thêm vào server mới: {guild.name} (ID: {guild.id}) "
@@ -312,7 +299,6 @@ class ServerLog(commands.Cog):
                 embed_guild.set_thumbnail(url=self.bot.user.display_avatar.url)
             embed_guild.set_footer(text=t(guild, "LOG_SERVER_WELCOME_FOOTER"))
 
-            # View nút liên kết hữu ích (Link buttons)
             class ServerWelcomeView(discord.ui.View):
                 def __init__(self):
                     super().__init__(timeout=None)
@@ -334,13 +320,9 @@ class ServerLog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
-        # Gửi thông báo DM chi tiết tới Bot Owner
         await self._send_owner_guild_remove_dm(guild)
         print(f"[-] Bot đã rời khỏi hoặc bị xóa khỏi server: {guild.name} (ID: {guild.id})")
 
-    # =========================================================================
-    # 2. SỰ KIỆN CẬP NHẬT CÀI ĐẶT SERVER (ON_GUILD_UPDATE)
-    # =========================================================================
 
     @commands.Cog.listener()
     async def on_guild_update(self, before: discord.Guild, after: discord.Guild):
@@ -389,7 +371,6 @@ class ServerLog(commands.Cog):
             )
             if after.icon:
                 embed.set_thumbnail(url=after.icon.url)
-            # Cứu lại file Icon cũ trước khi bị CDN xóa
             if before.icon:
                 try:
                     old_icon_file = await before.icon.to_file(filename="old_server_icon.png")
@@ -522,7 +503,6 @@ class ServerLog(commands.Cog):
             )
             changed = True
 
-        # Chỉ gọi API Audit Log khi thực sự có thuộc tính thay đổi
         if not changed:
             return
 
@@ -543,9 +523,6 @@ class ServerLog(commands.Cog):
         except (discord.Forbidden, discord.HTTPException):
             pass
 
-    # =========================================================================
-    # 3. SỰ KIỆN TẠO / XÓA KÊNH (CREATE & DELETE CHANNEL)
-    # =========================================================================
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel):
@@ -581,7 +558,6 @@ class ServerLog(commands.Cog):
             inline=True
         )
 
-        # Kiểm tra xem kênh mới tạo có phải là Kênh Riêng Tư (Private Channel) không
         everyone_ow = channel.overwrites_for(guild.default_role)
         if everyone_ow.view_channel is False:
             allowed_targets = [
@@ -622,7 +598,6 @@ class ServerLog(commands.Cog):
         if guild_id not in server_log_channels:
             return
 
-        # Nếu chính kênh Log bị xóa thì không gửi vào chính nó được nữa
         if channel.id == server_log_channels[guild_id]:
             return
 
@@ -630,12 +605,10 @@ class ServerLog(commands.Cog):
         if log_channel is None:
             return
 
-        # Đã sửa lỗi: Dùng đúng AuditLogAction.channel_delete thay vì channel_create
         executor = await self._get_audit_executor(
             guild, discord.AuditLogAction.channel_delete, target_id=channel.id
         )
 
-        # Kiểm tra Anti-Nuke: Đếm số kênh bị xóa trong vòng 10 giây
         now_ts = discord.utils.utcnow().timestamp()
         self.delete_tracker[guild.id] = [ts for ts in self.delete_tracker[guild.id] if now_ts - ts <= 10.0]
         self.delete_tracker[guild.id].append(now_ts)
@@ -669,7 +642,6 @@ class ServerLog(commands.Cog):
         else:
             embed.set_footer(text=t(guild, "LOG_SERVER_FOOTER_UNKNOWN"))
 
-        # Tạo bản thiết kế kênh (Blueprint) đính kèm để Admin dễ khôi phục
         blueprint_file = self._generate_channel_blueprint(channel)
         alert_content = f"⚠️ <@{guild.owner_id}> Phát hiện xóa nhiều kênh liên tiếp trong thời gian ngắn!" if is_mass_delete else None
 
@@ -678,9 +650,6 @@ class ServerLog(commands.Cog):
         except (discord.Forbidden, discord.HTTPException):
             pass
 
-    # =========================================================================
-    # 4. SỰ KIỆN CẬP NHẬT KÊNH (CÓ DEBOUNCE & CHI TIẾT OVERWRITES)
-    # =========================================================================
 
     @commands.Cog.listener()
     async def on_guild_channel_update(
@@ -698,8 +667,6 @@ class ServerLog(commands.Cog):
         if log_channel is None:
             return
 
-        # KIỂM TRA SỰ THAY ĐỔI TRƯỚC KHI GỌI API AUDIT LOG
-        # Bỏ qua việc gọi API nếu chỉ là thay đổi vị trí (position) do kéo thả kênh
         has_meaningful_change = (
             before.name != after.name
             or before.category != after.category
@@ -726,7 +693,6 @@ class ServerLog(commands.Cog):
                 "log_channel": log_channel
             }
         else:
-            # Giữ nguyên bản gốc `before` đầu tiên, chỉ cập nhật `after` mới nhất
             self.channel_update_queues[ch_id]["after"] = after
 
         if ch_id in self.channel_update_tasks and not self.channel_update_tasks[ch_id].done():
@@ -779,7 +745,6 @@ class ServerLog(commands.Cog):
             changed = True
 
         if hasattr(before, "topic") and before.topic != after.topic:
-            # Cắt ngắn mỗi bên tối đa 450 ký tự để không bao giờ vượt giới hạn 1024 của Embed Field
             b_topic = self._truncate(before.topic, 450) or t(guild, "LOG_SERVER_NONE")
             a_topic = self._truncate(after.topic, 450) or t(guild, "LOG_SERVER_NONE")
             embed.add_field(
@@ -854,7 +819,6 @@ class ServerLog(commands.Cog):
         if not changed:
             return
 
-        # Tìm người thực hiện trong cả channel_update lẫn overwrite_*
         executor = await self._get_audit_executor(
             guild, audit_actions, target_id=after.id, delay=0.0
         )
@@ -883,9 +847,6 @@ class ServerLog(commands.Cog):
         except (discord.Forbidden, discord.HTTPException):
             pass
 
-    # =========================================================================
-    # 5. GIÁM SÁT CHỦ ĐỀ (THREADS) & EMOJI / STICKER SERVER
-    # =========================================================================
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: discord.Thread):

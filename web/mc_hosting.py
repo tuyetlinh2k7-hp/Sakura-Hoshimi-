@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 import psutil
 
-# Cache for network I/O speed calculation
 _prev_net_io = None
 _prev_net_time = 0
 
@@ -20,7 +19,6 @@ def get_server_dir(server_id: str, base_dir: Path) -> Optional[Path]:
         if not target.is_relative_to(base_res):
             return None
     except AttributeError:
-        # Fallback for Python < 3.9
         if not str(target).startswith(str(base_res)):
             return None
     if target.exists() and target.is_dir():
@@ -39,7 +37,6 @@ def scan_mc_servers(base_dir: Path) -> List[Dict[str, Any]]:
     for entry in base_res.iterdir():
         if not entry.is_dir() or entry.name.startswith(".") or entry.name.lower() in ignored_dirs:
             continue
-        # Nhận diện server qua tên 'server', tiền tố 'server_', 'mc_', hoặc có cả server.properties / server.jar
         has_props = (entry / "server.properties").exists()
         has_server_jar = (entry / "server.jar").exists()
         is_server_named = entry.name.lower() == "server" or entry.name.lower().startswith("server_") or entry.name.lower().startswith("mc_")
@@ -78,7 +75,6 @@ def get_server_process(server_dir: Path) -> Optional[psutil.Process]:
             if "server.jar" in cmd_str or "paper" in cmd_str or "spigot" in cmd_str or "minecraft" in cmd_str:
                 if dir_str in cwd or any(dir_str in arg.lower() for arg in cmd):
                     return proc
-                # Nếu chỉ có 1 server folder và 1 tiến trình java server.jar
                 if server_dir.name.lower() == "server":
                     return proc
         except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -106,7 +102,6 @@ def get_server_summary(server_dir: Path) -> Dict[str, Any]:
         except Exception:
             pass
 
-    # Dung lượng thư mục server
     dir_size_mb = 0.0
     try:
         total_b = 0
@@ -120,7 +115,6 @@ def get_server_summary(server_dir: Path) -> Dict[str, Any]:
     except Exception:
         pass
 
-    # Disk usage
     try:
         disk_usage = shutil.disk_usage(server_dir)
         disk_total_gb = round(disk_usage.total / (1024 ** 3), 1)
@@ -130,12 +124,10 @@ def get_server_summary(server_dir: Path) -> Dict[str, Any]:
         disk_free_gb = 0.0
 
     motd = props.get("motd", "Sakura Minecraft Server")
-    # Làm sạch mã màu MOTD dạng \u00A7 hoặc §
     clean_motd = re.sub(r'§[0-9a-fk-or]', '', motd)
     port = int(props.get("server-port", 25565))
     ip = props.get("server-ip", "") or "127.0.0.1"
 
-    # Kiểm tra version từ version history hoặc bukkit/paper
     version = "1.20.1 (Paper/Spigot)"
     ver_file = server_dir / "version_history.json"
     if ver_file.exists():
@@ -163,7 +155,7 @@ def get_server_summary(server_dir: Path) -> Dict[str, Any]:
         "difficulty": props.get("difficulty", "normal"),
         "online_mode": props.get("online-mode", "true").lower() == "true",
         "max_players": int(props.get("max-players", 20)),
-        "players_online": 0, # Cập nhật thêm nếu có RCON
+        "players_online": 0,
         "cpu_percent": cpu_percent,
         "memory_mb": mem_mb,
         "dir_size_mb": dir_size_mb,
@@ -175,14 +167,12 @@ def get_system_metrics(server_dir: Path) -> Dict[str, Any]:
     """Lấy dữ liệu giám sát tài nguyên phần cứng thời gian thực."""
     global _prev_net_io, _prev_net_time
 
-    # System CPU & RAM
     sys_cpu = round(psutil.cpu_percent(interval=None), 1)
     vm = psutil.virtual_memory()
     sys_ram_used_mb = round(vm.used / (1024 * 1024), 1)
     sys_ram_total_mb = round(vm.total / (1024 * 1024), 1)
     sys_ram_percent = vm.percent
 
-    # Disk
     try:
         du = shutil.disk_usage(server_dir)
         disk_used_gb = round(du.used / (1024 ** 3), 1)
@@ -193,7 +183,6 @@ def get_system_metrics(server_dir: Path) -> Dict[str, Any]:
         disk_total_gb = 0.0
         disk_percent = 0.0
 
-    # Network I/O
     net_io = psutil.net_io_counters()
     now = time.time()
     net_up_speed_kb = 0.0
@@ -205,7 +194,6 @@ def get_system_metrics(server_dir: Path) -> Dict[str, Any]:
     _prev_net_io = net_io
     _prev_net_time = now
 
-    # Server process stats
     proc = get_server_process(server_dir)
     srv_cpu = 0.0
     srv_ram_mb = 0.0
@@ -313,7 +301,6 @@ def get_files_in_dir(server_dir: Path, rel_path: str = "") -> Tuple[bool, Any]:
     except Exception as e:
         return False, f"Lỗi đọc thư mục: {e}"
 
-    # Phân tích dung lượng các thành phần máy chủ
     disk_analysis = {}
     try:
         total_server_b = 0
@@ -354,7 +341,6 @@ def read_file_safe(server_dir: Path, rel_path: str) -> Tuple[bool, Any]:
     if not target.exists() or not target.is_file():
         return False, "File không tồn tại"
 
-    # Giới hạn kích thước file mở trên web là 4MB
     if target.stat().st_size > 4 * 1024 * 1024:
         return False, "File quá lớn để chỉnh sửa trên trình duyệt (giới hạn 4MB)"
 
@@ -385,7 +371,6 @@ def save_file_safe(server_dir: Path, rel_path: str, content: str) -> Tuple[bool,
             return False, "Truy cập trái phép: Vượt khỏi thư mục máy chủ"
 
     try:
-        # Tạo bản sao lưu nếu file đã tồn tại
         if target.exists() and target.is_file():
             bak_path = target.with_suffix(target.suffix + ".bak")
             try:
@@ -494,7 +479,6 @@ def update_server_properties(server_dir: Path, updates: Optional[Dict[str, Any]]
     """Cập nhật file server.properties."""
     props_path = server_dir / "server.properties"
     try:
-        # Backup
         if props_path.exists():
             shutil.copy2(props_path, props_path.with_suffix(".properties.bak"))
 
@@ -504,7 +488,6 @@ def update_server_properties(server_dir: Path, updates: Optional[Dict[str, Any]]
             return True, "Đã lưu cài đặt server.properties thành công!"
 
         if updates:
-            # Đọc file hiện tại và thay thế giá trị giữ nguyên format
             lines = []
             existing_keys = set()
             if props_path.exists():
@@ -538,9 +521,6 @@ def update_server_properties(server_dir: Path, updates: Optional[Dict[str, Any]]
     except Exception as e:
         return False, f"Lỗi lưu server.properties: {e}"
 
-# ==============================================================================
-# QUẢN LÝ ICON MÁY CHỦ (SERVER-ICON.PNG)
-# ==============================================================================
 
 def update_server_icon(server_dir: Path, image_bytes: bytes) -> Tuple[bool, str]:
     """Cập nhật icon server Minecraft (chuẩn 64x64 PNG)."""
@@ -557,9 +537,6 @@ def update_server_icon(server_dir: Path, image_bytes: bytes) -> Tuple[bool, str]
     except Exception as e:
         return False, f"Lỗi xử lý hình ảnh icon: {e}"
 
-# ==============================================================================
-# HỆ THỐNG PHÂN QUYỀN MC HOSTING DASHBOARD (/minecraft/manager)
-# ==============================================================================
 
 def get_mc_permissions(data_dir: Path) -> Dict[str, Any]:
     """Lấy danh sách người dùng và quyền hạn MC hosting."""
@@ -644,7 +621,6 @@ def check_mc_permission_access(data_dir: Path, sess: Optional[Dict[str, Any]], p
     if not sess:
         return False
     did = str(sess.get("discord_id") or sess.get("user_id") or "")
-    # Web admin hoặc Owner luôn có toàn quyền
     u = (sess.get("username") or "").lower()
     tag = (sess.get("tag") or "").lower()
     try:
@@ -667,9 +643,6 @@ def check_mc_permission_access(data_dir: Path, sess: Optional[Dict[str, Any]], p
     perms = user_entry.get("permissions", {})
     return bool(perms.get(perm_name, False))
 
-# ==============================================================================
-# BỘ GIẢI MÃ NBT THUẦN PYTHON & PHÂN TÍCH PLAYERDATA
-# ==============================================================================
 
 def parse_nbt_stream(data: bytes) -> Dict[str, Any]:
     """Bộ giải mã NBT thuần Python (Named Binary Tag) hỗ trợ đầy đủ Minecraft Dat."""
@@ -729,34 +702,34 @@ def parse_nbt_stream(data: bytes) -> Dict[str, Any]:
 
     def parse_payload(tag_type: int) -> Any:
         nonlocal offset
-        if tag_type == 0:  # TAG_End
+        if tag_type == 0:
             return None
-        elif tag_type == 1:  # TAG_Byte
+        elif tag_type == 1:
             return read_byte()
-        elif tag_type == 2:  # TAG_Short
+        elif tag_type == 2:
             return read_short()
-        elif tag_type == 3:  # TAG_Int
+        elif tag_type == 3:
             return read_int()
-        elif tag_type == 4:  # TAG_Long
+        elif tag_type == 4:
             return read_long()
-        elif tag_type == 5:  # TAG_Float
+        elif tag_type == 5:
             return round(read_float(), 2)
-        elif tag_type == 6:  # TAG_Double
+        elif tag_type == 6:
             return round(read_double(), 2)
-        elif tag_type == 7:  # TAG_Byte_Array
+        elif tag_type == 7:
             length = read_int()
             if length <= 0 or offset + length > dlen: return []
             res = list(data[offset:offset+length])
             offset += length
             return res
-        elif tag_type == 8:  # TAG_String
+        elif tag_type == 8:
             return read_string()
-        elif tag_type == 9:  # TAG_List
+        elif tag_type == 9:
             elem_type = read_byte()
             length = read_int()
             if length <= 0: return []
             return [parse_payload(elem_type) for _ in range(length)]
-        elif tag_type == 10:  # TAG_Compound
+        elif tag_type == 10:
             compound = {}
             while offset < dlen:
                 ttype = read_byte()
@@ -765,11 +738,11 @@ def parse_nbt_stream(data: bytes) -> Dict[str, Any]:
                 tname = read_string()
                 compound[tname] = parse_payload(ttype)
             return compound
-        elif tag_type == 11:  # TAG_Int_Array
+        elif tag_type == 11:
             length = read_int()
             if length <= 0: return []
             return [read_int() for _ in range(length)]
-        elif tag_type == 12:  # TAG_Long_Array
+        elif tag_type == 12:
             length = read_int()
             if length <= 0: return []
             return [read_long() for _ in range(length)]
@@ -780,7 +753,7 @@ def parse_nbt_stream(data: bytes) -> Dict[str, Any]:
     root_type = read_byte()
     if root_type != 10:
         return {}
-    read_string()  # root name (usually empty)
+    read_string()
     return parse_payload(10) or {}
 
 def _extract_text_component(comp: Any) -> str:
@@ -808,7 +781,6 @@ def parse_mc_item(it: Dict[str, Any]) -> Dict[str, Any]:
     components = it.get("components") if isinstance(it.get("components"), dict) else {}
     tag = it.get("tag") if isinstance(it.get("tag"), dict) else {}
 
-    # Tên tùy chỉnh
     name = ""
     raw_name = components.get("minecraft:custom_name") or tag.get("display", {}).get("Name")
     if raw_name:
@@ -816,7 +788,6 @@ def parse_mc_item(it: Dict[str, Any]) -> Dict[str, Any]:
     if not name:
         name = clean_id.replace("_", " ").title()
 
-    # Lore
     lore = []
     raw_lore = components.get("minecraft:lore") or tag.get("display", {}).get("Lore", [])
     if isinstance(raw_lore, list):
@@ -825,7 +796,6 @@ def parse_mc_item(it: Dict[str, Any]) -> Dict[str, Any]:
             if cleaned_line:
                 lore.append(cleaned_line)
 
-    # Enchantments
     enchants = []
     raw_ench = components.get("minecraft:enchantments") or tag.get("Enchantments", [])
     if isinstance(raw_ench, dict):
@@ -839,11 +809,9 @@ def parse_mc_item(it: Dict[str, Any]) -> Dict[str, Any]:
                 lvl = e.get("lvl", 1)
                 enchants.append(f"{eid} {lvl}")
 
-    # Shulker Box inspection
     is_shulker = "shulker_box" in clean_id
     shulker_items = []
     if is_shulker:
-        # Minecraft 1.20.5+ container component
         cont = components.get("minecraft:container", [])
         if isinstance(cont, list):
             for c_entry in cont:
@@ -853,7 +821,6 @@ def parse_mc_item(it: Dict[str, Any]) -> Dict[str, Any]:
                     if isinstance(c_item, dict):
                         sub_parsed = parse_mc_item(dict(c_item, slot=c_slot))
                         shulker_items.append(sub_parsed)
-        # BlockEntityTag (Older Minecraft versions)
         bet = tag.get("BlockEntityTag", {}).get("Items", [])
         if isinstance(bet, list):
             for b_it in bet:
@@ -881,7 +848,6 @@ def find_player_dat_files(server_dir: Path) -> Dict[str, Path]:
         server_dir / "world" / "players",
         server_dir / "playerdata"
     ]
-    # Cũng quét các thế giới khác như world_nether, world_the_end nếu có
     for w in server_dir.glob("world*"):
         if w.is_dir():
             candidate_dirs.append(w / "playerdata")
@@ -900,7 +866,6 @@ def get_server_players(server_dir: Path) -> List[Dict[str, Any]]:
     import json
     import gzip
 
-    # 1. Đọc usercache.json
     cache_users = {}
     uc_path = server_dir / "usercache.json"
     if uc_path.exists():
@@ -919,10 +884,8 @@ def get_server_players(server_dir: Path) -> List[Dict[str, Any]]:
         except Exception:
             pass
 
-    # 2. Tìm các file player .dat
     dat_files = find_player_dat_files(server_dir)
 
-    # 3. Đọc Essentials userdata nếu có
     ess_dir = server_dir / "plugins" / "Essentials" / "userdata"
     ess_data = {}
     if ess_dir.exists():
@@ -952,7 +915,6 @@ def get_server_players(server_dir: Path) -> List[Dict[str, Any]]:
             except Exception:
                 pass
 
-    # Tổng hợp tất cả UUID
     all_uuids = set(cache_users.keys()) | set(dat_files.keys()) | set(ess_data.keys())
     results = []
 
@@ -971,7 +933,7 @@ def get_server_players(server_dir: Path) -> List[Dict[str, Any]]:
         health = 20.0
         food = 20
         level = 0
-        gamemode = 0  # 0: Survival, 1: Creative, 2: Adventure, 3: Spectator
+        gamemode = 0
 
         if has_dat:
             try:
@@ -1009,7 +971,6 @@ def get_server_players(server_dir: Path) -> List[Dict[str, Any]]:
             "body_url": f"https://mc-heads.net/body/{uuid_str}/right"
         })
 
-    # Sắp xếp người chơi theo thời gian hoạt động mới nhất
     results.sort(key=lambda x: x["last_seen"], reverse=True)
     return results
 
@@ -1026,7 +987,6 @@ def get_player_detail(server_dir: Path, uuid_or_name: str) -> Optional[Dict[str,
         matched_uuid = target
         target_dat = dat_files[target]
     else:
-        # Tìm qua usercache.json
         players = get_server_players(server_dir)
         for p in players:
             if p["name"].lower() == target or p["uuid"] == target:
@@ -1045,12 +1005,10 @@ def get_player_detail(server_dir: Path, uuid_or_name: str) -> Optional[Dict[str,
     except Exception:
         return None
 
-    # Tìm tên người chơi
     players = get_server_players(server_dir)
     p_info = next((p for p in players if p["uuid"] == matched_uuid), None)
     player_name = p_info["name"] if p_info else f"Player_{matched_uuid[:8]}"
 
-    # Phân loại kho đồ (Inventory: 0-8 Hotbar, 9-35 Inventory, 100-103 Armor, -106 Offhand)
     raw_inv = pdata.get("Inventory", [])
     hotbar = [None] * 9
     main_inv = [None] * 27
@@ -1075,7 +1033,6 @@ def get_player_detail(server_dir: Path, uuid_or_name: str) -> Optional[Dict[str,
         elif s == -106:
             offhand = parsed
 
-    # Ender Chest (27 ô: 0-26)
     raw_ender = pdata.get("EnderItems", [])
     ender_chest = [None] * 27
     for it in raw_ender:
@@ -1084,7 +1041,6 @@ def get_player_detail(server_dir: Path, uuid_or_name: str) -> Optional[Dict[str,
         if 0 <= s < 27:
             ender_chest[s] = parsed
 
-    # Tọa độ và chiều không gian
     pos = pdata.get("Pos", [0.0, 0.0, 0.0])
     rot = pdata.get("Rotation", [0.0, 0.0])
     dim = str(pdata.get("Dimension", "minecraft:overworld")).replace("minecraft:", "").title()

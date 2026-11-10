@@ -211,7 +211,6 @@ class LeaderboardView(View):
 
     async def _update(self, interaction):
         embed = await self.cog.build_leaderboard_embed(self.guild, self.metric, self.period, self.scope)
-        # Cập nhật lựa chọn mặc định trên các menu
         for child in self.children:
             if isinstance(child, Select):
                 key = child.custom_id
@@ -487,7 +486,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
             title_metric = "LEVEL"
             if period == "all":
                 if global_scope:
-                    # Tổng level global lấy dữ liệu users trên toàn bộ server, gộp theo Discord ID.
                     async with aiosqlite.connect(DB_PATH) as db:
                         db.row_factory = aiosqlite.Row
                         cur = await db.execute("SELECT user_id, MAX(level) AS level, MAX(xp) AS xp FROM users GROUP BY user_id ORDER BY MAX(level) DESC, MAX(xp) DESC LIMIT 10")
@@ -612,14 +610,12 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
         act = action.lower()
         target_user = user or ctx.author
 
-        # Kiểm tra tag user khác đối với các lệnh thông tin cá nhân (xp, level, rank, balance)
         if target_user.id != ctx.author.id:
             is_owner = (ctx.author.id in (1144785664458637394, OWNER_ID) or await self.bot.is_owner(ctx.author))
             if not is_owner and act in ("rank", "lv", "level", "xp", "balance", "bal", "money"):
                 msg = "❌ Bạn chỉ có thể xem thông tin của chính mình! Không được phép xem của người khác." if is_vietnamese(ctx.guild.id) else "❌ You can only view your own info! You cannot view other players'."
                 return await ctx.send(msg, ephemeral=True)
 
-        # 1. XEM THẺ RANK ĐỒ HỌA
         if act in ("rank", "lv", "level"):
             if ctx.interaction:
                 await ctx.interaction.response.defer()
@@ -652,7 +648,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
             )
             return await ctx.send(file=discord.File(card_buf, filename="rank_card.png"))
 
-        # 2. XEM SỐ DƯ VÍ TIỀN & NGÂN HÀNG
         if act == "balance":
             vi = is_vietnamese(ctx.guild.id)
             data = await get_user_data(ctx.guild.id, target_user.id)
@@ -670,7 +665,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
             embed.add_field(name="💠 Xu Tích Lũy (Nạp/Owner)" if vi else "💠 VIP Xu (Deposit/Owner)", value=f"**`{user_xu:,}` xu**", inline=False)
             return await ctx.send(embed=embed)
 
-        # 3. ĐIỂM DANH DAILY
         if act == "daily":
             vi = is_vietnamese(ctx.guild.id)
             result = await award_daily(ctx.guild.id, ctx.author.id)
@@ -681,7 +675,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
             else:
                 return await ctx.send(f"🎉 Daily check-in successful! Received **+{result['reward']:,} coins** (Streak: **{result['streak']}** days).")
 
-        # 4. BẢNG XẾP HẠNG SERVER (TOP)
         if act in ("top", "leaderboard"):
             top_users = await get_leaderboard_data(ctx.guild.id, limit=10)
             if not top_users:
@@ -712,7 +705,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
             view = LeaderboardView(self, ctx.guild, ctx.author.id, metric="xu", period="all", scope="server")
             return await ctx.send(embed=embed, view=view)
 
-        # 5. MỞ BẢNG ĐIỀU KHIỂN PANEL ADMIN
         if act == "panel":
             if not is_admin_or_owner(ctx.author, ctx.guild):
                 return await ctx.send("⛔ Bạn không có quyền quản lý hệ thống cấp độ!", ephemeral=True)
@@ -724,7 +716,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
                 view.message = msg
             return
 
-        # 6. CÀI ĐẶT KÊNH THÔNG BÁO VÀ TỔNG KẾT TUẦN
         if act == "setchannel":
             if not is_admin_or_owner(ctx.author, ctx.guild):
                 return await ctx.send("⛔ Bạn không có quyền quản trị để cài đặt kênh!", ephemeral=True)
@@ -748,7 +739,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
             )
             return await ctx.send(embed=embed)
 
-        # 7. BẬT / TẮT HỆ THỐNG CẤP ĐỘ (TOGGLE)
         if act == "toggle":
             if not is_admin_or_owner(ctx.author, ctx.guild):
                 return await ctx.send("⛔ Bạn không có quyền quản lý hệ thống cấp độ!", ephemeral=True)
@@ -764,7 +754,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
             msg_key = "LEVEL_TOGGLE_ON" if is_on else "LEVEL_TOGGLE_OFF"
             return await ctx.send(t(ctx.guild, msg_key), ephemeral=True)
 
-        # 8. THÊM / XÓA KÊNH BỎ QUA XP
         if act in ("ignore_add", "ignore_remove"):
             if not is_admin_or_owner(ctx.author, ctx.guild):
                 return await ctx.send("⛔ Bạn không có quyền quản lý hệ thống cấp độ!", ephemeral=True)
@@ -787,7 +776,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
                 save_leveling_settings()
                 return await ctx.send(f"🗑️ Đã xóa kênh {channel.mention} khỏi danh sách bỏ qua.", ephemeral=True)
 
-        # 9. PHÁT TỔNG KẾT TUẦN THỦ CÔNG NGAY
         if act == "summary":
             if not is_admin_or_owner(ctx.author, ctx.guild):
                 return await ctx.send("⛔ Bạn không có quyền quản lý để phát tổng kết!", ephemeral=True)
@@ -831,7 +819,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
             embed = await self.build_leaderboard_embed(ctx.guild, "voice", scope_period, "server")
             return await ctx.send(embed=embed, view=LeaderboardView(self, ctx.guild, ctx.author.id, "voice", scope_period, "server"))
 
-        # 10. [OWNER ONLY] GÁN GIÁ TRỊ XP, LEVEL, COINS, BANK
         if act == "setstat":
             if ctx.author.id != OWNER_ID:
                 return await ctx.send("⛔ Chỉ có Chủ Bot (Owner) mới có quyền sử dụng chức năng này!", ephemeral=True)
@@ -946,9 +933,6 @@ class LevelingCog(commands.Cog, name="Hệ Thống Cấp Độ"):
     async def voicetop_cmd(self, ctx: commands.Context, period: Literal["all", "week", "month"] = "all"):
         await self.leveling(ctx, action="voicetop", period=period)
 
-    # -------------------------------------------------------------
-    # CÁC LỆNH PREFIX TIỆN LỢI (KHÔNG CÓ WORK & BANK ĐỂ TRÁNH XUNG ĐỘT)
-    # -------------------------------------------------------------
     @commands.command(name="rank", aliases=["xp", "level"])
     async def rank_cmd(self, ctx: commands.Context, user: Optional[discord.Member] = None):
         target = user

@@ -12,7 +12,7 @@ EXTENSIONS = (
     "confession",
     "tarot",
     "server_member", 
-    "xemboi_ai", # Giữ lại enka_commands cho các lệnh chung và game khác
+    "xemboi_ai",
     "help_command",
     "enka_commands",
     "menu_command",
@@ -22,21 +22,20 @@ EXTENSIONS = (
     "ai_chat_channel",
     "user_panel",
     "tts",
-   # "genshin",
     "anime",
-    "prefix", # Thêm cog quản lý prefix
+    "prefix",
     "ticket",
     "backup",
-    "global_chat", # Bật lại global_chat
-    "command_level", # Hệ thống level
+    "global_chat",
+    "command_level",
     "say",
-    "request_role", # Hệ thống yêu cầu tạo role
+    "request_role",
     "word_chain_game",
     "RoleManagen",
-    "voice_status", # Thêm lệnh kiểm tra voice
-    "proxy_command", # Thêm cog quản lý proxy
-    "language", # Hệ thống đa ngôn ngữ per-guild vi/en
-    "giveaway", # Hệ thống giveaway tự động.
+    "voice_status",
+    "proxy_command",
+    "language",
+    "giveaway",
     "guild_profile",
     "rule",
     "savefiler",

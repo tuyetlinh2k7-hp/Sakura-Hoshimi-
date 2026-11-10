@@ -168,7 +168,6 @@ class Basic(commands.Cog):
         )
         await ctx.send(embed=embed, ephemeral=True)
 
-    # --- NHÓM LỆNH HYBRID /user (Tối ưu hóa Slash Commands) ---
     @commands.hybrid_group(name="user", aliases=["nguoidung"], description="Tra cứu thông tin người dùng: Avatar, Banner, Hồ sơ")
     async def user_group(self, ctx: commands.Context):
         """Xem thông tin người dùng nếu không chọn lệnh con."""
@@ -190,7 +189,6 @@ class Basic(commands.Cog):
     async def user_banner_cmd(self, ctx: commands.Context, thanh_vien: discord.Member = None):
         await self._handle_banner(ctx, thanh_vien)
 
-    # Prefix shortcuts: !avatar, !av, !banner, !userinfo
     @commands.command(name="avatar", aliases=["av"])
     async def avatar(self, ctx: commands.Context, thanh_vien: discord.Member = None):
         await self._handle_avatar(ctx, thanh_vien)

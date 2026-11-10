@@ -46,7 +46,6 @@ class ActionPaginationView(discord.ui.View):
         self.user_id = user_id
         self.guild = guild
         self.current_page = 0
-        # Update button labels with i18n if guild provided
         if guild is not None:
             try:
                 self.btn_prev.label = t(guild, "ACTION_BTN_PREV")
@@ -107,15 +106,12 @@ class Action(commands.Cog):
 
     async def execute_action(self, ctx_or_interaction, action_name: str, member: discord.Member = None, is_slash: bool = False):
         """Hàm xử lý logic cốt lõi dùng chung cho cả Prefix và Slash Command"""
-        # Xác định người gửi và guild tương ứng
         author = ctx_or_interaction.user if is_slash else ctx_or_interaction.author
         guild = ctx_or_interaction.guild
 
-        # Defer trước vì gọi API lấy Gif có thể mất hơn 3 giây
         if is_slash:
             await ctx_or_interaction.response.defer()
 
-        # Chuyển sang API purrbot.site
         gif = None
         try:
             async with self.session.get(f"https://purrbot.site/api/img/sfw/{action_name}/gif") as resp:
@@ -159,7 +155,6 @@ class Action(commands.Cog):
         else:
             await ctx_or_interaction.send(embed=embed)
 
-    # --- 1. NHÓM LỆNH SLASH /action (Tối ưu hóa Slash Commands) ---
     action_group = app_commands.Group(name="action", description="Hệ thống tương tác hành động và cảm xúc")
 
     @action_group.command(name="do", description="Thực hiện một hành động tương tác hoặc trạng thái")
@@ -201,12 +196,10 @@ class Action(commands.Cog):
             for k, v in ACTION_MAP.items() if current.lower() in k.lower() or current.lower() in v.lower()
         ][:25]
 
-    # --- 2. XEM DANH SÁCH HÀNH ĐỘNG (Có phân trang chống lỗi Embed 1024/6000 ký tự) ---
     def build_action_list_pages(self, guild=None) -> list:
         interaction_actions = sorted([f"`{k}` ({v})" for k, v in ACTION_MAP.items()])
         solo_actions = sorted([f"`{k}` ({v})" for k, v in ACTIONS.items()])
 
-        # Chia nhỏ chuỗi lệnh để không bị tràn field của Embed
         def chunks(lst, n):
             for i in range(0, len(lst), n):
                 yield lst[i:i + n]
@@ -240,7 +233,6 @@ class Action(commands.Cog):
         if len(pages) <= 1: view.btn_next.disabled = True
         await ctx.send(embed=pages[0], view=view)
 
-    # --- 3. LỆNH MUỐN (!muon) ---
     @commands.command(aliases=["muốn"])
     async def muon(self, ctx, action_name=None, member: discord.Member = None):
         if not action_name or not member:

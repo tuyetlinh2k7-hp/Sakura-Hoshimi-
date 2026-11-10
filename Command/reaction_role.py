@@ -26,7 +26,6 @@ STYLE_NAMES = {
     "danger": "🔴 Đỏ (Danger)",
 }
 
-# ----------------- HÀM TIỆN ÍCH CƠ BẢN -----------------
 def parse_hex_color(hex_str: Optional[str]) -> discord.Color:
     if not hex_str:
         return discord.Color.blurple()
@@ -42,7 +41,6 @@ def resolve_emoji(guild: discord.Guild, emoji_input: Optional[str]) -> Optional[
     if not raw:
         return None
 
-    # 1. Parse chuỗi chuẩn dạng <:name:id>
     if raw.startswith("<") and raw.endswith(">"):
         try:
             partial = discord.PartialEmoji.from_str(raw)
@@ -53,16 +51,13 @@ def resolve_emoji(guild: discord.Guild, emoji_input: Optional[str]) -> Optional[
             pass
 
     clean_name = raw.strip(":")
-    # 2. Tìm theo tên
     found = discord.utils.get(guild.emojis, name=clean_name)
     if found:
         return found
-    # 3. Tìm theo ID
     if clean_name.isdigit():
         found = guild.get_emoji(int(clean_name))
         if found:
             return found
-    # 4. Tránh parse text thường thành emoji gây lỗi
     if all(ord(c) < 128 and (c.isalnum() or c in "_- ") for c in raw):
         return None
     return raw
@@ -122,7 +117,6 @@ def build_panel_embed(title: str, user_desc: str, color_hex: str, image_url: str
     return embed
 
 
-# ----------------- KIẾN TRÚC PERSISTENT VIEW (DÀNH CHO BUTTON) -----------------
 class RoleButton(discord.ui.Button):
     def __init__(self, item: dict, mode: str):
         style_key = item.get("style", "secondary")
@@ -192,7 +186,6 @@ class RolePanelView(discord.ui.View):
             self.add_item(RoleButton(item, mode))
 
 
-# ----------------- CÁC MODAL NHẬP LIỆU (BƯỚC 3 & CUSTOM EMOJI) -----------------
 class FinalEmbedModal(discord.ui.Modal):
     def __init__(self, cog: "RolePanelCog", target_channel: discord.TextChannel, mode: str, panel_type: str, configured_roles: list[dict]):
         super().__init__(title="Hoàn Tất Thiết Lập Bảng Role")
@@ -334,7 +327,6 @@ class EditPanelModal(discord.ui.Modal):
         await interaction.followup.send("✅ Cập nhật giao diện thành công!", ephemeral=True)
 
 
-# ----------------- UI CẤU HÌNH (BƯỚC 1 & 2) -----------------
 class RoleConfigView(discord.ui.View):
     def __init__(self, cog: "RolePanelCog", target_channel: discord.TextChannel, mode: str, panel_type: str, total_count: int):
         super().__init__(timeout=900)
@@ -518,7 +510,6 @@ class InitialSetupView(discord.ui.View):
         await interaction.response.edit_message(embed=config_view.get_embed(), view=config_view)
 
 
-# ----------------- COG CHÍNH -----------------
 class RolePanelCog(commands.GroupCog, group_name="reactionrole"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -670,7 +661,6 @@ class RolePanelCog(commands.GroupCog, group_name="reactionrole"):
                     except Exception: pass
                 break
 
-    # ----- LỆNH SLASH -----
     @app_commands.command(name="setup", description="Khởi tạo bảng chọn role")
     @app_commands.checks.has_permissions(manage_roles=True)
     async def setup_panel(self, interaction: discord.Interaction, channel: discord.TextChannel):

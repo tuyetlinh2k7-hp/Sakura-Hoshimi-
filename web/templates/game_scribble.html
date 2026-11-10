@@ -1069,7 +1069,7 @@ body {
 </head>
 <body>
 
-<!-- ================= 1. LOBBY SCREEN (INITIAL) ================= -->
+
 <div class="lobby-screen" id="lobbyScreen">
   <div class="skribbl-logo" onclick="window.location.href='/game'" style="cursor:pointer;user-select:none" title="Trở về danh sách Game">
     <span class="c1">V</span><span class="c2">ẽ</span>
@@ -1082,7 +1082,7 @@ body {
   </div>
 
   <div class="lobby-box">
-    <!-- AVATAR CUSTOMIZER -->
+    
     <div class="avatar-customizer">
       <div class="avatar-preview-box" id="avatarPreviewBox"></div>
 
@@ -1109,20 +1109,20 @@ body {
       </button>
     </div>
 
-    <!-- PLAYER NAME -->
+    
     <input type="text" id="playerNameInput" class="name-input" placeholder="Nhập tên của bạn..." maxlength="18">
 
-    <!-- PLAY PUBLIC -->
+    
     <button class="btn-play-public" onclick="enterRoom('public')">
       ▶ VÀO PHÒNG CHƠI CHUNG
     </button>
 
-    <!-- CREATE PRIVATE ROOM -->
+    
     <button class="btn-create-private" onclick="enterRoom('private')">
       ⚙️ TẠO PHÒNG RIÊNG &amp; CÀI ĐẶT
     </button>
 
-    <!-- CÁC PHÒNG ĐANG MỞ -->
+    
     <div class="open-rooms-card">
       <div class="open-rooms-header">
         <div class="open-rooms-title">
@@ -1137,9 +1137,9 @@ body {
   </div>
 </div>
 
-<!-- ================= 2. ROOM SETTINGS & WAITING ROOM SCREEN ================= -->
+
 <div class="waiting-screen hidden" id="waitingScreen">
-  <!-- TOP CARD: ROOM INFO & SHARE -->
+  
   <div class="waiting-top-card">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div class="room-code-tag">
@@ -1156,7 +1156,7 @@ body {
     </div>
   </div>
 
-  <!-- PLAYERS IN ROOM -->
+  
   <div class="waiting-players-card">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div style="font-size:1.1rem;font-weight:900">👥 Người chơi trong phòng (<span id="waitingPlayerCount">1</span>/<span id="waitingMaxPlayerDisplay">8</span>)</div>
@@ -1165,7 +1165,7 @@ body {
     <div class="players-waiting-grid" id="waitingPlayersGrid"></div>
   </div>
 
-  <!-- SETTINGS PANEL LAYER -->
+  
   <div class="settings-panel-card" id="settingsPanelCard">
     <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-card);padding-bottom:12px">
       <h2 style="font-size:1.35rem;font-weight:900;color:var(--accent-blue);display:flex;align-items:center;gap:8px">
@@ -1175,7 +1175,7 @@ body {
     </div>
 
     <div class="settings-grid-2col">
-      <!-- 1. Max Players -->
+      
       <div class="setting-field">
         <label class="setting-label">👥 Số người chơi tối đa</label>
         <select class="setting-select" id="cfgMaxPlayers" onchange="onSettingsFieldChange()">
@@ -1189,7 +1189,7 @@ body {
         </select>
       </div>
 
-      <!-- 2. Language -->
+      
       <div class="setting-field">
         <label class="setting-label">🌐 Ngôn ngữ từ vựng</label>
         <select class="setting-select" id="cfgLanguage" onchange="onSettingsFieldChange()">
@@ -1199,7 +1199,7 @@ body {
         </select>
       </div>
 
-      <!-- 3. Draw Time -->
+      
       <div class="setting-field">
         <label class="setting-label">⏱️ Thời gian vẽ mỗi lượt</label>
         <select class="setting-select" id="cfgDrawTime" onchange="onSettingsFieldChange()">
@@ -1214,7 +1214,7 @@ body {
         </select>
       </div>
 
-      <!-- 4. Max Rounds -->
+      
       <div class="setting-field">
         <label class="setting-label">🔄 Số vòng chơi (Rounds)</label>
         <select class="setting-select" id="cfgRounds" onchange="onSettingsFieldChange()">
@@ -1229,7 +1229,7 @@ body {
         </select>
       </div>
 
-      <!-- 5. Game Mode -->
+      
       <div class="setting-field">
         <label class="setting-label">🎮 Chế độ chơi</label>
         <select class="setting-select" id="cfgGameMode" onchange="onSettingsFieldChange()">
@@ -1240,7 +1240,7 @@ body {
         </select>
       </div>
 
-      <!-- 6. Word choices count -->
+      
       <div class="setting-field">
         <label class="setting-label">🔤 Số từ được chọn mỗi lượt</label>
         <select class="setting-select" id="cfgWordChoices" onchange="onSettingsFieldChange()">
@@ -1251,7 +1251,7 @@ body {
         </select>
       </div>
 
-      <!-- 7. Hints count -->
+      
       <div class="setting-field" style="grid-column: 1 / -1">
         <label class="setting-label">💡 Số ký tự gợi ý</label>
         <select class="setting-select" id="cfgHints" onchange="onSettingsFieldChange()">
@@ -1264,7 +1264,7 @@ body {
       </div>
     </div>
 
-    <!-- 8. Custom Words list with formula calculation -->
+    
     <div class="custom-words-box">
       <div class="custom-words-stats-bar">
         <label class="setting-label" style="color:#fff">
@@ -1281,7 +1281,7 @@ body {
       </div>
     </div>
 
-    <!-- ACTIONS BAR -->
+    
     <div class="waiting-actions-bar">
       <button class="btn-exit-room" style="background:#8e44ad;padding:12px 18px;font-size:1rem" id="btnBotToggleWaiting" onclick="toggleBot()">🤖 Bot Sakura: Tắt</button>
       <button class="btn-exit-room" style="background:#2980b9;padding:12px 20px;font-size:1rem" id="btnSaveSettings" onclick="saveRoomSettings()">💾 Lưu Cài Đặt</button>
@@ -1290,9 +1290,9 @@ body {
   </div>
 </div>
 
-<!-- ================= 3. IN-GAME SCREEN ================= -->
+
 <div class="game-screen hidden" id="gameScreen">
-  <!-- HEADER -->
+  
   <div class="skribbl-header">
     <div class="header-left">
       <button class="btn-exit-room" onclick="leaveRoom()">✕ Thoát</button>
@@ -1311,14 +1311,14 @@ body {
     </div>
   </div>
 
-  <!-- 3 COLUMNS -->
+  
   <div class="skribbl-body">
-    <!-- LEFT: PLAYERS -->
+    
     <div class="players-column" id="playersListContainer"></div>
 
-    <!-- CENTER: CANVAS -->
+    
     <div class="canvas-column">
-      <!-- Status pill banner -->
+      
       <div class="canvas-status-pill" id="canvasStatusPill">
         <span id="canvasStatusText">🖌️ Chuẩn bị bảng vẽ...</span>
         <span id="canvasStatusAction" style="color:var(--text-muted)"></span>
@@ -1334,20 +1334,20 @@ body {
           <button class="btn-rx" onclick="sendReaction('dislike')" title="Vẽ khó hiểu quá!">👎</button>
         </div>
 
-        <!-- OVERLAY: WORD SELECTION -->
+        
         <div class="overlay-curtain" id="overlayWordChoice">
           <h2 style="font-size:1.8rem;font-weight:900;color:var(--accent-yellow)">🎨 ĐẾN LƯỢT BẠN VẼ!</h2>
           <p style="color:var(--text-muted);font-weight:700;margin-top:4px">Chọn 1 từ khóa dưới đây:</p>
           <div class="word-choice-cards" id="wordChoiceButtons"></div>
         </div>
 
-        <!-- OVERLAY: ROUND END WORD REVEAL -->
+        
         <div class="overlay-curtain" id="overlayRoundEnd">
           <h3 style="font-size:1.3rem;color:var(--text-muted)" id="overlayEndReason">Hết thời gian!</h3>
           <div style="font-size:2.4rem;font-weight:900;color:var(--accent-yellow);margin-top:8px" id="overlayRevealedWord">CON MÈO</div>
         </div>
 
-        <!-- OVERLAY: GAME OVER PODIUM -->
+        
         <div class="overlay-curtain" id="overlayGameOver">
           <div style="font-size:3.5rem">🏆</div>
           <h1 style="font-size:2.2rem;font-weight:900;color:var(--accent-yellow)">KẾT THÚC VÁN ĐẤU!</h1>
@@ -1359,7 +1359,7 @@ body {
         </div>
       </div>
 
-      <!-- BOTTOM TOOLBAR (ALWAYS ACTIVE & INTERACTIVE) -->
+      
       <div class="skribbl-toolbar" id="drawerToolbar">
         <div class="palette-container">
           <div class="active-color-preview" id="activeColorPreview" style="background:#000000"></div>
@@ -1383,7 +1383,7 @@ body {
       </div>
     </div>
 
-    <!-- RIGHT: CHAT & GUESSES -->
+    
     <div class="chat-column">
       <div class="chat-history" id="chatHistoryBox">
         <div class="chat-msg system">🌸 Chào mừng đến với Scribble It!</div>

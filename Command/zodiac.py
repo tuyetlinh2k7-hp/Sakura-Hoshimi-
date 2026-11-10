@@ -12,13 +12,11 @@ class ZodiacCog(commands.Cog):
     @commands.hybrid_command(name="cunghoangdao", aliases=["chd", "zodiac"], description="Tra cứu cung hoàng đạo và tính cách qua ngày tháng sinh")
     @app_commands.describe(ngay="Nhập ngày sinh của bạn (Ví dụ: 15)", thang="Nhập tháng sinh của bạn (Ví dụ: 8)")
     async def zodiac_check(self, ctx: commands.Context, ngay: int, thang: int):
-        # Kiểm tra tính hợp lệ sơ bộ của ngày tháng
         if thang < 1 or thang > 12:
             return await ctx.send(t(ctx.guild, "ZODIAC_INVALID_MONTH"))
         if ngay < 1 or ngay > 31:
             return await ctx.send(t(ctx.guild, "ZODIAC_INVALID_DAY"))
         
-        # Tìm cung hoàng đạo tương ứng
         zodiac_info = get_zodiac(ngay, thang)
         
         embed = discord.Embed(

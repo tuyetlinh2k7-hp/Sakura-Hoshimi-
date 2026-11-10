@@ -6,7 +6,7 @@
   <title>📁 Sakura Bot — Quản Lý Tệp & Nạp Lại Cogs</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="icon" href="/images/avatar-bot.jpg">
-  <!-- Ace Editor for High-Performance Code Editing -->
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.min.js"></script>
   <style>
@@ -750,7 +750,7 @@
 </head>
 <body>
 
-  <!-- Topbar -->
+  
   <header class="bf-topbar">
     <div style="display: flex; align-items: center; gap: 20px;">
       <a href="/dashboard" class="bf-brand">
@@ -761,12 +761,12 @@
     </div>
 
     <div class="bf-topbar-actions">
-      <!-- Bot Status Pill -->
+      
       <div id="botStatusPill" class="bf-btn" style="cursor: default; pointer-events: none; border-color: rgba(80, 250, 123, 0.3);">
         <span style="color: #50fa7b;">🟢</span> <span id="botStatusText">Bot Online</span>
       </div>
 
-      <!-- Quick Cogs Action Buttons -->
+      
       <button class="bf-btn bf-btn-primary" onclick="openCogsModal()">
         <span>🧩</span> Danh Sách Cogs (<span id="loadedCogsCount">0</span>)
       </button>
@@ -779,7 +779,7 @@
         <span>🌲</span> Đồng Bộ Lệnh
       </button>
 
-      <!-- Theme Switcher -->
+      
       <button id="themeToggleBtn" class="bf-btn" style="padding: 8px 10px; font-size: 1.1rem;" onclick="toggleTheme()" title="Chuyển chế độ Sáng / Tối">
         🌙
       </button>
@@ -790,12 +790,12 @@
     </div>
   </header>
 
-  <!-- Workspace Dual Pane -->
+  
   <div class="bf-workspace">
 
-    <!-- Left Pane: File Explorer -->
+    
     <aside class="bf-sidebar">
-      <!-- Quick Folder Filter Tabs -->
+      
       <div class="bf-quick-tabs">
         <button class="bf-tab-btn active" onclick="navigatePath('')">📁 Tất Cả</button>
         <button class="bf-tab-btn" onclick="navigatePath('Command')">🤖 Command</button>
@@ -807,12 +807,12 @@
         <button class="bf-tab-btn" onclick="navigatePath('data')">🗄️ data</button>
       </div>
 
-      <!-- Breadcrumbs Path -->
+      
       <div class="bf-breadcrumb" id="breadcrumbBar">
         <span class="bf-crumb-link" onclick="navigatePath('')">root</span> /
       </div>
 
-      <!-- Explorer Tools: Search Row 1, 4 Action Buttons Row 2 -->
+      
       <div class="bf-explorer-tools">
         <input type="text" id="fileSearchInput" class="bf-search-input" placeholder="🔍 Tìm kiếm tệp tin..." oninput="filterFiles(this.value)">
         <div class="bf-tools-actions">
@@ -832,18 +832,18 @@
         <input type="file" id="fileUploadInput" style="display: none;" multiple onchange="uploadFiles(this.files)">
       </div>
 
-      <!-- File and Directory Tree -->
+      
       <ul class="bf-file-list" id="fileList">
         <li style="padding: 20px; text-align: center; color: var(--text-muted);">Đang tải dữ liệu tệp tin...</li>
       </ul>
     </aside>
 
-    <!-- Right Pane: Code Editor & Database Viewer Container -->
+    
     <main class="bf-editor-pane">
 
-      <!-- 1. CODE EDITOR CONTAINER -->
+      
       <div id="codeEditorContainer" style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
-        <!-- Editor Header -->
+        
         <div class="bf-editor-header">
           <div class="bf-editor-file-info">
             <span id="editorFileIcon">📄</span>
@@ -853,7 +853,7 @@
           </div>
 
           <div style="display: flex; gap: 10px; align-items: center;">
-            <!-- HTML Live Preview Mode Switcher (Chỉ hiển thị khi mở tệp HTML) -->
+            
             <div id="htmlPreviewTools" style="display: none; align-items: center; gap: 8px;">
               <div class="bf-db-tab-switcher">
                 <button id="btnHtmlModeCode" class="bf-tab-btn" onclick="setHtmlPreviewMode('code')" title="Chỉ xem mã nguồn HTML">
@@ -877,7 +877,7 @@
           </div>
         </div>
 
-        <!-- Cog Quick Reload Alert Banner -->
+        
         <div id="cogBanner" class="bf-cog-alert-banner" style="display: none;">
           <div>
             <span>⚡ Tệp này là một Extension Cog của SakuraBot: </span>
@@ -888,16 +888,16 @@
           </button>
         </div>
 
-        <!-- Editor Box with HTML Live Preview Support -->
+        
         <div class="bf-editor-box" id="editorBoxContainer">
           <div id="editorHalfPane" class="bf-editor-half">
             <div id="aceEditor"></div>
             <textarea id="fallbackTextarea" spellcheck="false" placeholder="Nội dung tệp sẽ xuất hiện ở đây..."></textarea>
           </div>
 
-          <!-- HTML Live Preview Half Pane -->
+          
           <div id="htmlPreviewPane" class="bf-preview-half">
-            <!-- Preview Top Control Bar -->
+            
             <div class="bf-preview-bar">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 0.8rem; font-weight: 700; color: #ff79c6;">👁️ Xem Trước HTML</span>
@@ -913,14 +913,14 @@
               </div>
             </div>
 
-            <!-- Iframe Container Wrapper -->
+            
             <div class="bf-preview-frame-wrap" id="previewFrameWrap">
               <iframe id="htmlPreviewFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups" title="HTML Preview"></iframe>
             </div>
           </div>
         </div>
 
-        <!-- Status Bar -->
+        
         <footer class="bf-statusbar">
           <div style="display: flex; gap: 16px;">
             <span id="syntaxStatus">⚪ Chưa kiểm tra cú pháp</span>
@@ -933,9 +933,9 @@
         </footer>
       </div>
 
-      <!-- 2. DATABASE VIEWER CONTAINER (Kích hoạt khi mở tệp SQLite: .db, .sqlite, .sqlite3) -->
+      
       <div id="dbViewerContainer" style="display: none; flex-direction: column; height: 100%; overflow: hidden; background: #0c101c;">
-        <!-- DB Header Bar -->
+        
         <div class="bf-editor-header" style="background: rgba(12, 16, 28, 0.98); border-bottom: 1px solid var(--border-glass);">
           <div class="bf-editor-file-info">
             <span style="font-size: 1.3rem;">🗄️</span>
@@ -960,9 +960,9 @@
           </div>
         </div>
 
-        <!-- DB Tab 1: Table Browser -->
+        
         <div id="dbTableTab" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-          <!-- Table Controls Toolbar -->
+          
           <div class="bf-db-toolbar">
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
               <label for="dbTableSelect" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">Bảng:</label>
@@ -984,12 +984,12 @@
             </div>
           </div>
 
-          <!-- Schema info tag bar -->
+          
           <div id="dbSchemaBar" class="bf-db-schema-bar">
             <span style="color: var(--text-muted); font-size: 0.75rem;">Đang tải cấu trúc cột...</span>
           </div>
 
-          <!-- Interactive Data Grid -->
+          
           <div class="bf-db-table-wrapper" id="dbTableWrapper">
             <table class="bf-db-data-table" id="dbDataTable">
               <thead id="dbTableHead"></thead>
@@ -999,7 +999,7 @@
             </table>
           </div>
 
-          <!-- DB Pagination Footer -->
+          
           <div class="bf-db-pagination">
             <div style="display: flex; align-items: center; gap: 12px;">
               <span id="dbPaginationInfo" style="font-size: 0.8rem; color: var(--text-muted);">Dòng 0 - 0 / 0</span>
@@ -1024,7 +1024,7 @@
           </div>
         </div>
 
-        <!-- DB Tab 2: SQL Console Runner -->
+        
         <div id="dbSqlTab" style="display: none; flex-direction: column; flex: 1; overflow: hidden; padding: 14px; gap: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -1043,18 +1043,18 @@
             </div>
           </div>
 
-          <!-- SQL Textarea Box -->
+          
           <div style="height: 130px; border-radius: 8px; border: 1px solid var(--border-subtle); overflow: hidden; background: #070a10;">
             <textarea id="dbSqlInput" style="width: 100%; height: 100%; box-sizing: border-box; background: transparent; color: #f8f8f2; border: none; outline: none; padding: 10px; font-family: var(--font-mono); font-size: 0.88rem; resize: none;" spellcheck="false" placeholder="Nhập câu lệnh SQL chỉ đọc (SELECT / PRAGMA)..."></textarea>
           </div>
 
-          <!-- SQL Results Bar -->
+          
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span id="dbSqlStatus" style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">Chưa thực thi truy vấn nào.</span>
             <button id="dbSqlExportBtn" class="bf-btn" style="display: none; padding: 4px 10px; font-size: 0.78rem;" onclick="exportSqlQueryResult()">📥 Xuất Kết Quả JSON</button>
           </div>
 
-          <!-- SQL Results Table Container -->
+          
           <div class="bf-db-table-wrapper" id="dbSqlResultWrapper" style="flex: 1;">
             <table class="bf-db-data-table" id="dbSqlDataTable">
               <thead id="dbSqlTableHead"></thead>
@@ -1066,9 +1066,9 @@
         </div>
       </div>
 
-      <!-- 3. MEDIA VIEWER CONTAINER (Ảnh, GIF, Video, Audio) -->
+      
       <div id="mediaViewerContainer" style="display: none; flex-direction: column; height: 100%; overflow: hidden; background: #080b12;">
-        <!-- Media Header -->
+        
         <div class="bf-editor-header" style="background: rgba(12, 16, 28, 0.98); border-bottom: 1px solid var(--border-glass);">
           <div class="bf-editor-file-info">
             <span id="mediaIcon" style="font-size: 1.3rem;">🖼️</span>
@@ -1079,7 +1079,7 @@
           </div>
 
           <div style="display: flex; gap: 8px; align-items: center;">
-            <!-- Image Zoom Controls (Chỉ hiển thị cho Ảnh/GIF) -->
+            
             <div id="mediaZoomControls" style="display: flex; align-items: center; gap: 4px;">
               <button class="bf-btn" style="padding: 6px 10px;" onclick="zoomMedia(-0.2)" title="Thu nhỏ (Zoom Out)">🔍-</button>
               <button class="bf-btn" style="padding: 6px 10px;" onclick="resetMediaZoom()" title="Vừa màn hình (Fit Screen)">100%</button>
@@ -1100,21 +1100,21 @@
           </div>
         </div>
 
-        <!-- Media Display Area -->
+        
         <div class="bf-media-display-area" id="mediaDisplayArea">
-          <!-- Image / GIF Display -->
+          
           <div id="mediaImageWrap" class="bf-media-img-wrap" style="display: none;">
             <img id="mediaImageEl" src="" alt="Media Preview" onclick="toggleMediaZoom()">
           </div>
 
-          <!-- Video Display -->
+          
           <div id="mediaVideoWrap" class="bf-media-video-wrap" style="display: none;">
             <video id="mediaVideoEl" controls autoplay loop playsinline>
               Trình duyệt không hỗ trợ thẻ video này.
             </video>
           </div>
 
-          <!-- Audio Display -->
+          
           <div id="mediaAudioWrap" class="bf-media-audio-wrap" style="display: none;">
             <div class="bf-audio-card">
               <div style="font-size: 3rem; margin-bottom: 12px;">🎵</div>
@@ -1130,7 +1130,7 @@
 
   </div>
 
-  <!-- Cogs Manager Modal -->
+  
   <div class="bf-modal" id="cogsModal">
     <div class="bf-modal-content">
       <div class="bf-modal-header">
@@ -1164,16 +1164,16 @@
     </div>
   </div>
 
-  <!-- Toast Notification -->
+  
   <div id="bfToast" class="bf-toast">
     <span id="toastIcon">ℹ️</span>
     <span id="toastMsg">Thông báo</span>
   </div>
 
-  <!-- Sakura Blossom Floating Effect -->
+  
   <script src="/static/js/sakura-fx.js"></script>
 
-  <!-- Main JavaScript Logic -->
+  
   <script>
     let currentPath = "";
     let activeFilePath = "";

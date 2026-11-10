@@ -24,7 +24,6 @@ except Exception:
 
 COOKIE_FILE = "data/hoyolab_cookies.json"
 
-# Danh sách các game được hỗ trợ điểm danh
 GAMES = {
     "genshin": {
         "name": "Genshin Impact",
@@ -48,7 +47,6 @@ GAMES = {
     }
 }
 
-# Đoạn mã JavaScript Bookmarklet chuẩn 1 chạm trích xuất cookie tự động
 BOOKMARKLET_JS = (
     "javascript:(function(){try{"
     "var c=document.cookie;"
@@ -119,30 +117,25 @@ def extract_hoyolab_cookies(text: str) -> Dict[str, str]:
     text = text.strip()
     result: Dict[str, str] = {}
 
-    # Tìm ltuid / account_id
     uid_match = re.search(r'(?:ltuid_v2|ltuid|account_id_v2|account_id)\s*[:=]\s*["\']?(\d+)', text, re.IGNORECASE)
     if uid_match:
         result['ltuid_v2'] = uid_match.group(1).strip()
         result['ltuid'] = result['ltuid_v2']
 
-    # Tìm ltoken
     token_match = re.search(r'(?:ltoken_v2|ltoken)\s*[:=]\s*["\']?([a-zA-Z0-9_\-\.]+)', text, re.IGNORECASE)
     if token_match:
         result['ltoken_v2'] = token_match.group(1).strip()
         result['ltoken'] = result['ltoken_v2']
 
-    # Tìm cookie_token (nếu có)
     ctoken_match = re.search(r'(?:cookie_token_v2|cookie_token)\s*[:=]\s*["\']?([a-zA-Z0-9_\-\.]+)', text, re.IGNORECASE)
     if ctoken_match:
         result['cookie_token_v2'] = ctoken_match.group(1).strip()
         result['cookie_token'] = result['cookie_token_v2']
 
-    # Tìm ltmid (nếu có)
     mid_match = re.search(r'(?:ltmid_v2|account_mid_v2)\s*[:=]\s*["\']?([a-zA-Z0-9_\-\.]+)', text, re.IGNORECASE)
     if mid_match:
         result['ltmid_v2'] = mid_match.group(1).strip()
 
-    # Nếu người dùng chỉ dán giá trị thô theo từng dòng
     if 'ltuid_v2' not in result or 'ltoken_v2' not in result:
         lines = [line.strip() for line in text.splitlines() if line.strip()]
         for line in lines:
@@ -155,7 +148,6 @@ def extract_hoyolab_cookies(text: str) -> Dict[str, str]:
 
     return result
 
-# Danh mục game hỗ trợ đổi Giftcode trực tiếp qua API HoYoverse
 REDEEM_SUPPORTED_GAMES = {
     "genshin": {
         "game": genshin.Game.GENSHIN,
@@ -174,7 +166,6 @@ REDEEM_SUPPORTED_GAMES = {
     }
 }
 
-# Link bù điểm danh chính thức từ HoYoLAB (Hoyo Buddy style)
 CHECK_IN_URLS = {
     "genshin": "https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481",
     "hsr": "https://act.hoyolab.com/bbs/event/signin/hkrpg/index.html?act_id=e202303301540311",
@@ -235,7 +226,6 @@ async def redeem_code_for_single_account(
     code = code.strip().upper()
     acc_name = acc.get("name", "Tài khoản")
 
-    # Kiểm tra cookie_token_v2, nếu thiếu mà có stoken_v2 thì tự động làm mới
     if not acc.get("cookie_token_v2") and acc.get("stoken_v2"):
         try:
             cookies_to_exchange = {
@@ -260,14 +250,12 @@ async def redeem_code_for_single_account(
 
     client = genshin.Client(cookies, lang="vi-vn")
 
-    # Xác định danh sách nhân vật cần đổi code
     targets_to_redeem = []
 
     tg = target_game.lower().strip() if target_game else None
     if tg == "gi": tg = "genshin"
     elif tg in ("starrail", "honkai_star_rail"): tg = "hsr"
 
-    # 1. Thử lấy danh sách nhân vật từ API getUserGameRolesByCookie
     try:
         roles = await client.get_game_accounts()
     except Exception:
@@ -297,7 +285,6 @@ async def redeem_code_for_single_account(
                 matched_cfg["name"]
             ))
 
-    # 2. Nếu không gọi được API get_game_accounts nhưng trong acc đã lưu game_uid
     if not targets_to_redeem and acc.get("game_uid"):
         saved_uid = int(acc["game_uid"])
         saved_biz = (acc.get("game_biz") or "").lower()
@@ -321,7 +308,6 @@ async def redeem_code_for_single_account(
         game_desc = f" ({REDEEM_SUPPORTED_GAMES[tg]['name']})" if tg in REDEEM_SUPPORTED_GAMES else ""
         return [f"⚠️ **{acc_name}**: Không tìm thấy nhân vật nào phù hợp{game_desc} trên tài khoản này để nhập mã."]
 
-    # 3. Tiến hành đổi code cho từng nhân vật
     for game_enum, uid, nick, gname in targets_to_redeem:
         try:
             await client.redeem_code(code, uid=uid, game=game_enum)
@@ -394,7 +380,6 @@ class SmartCookieModal(discord.ui.Modal, title="🌸 Thiết Lập Cookie HoYoLA
             )
             return await interaction.followup.send(embed=embed, ephemeral=True)
 
-        # Chuẩn bị auth dictionary đầy đủ cả v1 và v2
         auth_payload = {
             "ltoken_v2": parsed["ltoken_v2"],
             "ltuid_v2": parsed["ltuid_v2"],
@@ -410,7 +395,6 @@ class SmartCookieModal(discord.ui.Modal, title="🌸 Thiết Lập Cookie HoYoLA
             auth_payload["ltmid_v2"] = parsed["ltmid_v2"]
             auth_payload["account_mid_v2"] = parsed["ltmid_v2"]
 
-        # Kiểm tra tính hợp lệ của cookie với HoYoLAB trước khi lưu
         test_client = genshin.Client(auth_payload, lang="vi-vn")
         try:
             await test_client.get_reward_info(game=genshin.Game.GENSHIN)
@@ -432,7 +416,7 @@ class SmartCookieModal(discord.ui.Modal, title="🌸 Thiết Lập Cookie HoYoLA
             )
             return await interaction.followup.send(embed=embed_err, ephemeral=True)
         except Exception:
-            pass  # Nếu lỗi mạng tạm thời hoặc server HoYoverse bận, vẫn lưu tài khoản
+            pass
 
         cookies = load_cookies()
         if user_id not in cookies:
@@ -444,15 +428,14 @@ class SmartCookieModal(discord.ui.Modal, title="🌸 Thiết Lập Cookie HoYoLA
             "name": self.account_name.value.strip(),
             "ltoken_v2": parsed["ltoken_v2"],
             "ltuid_v2": parsed["ltuid_v2"],
-            "auto_checkin": True,  # Mặc định bật auto checkin khi thiết lập thành công
-            "auto_redeem": True   # Mặc định bật tự động nhận giftcode mới
+            "auto_checkin": True,
+            "auto_redeem": True
         }
         if "cookie_token_v2" in parsed:
             new_account["cookie_token_v2"] = parsed["cookie_token_v2"]
         if "ltmid_v2" in parsed:
             new_account["ltmid_v2"] = parsed["ltmid_v2"]
 
-        # Cập nhật nếu tên tài khoản đã tồn tại
         account_found = False
         for i, acc in enumerate(cookies[user_id]):
             if acc.get("name") == new_account["name"]:
@@ -466,20 +449,17 @@ class SmartCookieModal(discord.ui.Modal, title="🌸 Thiết Lập Cookie HoYoLA
 
         save_cookies(cookies)
 
-        # Cập nhật cache của Cog
         if self.cog_instance:
             self.cog_instance.cookies_data = cookies
         elif self.management_view and hasattr(self.management_view, "cog_instance"):
             self.management_view.cog_instance.cookies_data = cookies
 
-        # Cập nhật embed quản lý nếu view còn mở
         if self.management_view and hasattr(self.management_view, "update_embed_from_interaction"):
             try:
                 await self.management_view.update_embed_from_interaction(interaction)
             except Exception:
                 pass
 
-        # Truy vấn các nhân vật UID liên kết
         game_roles = []
         try:
             game_roles = await test_client.get_game_accounts()
@@ -607,12 +587,10 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
         pwd_str = self.password.value.strip()
         acc_name = self.account_name.value.strip()
 
-        # Tạo device_id đồng nhất theo user_id để tránh HoYoverse bắt xác thực lại liên tục (chuẩn 16 ký tự)
         device_id = hashlib.md5(f"sakura_hoyo_{user_id}".encode()).hexdigest()[:16]
         client = genshin.Client(lang="vi-vn")
 
         try:
-            # 1. Thử đăng nhập bằng endpoint chính thức của app HoYoverse (hỗ trợ RSA và DS)
             res = await client._app_login(
                 account_str,
                 pwd_str,
@@ -622,7 +600,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
             session_id = secrets.token_urlsafe(16)
             captcha_url = f"{WEB_BASE_URL.rstrip('/')}/hoyo/captcha?session={session_id}"
 
-            # 2. Xử lý trường hợp HoYoverse yêu cầu giải Geetest Captcha
             if isinstance(res, (genshin.models.SessionMMT, genshin.models.SessionMMTv4)):
                 loop = asyncio.get_running_loop()
                 captcha_future = loop.create_future()
@@ -663,7 +640,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
                 except asyncio.TimeoutError:
                     return await interaction.followup.send("⏰ **Đã hết thời gian chờ giải Captcha (5 phút).** Vui lòng thử lại!", ephemeral=True)
 
-                # Chuyển đổi dữ liệu xác thực Captcha từ web về MMTResult
                 if isinstance(res, genshin.models.SessionMMTv4):
                     mmt_result = genshin.models.SessionMMTv4Result(
                         session_id=res.session_id,
@@ -681,7 +657,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
                         geetest_seccode=captcha_data.get("geetest_seccode", "")
                     )
 
-                # Đăng nhập lại kèm kết quả giải Captcha
                 try:
                     res = await client._app_login(
                         account_str,
@@ -704,7 +679,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
                     update_captcha_session(session_id, {"stage": "error", "error": msg})
                     return await interaction.followup.send(msg, ephemeral=True)
 
-            # 3. Xử lý trường hợp HoYoverse yêu cầu xác thực 2 bước qua Email (ActionTicket)
             if isinstance(res, genshin.models.ActionTicket):
                 try:
                     email_res = await client._send_verification_email(res)
@@ -712,7 +686,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
                     update_captcha_session(session_id, {"stage": "error", "error": str(mail_err)})
                     return await interaction.followup.send(f"❌ **Không thể yêu cầu HoYoverse gửi mã Email:** {mail_err}", ephemeral=True)
 
-                # HoYoverse có thể yêu cầu giải tiếp Geetest Captcha để gửi mã xác nhận Email (anti-spam retcode -3101)
                 if isinstance(email_res, (genshin.models.SessionMMT, genshin.models.SessionMMTv4)):
                     loop = asyncio.get_running_loop()
                     email_captcha_future = loop.create_future()
@@ -785,7 +758,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
                         update_captcha_session(session_id, {"stage": "error", "error": str(mail_err2)})
                         return await interaction.followup.send(f"❌ **Lỗi khi gửi email sau khi giải Captcha:** {mail_err2}", ephemeral=True)
 
-                # Khi đã gửi email thành công -> Cập nhật session sang stage "otp_pending"
                 if not get_captcha_session(session_id):
                     create_captcha_session(session_id, {
                         "user_id": user_id,
@@ -823,7 +795,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
                 except asyncio.TimeoutError:
                     return await interaction.followup.send("⏰ **Đã hết thời gian chờ mã OTP Email (5 phút).** Vui lòng thử lại!", ephemeral=True)
 
-                # Xác thực mã OTP và chốt phiên đăng nhập
                 try:
                     await client._verify_email(otp_code, res)
                     res = await client._app_login(
@@ -847,7 +818,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
                     update_captcha_session(session_id, {"stage": "error", "error": msg})
                     return await interaction.followup.send(msg, ephemeral=True)
 
-            # 4. Khi đăng nhập thành công (nhận được AppLoginResult chứa stoken & ltuid)
             if isinstance(res, genshin.models.AppLoginResult):
                 cookies_to_exchange = {
                     "stoken": res.stoken,
@@ -902,7 +872,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
                     except Exception:
                         pass
 
-                # Truy vấn danh sách UID game liên kết
                 game_roles = []
                 try:
                     query_client = genshin.Client({"ltoken_v2": ltoken, "ltuid_v2": uid_val}, lang="vi-vn")
@@ -981,7 +950,6 @@ class HoyoBuddyLoginModal(discord.ui.Modal, title="🔐 Đăng Nhập HoYoverse 
         except Exception as e:
             await interaction.followup.send(f"❌ **Lỗi khi kết nối HoYoverse:** `{e}`", ephemeral=True)
 
-# Thông tin hiển thị cho các dòng game của HoYoverse
 GAME_BIZ_INFO = {
     "hk4e_global": ("Genshin Impact", "🌸", "genshin"),
     "hk4e_cn": ("Genshin Impact (CN)", "🌸", "genshin"),
@@ -1353,9 +1321,6 @@ class CheckinSelect(discord.ui.Select):
             else:
                 await self.cog_instance.checkin_now_logic(interaction, account_name=None, game=None)
 
-# ==============================================================================
-# HỆ THỐNG GIAO DIỆN & TÍNH NĂNG THEO PHONG CÁCH HOYO BUDDY
-# ==============================================================================
 
 class HoyoCheckinGameSelect(discord.ui.Select):
     def __init__(self, parent_view: 'HoyoCheckinOverviewView', options: list[discord.SelectOption]):
@@ -1509,7 +1474,6 @@ class HoyoOpenNotesFromCheckinButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        # Chuyển sang NotesView
         target_game = self.parent_view.current_game if self.parent_view.current_game in ["genshin", "hsr", "zzz"] else "genshin"
         notes_view = HoyoNotesView(
             self.parent_view.author,
@@ -1545,7 +1509,6 @@ class HoyoCheckinOverviewView(discord.ui.View):
     def render_controls(self):
         self.clear_items()
 
-        # Dropdown Game (Row 0)
         game_options = [
             discord.SelectOption(label="Genshin Impact", value="genshin", emoji="🌸", default=(self.current_game == "genshin")),
             discord.SelectOption(label="Honkai: Star Rail", value="hsr", emoji="🚂", default=(self.current_game == "hsr")),
@@ -1554,7 +1517,6 @@ class HoyoCheckinOverviewView(discord.ui.View):
         ]
         self.add_item(HoyoCheckinGameSelect(self, game_options))
 
-        # Dropdown Account (Row 1) nếu có nhiều acc
         if len(self.accounts) > 1:
             acc_options = []
             for i, acc in enumerate(self.accounts):
@@ -1564,7 +1526,6 @@ class HoyoCheckinOverviewView(discord.ui.View):
                 )
             self.add_item(HoyoCheckinAccountSelect(self, acc_options))
 
-        # Row 2: Buttons
         self.add_item(HoyoDoCheckinButton(self))
         self.add_item(HoyoViewCalendarButton(self))
         url = CHECK_IN_URLS.get(self.current_game, "https://act.hoyolab.com/")
@@ -1609,21 +1570,18 @@ class HoyoCheckinOverviewView(discord.ui.View):
         is_signed = info.signed_in
         missed = info.missed_rewards
 
-        # Xác định phần thưởng hôm nay
         today_reward = None
         if is_signed and claimed_num > 0 and claimed_num <= total_days:
             today_reward = rewards[claimed_num - 1]
         elif not is_signed and claimed_num < total_days:
             today_reward = rewards[claimed_num]
 
-        # Xác định phần thưởng tiếp theo
         next_reward = None
         if is_signed and claimed_num < total_days:
             next_reward = rewards[claimed_num]
         elif not is_signed and (claimed_num + 1) < total_days:
             next_reward = rewards[claimed_num + 1]
 
-        # Tìm các mốc Nguyên Thạch / Ngọc Ánh Sao / Phim Màu kế tiếp
         major_milestones = []
         for idx in range(claimed_num, total_days):
             r = rewards[idx]
@@ -1676,9 +1634,6 @@ class HoyoCheckinOverviewView(discord.ui.View):
         embed.set_footer(text="Phong cách Hoyo Buddy • SakuraBot")
         return embed
 
-# ==============================================================================
-# HỆ THỐNG REAL-TIME NOTES (THEO DÕI THỜI GIAN THỰC INGAME - HOYO BUDDY STYLE)
-# ==============================================================================
 
 class HoyoNotesGameSelect(discord.ui.Select):
     def __init__(self, parent_view: 'HoyoNotesView', options: list[discord.SelectOption]):
@@ -1951,7 +1906,6 @@ class ManagementView(discord.ui.View):
         self.cog_instance = cog_instance
         self.message = None
 
-        # Nút liên kết hướng dẫn bên ngoài
         self.add_item(discord.ui.Button(
             label="HoYoLAB Website",
             style=discord.ButtonStyle.link,
@@ -1969,7 +1923,6 @@ class ManagementView(discord.ui.View):
     async def update_embed_from_interaction(self, interaction: discord.Interaction):
         """Hàm làm mới Embed khi có thay đổi."""
         embed = self.cog_instance.create_management_embed(self.author)
-        # Tái tạo CheckinSelect với dữ liệu mới
         user_accounts = self.cog_instance.cookies_data.get(str(self.author.id), [])
         for item in list(self.children):
             if isinstance(item, CheckinSelect):
@@ -2337,7 +2290,7 @@ class HoyolabCheckinCog(commands.Cog, name="Trung Tâm Tài Khoản Hoyolab"):
                     f"❌ {emoji} **{game_name}:** Cookie hết hạn hoặc không hợp lệ (Lỗi [-100]).\n"
                     "   *(Hãy dùng nút `🔐 Đăng Nhập Tự Động` hoặc copy header F12 Network; Tuyệt đối không bấm Đăng xuất trên web)*"
                 )
-                break  # Cookie sai hoàn toàn thì dừng các game tiếp theo
+                break
             except genshin.errors.DailyGeetestTriggered:
                 results.append(f"⚠️ {emoji} **{game_name}:** HoYoLAB yêu cầu giải Captcha điểm danh hôm nay.")
             except genshin.errors.AccountNotFound:
@@ -2402,9 +2355,6 @@ class HoyolabCheckinCog(commands.Cog, name="Trung Tâm Tài Khoản Hoyolab"):
         view = ToggleView(user_accounts, interaction.user.id, management_view=management_view, cog_instance=self)
         await interaction.response.send_message("Chọn các tài khoản bạn muốn **BẬT** tự động điểm danh hàng ngày:", view=view, ephemeral=True)
 
-    # ==========================
-    # HYBRID COMMANDS
-    # ==========================
     @commands.hybrid_group(name="hoyolab", aliases=["hoyo"], description="Quản lý điểm danh tự động cho các game HoYoverse.")
     async def hoyocheckin(self, ctx: commands.Context):
         """Bảng điều khiển chung cho hệ thống HoYoLAB."""
@@ -2477,7 +2427,6 @@ class HoyolabCheckinCog(commands.Cog, name="Trung Tâm Tài Khoản Hoyolab"):
         if ctx.interaction:
             return await ctx.interaction.response.send_modal(SmartCookieModal(cog_instance=self))
 
-        # Nếu là Prefix command, gửi hướng dẫn qua DM
         try:
             embed = discord.Embed(
                 title="🌸 Thiết Lập Cookie HoYoLAB (Prefix)",
@@ -2607,7 +2556,6 @@ class HoyolabCheckinCog(commands.Cog, name="Trung Tâm Tài Khoản Hoyolab"):
         if ctx.interaction:
             await self.checkin_now_logic(ctx.interaction, account_name=actual_acc, game=actual_game)
         else:
-            # Fallback cho prefix command
             msg = await ctx.send("⏳ Đang tiến hành điểm danh...")
             user_id = str(ctx.author.id)
             user_accounts = self.cookies_data.get(user_id, [])
@@ -2822,7 +2770,6 @@ class HoyolabCheckinCog(commands.Cog, name="Trung Tâm Tài Khoản Hoyolab"):
             if isinstance(acc_list, dict):
                 acc_list = [acc_list]
             for acc in acc_list:
-                # Mặc định auto_redeem là True nếu chưa cài đặt
                 if not acc.get("auto_redeem", True):
                     continue
 
@@ -2989,9 +2936,6 @@ class HoyolabCheckinCog(commands.Cog, name="Trung Tâm Tài Khoản Hoyolab"):
             mock_i = MockInteraction(msg, ctx.author)
             await self.accompany_logic(mock_i, account_name=account_name)
 
-    # ==========================
-    # BACKGROUND TASK
-    # ==========================
     @tasks.loop(time=time(hour=1, minute=0, tzinfo=timezone(timedelta(hours=7))))
     async def auto_checkin_task(self):
         """Tác vụ chạy nền lúc 01:00 AM VN mỗi ngày để tự động điểm danh cho mọi user."""

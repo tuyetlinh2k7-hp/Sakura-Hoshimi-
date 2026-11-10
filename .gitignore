@@ -1,9 +1,4 @@
-# ==============================================================================
-# SAKURABOT - GITIGNORE CONFIGURATION
-# Ngăn chặn việc tải lên file bảo mật, dữ liệu cá nhân, file tạm và database
-# ==============================================================================
 
-# --- Secrets & Environment Variables ---
 .env
 *.env
 .env.*
@@ -11,7 +6,6 @@
 cookies.txt
 vts_token.json
 
-# --- SQLite Databases & Binary Storage ---
 *.db
 *.sqlite
 *.sqlite3
@@ -22,7 +16,6 @@ data/*.db
 data/backups/
 data/tts_cache/
 
-# --- Dynamic / Sensitive Server & User State JSON Data ---
 data/*.json
 !data/waifu_characters.json
 !data/trieuphu.json
@@ -30,7 +23,6 @@ data/*.json
 !data/enka_loc_vi.json
 !data/forbidden_words.json
 
-# --- Python Cache & Virtual Environments ---
 __pycache__/
 *.py[cod]
 *$py.class
@@ -54,7 +46,6 @@ wheels/
 .installed.cfg
 *.egg
 
-# --- Audio / Media & Cache ---
 cache/
 downloads/
 *.mp3
@@ -62,14 +53,12 @@ downloads/
 *.mp4
 *.webm
 
-# --- Logs & Debug files ---
 *.log
 *.log.*
 genshin_launcher.log
 .system_generated/
 scratch/
 
-# --- IDE & Operating System ---
 .vscode/
 .idea/
 *.swp
@@ -79,7 +68,6 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
-# --- External Submodules / Binaries ---
 server/
 FamilyTime/
 GenshinLauncher/

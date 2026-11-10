@@ -8,19 +8,15 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-# ==============================================================================
-# CẤU HÌNH & DỮ LIỆU
-# ==============================================================================
 DATA_DIR = "gacha_data"
 os.makedirs(DATA_DIR, exist_ok=True)
 DB_PATH = os.path.join(DATA_DIR, "database.sqlite")
 
 REPORT_THRESHOLD = 3
-CHECK_INTERVAL_SECONDS = 300  # 5 phút/lần
-REMIND_BEFORE_SECONDS = 7200  # Nhắc nhở khi code còn dưới 2 tiếng (7200 giây)
-VN_TZ = timezone(timedelta(hours=7))  # Múi giờ Việt Nam (UTC+7)
+CHECK_INTERVAL_SECONDS = 300
+REMIND_BEFORE_SECONDS = 7200
+VN_TZ = timezone(timedelta(hours=7))
 
-# Bạn có thể tạo 1 file JSON trên GitHub Gist chứa code của NTE và Endfield rồi dán link Raw vào đây
 CUSTOM_CODES_GIST_URL = None 
 
 GAMES = {
@@ -70,9 +66,6 @@ GAMES = {
     }
 }
 
-# ==============================================================================
-# HÀM BỔ TRỢ (DATABASE & API)
-# ==============================================================================
 async def init_db():
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("""
@@ -157,9 +150,6 @@ async def fetch_game_codes(session: aiohttp.ClientSession, game_key: str) -> lis
     }
     return mock_codes.get(game_key, [])
 
-# ==============================================================================
-# TẠO EMBED GIAO DIỆN
-# ==============================================================================
 def create_code_embed(game_key: str, code_data: dict, is_expired: bool = False, expired_reason: str = None, is_test: bool = False) -> discord.Embed:
     game_info = GAMES[game_key]
     code = code_data.get("code", "UNKNOWN")
@@ -253,9 +243,6 @@ def build_game_summary_embed(game_key: str, codes_list: list) -> discord.Embed:
     embed.description = "\n".join(lines)
     return embed
 
-# ==============================================================================
-# UI COMPONENTS (BUTTON & DROPDOWN)
-# ==============================================================================
 class CodeActionView(discord.ui.View):
     def __init__(self, cog: "GachaCodesCog"):
         super().__init__(timeout=None)
@@ -357,9 +344,6 @@ class AllCodesView(discord.ui.View):
         super().__init__(timeout=180)
         self.add_item(AllCodesSelect(all_data))
 
-# ==============================================================================
-# COG CHÍNH (LỆNH SLASH & VÒNG LẶP NỀN)
-# ==============================================================================
 GAME_CHOICES = [
     app_commands.Choice(name="Genshin Impact", value="genshin"),
     app_commands.Choice(name="Honkai: Star Rail", value="hsr"),
@@ -390,7 +374,6 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
         if self._owns_session and self.session and not self.session.closed:
             await self.session.close()
 
-    # --- CORE GIAO TIẾP GỬI/SỬA TIN NHẮN (WEBHOOK + SEMAPHORE) ---
     async def broadcast_code_to_channels(self, game_key: str, code_data: dict, embed: discord.Embed, target_guilds: list = None, is_test: int = 0, is_manual: int = 0):
         game_info = GAMES[game_key]
         
@@ -407,7 +390,7 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
         if not configs:
             return 0
 
-        sem = asyncio.Semaphore(15) # Giới hạn 15 request gửi đi cùng lúc
+        sem = asyncio.Semaphore(15)
         sent_count = 0
 
         async def send_task(config):
@@ -417,7 +400,6 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
 
             async with sem:
                 try:
-                    # ✅ Sửa lỗi "view parameter requires the webhook to be created with a bot or client"
                     webhook = discord.Webhook.from_url(webhook_url, session=self.session, client=self.bot)
                     mention_text = f"<@&{role_id}> " if role_id else ""
                     
@@ -453,7 +435,6 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
             exp_embed = create_code_embed(track['game_key'], dummy_code_data, is_expired=True, expired_reason=reason)
 
             if webhook_url:
-                # ✅ Sửa lỗi thêm client=self.bot cho chức năng xóa View khi sửa tin nhắn
                 webhook = discord.Webhook.from_url(webhook_url, session=self.session, client=self.bot)
                 await webhook.edit_message(int(track['message_id']), content="⚠️ **[MÃ NÀY ĐÃ HẾT HẠN]**", embed=exp_embed, view=None)
             else:
@@ -482,7 +463,6 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
                 await db.execute("DELETE FROM reports WHERE message_id = ?", (t['message_id'],))
             await db.commit()
 
-    # --- TÁC VỤ VÒNG LẶP CHẠY NGẦM ---
     @tasks.loop(seconds=CHECK_INTERVAL_SECONDS)
     async def check_codes_loop(self):
         current_time = time.time()
@@ -509,7 +489,6 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
                     await self.broadcast_code_to_channels(game_key, item, embed)
                     await db.execute("INSERT OR IGNORE INTO sent_codes (game_key, code) VALUES (?, ?)", (game_key, item["code"]))
 
-                    # Tự động nhập code cho các tài khoản HoYoverse đã liên kết và bật auto_redeem
                     if game_key in ["genshin", "hsr", "zzz"]:
                         hoyolab_cog = self.bot.get_cog("HoyolabCheckin")
                         if hoyolab_cog and hasattr(hoyolab_cog, "auto_redeem_new_code"):
@@ -518,7 +497,6 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
                 if new_items:
                     await db.commit()
 
-        # 2. Xử lý mã hết hạn & Nhắc nhở
         async with aiosqlite.connect(DB_PATH) as db:
             db.row_factory = aiosqlite.Row
             async with db.execute("SELECT * FROM tracked_messages") as cursor:
@@ -564,7 +542,6 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
     async def before_loop(self):
         await self.bot.wait_until_ready()
 
-    # --- SLASH COMMANDS ---
     @app_commands.command(name="setup", description="Cài đặt kênh nhận mã (Có thể bật/tắt nhiều game cùng lúc)")
     @app_commands.default_permissions(administrator=True)
     async def setup_code(
@@ -731,8 +708,5 @@ class GachaCodesCog(commands.GroupCog, group_name="gachacode"):
             scope_text = f"trên **{sent_count} server**" if all_servers else "vào kênh cài đặt"
             await interaction.followup.send(f"✅ Đã phát code `{clean_code}` {scope_text}!", ephemeral=True)
 
-# ==============================================================================
-# HÀM NẠP COG CHO BOT LỚN
-# ==============================================================================
 async def setup(bot: commands.Bot):
     await bot.add_cog(GachaCodesCog(bot))

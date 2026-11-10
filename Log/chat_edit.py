@@ -25,14 +25,11 @@ class JumpToMessageView(discord.ui.View):
 class ChatEditLog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Quản lý hàng đợi chống spam sửa liên tiếp theo message_id
         self.edit_queues: dict[int, dict] = {}
         self.edit_tasks: dict[int, asyncio.Task] = {}
         self.EDIT_DELAY = 4.0
-        self.MAX_FILE_SIZE = 8 * 1024 * 1024  # Giới hạn 8MB khi tải lại file bị gỡ
+        self.MAX_FILE_SIZE = 8 * 1024 * 1024
 
-        # Bộ nhớ đệm phụ trợ lưu trạng thái tin nhắn để đối chiếu trong on_raw_message_edit
-        # Giới hạn 5000 tin nhắn gần nhất để không tốn RAM
         self.local_cache: OrderedDict[int, dict] = OrderedDict()
         self.MAX_CACHE_SIZE = 5000
 
@@ -79,21 +76,17 @@ class ChatEditLog(commands.Cog):
         if log_channel is None:
             return
 
-        # Kiểm tra sự thay đổi về văn bản VÀ sự thay đổi về tệp đính kèm (gỡ ảnh/file)
         before_att_ids = {a.id for a in before.attachments}
         after_att_ids = {a.id for a in after.attachments}
 
         content_changed = before.content != after.content
         attachments_changed = before_att_ids != after_att_ids
 
-        # Bỏ qua nếu không đổi chữ và cũng không gỡ file (ví dụ Discord tự nhúng link preview)
         if not content_changed and not attachments_changed:
             return
 
-        # Cập nhật lại cache nội bộ
         self._save_to_local_cache(after)
 
-        # Xác định các tệp đính kèm vừa bị người dùng gỡ bỏ trong lần sửa này
         removed_atts = [a for a in before.attachments if a.id not in after_att_ids]
         saved_files = await self._extract_removed_attachments(removed_atts)
 
@@ -117,7 +110,6 @@ class ChatEditLog(commands.Cog):
                 "last_edited_at": now
             }
         else:
-            # Nếu người dùng tiếp tục sửa tin nhắn này khi đang trong thời gian chờ
             q = self.edit_queues[msg_id]
             q["latest_content"] = after.content or ""
             if not q["history"] or q["history"][-1] != (after.content or ""):
@@ -125,7 +117,6 @@ class ChatEditLog(commands.Cog):
             q["edit_count"] += 1
             q["last_edited_at"] = now
 
-            # Gom thêm các file bị gỡ (nếu có)
             existing_att_ids = {a.id for a in q["removed_attachments"]}
             for a in removed_atts:
                 if a.id not in existing_att_ids:
@@ -134,7 +125,6 @@ class ChatEditLog(commands.Cog):
                 if len(q["saved_files"]) < 9:
                     q["saved_files"].append(f)
 
-        # Reset bộ đếm Debounce 4 giây
         if msg_id in self.edit_tasks and not self.edit_tasks[msg_id].done():
             self.edit_tasks[msg_id].cancel()
 
@@ -164,7 +154,6 @@ class ChatEditLog(commands.Cog):
             return
 
         data = payload.data
-        # Bỏ qua nếu là sự kiện cập nhật embed tự động của Discord (không có trường content mới)
         if "content" not in data:
             return
 
@@ -177,7 +166,6 @@ class ChatEditLog(commands.Cog):
         channel_id = payload.channel_id
         jump_url = f"https://discord.com/channels/{guild.id}/{channel_id}/{msg_id}"
 
-        # Tìm thông tin người gửi
         author_id = int(author_data.get("id", 0)) if author_data.get("id") else None
         author = guild.get_member(author_id) if author_id else None
 
@@ -260,7 +248,6 @@ class ChatEditLog(commands.Cog):
         if not item:
             return
 
-        # Nếu sau khi sửa qua lại mà nội dung cuối cùng quay về y hệt ban đầu và không mất file nào -> Bỏ qua
         if (
             item["cached"]
             and item["initial_content"] == item["latest_content"]
@@ -271,7 +258,6 @@ class ChatEditLog(commands.Cog):
         guild: discord.Guild = item["guild"]
         view = JumpToMessageView(item["jump_url"])
 
-        # TRƯỜNG HỢP 1: Tin nhắn cũ ngoài bộ nhớ đệm (Uncached)
         if not item["cached"]:
             author = item["author"]
             a_data = item.get("author_data", {})
@@ -320,7 +306,6 @@ class ChatEditLog(commands.Cog):
                 pass
             return
 
-        # TRƯỜNG HỢP 2: Tin nhắn nằm trong bộ nhớ đệm (Cached đầy đủ)
         author: discord.Member | discord.User = item["author"]
         before_text: str = item["initial_content"]
         after_text: str = item["latest_content"]
@@ -356,7 +341,6 @@ class ChatEditLog(commands.Cog):
             inline=True
         )
 
-        # Nếu cả nội dung cũ và mới đều ngắn (< 200 ký tự), đặt cạnh nhau (inline=True) để dễ nhìn
         is_short = len(before_text) < 200 and len(after_text) < 200
 
         embed.add_field(
@@ -370,7 +354,6 @@ class ChatEditLog(commands.Cog):
             inline=is_short
         )
 
-        # Hiển thị khung Diff làm nổi bật thay đổi
         diff_block = self._generate_diff_text(before_text, after_text)
         if diff_block:
             embed.add_field(
@@ -379,7 +362,6 @@ class ChatEditLog(commands.Cog):
                 inline=False
             )
 
-        # Báo cáo các tệp đính kèm bị gỡ bỏ trong lúc sửa tin nhắn
         if removed_atts:
             att_lines = []
             for att in removed_atts[:5]:
@@ -397,7 +379,6 @@ class ChatEditLog(commands.Cog):
 
         embed.set_footer(text=t(guild, "LOG_EDIT_FOOTER", id=author.id))
 
-        # Xuất file .txt đính kèm nếu tin nhắn dài quá 1000 ký tự hoặc người dùng sửa liên tiếp nhiều lần
         if len(before_text) > 1000 or len(after_text) > 1000 or edit_count > 1:
             txt_lines = [
                 f"=== LỊCH SỬ CHỈNH SỬA TIN NHẮN (ID: {msg_id}) ===",

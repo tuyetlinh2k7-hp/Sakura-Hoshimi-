@@ -50,7 +50,6 @@ class ChannelSetup(commands.Cog):
         guild = ctx.guild
         guild_id = str(guild.id)
 
-        # Danh sách 11 loại Log văn bản chuẩn (Đã xóa Reaction, Thread, Emoji, Sticker)
         log_mapping = {
             ("chatlog", "chat"): (chat_log_channels, "Chat Log", "💬・chat-log"),
             ("editlog", "edit"): (edit_log_channels, "Edit Log", "✏️・edit-log"),
@@ -65,9 +64,6 @@ class ChannelSetup(commands.Cog):
             ("set_log", "warnlog"): (LOG_CHANNEL_ID, "Log Cảnh Cáo", "⚠️・log-cảnh-cáo"),
         }
 
-        # =====================================================================
-        # 1. XEM BẢNG TRẠNG THÁI (KHI BỎ TRỐNG MODE)
-        # =====================================================================
         if mode is None:
             embed = discord.Embed(
                 title=t(guild, "LOG_SETLOG_MENU_TITLE"),
@@ -103,9 +99,6 @@ class ChannelSetup(commands.Cog):
 
         mode_lower = mode.lower()
 
-        # =====================================================================
-        # 2. TỰ ĐỘNG TẠO DANH MỤC & CÁC KÊNH LOG (AUTO-SETUP)
-        # =====================================================================
         if mode_lower == "autosetup":
             if not guild.me.guild_permissions.manage_channels:
                 return await ctx.send(
@@ -116,7 +109,6 @@ class ChannelSetup(commands.Cog):
             await ctx.defer()
 
             try:
-                # 2.1. Tạo hoặc tìm lại Danh mục Hệ thống Log (Ẩn với @everyone)
                 overwrites_log = {
                     guild.default_role: discord.PermissionOverwrite(view_channel=False),
                     guild.me: discord.PermissionOverwrite(
@@ -143,7 +135,6 @@ class ChannelSetup(commands.Cog):
                     existing_id = target_dict.get(guild_id)
                     existing_ch = guild.get_channel(existing_id) if existing_id else None
 
-                    # Smart Reuse: Nếu kênh đã cài trước đó vẫn còn tồn tại thì giữ nguyên, không tạo trùng
                     if existing_ch and isinstance(existing_ch, discord.TextChannel):
                         reused_logs.append(f"{display_name} ({existing_ch.mention})")
                     else:
@@ -155,7 +146,6 @@ class ChannelSetup(commands.Cog):
                         target_dict[guild_id] = new_ch.id
                         created_logs.append(f"{display_name} ({new_ch.mention})")
 
-                # 2.2. Tạo Danh mục & Kênh Tạo Phòng Voice riêng biệt (Công khai cho @everyone)
                 existing_voice_id = CREATE_CHANNEL_ID.get(guild_id)
                 existing_voice_ch = guild.get_channel(existing_voice_id) if existing_voice_id else None
 
@@ -222,12 +212,8 @@ class ChannelSetup(commands.Cog):
             except discord.HTTPException as e:
                 return await ctx.send(f"❌ Lỗi kết nối Discord khi tạo kênh: `{e}`", ephemeral=True)
 
-        # =====================================================================
-        # 3. CHẾ ĐỘ GOM TẤT CẢ LOG VÀO 1 KÊNH DUY NHẤT (ALL)
-        # =====================================================================
         if mode_lower == "all":
             if channel is None:
-                # Nếu bỏ trống kênh -> Xóa toàn bộ cấu hình của cả 11 loại log
                 for _, (target_dict, _, _) in log_mapping.items():
                     target_dict.pop(guild_id, None)
                 save_data()
@@ -254,12 +240,8 @@ class ChannelSetup(commands.Cog):
             )
             return await ctx.send(embed=embed)
 
-        # =====================================================================
-        # 4. CÀI ĐẶT HOẶC HỦY TỪNG LOẠI LOG ĐƠN LẺ
-        # =====================================================================
         for keys, (target_dict, display_name, _) in log_mapping.items():
             if mode_lower in keys:
-                # Nếu bỏ trống channel -> Gỡ cài đặt (Unset) loại log đó
                 if channel is None:
                     if guild_id in target_dict:
                         del target_dict[guild_id]
@@ -273,7 +255,6 @@ class ChannelSetup(commands.Cog):
                 if not isinstance(channel, discord.TextChannel):
                     return await ctx.send(t(guild, "LOG_SETLOG_ERROR_NOT_TEXT"), ephemeral=True)
 
-                # Kiểm tra quyền của Bot trong kênh được chọn
                 perms = channel.permissions_for(guild.me)
                 if not (perms.view_channel and perms.send_messages and perms.embed_links):
                     return await ctx.send(
@@ -292,9 +273,6 @@ class ChannelSetup(commands.Cog):
                 embed.add_field(name=t(guild, "LOG_SETLOG_FIELD_TYPE"), value=display_name)
                 return await ctx.send(embed=embed)
 
-        # =====================================================================
-        # 5. CÀI ĐẶT HOẶC HỦY KÊNH TẠO PHÒNG VOICE (CREATEVOICE / JOINVOICE)
-        # =====================================================================
         if mode_lower in ["createvoice", "joinvoice"]:
             if channel is None:
                 if guild_id in CREATE_CHANNEL_ID:

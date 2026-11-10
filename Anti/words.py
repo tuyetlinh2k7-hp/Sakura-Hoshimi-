@@ -8,17 +8,15 @@ import re
 from typing import Literal
 from Check.i18n import t
 
-# Import các thành phần dùng chung
 from config import OWNER_ID
 from Check.mod import has_admin_role, is_owner, admin_roles
 from Anti.link_filter import link_warnings, link_settings, save_link_warnings, load_link_data
 
-# --- Quản lý dữ liệu cho Bộ lọc từ cấm ---
 WORD_SETTINGS_FILE = "data/word_filter_settings.json"
 FORBIDDEN_WORDS_FILE = "data/forbidden_words.json"
 
 word_settings = {}
-forbidden_words = {}  # Cấu trúc: {guild_id: ["từ1", "từ2"]}
+forbidden_words = {}
 global_word_filter_enabled = False
 
 def load_word_data():
@@ -36,7 +34,7 @@ def load_word_data():
             try: forbidden_words = json.load(f)
             except json.JSONDecodeError: forbidden_words = {}
 
-    load_link_data()  # Tải dữ liệu cảnh cáo chung
+    load_link_data()
 
 def save_word_settings():
     """Lưu cài đặt của bộ lọc từ cấm."""
@@ -53,7 +51,6 @@ def save_forbidden_words():
     with open(FORBIDDEN_WORDS_FILE, 'w', encoding='utf-8') as f:
         json.dump(forbidden_words, f, indent=4, ensure_ascii=False)
 
-# --- MODAL VÀ VIEW ---
 class WordModal(discord.ui.Modal):
     def __init__(self, title: str, current_word: str = "", guild=None):
         super().__init__(title=title)
@@ -154,7 +151,7 @@ class WordFilterCog(commands.Cog, name="Anti-Word"):
         embed = discord.Embed(
             title=t(guild, "ANTI_WORD_DASHBOARD_TITLE"),
             description=t(guild, "ANTI_WORD_DASHBOARD_DESC", global_status=global_status, guild_status=guild_status, count=word_count),
-            color=discord.Color.from_rgb(231, 76, 60) # Alizarin
+            color=discord.Color.from_rgb(231, 76, 60)
         )
         embed.add_field(
             name=t(guild, "ANTI_WORD_FIELD_MANAGE"),
@@ -211,13 +208,11 @@ class WordFilterCog(commands.Cog, name="Anti-Word"):
         if not words_to_check: return
 
         content_lower = message.content.lower()
-        # Tạo một biểu thức chính quy để tìm chính xác từ (word boundary)
-        # Ví dụ: cấm "heo" sẽ không chặn "chèo"
         for word in words_to_check:
             pattern = r'\b' + re.escape(word) + r'\b'
             if re.search(pattern, content_lower):
                 await self.handle_word_violation(message, word)
-                return # Dừng lại sau khi xử lý vi phạm đầu tiên
+                return
 
     @commands.group(name="antiword", aliases=["wordfilter"], description="Quản lý hệ thống lọc từ cấm.")
     @has_admin_role()
@@ -285,7 +280,6 @@ class WordFilterCog(commands.Cog, name="Anti-Word"):
                 await interaction_or_ctx.send(embed=embed, ephemeral=True)
             return
 
-        # Tạo Select Menu để xóa
         options = [discord.SelectOption(label=word[:100], value=word) for word in sorted(server_words)]
         select = discord.ui.Select(placeholder=t(guild, "ANTI_WORD_SELECT_PLACEHOLDER"), options=options, min_values=1, max_values=1)
 
@@ -294,7 +288,6 @@ class WordFilterCog(commands.Cog, name="Anti-Word"):
             server_words.remove(word_to_remove)
             save_forbidden_words()
             await interaction.response.send_message(t(interaction.guild, "ANTI_WORD_REMOVED_SELECT", word=word_to_remove), ephemeral=True)
-            # Tùy chọn: Cập nhật lại embed danh sách sau khi xóa
 
         select.callback = select_callback
         view = discord.ui.View(timeout=180)

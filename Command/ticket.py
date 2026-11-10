@@ -8,11 +8,9 @@ import asyncio
 from datetime import datetime
 from Check.i18n import t, is_vietnamese
 
-# --- Tên file cấu hình ---
 TICKET_CONFIG_FILE = "data/ticket_config.json"
 OPEN_TICKETS_FILE = "data/open_tickets.json"
 
-# --- Các hàm hỗ trợ đọc/ghi file JSON ---
 def load_json_data(file_path):
     """Tải dữ liệu từ file JSON một cách an toàn."""
     if os.path.exists(file_path):
@@ -29,7 +27,6 @@ def save_json_data(data, file_path):
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
-# --- View chứa nút "Đóng Ticket" ---
 class CloseTicketView(discord.ui.View):
     def __init__(self, guild=None):
         super().__init__(timeout=None)
@@ -40,7 +37,6 @@ class CloseTicketView(discord.ui.View):
     async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
 
-        # --- SỬA LỖI LOGIC: Tìm người tạo ticket dựa trên channel ID ---
         open_tickets = load_json_data(OPEN_TICKETS_FILE)
         ticket_creator_id = None
         for user_id, channel_id in open_tickets.items():
@@ -48,11 +44,9 @@ class CloseTicketView(discord.ui.View):
                 ticket_creator_id = user_id
                 break
 
-        # Nếu không tìm thấy ticket trong hệ thống (có thể đã bị đóng), thông báo và dừng lại
         if not ticket_creator_id:
             error_embed = discord.Embed(title=t(interaction.guild, "TICKET_ERROR_TITLE"), description=t(interaction.guild, "TICKET_ERROR_NOT_FOUND"), color=discord.Color.red())
             await interaction.followup.send(embed=error_embed, ephemeral=True)
-            # Có thể kênh này không phải do bot tạo, nên cân nhắc xóa nếu cần
             if interaction.channel.name.startswith("ticket-"):
                  warning_embed = discord.Embed(
                     description=t(interaction.guild, "TICKET_DELETE_WARNING"),
@@ -64,7 +58,6 @@ class CloseTicketView(discord.ui.View):
 
         ticket_creator = interaction.guild.get_member(int(ticket_creator_id))
 
-        # Tạo transcript
         ticket_config = load_json_data(TICKET_CONFIG_FILE)
         guild_config = ticket_config.get(str(interaction.guild_id))
         if guild_config and guild_config.get("log_channel_id"):
@@ -75,23 +68,18 @@ class CloseTicketView(discord.ui.View):
                 transcript += f"Người đóng: {interaction.user.name} (ID: {interaction.user.id})\n"
                 transcript += f"Thời gian đóng: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 
-                # Lấy lịch sử tin nhắn
                 messages = []
                 async for msg in interaction.channel.history(limit=None, oldest_first=True):
                     messages.append(f"[{msg.created_at.strftime('%d/%m %H:%M')}] {msg.author.name}: {msg.content}")
                 
                 transcript += "\n".join(messages)
 
-                # Gửi transcript dưới dạng file .txt
                 transcript_file = discord.File(io.BytesIO(transcript.encode()), filename=f"ticket-{interaction.channel.name}.txt")
                 await log_channel.send(t(interaction.guild, "TICKET_TRANSCRIPT_SENT", mention=ticket_creator.mention if ticket_creator else 'Người dùng đã rời đi'), file=transcript_file)
 
-        # Xóa ticket khỏi danh sách đang mở
-        # Đã tìm được ticket_creator_id ở trên
         del open_tickets[ticket_creator_id]
         save_json_data(open_tickets, OPEN_TICKETS_FILE)
 
-        # --- CẢI TIẾN: Gửi DM cho người tạo ticket ---
         if ticket_creator:
             try:
                 dm_embed = discord.Embed(
@@ -101,10 +89,8 @@ class CloseTicketView(discord.ui.View):
                 )
                 await ticket_creator.send(embed=dm_embed)
             except discord.Forbidden:
-                # Không thể gửi DM nếu người dùng đã chặn bot hoặc rời server
                 pass
 
-        # Gửi tin nhắn thông báo và xóa luồng
         closing_embed = discord.Embed(
             description=t(interaction.guild, "TICKET_CLOSING_DESC"),
             color=discord.Color.orange()
@@ -113,7 +99,6 @@ class CloseTicketView(discord.ui.View):
         await asyncio.sleep(5)
         await interaction.channel.delete(reason="Ticket đã được đóng.")
 
-# --- Modal để admin gửi tin nhắn thay mặt người dùng ---
 class SpeakAsModal(discord.ui.Modal, title="Gửi tin nhắn thay mặt"):
     def __init__(self):
         super().__init__(timeout=None)
@@ -141,7 +126,6 @@ class SpeakAsModal(discord.ui.Modal, title="Gửi tin nhắn thay mặt"):
         if not isinstance(member, discord.Member):
             member = await interaction.guild.fetch_member(member.id)
 
-        # Tìm hoặc tạo webhook để gửi tin nhắn
         webhook = None
         webhooks = await interaction.channel.webhooks()
         for wh in webhooks:
@@ -167,7 +151,6 @@ class SpeakAsModal(discord.ui.Modal, title="Gửi tin nhắn thay mặt"):
             await interaction.followup.send(t(interaction.guild, "TICKET_WEBHOOK_ERROR", error=e), ephemeral=True)
 
 
-# --- View chứa các nút hành động trong ticket ---
 class TicketActionView(CloseTicketView):
     def __init__(self, guild=None):
         super().__init__(guild=guild)
@@ -176,12 +159,10 @@ class TicketActionView(CloseTicketView):
 
     @discord.ui.button(label="Gửi tin thay mặt", style=discord.ButtonStyle.secondary, emoji="🗣️", custom_id="speak_as_button")
     async def speak_as(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Chỉ admin mới được dùng
         if not interaction.user.guild_permissions.manage_messages:
             return await interaction.response.send_message(t(interaction.guild, "TICKET_NO_PERM_SPEAK"), ephemeral=True)
         await interaction.response.send_modal(SpeakAsModal())
 
-# --- SỬA LỖI: Tách Modal và Select ra làm 2 bước ---
 class TicketCreationModal(discord.ui.Modal, title="Tạo Ticket Hỗ Trợ Mới"):
     def __init__(self, topic_value: str, topic_label: str):
         super().__init__()
@@ -208,16 +189,13 @@ class TicketCreationModal(discord.ui.Modal, title="Tạo Ticket Hỗ Trợ Mới
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
-        # Lấy dữ liệu từ modal
         topic_value = self.topic_value
         topic_label = self.topic_label
         ticket_title = self.title_input.value
         ticket_description = self.description_input.value
 
-        # Lấy cấu hình và role
         ticket_config = load_json_data(TICKET_CONFIG_FILE)
         guild_config = ticket_config.get(str(interaction.guild_id))
-        # --- THAY ĐỔI: Lấy kênh ticket "mẹ" thay vì category ---
         ticket_channel_parent = interaction.guild.get_channel(guild_config["ticket_channel_id"])
         support_role = interaction.guild.get_role(guild_config["support_role_id"])
 
@@ -225,7 +203,6 @@ class TicketCreationModal(discord.ui.Modal, title="Tạo Ticket Hỗ Trợ Mới
             error_embed = discord.Embed(title=t(interaction.guild, "TICKET_ERROR_CONFIG_TITLE"), description=t(interaction.guild, "TICKET_ERROR_CONFIG"), color=discord.Color.red())
             return await interaction.followup.send(embed=error_embed, ephemeral=True)
 
-        # --- THAY ĐỔI: Tạo một luồng (thread) riêng tư thay vì kênh mới ---
         channel_name = f"{topic_value}-{interaction.user.name}"
         ticket_thread = await ticket_channel_parent.create_thread(
             name=channel_name,
@@ -233,12 +210,10 @@ class TicketCreationModal(discord.ui.Modal, title="Tạo Ticket Hỗ Trợ Mới
             reason=f"Ticket được tạo bởi {interaction.user.name}"
         )
 
-        # Lưu ticket đang mở
         open_tickets = load_json_data(OPEN_TICKETS_FILE)
         open_tickets[str(interaction.user.id)] = ticket_thread.id
         save_json_data(open_tickets, OPEN_TICKETS_FILE)
 
-        # Gửi thông tin ticket vào kênh mới
         ticket_embed = discord.Embed(
             title=f"📝 {ticket_title}",
             description=ticket_description,
@@ -282,7 +257,6 @@ class TopicSelectView(discord.ui.View):
         
         await interaction.response.send_modal(TicketCreationModal(topic_value, topic_label))
 
-# --- View chứa nút "Tạo Ticket" ---
 class TicketPanelView(discord.ui.View):
     def __init__(self, guild=None):
         super().__init__(timeout=None)
@@ -293,29 +267,25 @@ class TicketPanelView(discord.ui.View):
     async def create_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
 
-        # Load cấu hình
         ticket_config = load_json_data(TICKET_CONFIG_FILE)
         open_tickets = load_json_data(OPEN_TICKETS_FILE)
         guild_id_str = str(interaction.guild_id)
         user_id_str = str(interaction.user.id)
         
-        # Kiểm tra xem server đã setup chưa
         if guild_id_str not in ticket_config:
             error_embed = discord.Embed(title=t(interaction.guild, "TICKET_NOT_SETUP_TITLE"), description=t(interaction.guild, "TICKET_NOT_SETUP"), color=discord.Color.red())
             return await interaction.followup.send(embed=error_embed, ephemeral=True)
 
-        # Kiểm tra xem người dùng đã có ticket đang mở chưa
         if user_id_str in open_tickets:
             existing_channel_id = open_tickets[user_id_str]
             existing_channel = interaction.guild.get_channel(existing_channel_id)
             if existing_channel:
                 error_embed = discord.Embed(title=t(interaction.guild, "TICKET_ALREADY_OPEN_TITLE"), description=t(interaction.guild, "TICKET_ALREADY_OPEN", mention=existing_channel.mention), color=discord.Color.orange())
                 return await interaction.followup.send(embed=error_embed, ephemeral=True)
-            else: # Nếu kênh không tồn tại, xóa record cũ
+            else:
                 del open_tickets[user_id_str]
                 save_json_data(open_tickets, OPEN_TICKETS_FILE)
 
-        # --- SỬA LỖI: Gửi View chứa Select Menu trước khi mở Modal ---
         guild_config = ticket_config[guild_id_str]
         if not guild_config.get("support_role_id") or not guild_config.get("ticket_channel_id"):
             error_embed = discord.Embed(title=t(interaction.guild, "TICKET_ERROR_CONFIG_TITLE"), description=t(interaction.guild, "TICKET_ERROR_CONFIG"), color=discord.Color.red())
@@ -325,7 +295,6 @@ class TicketPanelView(discord.ui.View):
         await interaction.followup.send(t(interaction.guild, "TICKET_STEP1"), view=view, ephemeral=True)
 
 
-# --- COG CHÍNH ---
 class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -362,7 +331,6 @@ class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
         """Cài đặt và tạo bảng điều khiển ticket."""
         await ctx.defer(ephemeral=True)
 
-        # --- THAY ĐỔI: Lưu ID từ các đối tượng được mention ---
         ticket_config = load_json_data(TICKET_CONFIG_FILE)
         guild_id_str = str(ctx.guild.id)
         ticket_config[guild_id_str] = {
@@ -373,7 +341,6 @@ class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
         }
         save_json_data(ticket_config, TICKET_CONFIG_FILE)
 
-        # Tạo và gửi bảng điều khiển
         panel_embed = discord.Embed(
             title=t(ctx.guild, "TICKET_PANEL_TITLE"),
             description=t(ctx.guild, "TICKET_PANEL_DESC"),
@@ -387,7 +354,6 @@ class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
             error_embed = discord.Embed(title=t(ctx.guild, "TICKET_NO_PERM_TITLE"), description=t(ctx.guild, "TICKET_NO_PERM_PANEL"), color=discord.Color.red())
             return await ctx.send(embed=error_embed, ephemeral=True)
 
-        # Gửi thông báo cài đặt thành công
         success_embed = discord.Embed(
             title=t(ctx.guild, "TICKET_SETUP_SUCCESS_TITLE"),
             description=t(ctx.guild, "TICKET_SETUP_SUCCESS_DESC"),
@@ -408,7 +374,6 @@ class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
 
         target_channel = channel or ctx.channel
 
-        # Kiểm tra xem server đã được cấu hình chưa
         ticket_config = load_json_data(TICKET_CONFIG_FILE)
         guild_id_str = str(ctx.guild.id)
 
@@ -420,7 +385,6 @@ class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
             )
             return await ctx.send(embed=error_embed, ephemeral=True)
 
-        # Tạo và gửi lại bảng điều khiển
         panel_embed = discord.Embed(
             title=t(ctx.guild, "TICKET_PANEL_TITLE"),
             description=t(ctx.guild, "TICKET_PANEL_DESC"),
@@ -440,16 +404,12 @@ class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
     @commands.has_permissions(manage_channels=True)
     async def close_ticket_command(self, ctx: commands.Context):
         """Lệnh đóng ticket thủ công."""
-        # --- SỬA LỖI: Kiểm tra xem đây có phải là một luồng ticket hợp lệ không ---
         open_tickets = load_json_data(OPEN_TICKETS_FILE)
         if not isinstance(ctx.channel, discord.Thread) or ctx.channel.id not in open_tickets.values():
             error_embed = discord.Embed(title=t(ctx.guild, "TICKET_WRONG_CHANNEL_TITLE"), description=t(ctx.guild, "TICKET_WRONG_CHANNEL_DESC"), color=discord.Color.orange())
             return await ctx.send(embed=error_embed, ephemeral=True)
 
-        # Tái sử dụng logic của nút bấm
-        # Tạo một interaction giả để truyền vào hàm của nút
         class FakeInteraction:
-            # --- SỬA LỖI: Thêm class giả cho response và followup ---
             class _FakeResponse:
                 async def defer(self, ephemeral: bool = False, thinking: bool = False) -> None:
                     pass
@@ -457,7 +417,6 @@ class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
                 def __init__(self, channel):
                     self._channel = channel
                 async def send(self, *args, **kwargs):
-                    # Bỏ qua ephemeral vì lệnh prefix không hỗ trợ
                     kwargs.pop('ephemeral', None)
                     return await self._channel.send(*args, **kwargs)
 
@@ -506,7 +465,6 @@ class TicketCog(commands.Cog, name="Hệ Thống Ticket"):
             error_embed = discord.Embed(title=t(ctx.guild, "TICKET_WRONG_CHANNEL_TITLE"), description=t(ctx.guild, "TICKET_WRONG_CHANNEL_DESC"), color=discord.Color.orange())
             return await ctx.send(embed=error_embed, ephemeral=True)
 
-        # Tìm người tạo ticket để không cho phép xóa họ
         ticket_creator_id = None
         for user_id, channel_id in open_tickets.items():
             if channel_id == ctx.channel.id:

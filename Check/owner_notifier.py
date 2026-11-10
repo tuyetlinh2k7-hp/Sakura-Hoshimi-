@@ -19,7 +19,6 @@ import discord
 from discord.ext import commands
 import psutil
 
-# Cấu hình Owner
 try:
     from config import OWNER_ID, PREFIX, WEB_PORT
 except Exception:
@@ -27,10 +26,8 @@ except Exception:
     PREFIX = "s!"
     WEB_PORT = 10272
 
-# Thời điểm bot bắt đầu chạy để tính Uptime
 BOT_BOOT_TIME = time.time()
 
-# Bảng mã màu Embed Sakura
 COLOR_SAKURA_PINK = 0xFF79C6
 COLOR_ONLINE_GREEN = 0x2ECC71
 COLOR_RESTART_ORANGE = 0xF39C12
@@ -51,12 +48,9 @@ __all__ = [
     "setup_live_console",
 ]
 
-# Anti-Spam / Debounce Cache cho lỗi lặp lại
-# Key: error_hash -> { "first_seen": float, "last_sent": float, "count": int, "suppressed": int }
 _ERROR_DEBOUNCE_CACHE: Dict[str, Dict[str, Any]] = {}
-ERROR_COOLDOWN_SECONDS = 45.0  # Chặn spam cùng 1 lỗi trong 45 giây
+ERROR_COOLDOWN_SECONDS = 45.0
 
-# Regex loại bỏ mã màu ANSI khỏi log
 ANSI_REGEX = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
 def strip_ansi(text: str) -> str:
@@ -113,9 +107,6 @@ async def get_owner_user(bot: commands.Bot) -> Optional[discord.User]:
     return user
 
 
-# ==============================================================================
-# 1. LIVE CONSOLE STDOUT / STDERR TEE STREAM
-# ==============================================================================
 class ConsoleStreamTee:
     """Tee stream: Vừa in ra màn hình terminal thật, vừa chuyển tiếp vào Live Console Web."""
     def __init__(self, original_stream, level: str = "INFO"):
@@ -166,9 +157,6 @@ def install_live_console_tee():
     print("[LiveConsole] ✅ Đã kích hoạt hệ thống Live Console Stream thời gian thực.")
 
 
-# ==============================================================================
-# 2. GỬI THÔNG BÁO DM ĐẾN OWNER
-# ==============================================================================
 async def send_owner_dm(bot: commands.Bot, embed: discord.Embed, file: Optional[discord.File] = None):
     """Gửi DM an toàn tới Owner kèm Embed và file đính kèm nếu có."""
     owner = await get_owner_user(bot)
@@ -188,9 +176,6 @@ async def send_owner_dm(bot: commands.Bot, embed: discord.Embed, file: Optional[
         return False
 
 
-# ------------------------------------------------------------------------------
-# A. THÔNG BÁO BOT ONLINE (KHỞI ĐỘNG THÀNH CÔNG)
-# ------------------------------------------------------------------------------
 async def notify_owner_bot_online(bot: commands.Bot):
     """Gửi thông báo DM tới Owner khi bot đã kết nối và sẵn sàng hoạt động."""
     guilds_count = len(bot.guilds)
@@ -240,9 +225,6 @@ async def notify_owner_bot_online(bot: commands.Bot):
         print("[OwnerNotifier] 📨 Đã gửi thông báo Bot Online đến DM của Owner thành công.")
 
 
-# ------------------------------------------------------------------------------
-# B. THÔNG BÁO BOT RESTART / SHUTDOWN
-# ------------------------------------------------------------------------------
 async def notify_owner_bot_lifecycle(bot: commands.Bot, action: str = "restart", source: str = "Lệnh Owner"):
     """Gửi thông báo DM tới Owner khi có tín hiệu Restart hoặc Shutdown."""
     uptime_str = format_uptime(time.time() - BOT_BOOT_TIME)
@@ -276,13 +258,9 @@ async def notify_owner_bot_lifecycle(bot: commands.Bot, action: str = "restart",
     embed.set_footer(text="🌸 SakuraBot Live Notifier • Bảo vệ tiến trình")
 
     await send_owner_dm(bot, embed)
-    # Nghỉ 0.5s để đảm bảo request gửi đi thành công trước khi process bị tắt/restart
     await asyncio.sleep(0.5)
 
 
-# ------------------------------------------------------------------------------
-# C. THÔNG BÁO RUNTIME ERROR / EXCEPTION (CÓ EMBED ĐẸP & CHỐNG SPAM)
-# ------------------------------------------------------------------------------
 async def notify_owner_bot_error(
     bot: commands.Bot,
     error: BaseException,
@@ -299,7 +277,6 @@ async def notify_owner_bot_error(
     err_type = type(error).__name__
     err_msg = str(error) or "Không có thông báo lỗi cụ thể."
 
-    # Lấy traceback hoàn chỉnh
     if hasattr(error, '__traceback__') and error.__traceback__:
         tb_lines = traceback.format_exception(type(error), error, error.__traceback__)
         full_tb = "".join(tb_lines)
@@ -308,7 +285,6 @@ async def notify_owner_bot_error(
         if not full_tb or "NoneType: None" in full_tb:
             full_tb = f"{err_type}: {err_msg}"
 
-    # Tạo signature băm lỗi để chống spam lặp
     error_signature = f"{source}:{err_type}:{err_msg[:80]}"
     cached = _ERROR_DEBOUNCE_CACHE.get(error_signature)
 
@@ -317,10 +293,8 @@ async def notify_owner_bot_error(
         cached["count"] += 1
         if elapsed < ERROR_COOLDOWN_SECONDS:
             cached["suppressed"] += 1
-            # Bỏ qua gửi DM trùng lặp để không làm phiền Owner liên tục
             return False
         else:
-            # Hết cooldown, ghi nhận gửi lần tiếp
             suppressed_count = cached["suppressed"]
             cached["last_sent"] = now
             cached["suppressed"] = 0
@@ -333,7 +307,6 @@ async def notify_owner_bot_error(
         }
         suppressed_count = 0
 
-    # Xác định người gọi và vị trí lỗi
     invoker_text = "Hệ Thống Tự Động / Task"
     location_text = "Hậu Đài (Background Task / Console)"
 
@@ -371,7 +344,6 @@ async def notify_owner_bot_error(
     embed.add_field(name="🌐 Vị Trí Xảy Ra", value=location_text, inline=False)
     embed.add_field(name="💬 Nội Dung Lỗi", value=f"```{err_msg[:500]}```", inline=False)
 
-    # Hiển thị Traceback (tối đa 900 ký tự để không vượt quá giới hạn 1024 của field Embed)
     tb_file = None
     if len(full_tb) > 900:
         tb_snippet = full_tb[-900:]
@@ -380,7 +352,6 @@ async def notify_owner_bot_error(
             value=f"```py\n... [Đã rút gọn - Xem file đính kèm]\n{tb_snippet}\n```",
             inline=False
         )
-        # Tạo file đính kèm traceback đầy đủ
         tb_bytes = io.BytesIO(full_tb.encode("utf-8"))
         tb_file = discord.File(tb_bytes, filename=f"traceback_{int(now)}.txt")
     else:
@@ -409,9 +380,6 @@ async def notify_owner_bot_error(
     return True
 
 
-# ------------------------------------------------------------------------------
-# D. THÔNG BÁO BOT THAM GIA MÁY CHỦ MỚI (GUILD JOIN)
-# ------------------------------------------------------------------------------
 async def notify_owner_guild_join(bot: commands.Bot, guild: discord.Guild) -> bool:
     """
     Gửi thông báo DM chi tiết cho Bot Owner khi SakuraBot được mời/thêm vào một server mới.
@@ -421,7 +389,6 @@ async def notify_owner_guild_join(bot: commands.Bot, guild: discord.Guild) -> bo
     guilds_count = len(bot.guilds)
     total_users = sum(g.member_count or 0 for g in bot.guilds)
 
-    # 1. Tìm thông tin Chủ sở hữu máy chủ (Server Owner)
     owner_str = "Không rõ"
     owner_mention = f"<@{guild.owner_id}>" if guild.owner_id else "N/A"
     owner_obj = guild.owner
@@ -436,7 +403,6 @@ async def notify_owner_guild_join(bot: commands.Bot, guild: discord.Guild) -> bo
     elif guild.owner_id:
         owner_str = f"ID: `{guild.owner_id}` ({owner_mention})"
 
-    # 2. Tìm người đã mời bot vào server (qua Audit Log nếu có quyền)
     inviter_str = "Không rõ (Thiếu quyền Audit Log hoặc cache Discord)"
     try:
         if guild.me and guild.me.guild_permissions.view_audit_log:
@@ -447,7 +413,6 @@ async def notify_owner_guild_join(bot: commands.Bot, guild: discord.Guild) -> bo
     except Exception:
         pass
 
-    # 3. Ngày tạo máy chủ
     created_ts = int(guild.created_at.timestamp()) if guild.created_at else 0
     created_str = f"<t:{created_ts}:F> (<t:{created_ts}:R>)" if created_ts else "N/A"
 
@@ -485,7 +450,6 @@ async def notify_owner_guild_join(bot: commands.Bot, guild: discord.Guild) -> bo
         inline=True
     )
 
-    # 4. Chi tiết quy mô máy chủ
     members_count = guild.member_count or len(guild.members)
     text_count = len(guild.text_channels)
     voice_count = len(guild.voice_channels)
@@ -518,9 +482,6 @@ async def notify_owner_guild_join(bot: commands.Bot, guild: discord.Guild) -> bo
     return sent
 
 
-# ------------------------------------------------------------------------------
-# E. THÔNG BÁO BOT RỜI KHỎI MÁY CHỦ (GUILD REMOVE / KICK)
-# ------------------------------------------------------------------------------
 async def notify_owner_guild_remove(bot: commands.Bot, guild: discord.Guild) -> bool:
     """
     Gửi thông báo DM chi tiết cho Bot Owner khi SakuraBot bị kick hoặc rời khỏi một server.
@@ -596,9 +557,6 @@ async def notify_owner_guild_remove(bot: commands.Bot, guild: discord.Guild) -> 
     return sent
 
 
-# ==============================================================================
-# 3. TRÌNH XỬ LÝ LỆNH LIVE CONSOLE TỪ WEB DASHBOARD
-# ==============================================================================
 async def process_live_console_command(cmd_text: str, bot: Optional[commands.Bot]) -> str:
     """Xử lý các câu lệnh tương tác gõ từ giao diện Live Console trên Web."""
     cmd_text = cmd_text.strip()

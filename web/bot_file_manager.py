@@ -13,11 +13,9 @@ from aiohttp import web
 import discord
 from discord.ext import commands
 
-# Thư mục gốc dự án
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
-# Danh sách thư mục/tệp bị giới hạn hoặc bảo vệ
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".bmp", ".avif"}
 VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov", ".mkv", ".avi", ".flv"}
 AUDIO_EXTENSIONS = {".mp3", ".wav", ".ogg", ".m4a", ".flac", ".aac"}
@@ -61,7 +59,6 @@ def get_bot_files_list(base_dir: Path, rel_path: str = "") -> Tuple[bool, Any]:
 
     try:
         for entry in sorted(target_dir.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
-            # Bỏ qua các thư mục nội bộ
             if entry.name in RESTRICTED_PARTS:
                 continue
 
@@ -70,7 +67,6 @@ def get_bot_files_list(base_dir: Path, rel_path: str = "") -> Tuple[bool, Any]:
             mtime_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stat.st_mtime))
 
             if entry.is_dir():
-                # Đếm số lượng item con (trừ cache)
                 child_count = 0
                 try:
                     child_count = len([c for c in entry.iterdir() if c.name not in RESTRICTED_PARTS])
@@ -126,12 +122,10 @@ def read_bot_file(base_dir: Path, rel_path: str) -> Tuple[bool, Any]:
     if not target_file.is_file():
         return False, "Đường dẫn không phải là tệp tin"
 
-    # Giới hạn kích thước tệp mở trên web (tối đa 5MB)
     stat = target_file.stat()
     norm_rel = str(target_file.relative_to(base_dir)).replace("\\", "/")
     ext = target_file.suffix.lower()
     if ext in (".db", ".sqlite", ".sqlite3"):
-        # Trả về cờ tệp cơ sở dữ liệu SQLite
         return True, {
             "path": norm_rel,
             "name": target_file.name,
@@ -145,7 +139,6 @@ def read_bot_file(base_dir: Path, rel_path: str) -> Tuple[bool, Any]:
         }
 
     if ext in MEDIA_EXTENSIONS:
-        # Trả về cờ tệp Media (Ảnh, GIF, Video, Audio)
         media_type = "image" if ext in IMAGE_EXTENSIONS else ("video" if ext in VIDEO_EXTENSIONS else "audio")
         return True, {
             "path": norm_rel,
@@ -199,7 +192,6 @@ def save_bot_file(base_dir: Path, rel_path: str, content: str) -> Tuple[bool, st
 
     norm_rel = str(rel_path).replace("\\", "/").strip().lstrip("/")
 
-    # 1. Kiểm tra lỗi cú pháp Python trước khi ghi
     if norm_rel.endswith(".py"):
         try:
             compile(content, target_file.name, "exec")
@@ -210,7 +202,6 @@ def save_bot_file(base_dir: Path, rel_path: str, content: str) -> Tuple[bool, st
                 "text": syn_err.text
             }
 
-    # 2. Ghi tệp an toàn
     try:
         target_file.parent.mkdir(parents=True, exist_ok=True)
         with open(target_file, "w", encoding="utf-8") as f:
@@ -221,9 +212,6 @@ def save_bot_file(base_dir: Path, rel_path: str, content: str) -> Tuple[bool, st
         return False, f"Lỗi khi ghi tệp: {e}", None
 
 
-# ==============================================================================
-# HỆ THỐNG COG / EXTENSION RELOADER CHO ADMIN WEB
-# ==============================================================================
 
 def get_registered_extensions(bot=None) -> List[Dict[str, Any]]:
     """Thu thập danh sách tất cả Cogs và Extensions của Bot."""
@@ -231,7 +219,6 @@ def get_registered_extensions(bot=None) -> List[Dict[str, Any]]:
     if bot and hasattr(bot, "extensions"):
         loaded_extensions = set(bot.extensions.keys())
 
-    # Lấy danh sách định nghĩa sẵn trong file1, file2, file3
     defined_exts = set()
     try:
         import file1
@@ -259,13 +246,11 @@ def get_registered_extensions(bot=None) -> List[Dict[str, Any]]:
     result = []
     for ext_name in all_ext_names:
         is_loaded = ext_name in loaded_extensions
-        # Đếm số lượng cogs / commands thuộc extension này nếu bot đang online
         cog_names = []
         cmd_count = 0
         if bot and is_loaded:
             ext_module = bot.extensions.get(ext_name)
             if ext_module:
-                # Quét cogs
                 for cog_name, cog_instance in bot.cogs.items():
                     if cog_instance.__module__ == ext_module.__name__:
                         cog_names.append(cog_name)
@@ -288,7 +273,6 @@ async def reload_extension_action(bot, ext_name: str, sync_tree: bool = False) -
         return {"ok": False, "error": "Bot hiện chưa được khởi chạy cùng Web Server!"}
 
     if ext_name == "all":
-        # Nạp lại toàn bộ
         all_exts = get_registered_extensions(bot)
         reloaded = []
         failed = []
@@ -325,7 +309,6 @@ async def reload_extension_action(bot, ext_name: str, sync_tree: bool = False) -
         }
 
     else:
-        # Nạp lại 1 extension cụ thể
         try:
             if ext_name in bot.extensions:
                 await bot.reload_extension(ext_name)
@@ -358,13 +341,9 @@ async def reload_extension_action(bot, ext_name: str, sync_tree: bool = False) -
             }
 
 
-# ==============================================================================
-# ROUTE HANDLERS
-# ==============================================================================
 
 async def handle_bot_files_page(request: web.Request):
     """Trang giao diện quản lý tệp tin và nạp lại Cogs của Bot (/admin/files)."""
-    # Import hàm kiểm tra session từ server
     from web.server import get_session, is_admin_session
     sess = get_session(request)
     if not sess:
@@ -424,7 +403,6 @@ async def handle_api_bot_files_save(request: web.Request):
         if not ok:
             return web.json_response({"ok": False, "error": msg, "syntax_error": bool(syntax_info), "details": syntax_info}, status=400)
 
-        # Trả về kèm thông tin có phải Cog không để client gợi ý reload
         norm_rel = rel_path.replace("\\", "/").strip().lstrip("/")
         cog_mod = get_extension_from_path(norm_rel)
 
@@ -489,11 +467,9 @@ async def handle_api_bot_files_delete(request: web.Request):
         if not target or not target.exists():
             return web.json_response({"ok": False, "error": "Mục cần xóa không tồn tại"}, status=404)
 
-        # Chặn xóa thư mục gốc của bot
         if target.resolve() == BASE_DIR.resolve():
             return web.json_response({"ok": False, "error": "Không thể xóa thư mục gốc của Bot!"}, status=400)
 
-        # Chặn xóa các thư mục cốt lõi trực tiếp
         if target.parent.resolve() == BASE_DIR.resolve() and target.name in ("Command", "Anti", "Log", "Check", "web", "data"):
             return web.json_response({"ok": False, "error": f"Không được phép xóa thư mục cốt lõi `{target.name}`!"}, status=400)
 
@@ -599,9 +575,6 @@ async def handle_api_bot_files_raw(request: web.Request):
     return web.FileResponse(target)
 
 
-# ==============================================================================
-# COGS API HANDLERS
-# ==============================================================================
 
 async def handle_api_admin_cogs_list(request: web.Request):
     from web.server import get_session, is_admin_session, BOT_INSTANCE
@@ -636,7 +609,6 @@ async def handle_api_admin_cogs_reload(request: web.Request):
         if not extension:
             return web.json_response({"ok": False, "error": "Vui lòng chọn extension hoặc chọn 'all' để nạp lại"}, status=400)
 
-        # Nếu user truyền đường dẫn tệp (vd: "Command/bank.py"), chuyển đổi sang tên extension
         converted = get_extension_from_path(extension)
         if converted:
             extension = converted
@@ -669,9 +641,6 @@ async def handle_api_admin_cogs_sync_tree(request: web.Request):
 
 
 
-# ==============================================================================
-# HỆ THỐNG ĐỌC CƠ SỞ DỮ LIỆU SQLITE (DATABASE VIEWER)
-# ==============================================================================
 
 def get_sqlite_schema(base_dir: Path, rel_path: str) -> Tuple[bool, Any]:
     """Lấy danh sách các bảng, view và cấu trúc cột của tệp SQLite."""
@@ -694,7 +663,6 @@ def get_sqlite_schema(base_dir: Path, rel_path: str) -> Tuple[bool, Any]:
             table_name = row["name"]
             table_type = row["type"]
 
-            # Lấy thông tin các cột
             cursor.execute(f'PRAGMA table_info("{table_name}");')
             columns_info = [
                 {
@@ -708,7 +676,6 @@ def get_sqlite_schema(base_dir: Path, rel_path: str) -> Tuple[bool, Any]:
                 for col in cursor.fetchall()
             ]
 
-            # Đếm số bản ghi
             row_count = 0
             try:
                 cursor.execute(f'SELECT COUNT(*) FROM "{table_name}";')
@@ -747,13 +714,11 @@ def get_sqlite_table_data(base_dir: Path, rel_path: str, table_name: str, limit:
         conn = sqlite3.connect(f"file:{target_file.resolve()}?mode=ro", uri=True)
         cursor = conn.cursor()
 
-        # Kiểm tra bảng có tồn tại trong sqlite_master không (ngăn chặn SQL Injection)
         cursor.execute("SELECT name FROM sqlite_master WHERE type IN ('table', 'view') AND name = ?;", (table_name,))
         if not cursor.fetchone():
             conn.close()
             return False, f"Bảng `{table_name}` không tồn tại trong cơ sở dữ liệu"
 
-        # Lấy thông tin cột & schema
         cursor.execute(f'PRAGMA table_info("{table_name}");')
         cols = cursor.fetchall()
         col_names = [c[1] for c in cols]
@@ -778,17 +743,14 @@ def get_sqlite_table_data(base_dir: Path, rel_path: str, table_name: str, limit:
                 where_clause = " WHERE " + " OR ".join(or_parts)
                 params = [kw] * len(or_parts)
 
-        # Đếm tổng số dòng
         count_query = f'SELECT COUNT(*) FROM "{table_name}"{where_clause};'
         cursor.execute(count_query, params)
         total_rows = cursor.fetchone()[0]
 
-        # Truy vấn dữ liệu
         data_query = f'SELECT * FROM "{table_name}"{where_clause} LIMIT ? OFFSET ?;'
         cursor.execute(data_query, params + [max(1, min(limit, 500)), max(0, offset)])
         raw_rows = cursor.fetchall()
 
-        # Format các kiểu dữ liệu an toàn cho JSON serialization
         formatted_rows = []
         for r in raw_rows:
             row_dict = {}
@@ -871,7 +833,6 @@ def execute_sqlite_query(base_dir: Path, rel_path: str, query: str) -> Tuple[boo
         return False, f"Lỗi thực thi SQL: {e}"
 
 
-# Handlers cho Database APIs
 async def handle_api_database_schema(request: web.Request):
     from web.server import get_session, is_admin_session
     sess = get_session(request)

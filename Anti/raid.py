@@ -8,7 +8,6 @@ from collections import deque
 from typing import Literal, Optional
 from Check.i18n import t
 
-# --- Quản lý dữ liệu ---
 RAID_SETTINGS_FILE = "data/raid_settings.json"
 global_raid_enabled = False
 
@@ -53,7 +52,7 @@ class AntiRaidControlView(discord.ui.View):
 
     async def _update_view(self, interaction: discord.Interaction):
         """Hàm helper để cập nhật lại embed và view sau khi có thay đổi."""
-        prefix = "/" # Mặc định cho slash command
+        prefix = "/"
         new_embed = self.cog._create_status_embed(interaction.guild, prefix)
         config = self.cog.get_guild_settings(interaction.guild.id)
         self.toggle_on.disabled = config.get("enabled", False)
@@ -115,8 +114,7 @@ class AntiRaidCog(commands.Cog, name="Anti-Raid"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.settings = load_raid_settings() # type: ignore
-        # Cấu trúc: {guild_id: deque([timestamp])}
+        self.settings = load_raid_settings()
         self.join_tracker = {}
 
     def get_guild_settings(self, guild_id: int) -> dict:
@@ -127,7 +125,7 @@ class AntiRaidCog(commands.Cog, name="Anti-Raid"):
             "log_channel": None,
             "punishment": "kick",
             "join_limit": 10,
-            "timeframe": 15  # 10 người trong 15 giây
+            "timeframe": 15
         }
         if guild_id_str not in self.settings:
             self.settings[guild_id_str] = defaults
@@ -162,31 +160,26 @@ class AntiRaidCog(commands.Cog, name="Anti-Raid"):
             return
 
         current_time = time.time()
-        timeframe = config.get("timeframe", 15) # type: ignore
+        timeframe = config.get("timeframe", 15)
 
         if guild.id not in self.join_tracker:
             self.join_tracker[guild.id] = deque()
 
-        # Dọn dẹp các lượt tham gia cũ
-        join_queue = self.join_tracker[guild.id] # type: ignore
+        join_queue = self.join_tracker[guild.id]
         while join_queue and join_queue[0] < current_time - timeframe:
             join_queue.popleft()
 
-        # Ghi nhận lượt tham gia mới
         join_queue.append(current_time)
 
-        # Kiểm tra nếu vượt ngưỡng
-        join_limit = config.get("join_limit", 10) # type: ignore
+        join_limit = config.get("join_limit", 10)
         if len(join_queue) >= join_limit:
-            # Kích hoạt chế độ raid
             await self._handle_raid(guild, member)
-            # Xóa tracker để tránh phạt liên tục
             self.join_tracker[guild.id].clear()
 
     async def _handle_raid(self, guild: discord.Guild, member: discord.Member):
         """Xử lý khi phát hiện raid."""
         config = self.get_guild_settings(guild.id)
-        punishment = config.get("punishment", "kick") # type: ignore
+        punishment = config.get("punishment", "kick")
         reason = "Anti-Raid: Phát hiện tham gia hàng loạt."
 
         try:
@@ -199,8 +192,7 @@ class AntiRaidCog(commands.Cog, name="Anti-Raid"):
         except Exception as e:
             print(f"[Anti-Raid] Lỗi khi phạt {member}: {e}")
 
-        # Gửi log
-        log_channel_id = config.get("log_channel") # type: ignore
+        log_channel_id = config.get("log_channel")
         if log_channel_id:
             log_channel = guild.get_channel(log_channel_id)
             if log_channel:
@@ -209,16 +201,15 @@ class AntiRaidCog(commands.Cog, name="Anti-Raid"):
                     description=t(guild, "ANTI_RAID_ALERT_DESC"),
                     color=discord.Color.dark_red()
                 )
-                embed.add_field(name=t(guild, "ANTI_RAID_FIELD_MEMBER"), value=f"{member.mention} (`{member.id}`)", inline=False) # type: ignore
-                embed.add_field(name=t(guild, "ANTI_RAID_FIELD_COUNT"), value=f"`{len(self.join_tracker.get(guild.id, []))} người / {config.get('timeframe')} giây`", inline=True) # type: ignore
-                embed.add_field(name=t(guild, "ANTI_RAID_FIELD_PUNISHMENT"), value=f"`{punishment.title()}`", inline=True) # type: ignore
+                embed.add_field(name=t(guild, "ANTI_RAID_FIELD_MEMBER"), value=f"{member.mention} (`{member.id}`)", inline=False)
+                embed.add_field(name=t(guild, "ANTI_RAID_FIELD_COUNT"), value=f"`{len(self.join_tracker.get(guild.id, []))} người / {config.get('timeframe')} giây`", inline=True)
+                embed.add_field(name=t(guild, "ANTI_RAID_FIELD_PUNISHMENT"), value=f"`{punishment.title()}`", inline=True)
                 embed.set_footer(text=t(guild, "ANTI_RAID_FOOTER"))
                 embed.timestamp = discord.utils.utcnow()
                 view_to_send = AntiRaidActionView(member.id, guild=guild) if punishment == "ban" else None
                 
                 await log_channel.send(embed=embed, view=view_to_send)
 
-    # --- Lệnh quản lý (Prefix) ---
     @commands.group(name="antiraid", description="Quản lý hệ thống chống tấn công (raid).")
     @commands.has_permissions(administrator=True)
     async def antiraid(self, ctx: commands.Context):

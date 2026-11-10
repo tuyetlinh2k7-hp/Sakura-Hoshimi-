@@ -83,36 +83,27 @@ ytdl = yt_dlp.YoutubeDL(
     YTDL_OPTIONS
 )
 
-# delay fish system
 last_global_fish = {}
 
-# tts system
 tts_queue = {}
 tts_playing = {}
 
 last_tts_user = {}
 
-# Voice text channels system
 voice_text_channels = {}
 
-# Chat log system
 chat_log_channels = {}
 edit_log_channels = {}
 delete_log_channels = {}
 
-# AFK system
 afk_users = {}
 
-# Cooldown system
 download_cooldown = {}
 
-#admin role system
 admin_roles = {}
 
-#blacklist system
 blacklist_users = set()
 
-#` Log system`
 warnings = {}
 
 guild_settings = {}
@@ -123,7 +114,6 @@ with open(DATA_FILE, "r", encoding="utf-8") as f:
 
 admin_roles = data.get("admin_roles", {})
 
-# Load data from file
 if os.path.exists(DATA_FILE):
 
     with open(DATA_FILE, "r") as f:
@@ -175,12 +165,10 @@ def is_bot_owner():
 
     async def predicate(ctx):
 
-        # Nếu là chủ bot
         if ctx.author.id == OWNER_ID:
 
             return True
 
-        # Không phải chủ bot
         embed = discord.Embed(
             title=t(ctx, "CHECK_NO_PERMISSION", default="❌ Không có quyền"),
             description=t(ctx, "CHECK_OWNER_ONLY", default="Chỉ chủ bot mới được dùng lệnh này"),
@@ -224,12 +212,10 @@ def create_user(user_id):
         "muted_until": 0
     }
 
-    # chưa có user
     if user_id not in levels:
 
         levels[user_id] = defaults.copy()
 
-    # thiếu key
     else:
 
         for k, v in defaults.items():
@@ -253,7 +239,6 @@ async def play_next_tts(
     bot
 ):
 
-    # queue rỗng
     if (
 
         guild_id not in tts_queue
@@ -271,7 +256,6 @@ async def play_next_tts(
 
     file_name = data["file"]
 
-    # play
     voice.play(
 
         discord.FFmpegPCMAudio(
@@ -301,7 +285,7 @@ tts_names = load_json(
 
 def is_valid_word(word):
 
-    return word.lower() in VALID_WORDS # type: ignore
+    return word.lower() in VALID_WORDS
 
 def save_tts_names():
     save_json(
@@ -318,7 +302,6 @@ async def after_tts(
     filename
 ):
 
-    # đợi ffmpeg release file
     await asyncio.sleep(2)
 
     try:
@@ -331,7 +314,6 @@ async def after_tts(
 
         pass
 
-    # play tiếp
     await play_next_tts(
 
         guild_id,
@@ -548,21 +530,14 @@ PREDICTIONS = [
     "❌ Các vì sao nói rằng câu trả lời là không."
 ]
 
-# Load blacklist from file
 async def blacklist_check(ctx):
 
-    # =========================
-    # BYPASS COMMAND
-    # =========================
 
     bypass_commands = [
 
         "appeal"
     ]
 
-    # =========================
-    # ALLOW BYPASS
-    # =========================
 
     if (
         ctx.command
@@ -573,9 +548,6 @@ async def blacklist_check(ctx):
 
         return True
 
-    # =========================
-    # CHECK BLACKLIST
-    # =========================
 
     if ctx.author.id in blacklist_users:
 
@@ -642,18 +614,13 @@ def update_rank(user_id, money):
 
     save_rank(data)
 
-# =========================
-# ADD GLOBAL CHECK
-# =========================
 
-# Kiểm tra data
 for user_id in user_inventory:
 
     if type(user_inventory[user_id]) != list:
 
         user_inventory[user_id] = []
 
-# Save data to file
 def save_data():
 
     data = {
@@ -676,7 +643,6 @@ def save_data():
 
         json.dump(data, f, indent=4)
 
-# kênh gửi phản hồi từ user tới admin
 APPEAL_CHANNEL_ID = 1505854802645487696
 
 RARITY_COLORS = {
@@ -694,25 +660,19 @@ RARITY_COLORS = {
 
 appeal_cooldown = {}
 
-# LEVEL SYSTEM
 user_xp = {}
 user_level = {}
 
-# COIN SYSTEM
 user_coins = {}
 
-# TTS CHANNELS SYSTEM
 tts_channels = ()
 
 muted_users = {}
 
-# Inventory system
 user_inventory = {}
 
-# Cooldown system
 daily_cooldown = {}
 
-#market system
 market_items = []
 
 if os.path.exists(

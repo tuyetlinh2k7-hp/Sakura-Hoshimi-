@@ -649,7 +649,7 @@
 </head>
 <body>
 
-  <!-- Top Navigation -->
+  
   <nav class="tk-nav">
     <a href="/" class="tk-nav-brand">
       <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256" alt="Sakura Bot" onerror="this.src='/images/avatar-bot.jpg'">
@@ -665,13 +665,13 @@
   </nav>
 
   <div class="tk-wrap">
-    <!-- Hero Header -->
+    
     <div class="tk-hero">
       <div class="tk-badge">✨ Trình Tải TikTok & Douyin Đa Năng</div>
       <h1 class="tk-title">Xem Trước & Tải Video TikTok Không Logo</h1>
       <p class="tk-subtitle">Dán liên kết TikTok hoặc Douyin bất kỳ để xem trước video, chọn độ phân giải Full HD / SD, tải âm thanh MP3 hoặc trọn bộ album ảnh Slideshow chất lượng gốc.</p>
 
-      <!-- Input Bar Card -->
+      
       <div class="tk-input-card">
         <div class="tk-input-group">
           <input type="text" id="urlInput" class="tk-input" placeholder="Dán link TikTok (vd: https://vt.tiktok.com/... hoặc https://www.tiktok.com/@.../video/...)" autocomplete="off">
@@ -684,7 +684,7 @@
         </div>
       </div>
 
-      <!-- Quick hints -->
+      
       <div class="tk-quick-bar">
         <span>💡 Hỗ trợ:</span>
         <span class="tk-quick-chip" onclick="setInput('https://www.tiktok.com/@tiktok')">Link video thường</span>
@@ -694,33 +694,33 @@
       </div>
     </div>
 
-    <!-- Error Alert Box -->
+    
     <div id="errorAlert" class="tk-error">
       <span style="font-size:1.4rem">⚠️</span>
       <span id="errorMessage">Đã xảy ra lỗi</span>
     </div>
 
-    <!-- Loading Spinner Box -->
+    
     <div id="loadingStatus" class="tk-status">
       <div class="tk-spinner"></div>
       <h4 style="margin:0 0 6px;color:#fff;font-weight:700">Đang phân tích bài viết TikTok...</h4>
       <p style="margin:0;color:var(--text-muted);font-size:0.86rem" id="loadingStep">Đang trích xuất luồng video chất lượng cao & dữ liệu album...</p>
     </div>
 
-    <!-- Result Display Container -->
+    
     <div id="resultContainer" class="tk-result">
       <div class="tk-card">
 
-        <!-- ================= CASE 1: VIDEO POST ================= -->
+        
         <div id="videoLayout" class="tk-media-grid" style="display:none">
-          <!-- Left: Video Player -->
+          
           <div class="tk-player-box">
             <video id="videoPlayer" class="tk-video-player" controls playsinline preload="metadata">
               Trình duyệt của bạn không hỗ trợ thẻ video HTML5.
             </video>
           </div>
 
-          <!-- Right: Video Info & Download Options -->
+          
           <div class="tk-info-col">
             <div class="tk-author-bar">
               <img id="videoAuthorAvatar" class="tk-author-avatar" src="" alt="Avatar">
@@ -745,7 +745,7 @@
               <span id="videoMusicTitle">Âm thanh gốc</span>
             </div>
 
-            <!-- Download Options Grid -->
+            
             <div class="tk-download-section">
               <div class="tk-download-title">
                 <span>📥 TÙY CHỌN CHẤT LƯỢNG & TẢI XUỐNG</span>
@@ -772,15 +772,15 @@
           </div>
         </div>
 
-        <!-- ================= CASE 2: PHOTO SLIDESHOW POST ================= -->
+        
         <div id="slideshowLayout" class="tk-media-grid" style="display:none">
-          <!-- Left: Photo Slideshow Viewer -->
+          
           <div class="tk-slideshow-box">
             <div class="tk-main-photo-wrapper">
               <img id="mainPhoto" class="tk-main-photo" src="" alt="Photo Slide">
               <div id="photoCounter" class="tk-slide-counter">Ảnh 1 / 1</div>
             </div>
-            <!-- Slide Navigation Buttons -->
+            
             <div class="tk-slide-nav-bar">
               <button type="button" id="btnSlidePrev" class="tk-nav-btn" onclick="prevSlide()">
                 ◀️ Trước
@@ -790,11 +790,11 @@
                 Tiếp ▶️
               </button>
             </div>
-            <!-- Thumbnails List -->
+            
             <div id="thumbStrip" class="tk-thumb-strip"></div>
           </div>
 
-          <!-- Right: Album Info & Download Options -->
+          
           <div class="tk-info-col">
             <div class="tk-author-bar">
               <img id="photoAuthorAvatar" class="tk-author-avatar" src="" alt="Avatar">
@@ -818,7 +818,7 @@
               <span id="photoMusicTitle">Âm thanh nền</span>
             </div>
 
-            <!-- Download Options for Album -->
+            
             <div class="tk-download-section">
               <div class="tk-download-title">
                 <span>📥 TÙY CHỌN TẢI ALBUM ẢNH</span>
@@ -844,7 +844,7 @@
       </div>
     </div>
 
-    <!-- Feature Grid -->
+    
     <div class="tk-features-grid">
       <div class="tk-feature-card">
         <span class="tk-feature-icon">🎬</span>

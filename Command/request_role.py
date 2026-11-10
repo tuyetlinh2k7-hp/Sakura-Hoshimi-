@@ -7,11 +7,9 @@ import json
 import aiohttp
 import os
 
-# Import các hàm và biến cần thiết từ các file khác
 from Check.mod import has_admin_role, admin_roles
 from Check.i18n import t
 
-# --- QUẢN LÝ CẤU HÌNH ---
 REQUEST_ROLE_CONFIG_FILE = "data/request_role_config.json"
 
 def load_request_role_config():
@@ -39,10 +37,9 @@ async def get_color_name(hex_code: str) -> str:
                     data = await response.json()
                     return data.get("name", {}).get("value", hex_code.upper())
     except Exception:
-        pass # Nếu API lỗi, trả về mã hex gốc
+        pass
     return hex_code.upper()
 
-# --- TỪ ĐIỂN MÀU TIẾNG VIỆT ---
 VIETNAMESE_COLORS = {
     "đỏ": "#ff0000", "đỏ tươi": "#ff0000", "đỏ đậm": "#8b0000",
     "xanh lá": "#00ff00", "xanh lá cây": "#008000", "xanh đậm": "#00008b",
@@ -59,9 +56,9 @@ VIETNAMESE_COLORS = {
 
 def parse_color_input(color_input: str) -> discord.Color | None:
     """Phân tích đầu vào màu sắc, hỗ trợ HEX, tên tiếng Anh và tiếng Việt."""
-    try: return discord.Color(int(color_input.lstrip('#'), 16)) # Thử HEX
+    try: return discord.Color(int(color_input.lstrip('#'), 16))
     except ValueError:
-        try: return discord.Color.from_str(color_input) # Thử tên tiếng Anh
+        try: return discord.Color.from_str(color_input)
         except ValueError:
             hex_from_vietnamese = VIETNAMESE_COLORS.get(color_input.lower())
             if hex_from_vietnamese:
@@ -69,7 +66,6 @@ def parse_color_input(color_input: str) -> discord.Color | None:
                 except ValueError: return None
     return None
 
-# --- MODAL (CỬA SỔ POPUP) ---
 
 class RoleRequestModal(discord.ui.Modal, title="📝 Yêu Cầu Tạo Role Mới"):
     """Modal để người dùng nhập thông tin role họ muốn tạo."""
@@ -112,16 +108,14 @@ class RoleRequestModal(discord.ui.Modal, title="📝 Yêu Cầu Tạo Role Mới
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
-        # Lấy kênh đã được cấu hình để nhận yêu cầu
         guild_id_str = str(interaction.guild_id)
         config = load_request_role_config()
         guild_cfg = config.get(guild_id_str, {})
         request_channel_id = guild_cfg.get("approval_channel_id")
 
-        # --- CẢI TIẾN: Xử lý và kiểm tra mã màu (HEX, tiếng Anh, tiếng Việt) ---
-        embed_color = discord.Color.orange() # Màu mặc định cho embed
+        embed_color = discord.Color.orange()
         role_color_input = self.role_color.value.strip() if self.role_color.value else None
-        final_role_color_str_for_data = None # Biến để lưu mã hex chuẩn cho persistent_data
+        final_role_color_str_for_data = None
 
         if role_color_input:
             parsed_color = parse_color_input(role_color_input)
@@ -134,7 +128,6 @@ class RoleRequestModal(discord.ui.Modal, title="📝 Yêu Cầu Tạo Role Mới
                     ephemeral=True
                 )
 
-        # Nếu không có kênh duyệt thì tạo role ngay, không cần duyệt.
         if not request_channel_id:
             try:
                 role_name = self.role_name.value.strip()
@@ -159,10 +152,8 @@ class RoleRequestModal(discord.ui.Modal, title="📝 Yêu Cầu Tạo Role Mới
             except Exception as e:
                 return await interaction.followup.send(t(interaction.guild, "REQROLE_APPROVE_ERROR", error=e), ephemeral=True)
 
-        # Lấy tên màu từ API (sử dụng mã hex đã chuẩn hóa nếu có, nếu không thì dùng input gốc)
         color_name_str = await get_color_name(final_role_color_str_for_data or role_color_input)
 
-        # Tạo embed yêu cầu để gửi cho admin
         embed = discord.Embed(
             title=t(interaction.guild, "REQROLE_NEW_REQUEST_TITLE"),
             description=t(interaction.guild, "REQROLE_NEW_REQUEST_DESC", mention=interaction.user.mention),
@@ -178,8 +169,6 @@ class RoleRequestModal(discord.ui.Modal, title="📝 Yêu Cầu Tạo Role Mới
         if self.reason.value:
             embed.add_field(name=t(interaction.guild, "REQROLE_FIELD_REASON"), value=self.reason.value, inline=False)
 
-        # Thêm một trường ẩn để lưu trữ tất cả dữ liệu cần thiết cho persistent view
-        # Dữ liệu này sẽ được phân tích lại khi nút Duyệt/Từ chối được nhấn
         persistent_data = {
             "requester_id": interaction.user.id,
             "role_name": self.role_name.value.strip(),
@@ -189,10 +178,8 @@ class RoleRequestModal(discord.ui.Modal, title="📝 Yêu Cầu Tạo Role Mới
         }
         embed.add_field(name="persistent_data", value=json.dumps(persistent_data), inline=False)
 
-        # Chuẩn bị view với các nút duyệt/từ chối
         view = AdminApprovalView(bot=self.bot)
 
-        # Gửi yêu cầu đến kênh đã cấu hình
         try:
             request_channel = self.bot.get_channel(request_channel_id) or await self.bot.fetch_channel(request_channel_id)
             if not request_channel.permissions_for(interaction.guild.me).send_messages:
@@ -214,7 +201,7 @@ class DenyReasonModal(discord.ui.Modal, title="📝 Lý Do Từ Chối"):
         self.bot = bot
         self.requester = requester
         self.role_name = role_name
-        self.original_message = original_message # Lưu tin nhắn gốc để cập nhật
+        self.original_message = original_message
 
     reason = discord.ui.TextInput(
         label="Nhập lý do từ chối yêu cầu",
@@ -223,35 +210,29 @@ class DenyReasonModal(discord.ui.Modal, title="📝 Lý Do Từ Chối"):
         max_length=500
     )
     async def on_submit(self, interaction: discord.Interaction):
-        # Phản hồi tương tác modal trước
         await interaction.response.defer()
 
-        # Gửi thông báo từ chối cho người dùng gốc
         await self.requester.send(t(interaction.guild, "REQROLE_DENY_DM", name=self.role_name, reason=self.reason.value))
         
-        # Lấy embed từ tin nhắn gốc và cập nhật nó
         embed = self.original_message.embeds[0]
         embed.title = t(interaction.guild, "REQROLE_DENIED_TITLE")
         embed.color = discord.Color.red()
-        embed.remove_field(embed.fields.index(next(f for f in embed.fields if f.name == "persistent_data"))) # Xóa trường ẩn
-        embed.clear_fields() # Xóa các field cũ
+        embed.remove_field(embed.fields.index(next(f for f in embed.fields if f.name == "persistent_data")))
+        embed.clear_fields()
         embed.add_field(name=t(interaction.guild, "REQROLE_FIELD_APPROVER"), value=interaction.user.mention, inline=False)
         embed.add_field(name=t(interaction.guild, "REQROLE_FIELD_DENY_REASON"), value=self.reason.value, inline=False)
         
-        # Vô hiệu hóa các nút trên tin nhắn gốc và cập nhật nó
-        self.view.stop() # Dừng view cũ
+        self.view.stop()
         for item in self.view.children: item.disabled = True
         await self.original_message.edit(embed=embed, view=self.view)
 
 
-# --- VIEW (BỘ NÚT BẤM) ---
 
 class AdminApprovalView(discord.ui.View):
     """View chứa nút Duyệt/Từ chối cho admin."""
     def __init__(self, bot: commands.Bot):
-        super().__init__(timeout=None) # Đặt timeout=None để view không hết hạn
+        super().__init__(timeout=None)
         self.bot = bot
-        # Các thuộc tính này sẽ được lấy từ embed khi nút được nhấn
         self.requester: Optional[discord.Member] = None
         self.role_name: Optional[str] = None
         self.role_color_str: Optional[str] = None
@@ -274,9 +255,8 @@ class AdminApprovalView(discord.ui.View):
     
     @discord.ui.button(label="Duyệt", style=discord.ButtonStyle.success, emoji="✅", custom_id="request_role:approve")
     async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer() # Defer để có thời gian xử lý
+        await interaction.response.defer()
 
-        # Trích xuất dữ liệu từ embed
         try:
             await self._extract_data_from_embed(interaction.message.embeds[0], interaction.guild)
         except (ValueError, json.JSONDecodeError, KeyError) as e:
@@ -286,7 +266,6 @@ class AdminApprovalView(discord.ui.View):
             return await interaction.followup.send(t(interaction.guild, "REQROLE_NOT_FOUND"), ephemeral=True)
 
 
-        # Xử lý màu
         role_color = discord.Color.default()
         if self.role_color_str:
             try:
@@ -294,14 +273,11 @@ class AdminApprovalView(discord.ui.View):
             except ValueError:
                 await interaction.followup.send(t(interaction.guild, "REQROLE_COLOR_FALLBACK"), ephemeral=True)
 
-        # Xử lý hoist
         hoist = self.hoist_str.lower() in ['yes', 'có', 'true', '1'] if self.hoist_str else False
         
-        # Xử lý vị trí
         position_above = self.position_above_str.lower() in ['yes', 'có', 'true', '1'] if self.position_above_str else False
 
         try:
-            # Tạo role
             new_role = await interaction.guild.create_role(
                 name=self.role_name,
                 color=role_color,
@@ -309,13 +285,10 @@ class AdminApprovalView(discord.ui.View):
                 reason=f"Yêu cầu bởi {self.requester.name}, duyệt bởi {interaction.user.name}"
             )
 
-            # Xử lý vị trí của role nếu được yêu cầu
             position_message = ""
             if position_above:
                 try:
-                    # Vị trí mục tiêu là ngay trên role cao nhất của người yêu cầu
                     target_position = self.requester.top_role.position + 1
-                    # Đảm bảo không đặt role cao hơn bot
                     if target_position < interaction.guild.me.top_role.position:
                         await new_role.edit(position=target_position)
                         position_message = t(interaction.guild, "REQROLE_POSITION_MOVED", mention=self.requester.top_role.mention)
@@ -324,24 +297,20 @@ class AdminApprovalView(discord.ui.View):
                 except Exception as pos_e:
                     position_message = t(interaction.guild, "REQROLE_POSITION_ERROR", error=pos_e)
 
-            # Gán role cho người yêu cầu
             await self.requester.add_roles(new_role)
 
-            # Cập nhật tin nhắn của admin
             embed = interaction.message.embeds[0]
             embed.title = t(interaction.guild, "REQROLE_APPROVED_TITLE")
-            embed.remove_field(embed.fields.index(next(f for f in embed.fields if f.name == "persistent_data"))) # Xóa trường ẩn
+            embed.remove_field(embed.fields.index(next(f for f in embed.fields if f.name == "persistent_data")))
             embed.color = discord.Color.green()
-            embed.clear_fields() # Xóa các field cũ
+            embed.clear_fields()
             embed.add_field(name=t(interaction.guild, "REQROLE_FIELD_APPROVER"), value=interaction.user.mention, inline=False)
             embed.add_field(name=t(interaction.guild, "REQROLE_CREATED_ROLE"), value=new_role.mention, inline=False)
             
-            # Vô hiệu hóa các nút và cập nhật tin nhắn
             for item in self.children:
                 item.disabled = True
             await interaction.edit_original_response(embed=embed, view=self)
 
-            # Gửi DM cho người yêu cầu
             await self.requester.send(t(interaction.guild, "REQROLE_ASSIGN_SUCCESS_DM", name=self.role_name, extra=position_message))
 
         except discord.Forbidden:
@@ -351,7 +320,6 @@ class AdminApprovalView(discord.ui.View):
 
     @discord.ui.button(label="Từ chối", style=discord.ButtonStyle.danger, emoji="🚫", custom_id="request_role:deny")
     async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Trích xuất dữ liệu từ embed
         try:
             await self._extract_data_from_embed(interaction.message.embeds[0], interaction.guild)
         except (ValueError, json.JSONDecodeError, KeyError) as e:
@@ -360,16 +328,15 @@ class AdminApprovalView(discord.ui.View):
         if not self.requester:
             return await interaction.followup.send(t(interaction.guild, "REQROLE_NOT_FOUND"), ephemeral=True)
 
-        # Mở modal để admin nhập lý do từ chối
         modal = DenyReasonModal(self.bot, self.requester, self.role_name, interaction.message)
-        modal.view = self # Truyền view vào modal để nó có thể vô hiệu hóa nút
+        modal.view = self
         await interaction.response.send_modal(modal)
 
 
 class RequestRoleView(discord.ui.View):
     """View chứa nút bấm ban đầu để người dùng bắt đầu yêu cầu."""
     def __init__(self, bot: commands.Bot):
-        super().__init__(timeout=None) # Nút không bao giờ hết hạn
+        super().__init__(timeout=None)
         self.bot = bot
 
     @discord.ui.button(label="Tạo Yêu Cầu Role", style=discord.ButtonStyle.primary, emoji="✨", custom_id="request_role_button")
@@ -377,7 +344,6 @@ class RequestRoleView(discord.ui.View):
         await interaction.response.send_modal(RoleRequestModal(self.bot))
 
 
-# --- COG CHÍNH ---
 
 class RoleRequestCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -386,8 +352,7 @@ class RoleRequestCog(commands.Cog):
     async def cog_load(self):
         """Đăng ký view persistent khi cog được nạp."""
         self.bot.add_view(RequestRoleView(self.bot))
-        self.bot.add_view(AdminApprovalView(self.bot)) # Đăng ký AdminApprovalView
-        # Thay vào đó, chúng ta sẽ xử lý nó thông qua custom_id.
+        self.bot.add_view(AdminApprovalView(self.bot))
         print("✅ Đã nạp View của hệ thống Request Role (Panel).")
 
     @commands.hybrid_group(name="requestrole", description="Hệ thống yêu cầu tạo role mới.")
@@ -407,7 +372,7 @@ class RoleRequestCog(commands.Cog):
         
         try:
             await channel.send(embed=panel_embed, view=RequestRoleView(self.bot))
-            return True, None # Trả về True và không có lỗi
+            return True, None
         except Exception as e:
             return False, t(channel.guild, "REQROLE_PANEL_SEND_ERROR", error=e)
 
@@ -421,7 +386,6 @@ class RoleRequestCog(commands.Cog):
         """Cài đặt kênh panel và kênh duyệt cho hệ thống yêu cầu role. Nếu không có kênh duyệt thì không cần duyệt."""
         await ctx.defer(ephemeral=True)
 
-        # Lưu cấu hình
         config = load_request_role_config()
         guild_cfg = {
             "panel_channel_id": panel_channel.id,
@@ -431,7 +395,6 @@ class RoleRequestCog(commands.Cog):
         config[str(ctx.guild.id)] = guild_cfg
         save_request_role_config(config)
 
-        # Tự động khóa chat trong kênh panel
         try:
             everyone_role = ctx.guild.default_role
             await panel_channel.set_permissions(everyone_role, send_messages=False, reason="Thiết lập kênh panel cho Request Role")

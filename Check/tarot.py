@@ -27,17 +27,16 @@ def save_history(user_id: int, user_name: str, kieu_trai: str, danh_sach_la: lis
     if str_user_id not in data:
         data[str_user_id] = []
 
-    # Tạo bản ghi mới với 'danh_sach_la' là một List
     new_record = {
         "user_name": user_name,
         "kieu_trai": kieu_trai,
-        "danh_sach_la": danh_sach_la,  # Lưu mảng các lá bài
+        "danh_sach_la": danh_sach_la,
         "thoi_gian": datetime.now(VN_TZ).strftime("%Y-%m-%d %H:%M:%S"),
-        "timestamp": datetime.now(VN_TZ).isoformat() # Thêm timestamp để kiểm tra cooldown
+        "timestamp": datetime.now(VN_TZ).isoformat()
     }
     
     data[str_user_id].insert(0, new_record)
-    data[str_user_id] = data[str_user_id][:5] # Giữ tối đa 5 lượt gần nhất
+    data[str_user_id] = data[str_user_id][:5]
 
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -55,7 +54,6 @@ def get_history(user_id: int):
 
 def draw_cards(num_cards=1):
     card_names = list(TAROT_DECK.keys())
-    # Nếu muốn rút không trùng nhau trong một lượt trải:
     selected_names = random.sample(card_names, min(num_cards, len(card_names)))
     
     results = []
@@ -88,10 +86,8 @@ def can_draw_today(user_id: int) -> tuple[bool, str]:
     if str_user_id not in data:
         return True, ""
         
-    # Tìm lượt rút bài "Lá Bài Hôm Nay 🌅" gần nhất của người này
     for record in data[str_user_id]:
         if record["kieu_trai"] == "Lá Bài Hôm Nay 🌅":
-            # Lấy thời gian lưu trong file (định dạng ISO)
             last_draw_str = record.get("timestamp")
             if not last_draw_str:
                 continue
@@ -99,9 +95,7 @@ def can_draw_today(user_id: int) -> tuple[bool, str]:
             last_draw = datetime.fromisoformat(last_draw_str).astimezone(VN_TZ)
             now = datetime.now(VN_TZ)
             
-            # Nếu trùng Ngày, Tháng, Năm tức là hôm nay đã rút rồi
             if last_draw.date() == now.date():
-                # Tính xem còn bao nhiêu tiếng nữa là sang ngày mới (00:00)
                 tomorrow = datetime.combine(now.date() + timedelta(days=1), datetime.min.time(), tzinfo=VN_TZ)
                 time_remaining = tomorrow - now
                 hours, remainder = divmod(time_remaining.seconds, 3600)

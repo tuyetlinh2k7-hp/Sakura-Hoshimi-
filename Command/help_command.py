@@ -18,7 +18,6 @@ class SearchCommandModal(discord.ui.Modal):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        # Determine guild language for response
         guild = interaction.guild
         query = self.command_name.value.lower().strip()
         found_command = None
@@ -56,7 +55,6 @@ class HelpPaginationView(discord.ui.View):
         self.current_page = 0
         self.bot = bot
         self.guild = guild
-        # Update button labels per language
         for child in self.children:
             if child.custom_id == "help_prev":
                 child.label = t(guild, "HELP_BTN_PREV")

@@ -4,15 +4,12 @@ from data.data import ZODIAC_DATA
 from Check.i18n import t
 
 def get_zodiac(day: int, month: int):
-    # Quy đổi ngày tháng nhập vào thành 1 mã số nguyên duy nhất để so sánh
     date_code = month * 100 + day
     
-    # Duyệt qua các cung (trừ Ma Kết có chu kỳ vắt năm)
     for z in ZODIAC_DATA[:-1]:
         if z["start_code"] <= date_code <= z["end_code"]:
             return z
             
-    # Nếu không thuộc các cung trên, mặc định rơi vào chu kỳ Ma Kết (22/12 - 19/01)
     return ZODIAC_DATA[-1]
 
 
@@ -37,7 +34,6 @@ class ZodiacDropdown(discord.ui.Select):
         )
         embed.set_footer(text=f"Khám phá bởi {interaction.user.name}", icon_url=interaction.user.display_avatar.url)
         
-        # Giữ lại menu để người chơi có thể bấm xem khía cạnh khác nếu muốn
         await interaction.response.edit_message(embed=embed, view=self.view)
 
 class ZodiacView(discord.ui.View):

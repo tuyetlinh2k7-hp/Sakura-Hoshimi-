@@ -22,7 +22,6 @@ def save_config(config):
 
 def get_guild_confession(guild_id):
     cfg=load_config().get(str(guild_id), {})
-    # defaults như hình web (tất cả bật)
     return {
         "enabled": cfg.get("enabled", True) if "enabled" in cfg else True,
         "confession_channel_id": cfg.get("confession_channel_id"),
@@ -142,7 +141,6 @@ class ConfessionModal(discord.ui.Modal):
         if not gc.get("enabled", True):
             await interaction.followup.send("❌ Confession đang tắt trong cài đặt.", ephemeral=True)
             return
-        # kiểm tra quyền theo loại
         if self.anonymous and not gc.get("allow_anonymous", True):
             await interaction.followup.send("❌ Gửi Ẩn danh đang bị tắt.", ephemeral=True)
             return
@@ -174,7 +172,6 @@ class ConfessionModal(discord.ui.Modal):
             else:
                 embed_cfs.set_footer(text=t(interaction.guild, "CFS_FOOTER_PUBLIC", name=interaction.user.display_name))
 
-            # quyết định view trả lời theo anon_reply
             reply_view = ReplyView(self.bot, guild=interaction.guild) if gc.get("anon_reply", True) else None
             cfs_message = await channel.send(embed=embed_cfs, view=reply_view)
 
@@ -188,7 +185,6 @@ class ConfessionModal(discord.ui.Modal):
                     print(f"[CFS] create_thread fail: {e}")
 
             new_panel_embed = create_panel_embed(interaction.guild)
-            # panel mới cũng tôn trọng allow flags
             panel_view = CreateConfessionView(self.bot, guild=interaction.guild)
             if not gc.get("allow_anonymous", True):
                 for ch in list(panel_view.children):
@@ -260,7 +256,6 @@ class ReplyModal(discord.ui.Modal, title="Bình luận ẩn danh"):
             return await interaction.response.send_message("❌ Trả lời ẩn danh đang tắt.", ephemeral=True)
         thread = interaction.message.thread
         if not thread:
-            # nếu không tạo thread mà vẫn bấm reply (view cũ) -> gửi thẳng vào kênh
             thread = interaction.channel
             if gc.get("create_thread", True):
                 return await interaction.response.send_message(t(interaction.guild, "CFS_REPLY_NO_THREAD"), ephemeral=True)

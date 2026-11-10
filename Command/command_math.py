@@ -8,11 +8,9 @@ import math
 import time
 from typing import Union, Optional
 
-# Giới hạn an toàn chống tràn số / CPU denial of service
 MAX_POWER = 10000
 MAX_FACTORIAL = 1000
 
-# Bảng toán tử an toàn
 OPERATORS = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
@@ -25,7 +23,6 @@ OPERATORS = {
     ast.UAdd: operator.pos,
 }
 
-# Các hàm và hằng số toán học được phép gọi
 SAFE_MATH_FUNCTIONS = {
     "sqrt": math.sqrt,
     "cbrt": lambda x: math.pow(x, 1/3) if x >= 0 else -math.pow(-x, 1/3),
@@ -64,7 +61,6 @@ class SafeEvaluator(ast.NodeVisitor):
         if op_type not in OPERATORS:
             raise ValueError(f"Toán tử không được hỗ trợ: {op_type.__name__}")
         
-        # Chặn lũy thừa quá lớn
         if op_type == ast.Pow:
             if isinstance(right, (int, float)) and abs(right) > MAX_POWER:
                 raise ValueError(f"Số mũ quá lớn (tối đa {MAX_POWER})")
@@ -114,7 +110,6 @@ class SafeEvaluator(ast.NodeVisitor):
 def evaluate_expression(expr: str) -> float:
     """Đánh giá an toàn biểu thức toán học."""
     clean_expr = expr.strip().replace("^", "**").replace("×", "*").replace("÷", "/")
-    # Hỗ trợ cú pháp phần trăm cơ bản: "X% of Y" -> "(X / 100) * Y"
     import re
     pct_match = re.match(r"^([0-9.]+)\s*%\s+of\s+([0-9.]+)$", clean_expr, re.IGNORECASE)
     if pct_match:
@@ -144,7 +139,6 @@ class MathCog(commands.Cog, name="Math"):
         guild = ctx.guild
         vi = is_vietnamese(guild)
 
-        # Kiểm tra điều kiện mở khóa Vote
         from Command.vote import require_vote_or_notify
         vote_feature_name = "/math (Máy Tính Toán Nâng Cao)" if vi else "/math (Advanced Math Calculator)"
         if not await require_vote_or_notify(ctx, vote_feature_name):
@@ -164,7 +158,6 @@ class MathCog(commands.Cog, name="Math"):
             result = evaluate_expression(raw_expr)
             t_elapsed = (time.perf_counter() - t_start) * 1000
 
-            # Định dạng kết quả số nguyên hoặc số thực
             if isinstance(result, float) and result.is_integer():
                 formatted_res = f"{int(result):,}"
             elif isinstance(result, float):

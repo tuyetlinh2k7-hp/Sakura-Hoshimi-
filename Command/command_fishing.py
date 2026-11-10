@@ -147,9 +147,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FISHING_DATA_FILE = BASE_DIR / "data" / "fishing_inventory.json"
 VN_TZ = timezone(timedelta(hours=7))
 
-# ==============================================================================
-# CATALOG TOÀN DIỆN VẬT PHẨM, MỒI, RƯƠNG & CHÌA KHÓA
-# ==============================================================================
 RODS_CATALOG = {
     "rod_wood": {"name": "🎣 Cần Câu Gỗ", "price": 5000, "level": 1, "luck": 2, "durability": 50, "rarity": "common", "chest_only": False},
     "rod_bamboo": {"name": "🎋 Cần Câu Tre Dẻo", "price": 25000, "level": 3, "luck": 8, "durability": 90, "rarity": "common", "chest_only": False},
@@ -159,7 +156,6 @@ RODS_CATALOG = {
     "rod_obsidian": {"name": "🖤 Cần Hắc Diện Thạch", "price": 950000, "level": 16, "luck": 55, "durability": 700, "rarity": "epic", "chest_only": False},
     "rod_diamond": {"name": "💎 Cần Câu Kim Cương", "price": 2200000, "level": 20, "luck": 75, "durability": 1100, "rarity": "legendary", "chest_only": False},
     "rod_mecha": {"name": "🤖 Cần Cơ Khí Thủy Triều", "price": 5500000, "level": 25, "luck": 105, "durability": 1800, "rarity": "legendary", "chest_only": False},
-    # Cần độc quyền rương
     "rod_poseidon": {"name": "🔱 Cần Hải Thần Poseidon", "price": 0, "level": 30, "luck": 160, "durability": 3000, "rarity": "legendary", "chest_only": True},
     "rod_abyssal_reaper": {"name": "💀 Cần Tử Thần Vực Thẳm", "price": 0, "level": 35, "luck": 210, "durability": 4500, "rarity": "legendary", "chest_only": True},
     "rod_starlight": {"name": "✨ Cần Tinh Tú Thần Thoại", "price": 0, "level": 40, "luck": 280, "durability": 6000, "rarity": "legendary", "chest_only": True},
@@ -169,7 +165,6 @@ RODS_CATALOG = {
     "rod_owner4": {"name": "👑 Cần Câu Tối Thượng VI", "price": 99999999999, "level": 150, "luck": 1000, "durability": 29999, "rarity": "admin", "chest_only": False},
     "rod_owner5": {"name": "👑 Cần Câu Tối Thượng V", "price": 9999999999999, "level": 150, "luck": 1200, "durability": 39999, "rarity": "admin", "chest_only": False},
     "rod_owner6": {"name": "👑 Cần Câu Tối Thượng II", "price": 99999999999999, "level": 150, "luck": 2000, "durability": 49999, "rarity": "admin", "chest_only": False},
-    # Cần câu mua bằng Xu cao cấp
     "rod_astral_god": {"name": "🌌 Cần Thần Tinh Tú Astral", "price": 500, "currency": "xu", "level": 1, "luck": 350, "durability": 8000, "rarity": "legendary", "chest_only": False},
     "rod_dragon_emperor": {"name": "🐉 Cần Long Vương Tối Cao", "price": 1500, "currency": "xu", "level": 1, "luck": 600, "durability": 15000, "rarity": "legendary", "chest_only": False},
     "rod_infinity_void": {"name": "🔮 Cần Vô Cực Hư Không", "price": 5000, "currency": "xu", "level": 1, "luck": 1200, "durability": 30000, "rarity": "admin", "chest_only": False},
@@ -182,14 +177,12 @@ BAITS_CATALOG = {
     "bait_glow": {"name": "✨ Mồi Dạ Quang", "price": 505000, "luck": 35, "buyable": True},
     "bait_legend": {"name": "🪱 Mồi Huyền Thoại", "price": 1040000, "luck": 55, "buyable": True},
     "bait_dragon": {"name": "🩸 Mồi Máu Rồng", "price": 3020000, "luck": 80, "buyable": True},
-    # Độc quyền Rương
     "bait_mermaid_tear": {"name": "💧 Nước Mắt Tiên Cá", "price": 0, "luck": 105, "buyable": False},
     "bait_abyss": {"name": "🌀 Mồi Vực Thẳm", "price": 0, "luck": 130, "buyable": False},
     "bait_kraken_tentacle": {"name": "🦑 Xúc Tu Kraken", "price": 0, "luck": 160, "buyable": False},
     "bait_golden": {"name": "🪙 Mồi Hoàng Kim", "price": 0, "luck": 200, "buyable": False},
     "bait_godly_essence": {"name": "🌟 Tinh Hoa Thần Biển", "price": 0, "luck": 260, "buyable": False},
     "bait_cosmic": {"name": "🪐 Mồi Vũ Trụ", "price": 0, "luck": 350, "buyable": False},
-    # Mồi câu mua bằng Xu
     "bait_phoenix_blood": {"name": "🩸 Mồi Huyết Phượng Hoàng", "price": 10, "currency": "xu", "luck": 150, "buyable": True},
     "bait_cosmic_core": {"name": "🪐 Mồi Lõi Vũ Trụ", "price": 25, "currency": "xu", "luck": 300, "buyable": True},
     "bait_celestial_ambrosia": {"name": "🌟 Mồi Tiên Dược Thiên Giới", "price": 60, "currency": "xu", "luck": 500, "buyable": True},
@@ -210,7 +203,6 @@ BAGS_UPGRADES = {
     "fish_bag_large9s": {"name": "Thùng Cá Lớn XI", "price": 3667890000, "extra_slots": 13667 },
     "fish_bag_large10s": {"name": "Thùng Cá Lớn X", "price": 36363890000, "extra_slots": 363636 },
     "fish_bag_admin": {"name": "👑 Kho Cá Admin (+999 ô)", "price": 999999999999999, "extra_slots": 9999999},
-    # Túi mở rộng mua bằng Xu
     "fish_bag_infinity_1": {"name": "🎒 Túi Không Gian Vô Tận I (+5,000 ô)", "price": 50, "currency": "xu", "extra_slots": 5000},
     "fish_bag_infinity_2": {"name": "👜 Túi Không Gian Vô Tận II (+20,000 ô)", "price": 150, "currency": "xu", "extra_slots": 20000},
     "fish_bag_infinity_max": {"name": "👑 Kho Vũ Trụ Vô Cực (+100,000 ô)", "price": 500, "currency": "xu", "extra_slots": 100000},
@@ -224,7 +216,6 @@ PETS_CATALOG = {
     "dolphin_pet": {"name": "🐬 Cá Heo Thần Sóng", "price": 60000000, "luck_bonus": 40, "bait_drop_bonus": 0.30, "price_multi": 1.28},
     "dragon_pet": {"name": "🐉 Rồng Đại Dương", "price": 150000000, "luck_bonus": 55, "bait_drop_bonus": 0.35, "price_multi": 1.38},
     "kraken_pet": {"name": "🐙 Tiểu Kraken Vực Sâu", "price": 350000000, "luck_bonus": 80, "bait_drop_bonus": 0.45, "price_multi": 1.50},
-    # Pet mua bằng Xu
     "pet_phoenix": {"name": "🔥 Phượng Hoàng Lửa Đại Dương", "price": 300, "currency": "xu", "luck_bonus": 80, "bait_drop_bonus": 0.35, "price_multi": 1.50},
     "pet_celestial_fox": {"name": "🦊 Hồ Ly Cửu Vĩ Tinh Tú", "price": 800, "currency": "xu", "luck_bonus": 150, "bait_drop_bonus": 0.50, "price_multi": 2.00},
 }
@@ -237,7 +228,6 @@ UTILITY_ITEMS = {
     "voice_kick": {"name": "🔊 Voice Kick", "price": 30000000, "desc": "Trục xuất đối phương khỏi phòng thoại Discord."},
     "mute_card": {"name": "🔇 Thẻ Mute", "price": 32000000, "desc": "Khóa mõm (Timeout) đối phương trong 30 giây."},
     "ghost_ping": {"name": "👻 Thẻ Ghost Ping", "price": 12000000, "desc": "Ping ma bí ẩn rồi lập tức xóa dấu vết."},
-    # Vật phẩm troll mới
     "banana_peel": {"name": "🍌 Vỏ Chuối Trơn Trượt", "price": 6500000, "desc": "Đặt bẫy khiến người khác trượt chân rơi mất 10,000 - 50,000 coin!", "action_key": "STEAL_COIN"},
     "magic_mirror": {"name": "🪞 Gương Phản Chiếu", "price": 28000000, "desc": "Bật ngược lại 1 đòn troll của kẻ khác sang chính họ."},
     "mystery_box": {"name": "🎁 Hộp Quà Bí Ẩn", "price": 9000000, "desc": "Tặng quà troll: Người mở nhận hù dọa hoặc trúng 500,000 coin ngẫu nhiên."},
@@ -249,18 +239,15 @@ UTILITY_ITEMS = {
     "slap_fish": {"name": "🐟 Cá Hồi Tát Mặt", "price": 7500000, "desc": "Cầm cá hồi quất bôm bốp vào mặt đối thủ kèm tiếng vang!", "action_key": "SLAP"},
     "cursed_bait": {"name": "🪱 Mồi Câu Nguyền Rủa", "price": 16000000, "desc": "Bỏ lén vào giỏ, khiến lần câu tiếp theo của mục tiêu 100% vớt rác!", "action_key": "CURSED_BAIT"},
     "troll_box": {"name": "📦 Hộp Quà Lừa Tình", "price": 10000000, "desc": "Hộp quà nhìn như rương thần nhưng mở ra thì bị hù dọa té khói!", "action_key": "JUMPSCARE"},
-    # Chìa khóa mở rương cao cấp
     "key_silver": {"name": "🔑 Chìa Khóa Bạc", "price": 800900, "desc": "Mở Rương Bạc Chìm dưới đáy biển."},
     "key_shipwreck": {"name": "🗝️ Chìa Khóa Tàu Cổ", "price": 2200000, "desc": "Mở Rương Tàu Đắm Cổ xưa."},
     "key_gold": {"name": "👑 Chìa Khóa Hoàng Gia", "price": 6009000, "desc": "Mở Rương Hoàng Gia lộng lẫy."},
     "key_abyss": {"name": "🐙 Chìa Khóa Vực Thẳm", "price": 18000900, "desc": "Mở Rương Thủy Quái Vực Sâu."},
     "key_void": {"name": "🌌 Chìa Khóa Hư Không", "price": 50000000, "desc": "Mở Rương Hư Không Vĩnh Hằng."},
-    # Báu vật độc quyền rương
     "pearl_ancient": {"name": "🔮 Ngọc Trai Cổ Đại", "price": 0, "desc": "Bán cho thương gia thu về 500,000 - 1,500,000 coin!"},
     "treasure_map": {"name": "🗺️ Bản Đồ Kho Báu", "price": 0, "desc": "Buff nhân đôi (+100%) May Mắn trong 60 phút."},
     "relic_sea_stone": {"name": "🗿 Đá Trấn Hải", "price": 0, "desc": "Cần câu không mất độ bền trong 30 lần thả câu."},
     "relic_golden_scale": {"name": "🪙 Vảy Rồng Vàng", "price": 0, "desc": "Tăng +50% giá bán toàn bộ cá trong 60 phút."},
-    # Vật phẩm xã hội/hôn nhân (được lưu trong kho vật phẩm)
     "ring_bronze": {"name": "💍 Nhẫn Đồng Đôi", "price": 2500670, "desc": "Nhẫn khởi đầu cho lễ cưới trong hệ thống hôn nhân."},
     "ring_silver": {"name": "💍 Nhẫn Bạc Tình Yêu", "price": 15000870, "desc": "Nhẫn bạc dành cho cặp đôi."},
     "ring_gold": {"name": "💍 Nhẫn Vàng Vĩnh Cửu", "price": 75009800, "desc": "Nhẫn vàng cao cấp dành cho lễ cưới."},
@@ -272,16 +259,13 @@ UTILITY_ITEMS = {
     "love_flower": {"name": "💐 Bó Hoa Lãng Mạn", "price": 12000, "desc": "Tặng người thương để tăng điểm tình cảm."},
     "love_teddy": {"name": "🧸 Gấu Bông Ôm Ấp", "price": 30000, "desc": "Quà tặng tình cảm đáng yêu."},
     "love_date": {"name": "🕯️ Vé Hẹn Hò", "price": 80000, "desc": "Vật phẩm cho hoạt động hẹn hò của cặp đôi."},
-    # Vật phẩm mua bằng Xu
     "buff_luck_potion_x3": {"name": "🧪 Thuốc Thần May Mắn x3 (1h)", "price": 20, "currency": "xu", "desc": "Tăng gấp 3 lần may mắn khi câu trong 60 phút."},
     "unbreakable_anvil": {"name": "🔨 Đe Cường Hóa Hoàng Kim (100% tỉ lệ)", "price": 100, "currency": "xu", "desc": "Đảm bảo 100% đập cần thành công lên cấp tiếp theo."},
     "potion_x2_coins_2h": {"name": "🧪 Thuốc Nhân Đôi Coins (2h)", "price": 0, "desc": "Nhân đôi (x2) toàn bộ lượng Coins nhận được từ bán cá trong 2 giờ.", "action_key": "BUFF_X2_COINS_2H"},
-    # Nguyên liệu Tiến Cấp Sao & Enchant
     "stardust_dust": {"name": "✨ Bụi Sao Lấp Lánh", "price": 1000000, "desc": "Bụi sao huyền ảo, nguyên liệu cần thiết để Tiến Cấp Sao cho trang bị đạt +150."},
     "black_pearl": {"name": "🦪 Ngọc Trai Đen", "price": 5000000, "desc": "Ngọc trai đen quý hiếm mở từ Rương Báu hoặc mò dưới đáy đại dương, dùng để Tiến Cấp Sao."},
     "end_crystal": {"name": "💎 Đá Pha Lê End", "price": 8000000, "desc": "Đá pha lê chứa năng lượng thần bí, dùng cùng 10M coins để Enchant gán dòng thuộc tính ngẫu nhiên."},
     "special_enchant_stone": {"name": "🔮 Đá Enchant Đặc Biệt", "price": 40000000, "desc": "Đá cổ xưa quý giá, dùng cùng 100M coins để mở thêm ô dòng Enchant vượt giới hạn trang bị."},
-    # Dụng cụ & Phân bón Nông trại
     "fertilizer_organic": {"name": "🌿 Phân Hữu Cơ Vi Sinh", "price": 3000, "desc": "Tăng 30% tốc độ lớn của cây trồng trong ô đất."},
     "fertilizer_speed": {"name": "⚡ Phân Bón Siêu Tốc", "price": 12000, "desc": "Rút ngắn 50% thời gian chín của cây trồng."},
     "fertilizer_yield": {"name": "🌾 Phân Bón Bội Thu", "price": 25000, "desc": "Nhân đôi (x2) sản lượng nông sản khi thu hoạch."},
@@ -330,9 +314,6 @@ WEATHER_CYCLE = [
     {"id": "cosmic_radiation", "name": "🪐 Bão Bức Xạ Vũ Trụ", "bonus_luck": 130, "mutation_rate": 0.65, "desc": "Năng lượng vũ trụ tràn xuống, cá hiếm xuất hiện dày đặc!"},
 ]
 
-# ==============================================================================
-# HỆ THỐNG VÙNG CÂU CÁ ĐẠI DƯƠNG (FISHING ZONES)
-# ==============================================================================
 FISHING_ZONES = {
     "ven_bo": {
         "id": "ven_bo",
@@ -417,7 +398,6 @@ DEX_MILESTONES = [
     {"count": 100, "reward_coin": 25000000, "reward_bait": "bait_godly_essence", "bait_amount": 4},
 ]
 
-# Shop Items & Custom Item Loader
 CUSTOM_FISHING_ITEMS_FILE = BASE_DIR / "data" / "custom_fishing_items.json"
 MASTER_SHOP_ITEMS = []
 
@@ -439,7 +419,6 @@ def rebuild_master_shop_items():
     for k, v in UTILITY_ITEMS.items():
         if v.get("price", 0) > 0:
             MASTER_SHOP_ITEMS.append({"id": k, "category": "item", **v})
-    # Hạt giống nông nghiệp phong phú
     for k, v in SEEDS_CATALOG.items():
         y_range = v.get("harvest_yield", (v.get("yield_min", 2), v.get("yield_max", 5)))
         sell_val = v.get("crop_sell_price", v.get("sell_price", 500))
@@ -454,7 +433,6 @@ def rebuild_master_shop_items():
             "currency": "coins",
             "desc": f"Thu hoạch: {y_range[0]}-{y_range[1]} {c_name} | Bán: {sell_val:,}c | Lớn: {grow_sec//60}p | Mùa: {', '.join(seasons)}"
         })
-    # Dụng cụ, phân bón & lồng kính nông nghiệp
     for k, v in FARM_TOOLS_CATALOG.items():
         MASTER_SHOP_ITEMS.append({
             "id": k,
@@ -464,7 +442,6 @@ def rebuild_master_shop_items():
             "currency": "coins",
             "desc": v.get("desc", "Dụng cụ nông nghiệp")
         })
-    # Cuốc đào & Vật tư hầm mỏ
     try:
         from Command.command_mining import PICKS_CATALOG, MINING_SUPPLIES
         for k, v in PICKS_CATALOG.items():
@@ -475,7 +452,6 @@ def rebuild_master_shop_items():
     except Exception:
         pass
 
-    # Áp dụng các chỉnh sửa tùy biến (Shop Overrides: giá, ẩn/hiện, thuộc tính)
     shop_overrides_file = BASE_DIR / "data" / "shop_overrides.json"
     if shop_overrides_file.exists():
         try:
@@ -575,7 +551,6 @@ def check_user_item_expiration(user_id: int) -> list:
     expired_notifs = []
     item_exp = u_fish.setdefault("item_expiry", {})
 
-    # 1. Kiểm tra Cần câu
     user_rods = u_fish.setdefault("rods", {})
     for rid in list(user_rods.keys()):
         r_entry = user_rods[rid]
@@ -591,7 +566,6 @@ def check_user_item_expiration(user_id: int) -> list:
             renewable = item_exp[rid].get("renewable", False)
             duration_days = item_exp[rid].get("duration_days", 7)
         elif rid in RODS_CATALOG and RODS_CATALOG[rid].get("has_expiry"):
-            # Catalog có cấu hình HSD
             exp_info = RODS_CATALOG[rid]
             renewable = exp_info.get("renewable", False)
             duration_days = exp_info.get("duration_days", 7)
@@ -610,7 +584,6 @@ def check_user_item_expiration(user_id: int) -> list:
                     r_entry["expired"] = True
                 expired_notifs.append(f"⏳ Cần câu **{r_name}** đã hết hạn sử dụng. Hãy gia hạn để tiếp tục sử dụng!")
 
-    # 2. Kiểm tra Thú cưng (Pet)
     user_pets = u_fish.setdefault("pets", [])
     for pid in list(user_pets):
         exp_time = None
@@ -636,7 +609,6 @@ def check_user_item_expiration(user_id: int) -> list:
                 item_exp.setdefault(pid, {})["expired"] = True
                 expired_notifs.append(f"⏳ Thú cưng **{p_name}** đã hết hạn. Hãy gia hạn để pet tiếp tục buff chỉ số!")
 
-    # 3. Kiểm tra Vật phẩm tiện ích / Troll
     user_items = u_fish.setdefault("items", {})
     for iid in list(user_items.keys()):
         if iid in item_exp:
@@ -674,7 +646,6 @@ async def renew_user_item(user_id: int, item_id: str, guild_id: int) -> tuple:
     )
     exp_info = item_exp.get(item_id, {})
 
-    # Kiểm tra xem người chơi có sở hữu vật phẩm này không
     has_item = (
         item_id in u_fish.get("rods", {})
         or item_id in u_fish.get("pets", [])
@@ -823,9 +794,6 @@ def get_user_fishing(user_id: int) -> dict:
     return users[uid]
 
 
-# ==============================================================================
-# MODALS NHẬP CODE & MUA HÀNG CÓ SỐ LƯỢNG & TROLL MỚI
-# ==============================================================================
 class ShopQuantityModal(discord.ui.Modal):
     quantity_input = discord.ui.TextInput(
         label="Số lượng muốn mua",
@@ -1090,7 +1058,6 @@ class RedeemCodeModal(discord.ui.Modal, title="🎁 Nhập Mã Giftcode"):
                 u_fish.setdefault("items", {})[iid] = u_fish.setdefault("items", {}).get(iid, 0) + amt
                 reward_lines.append(f"• ✨ **{amt}x {UTILITY_ITEMS[iid]['name']}**")
 
-        # Quà nông trại (Farm items: Hạt giống, Nông sản, Dụng cụ, Phân bón)
         try:
             from Command.farm_system import get_user_farm, SEEDS_CATALOG, CROPS_CATALOG, FARM_TOOLS_CATALOG
             user_farm = get_user_farm(u_fish)
@@ -1120,7 +1087,6 @@ class RedeemCodeModal(discord.ui.Modal, title="🎁 Nhập Mã Giftcode"):
         except Exception:
             pass
 
-        # Quà vật phẩm ID tùy chỉnh (Custom Items)
         for c_item in rewards.get("custom_items", []):
             try:
                 c_id = str(c_item.get("id", "")).strip()
@@ -1169,7 +1135,6 @@ class RedeemCodeModal(discord.ui.Modal, title="🎁 Nhập Mã Giftcode"):
             except Exception:
                 pass
 
-        # Quà quặng đào khoáng
         ores_dict = rewards.get("ores", {})
         if ores_dict and isinstance(ores_dict, dict):
             try:
@@ -1195,7 +1160,6 @@ class RedeemCodeModal(discord.ui.Modal, title="🎁 Nhập Mã Giftcode"):
             except Exception:
                 pass
 
-        # Quà vật tư hầm mỏ
         supplies_dict = rewards.get("supplies", {})
         if supplies_dict and isinstance(supplies_dict, dict):
             try:
@@ -1296,7 +1260,6 @@ class ItemTargetModal(discord.ui.Modal):
         target_fish = get_user_fishing(target_member.id)
         target_buffs = target_fish.setdefault("buffs", {})
 
-        # 1. Kiểm tra Gương Phản Chiếu
         if target_buffs.get("magic_mirror", False):
             target_buffs["magic_mirror"] = False
             items[self.item_id] -= 1
@@ -1306,7 +1269,6 @@ class ItemTargetModal(discord.ui.Modal):
                 ephemeral=False
             )
 
-        # 2. Kiểm tra Khiên Bảo Vệ
         if target_buffs.get("shield", False):
             target_buffs["shield"] = False
             items[self.item_id] -= 1
@@ -1433,7 +1395,6 @@ class ItemTargetModal(discord.ui.Modal):
             await interaction.channel.send(f"👻 **OÁCH XÀ LÁCH!** Rương phát nổ ra một đầu lâu quỷ ma lè lưỡi hù {target_member.mention} giật bắn mình té ghế!")
 
         else:
-            # Xử lý vật phẩm troll tùy biến tạo từ Web với action_key
             it_info = UTILITY_ITEMS.get(self.item_id, {})
             act_k = it_info.get("action_key", "").upper()
             act_val = it_info.get("action_value", "")
@@ -1465,9 +1426,6 @@ class ItemTargetModal(discord.ui.Modal):
                 await interaction.response.send_message(f"✨ {self.author.mention} đã sử dụng thành công **{it_n}** lên {target_member.mention}!", ephemeral=False)
 
 
-# ==============================================================================
-# VIEW BẢO TÀNG THỦY CUNG (CÓ NÚT THẢ TIM KHI NGƯỜI KHÁC XEM)
-# ==============================================================================
 class AquariumView(discord.ui.View):
     def __init__(self, owner: discord.Member, viewer: discord.Member, guild_id: int):
         super().__init__(timeout=240)
@@ -1475,7 +1433,6 @@ class AquariumView(discord.ui.View):
         self.viewer = viewer
         self.guild_id = guild_id
         
-        # Đảm bảo mốc claim và sức chứa thủy cung luôn được khởi tạo
         u_fish = get_user_fishing(self.owner.id)
         if "aquarium_last_claim" not in u_fish or not isinstance(u_fish.get("aquarium_last_claim"), (int, float)):
             u_fish["aquarium_last_claim"] = time.time()
@@ -1499,7 +1456,6 @@ class AquariumView(discord.ui.View):
         cur_row = 0
 
         if is_self:
-            # Chọn thả cá vào bể (chỉ hiện khi giỏ có cá và bể còn chỗ)
             if bag and len(tank) < max_slots:
                 options = []
                 for idx, f in enumerate(bag[:25]):
@@ -1519,7 +1475,6 @@ class AquariumView(discord.ui.View):
                 self.add_item(deposit_select)
                 cur_row += 1
 
-            # Chọn cá ngôi sao linh vật (+25% vé)
             if tank:
                 fav_options = []
                 fav_raw = u_fish.get("aquarium_favorite")
@@ -1541,7 +1496,6 @@ class AquariumView(discord.ui.View):
                 cur_row += 1
 
             vi = is_vietnamese(self.guild_id)
-            # Thu tiền vé & Rút cá & Mua ô
             claim_lbl = "Thu Tiền Vé" if vi else "Collect Fees"
             withdraw_lbl = "Rút Cá Về Giỏ" if vi else "Withdraw Fish"
             upgrade_lbl = f"Mua Ô ({max_slots}➜{max_slots + 2})" if vi else f"Upgrade Slots ({max_slots}➜{max_slots + 2})"
@@ -1560,7 +1514,6 @@ class AquariumView(discord.ui.View):
             self.add_item(upgrade_tank_btn)
             cur_row += 1
 
-            # Điều hướng
             if cur_row <= 4:
                 cook_nav_lbl = "Menu Nấu Nướng" if vi else "Kitchen Menu"
                 inv_nav_lbl = "Về Túi Đồ" if vi else "Back to Bag"
@@ -1573,7 +1526,6 @@ class AquariumView(discord.ui.View):
                 self.add_item(inv_nav_btn)
 
         else:
-            # Khi người khác soi Thủy cung: Có NÚT THẢ TIM YÊU THÍCH
             vi = is_vietnamese(self.guild_id)
             has_liked = self.viewer.id in u_fish.setdefault("aquarium_likes", [])
             like_text = ('Đã Thả Tim' if has_liked else 'Thả Tim Thủy Cung') if vi else ('Liked' if has_liked else 'Like Aquarium')
@@ -1587,7 +1539,6 @@ class AquariumView(discord.ui.View):
             like_btn.callback = self._like_aquarium
             self.add_item(like_btn)
 
-            # Quản trị viên / Chủ bot soi bể người khác: Có nút Quản Trị Bể
             is_admin = (self.viewer.id == OWNER_ID or (getattr(self.viewer, 'guild_permissions', None) and self.viewer.guild_permissions.administrator))
             if is_admin:
                 admin_btn = discord.ui.Button(
@@ -1621,7 +1572,6 @@ class AquariumView(discord.ui.View):
 
         fav_name = tank[fav_idx]["name"] if (fav_idx is not None and 0 <= fav_idx < len(tank)) else "Chưa thiết lập"
 
-        # Thanh tiến trình sức chứa
         filled_blocks = min(10, max(0, int((len(tank) / max(1, slots)) * 10)))
         cap_bar = "█" * filled_blocks + "░" * (10 - filled_blocks)
 
@@ -1671,7 +1621,6 @@ class AquariumView(discord.ui.View):
             return await interaction.response.send_message("❤️ Bạn đã thả tim cho Thủy Cung này rồi!", ephemeral=True)
 
         likes.append(self.viewer.id)
-        # Thưởng người like 5,000 coin khích lệ
         await update_user_coins(self.guild_id, self.viewer.id, 5000)
         save_fishing_data()
 
@@ -1694,7 +1643,6 @@ class AquariumView(discord.ui.View):
         chosen = bag.pop(idx)
         tank.append(chosen)
         
-        # Nếu đây là con cá đầu tiên trong bể, khởi tạo mốc tích lũy và linh vật
         if len(tank) == 1:
             u_fish["aquarium_last_claim"] = time.time()
             if u_fish.get("aquarium_favorite") is None:
@@ -1800,16 +1748,13 @@ class AquariumView(discord.ui.View):
         await interaction.response.edit_message(embed=inv_view.build_embed(u_data.get("coins", 0)), view=inv_view)
 
 
-# ==============================================================================
-# VIEW TÚI ĐỒ (FISHING INVENTORY VIEW - 5 PHÂN TRANG TOÀN DIỆN)
-# ==============================================================================
 class FishingInventoryView(discord.ui.View):
     def __init__(self, author: discord.Member, guild_id: int, inv_page: int = 0, enhance_target: str = "rod"):
         super().__init__(timeout=240)
         self.author = author
         self.guild_id = guild_id
-        self.inv_page = inv_page  # 0: Đồ câu, 1: Pet/Rương, 2: Kho Farmer, 3: Đập đồ +150 & Sao, 4: Enchant Gán dòng, 5: Kho Quặng & Cuốc
-        self.enhance_target = enhance_target  # "rod" hoặc "pick"
+        self.inv_page = inv_page
+        self.enhance_target = enhance_target
         self._build_components()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
@@ -1849,7 +1794,6 @@ class FishingInventoryView(discord.ui.View):
         u_fish = get_user_fishing(self.author.id)
 
         if self.inv_page == 0:
-            # === TRANG 1: CẦN CÂU, MỒI, BÁN CÁ, TÚI CÁ, BẾP, THỦY CUNG, ĐỔI VÙNG ===
             user_rods = u_fish.get("rods", {})
             if user_rods:
                 rod_options = []
@@ -1870,7 +1814,6 @@ class FishingInventoryView(discord.ui.View):
                 rod_select.callback = self._select_rod_callback
                 self.add_item(rod_select)
 
-            # Row 1: Chọn mồi câu
             user_baits = u_fish.get("baits", {})
             bait_options = [
                 discord.SelectOption(label="Không dùng mồi", value="none", emoji="❌", default=(u_fish.get("equipped_bait") is None))
@@ -1892,7 +1835,6 @@ class FishingInventoryView(discord.ui.View):
                 bait_select.callback = self._select_bait_callback
                 self.add_item(bait_select)
 
-            # Row 2: Tái chế rác, Mở rộng túi, Chi tiết giỏ cá
             bag_detail_btn = discord.ui.Button(label="Chi Tiết Giỏ Cá", style=discord.ButtonStyle.primary, emoji="🐟", row=2)
             bag_detail_btn.callback = self._goto_bag_detail
             self.add_item(bag_detail_btn)
@@ -1905,7 +1847,6 @@ class FishingInventoryView(discord.ui.View):
             expand_bag_btn.callback = self._expand_bag
             self.add_item(expand_bag_btn)
 
-            # Row 3: Bếp, Thủy Cung, Sổ Sưu Tầm, Đổi Vùng
             cook_btn = discord.ui.Button(label="Bếp Nấu Ăn", style=discord.ButtonStyle.primary, emoji="🍳", row=3)
             cook_btn.callback = self._goto_cook
             self.add_item(cook_btn)
@@ -1922,11 +1863,9 @@ class FishingInventoryView(discord.ui.View):
             zone_btn.callback = self._open_zone_view
             self.add_item(zone_btn)
 
-            # Row 4: Tab selector
             self._add_tab_selector()
 
         elif self.inv_page == 1:
-            # === TRANG 2: PET, RƯƠNG BÁU, DÙNG VẬT PHẨM, NHẬP CODE, BÁN CÁ CẤP ===
             user_pets = u_fish.get("pets", [])
             pet_options = [
                 discord.SelectOption(label="Không dùng Pet", value="none", emoji="❌", default=(u_fish.get("equipped_pet") is None))
@@ -1948,7 +1887,6 @@ class FishingInventoryView(discord.ui.View):
                 pet_select.callback = self._select_pet_callback
                 self.add_item(pet_select)
 
-            # Row 1: Mở Rương Báu
             chests = u_fish.get("chests", {})
             chest_options = []
             for cid, cnt in chests.items():
@@ -1968,7 +1906,6 @@ class FishingInventoryView(discord.ui.View):
                 chest_select.callback = self._select_chest_callback
                 self.add_item(chest_select)
 
-            # Row 2: Chọn Dùng Vật Phẩm Chức Năng / Troll
             user_items = u_fish.get("items", {})
             usable_items = [iid for iid, count in user_items.items() if count > 0 and iid in UTILITY_ITEMS]
             if usable_items:
@@ -1987,7 +1924,6 @@ class FishingInventoryView(discord.ui.View):
                 item_select.callback = self._select_item_callback
                 self.add_item(item_select)
 
-            # Row 3: Bán cá phân cấp & Nhập Code & Chuyển Coin
             sell_tiered_btn = discord.ui.Button(label="Bán Cá Theo Cấp", style=discord.ButtonStyle.secondary, emoji="💰", row=3)
             sell_tiered_btn.callback = self._open_sell_tiered_modal
             self.add_item(sell_tiered_btn)
@@ -2003,11 +1939,9 @@ class FishingInventoryView(discord.ui.View):
             self._add_tab_selector()
 
         elif self.inv_page == 2:
-            # === TRANG 3: KHO NÔNG DÂN (FARMER BAG) - BÁN HOA MÀU, BÁN SÂU, ĂN THỰC PHẨM ===
             farm_data = u_fish.setdefault("farm", {})
             crops = farm_data.setdefault("crops", {})
 
-            # Row 0: Nút chuyển nhanh vào Nông Trại & Bếp Nấu Ăn
             go_farm_btn = discord.ui.Button(label="Mở Nông Trại Trồng Cây", style=discord.ButtonStyle.success, emoji="🌾", row=0)
             go_farm_btn.callback = self._goto_farm_view
             self.add_item(go_farm_btn)
@@ -2020,7 +1954,6 @@ class FishingInventoryView(discord.ui.View):
             shop_farm_btn.callback = self._goto_farm_shop
             self.add_item(shop_farm_btn)
 
-            # Row 1: Bán Toàn Bộ Hoa Màu & Bán Sâu Bọ
             sell_crops_btn = discord.ui.Button(label="Bán Toàn Bộ Hoa Màu", style=discord.ButtonStyle.success, emoji="💰", row=1)
             sell_crops_btn.callback = self._sell_all_crops
             self.add_item(sell_crops_btn)
@@ -2029,7 +1962,6 @@ class FishingInventoryView(discord.ui.View):
             sell_pests_btn.callback = self._sell_all_pests
             self.add_item(sell_pests_btn)
 
-            # Row 2: Chọn ăn hoa màu để hồi độ bền cần câu hoặc nhận buff
             available_crops = [cid for cid, cnt in crops.items() if cnt > 0]
             if available_crops:
                 eat_options = []
@@ -2051,7 +1983,6 @@ class FishingInventoryView(discord.ui.View):
             self._add_tab_selector()
 
         elif self.inv_page == 3:
-            # === TRANG 4: LÒ RÈN CƯỜNG HÓA (+150) & TIẾN CẤP SAO (⭐ 1-20) ===
             is_pick = (self.enhance_target == "pick")
             if is_pick:
                 from Command.command_mining import get_user_mining
@@ -2069,13 +2000,11 @@ class FishingInventoryView(discord.ui.View):
             ref = cur_item.get("refine", 0) if cur_item else 0
             stars = cur_item.get("stars", 0) if cur_item else 0
 
-            # Row 0: Nút Cường Hóa (+1 đến +150)
             upgrade_label = f"Cường Hóa {item_title} (+{ref} ➜ +{ref + 1})" if ref < 150 else f"{item_title} Đã Max (+150)!"
             upgrade_btn = discord.ui.Button(label=upgrade_label, style=discord.ButtonStyle.primary, emoji="🔨", row=0, disabled=(ref >= 150 or cur_item is None))
             upgrade_btn.callback = self._upgrade_rod
             self.add_item(upgrade_btn)
 
-            # Row 1: Nút Tiến Cấp Sao ⭐ (Cần +150, max 20 sao)
             star_label = f"Tiến Cấp Sao {item_title} (⭐ {stars} ➜ ⭐ {stars + 1})" if stars < 20 else f"{item_title} Đã Max 20 Sao ⭐!"
             star_btn = discord.ui.Button(
                 label=star_label,
@@ -2087,7 +2016,6 @@ class FishingInventoryView(discord.ui.View):
             star_btn.callback = self._ascend_star
             self.add_item(star_btn)
 
-            # Row 2: Sửa Chữa & Mua Nguyên Liệu
             repair_btn = discord.ui.Button(label=f"Sửa Độ Bền {item_title}", style=discord.ButtonStyle.secondary, emoji="🔧", row=2, disabled=(cur_item is None))
             repair_btn.callback = self._repair_rod
             self.add_item(repair_btn)
@@ -2096,7 +2024,6 @@ class FishingInventoryView(discord.ui.View):
             shop_mat_btn.callback = self._goto_material_shop
             self.add_item(shop_mat_btn)
 
-            # Row 3: Nút chuyển đổi mục tiêu rèn
             switch_btn = discord.ui.Button(label=switch_label, style=discord.ButtonStyle.primary, emoji="🔄", row=3)
             switch_btn.callback = self._switch_enhance_target
             self.add_item(switch_btn)
@@ -2104,7 +2031,6 @@ class FishingInventoryView(discord.ui.View):
             self._add_tab_selector()
 
         elif self.inv_page == 4:
-            # === TRANG 5: BÀN PHÉP ENCHANT / GÁN DÒNG THUỘC TÍNH ===
             is_pick = (self.enhance_target == "pick")
             if is_pick:
                 from Command.command_mining import get_user_mining
@@ -2119,22 +2045,18 @@ class FishingInventoryView(discord.ui.View):
                 item_title = "Cần Câu"
                 switch_label = "Đổi Mục Tiêu: ⛏️ Cuốc Đào"
 
-            # Row 0: Nút Gán Dòng Mới
             enchant_btn = discord.ui.Button(label=f"Gán Dòng {item_title} (1 Đá End + 10M)", style=discord.ButtonStyle.primary, emoji="✨", row=0, disabled=(cur_item is None))
             enchant_btn.callback = self._enchant_rod
             self.add_item(enchant_btn)
 
-            # Row 1: Nút Mở Thêm Ô Dòng Đặc Biệt
             extra_btn = discord.ui.Button(label=f"Mở Ô Dòng {item_title} (1 Đá ĐB + 100M)", style=discord.ButtonStyle.success, emoji="🔓", row=1, disabled=(cur_item is None))
             extra_btn.callback = self._unlock_extra_enchant_slot
             self.add_item(extra_btn)
 
-            # Row 2: Nút Tẩy Toàn Bộ Dòng (Reroll)
             clear_btn = discord.ui.Button(label=f"Tẩy Dòng {item_title}", style=discord.ButtonStyle.danger, emoji="♻️", row=2, disabled=(cur_item is None))
             clear_btn.callback = self._clear_enchant_affixes
             self.add_item(clear_btn)
 
-            # Row 3: Nút chuyển đổi mục tiêu enchant
             switch_btn = discord.ui.Button(label=switch_label, style=discord.ButtonStyle.primary, emoji="🔄", row=3)
             switch_btn.callback = self._switch_enhance_target
             self.add_item(switch_btn)
@@ -2142,12 +2064,10 @@ class FishingInventoryView(discord.ui.View):
             self._add_tab_selector()
 
         else:
-            # === TRANG 6: KHOÁNG SẢN & CUỐC ĐÀO ===
             from Command.command_mining import get_user_mining
             u_mine = get_user_mining(self.author.id)
             user_picks = u_mine.get("picks", {})
 
-            # Row 0: Menu chọn cuốc đang cầm
             if user_picks:
                 pick_options = []
                 for pid, pdata in list(user_picks.items())[:25]:
@@ -2167,7 +2087,6 @@ class FishingInventoryView(discord.ui.View):
                 pick_select.callback = self._select_pick_callback
                 self.add_item(pick_select)
 
-            # Row 1: Bán Toàn Bộ Quặng & Mở Bảo Tàng
             sell_ores_btn = discord.ui.Button(label="Bán Toàn Bộ Quặng", style=discord.ButtonStyle.success, emoji="💰", row=1)
             sell_ores_btn.callback = self._sell_all_ores
             self.add_item(sell_ores_btn)
@@ -2176,7 +2095,6 @@ class FishingInventoryView(discord.ui.View):
             museum_btn.callback = self._goto_mining_museum
             self.add_item(museum_btn)
 
-            # Row 2: Đổi Mỏ & Mua Cuốc / Vật Tư Mỏ
             zone_mine_btn = discord.ui.Button(label="Đổi Mỏ Khoáng", style=discord.ButtonStyle.secondary, emoji="📍", row=2)
             zone_mine_btn.callback = self._open_mining_zone_view
             self.add_item(zone_mine_btn)
@@ -2185,7 +2103,6 @@ class FishingInventoryView(discord.ui.View):
             shop_mine_btn.callback = self._goto_mining_shop
             self.add_item(shop_mine_btn)
 
-            # Row 3: Vào Lò Rèn Cuốc Đào
             forge_pick_btn = discord.ui.Button(label="Vào Lò Rèn Cuốc (+150 & ⭐)", style=discord.ButtonStyle.primary, emoji="🔨", row=3)
             forge_pick_btn.callback = self._goto_pick_forge
             self.add_item(forge_pick_btn)
@@ -2205,7 +2122,6 @@ class FishingInventoryView(discord.ui.View):
         )
 
         if self.inv_page == 0:
-            # TRANG 1: Cần, Giỏ, Mồi
             if cur_rod:
                 ref_str = f" (+{cur_rod.get('refine', 0)})" if cur_rod.get("refine", 0) > 0 else ""
                 star_str = f" [⭐x{cur_rod.get('stars', 0)}]" if cur_rod.get("stars", 0) > 0 else ""
@@ -2253,7 +2169,6 @@ class FishingInventoryView(discord.ui.View):
             embed.set_footer(text="Dùng Menu chọn ở phía dưới để chuyển sang Trang 2, 3, 4, 5, 6!")
 
         elif self.inv_page == 1:
-            # TRANG 2: Pet & Rương & Troll
             eq_pet = u_fish.get("equipped_pet")
             p_name = PETS_CATALOG[eq_pet]['name'] if eq_pet in PETS_CATALOG else "*Chưa trang bị*"
             safe_add_field(embed, name="🐾 Thú Cưng Đang Dùng", value=p_name, inline=True)
@@ -2276,7 +2191,6 @@ class FishingInventoryView(discord.ui.View):
             embed.set_footer(text="Trang 2: Quản lý Pet, Mở Rương Báu và Vật phẩm Troll")
 
         elif self.inv_page == 2:
-            # TRANG 3: Kho Nông Dân
             farm_data = u_fish.setdefault("farm", {})
             seeds = farm_data.get("seeds", {})
             crops = farm_data.get("crops", {})
@@ -2330,7 +2244,6 @@ class FishingInventoryView(discord.ui.View):
             embed.set_footer(text="Trang 3: Kho Nông Dân • Bấm [Mở Nông Trại Trồng Cây] để vào vườn!")
 
         elif self.inv_page == 3:
-            # TRANG 4: Lò Rèn Cường Hóa (+150) & Tiến Cấp Sao (⭐ 1-20) cho CẦN và CUỐC
             is_pick = (self.enhance_target == "pick")
             if is_pick:
                 from Command.command_mining import get_user_mining
@@ -2396,7 +2309,6 @@ class FishingInventoryView(discord.ui.View):
             embed.set_footer(text=f"Trang 4: Lò Rèn Cường Hóa (+150) & Tiến Cấp Sao ⭐ 1-20 • Mục tiêu: {item_header}")
 
         elif self.inv_page == 4:
-            # TRANG 5: Bàn Phép Enchant / Gán Dòng cho CẦN và CUỐC
             is_pick = (self.enhance_target == "pick")
             if is_pick:
                 from Command.command_mining import get_user_mining
@@ -2451,7 +2363,6 @@ class FishingInventoryView(discord.ui.View):
             embed.set_footer(text=f"Trang 5: Bàn Phép Gán Dòng Enchant Thuộc Tính Cao Cấp • Mục tiêu: {item_header}")
 
         else:
-            # TRANG 6: Kho Quặng & Cuốc Đào
             from Command.command_mining import get_user_mining, MINING_ZONES, RARITY_ICONS as M_ICONS
             u_mine = get_user_mining(self.author.id)
             eq_pick_id = u_mine.get("equipped_pick")
@@ -2788,7 +2699,6 @@ class FishingInventoryView(discord.ui.View):
 
         await interaction.response.send_message("Chọn phân cấp cá muốn thanh lý:", view=SellTierSelectView(self), ephemeral=True)
 
-    # ------------------ CÁC HÀM XỬ LÝ CHO TRANG 3: KHO NÔNG DÂN ------------------
     async def _goto_farm_view(self, interaction: discord.Interaction):
         from Command.farm_system import FarmView
         fv = FarmView(self.author, self.guild_id)
@@ -2889,7 +2799,6 @@ class FishingInventoryView(discord.ui.View):
         now = time.time()
 
         if any(k in crop_id for k in ("golden_apple", "peach", "snow_lotus")):
-            # Trái cây thần thoại: Hồi phục 100% độ bền + buff may mắn cực lớn
             if cur_rod:
                 cur_rod["durability"] = cur_rod.get("max_durability", 100)
             u_fish.setdefault("buffs", {})["divine_fruit_buff"] = now + 3600
@@ -2911,7 +2820,6 @@ class FishingInventoryView(discord.ui.View):
         await interaction.response.edit_message(embed=self.build_embed(u_data.get("coins", 0)), view=self)
         await interaction.followup.send(f"😋 **ĂN {c_info['name'].upper()} THÀNH CÔNG!** {buff_msg}", ephemeral=True)
 
-    # ------------------ CÁC HÀM XỬ LÝ CHO TRANG 4: CƯỜNG HÓA & TIẾN CẤP SAO (CẦN & CUỐC) ------------------
     async def _switch_enhance_target(self, interaction: discord.Interaction):
         self.enhance_target = "rod" if self.enhance_target == "pick" else "pick"
         self._build_components()
@@ -2944,7 +2852,6 @@ class FishingInventoryView(discord.ui.View):
 
         curr_refine = target_item.setdefault("refine", 0)
 
-        # MỞ RỘNG MỐC CƯỜNG HÓA LÊN ĐẾN +300
         if curr_refine >= 300:
             return await interaction.response.send_message(f"⭐ {item_type_label} này đã đạt cấp tối đa (**+300 TỐI THƯỢNG**)! Hãy sử dụng tính năng **Tiến Cấp Sao** để thăng cấp sức mạnh!", ephemeral=True)
 
@@ -2956,7 +2863,6 @@ class FishingInventoryView(discord.ui.View):
 
         await update_user_coins(self.guild_id, self.author.id, -cost)
 
-        # Điều phối tỉ lệ thành công chuẩn xác cho 300 cấp độ
         if curr_refine < 10:
             success_rate = 1.0 - (curr_refine * 0.03)
         elif curr_refine < 30:
@@ -2973,7 +2879,6 @@ class FishingInventoryView(discord.ui.View):
         if ench_stats.get("refine_rate", 0) > 0:
             success_rate = min(0.95, success_rate + (ench_stats["refine_rate"] / 100.0))
 
-        # Thao túng tỉ lệ đập đồ từ Web Admin hoặc Auto 100% cho Owner / Web Admin
         is_admin_or_owner = False
         try:
             from config import OWNER_ID
@@ -2994,7 +2899,7 @@ class FishingInventoryView(discord.ui.View):
                 pass
 
         if is_admin_or_owner:
-            success_rate = 1.0  # Owner / Admin Web auto đập 100% lên!
+            success_rate = 1.0
         else:
             try:
                 from data.game_rates import calculate_refine_rate
@@ -3067,7 +2972,6 @@ class FishingInventoryView(discord.ui.View):
         dust = items.get("stardust_dust", 0)
         pearl = items.get("black_pearl", 0)
 
-        # Kiểm tra nguyên liệu: 10 Bụi sao + 2 Cá phẩm chất bất kỳ + 1 Ngọc trai đen
         missing = []
         if dust < 10:
             missing.append(f"• Bụi sao lấp lánh: thiếu `{10 - dust}` (Hiện có: `{dust}/10`)")
@@ -3079,12 +2983,10 @@ class FishingInventoryView(discord.ui.View):
         if missing:
             return await interaction.response.send_message("❌ **CHƯA ĐỦ NGUYÊN LIỆU TIẾN CẤP SAO!**\n" + "\n".join(missing), ephemeral=True)
 
-        # Tiêu hao nguyên liệu
         items["stardust_dust"] -= 10
         items["black_pearl"] -= 1
         sacrificed_fish = [fish_bag.pop(0), fish_bag.pop(0)]
 
-        # Tỉ lệ thành công theo số sao
         if curr_stars < 2:
             star_rate = 0.50
         elif curr_stars < 6:
@@ -3099,7 +3001,6 @@ class FishingInventoryView(discord.ui.View):
         if ench_stats.get("refine_rate", 0) > 0:
             star_rate = min(0.90, star_rate + (ench_stats["refine_rate"] / 100.0))
 
-        # Thao túng tỉ lệ thăng sao từ Web Admin
         try:
             from data.game_rates import calculate_star_rate
             star_rate = calculate_star_rate(star_rate)
@@ -3110,7 +3011,7 @@ class FishingInventoryView(discord.ui.View):
 
         if is_success:
             target_item["stars"] += 1
-            target_item["refine"] = 0  # ĐẶT LẠI VỀ +0 ĐỂ NGƯỜI DÙNG TIẾP TỤC ĐẬP TIẾP LÊN SAO TIẾP THEO
+            target_item["refine"] = 0
             bonus_luck = 60
             target_item["luck"] = target_item.get("luck", 1) + bonus_luck
             save_fn()
@@ -3198,7 +3099,6 @@ class FishingInventoryView(discord.ui.View):
         await interaction.response.edit_message(embed=self.build_embed(u_data.get("coins", 0)), view=self)
         await interaction.followup.send(f"🔧 Đã sửa chữa hoàn toàn {item_type_label} **{target_item['name']}** về độ bền **{max_dur}/{max_dur}** với chi phí **`{cost:,}` coin**!", ephemeral=True)
 
-    # ------------------ CÁC HÀM XỬ LÝ CHO TRANG 5: ENCHANT & GÁN DÒNG THUỘC TÍNH ------------------
     async def _enchant_rod(self, interaction: discord.Interaction):
         """Gán dòng thuộc tính cho cần câu hoặc cuốc đào: Tốn 1 Đá End + 10,000,000 Coins."""
         u_fish = get_user_fishing(self.author.id)
@@ -3358,7 +3258,6 @@ class FishingInventoryView(discord.ui.View):
         await interaction.response.edit_message(embed=self.build_embed(u_data.get("coins", 0)), view=self)
         await interaction.followup.send(f"♻️ **ĐÃ TẨY TOÀN BỘ DÒNG ENCHANT!** {item_type_label} **{target_item['name']}** đã được thanh tẩy sạch sẽ, sẵn sàng gán dòng mới!", ephemeral=True)
 
-    # ------------------ CÁC HÀM XỬ LÝ CHO TRANG 6: KHOÁNG SẢN & CUỐC ĐÀO ------------------
     async def _select_pick_callback(self, interaction: discord.Interaction):
         from Command.command_mining import get_user_mining, save_mining_data as save_mine_fn
         selected_pick = interaction.data["values"][0]
@@ -3494,9 +3393,6 @@ class FishingInventoryView(discord.ui.View):
 
 
 
-# ==============================================================================
-# VIEW BẢN ĐỒ & DI CHUYỂN VÙNG CÂU CÁ (FISHING ZONES)
-# ==============================================================================
 class FishingZoneSelectView(discord.ui.View):
     def __init__(self, author: discord.Member, current_zone_id: str, user_level: int, inv_parent: Optional["FishingInventoryView"] = None):
         super().__init__(timeout=120)
@@ -3571,9 +3467,6 @@ class FishingZoneSelectView(discord.ui.View):
         await interaction.followup.send(f"⛵ Thuyền câu đã cập bến **{zdata['name']}** thành công!", ephemeral=True)
 
 
-# ==============================================================================
-# VIEW SHOP MUA HÀNG (MỞ MODAL NHẬP SỐ LƯỢNG)
-# ==============================================================================
 class FishingShopView(discord.ui.View):
     def __init__(self, author: discord.Member, guild_id: int):
         super().__init__(timeout=180)
@@ -3585,7 +3478,6 @@ class FishingShopView(discord.ui.View):
         self._refresh_components()
 
     def _get_filtered_items(self):
-        # Chỉ hiển thị các vật phẩm không bị ẩn (không bán trong shop)
         items = [it for it in MASTER_SHOP_ITEMS if not it.get("is_hidden", False)]
         if self.selected_category != "all":
             items = [it for it in items if it.get("category") == self.selected_category]
@@ -3605,7 +3497,6 @@ class FishingShopView(discord.ui.View):
         self.clear_items()
 
         vi = is_vietnamese(self.guild_id)
-        # Row 0: Menu chọn danh mục phân loại shop
         if vi:
             cat_options = [
                 discord.SelectOption(label="🌟 Tất Cả Vật Phẩm", value="all", description="Xem toàn bộ đồ trong cửa hàng", default=(self.selected_category == "all")),
@@ -3652,7 +3543,6 @@ class FishingShopView(discord.ui.View):
         cat_select.callback = self._on_select_category
         self.add_item(cat_select)
 
-        # Row 1: Các nút chọn mua vật phẩm theo số thứ tự
         page_items = self._get_page_items()
         for idx, item in enumerate(page_items):
             btn = discord.ui.Button(
@@ -3664,7 +3554,6 @@ class FishingShopView(discord.ui.View):
             btn.callback = self._create_buy_callback(item)
             self.add_item(btn)
 
-        # Row 2: Điều hướng trang
         prev_btn = discord.ui.Button(label=prev_lbl, style=discord.ButtonStyle.secondary, disabled=(self.current_page == 0), row=2)
         prev_btn.callback = self._prev_page
         self.add_item(prev_btn)
@@ -3780,9 +3669,6 @@ class FishingShopView(discord.ui.View):
         self.stop()
 
 
-# ==============================================================================
-# [KHÔI PHỤC] MODAL CHUYỂN COIN
-# ==============================================================================
 class TransferCoinModal(discord.ui.Modal, title="💸 Chuyển Coin Cho Thành Viên"):
     target_input = discord.ui.TextInput(label="ID hoặc @Mention người nhận", placeholder="Ví dụ: 123456789012345678", required=True, max_length=30)
     amount_input = discord.ui.TextInput(label="Số coin muốn chuyển", placeholder="Ví dụ: 50000", required=True, max_length=15)
@@ -3813,9 +3699,6 @@ class TransferCoinModal(discord.ui.Modal, title="💸 Chuyển Coin Cho Thành V
         await interaction.response.send_message(f"💸 {self.author.mention} đã chuyển **`{amount:,}` coin** cho {target.mention}!")
 
 
-# ==============================================================================
-# [KHÔI PHỤC] QTE KÉO CÁ BOSS
-# ==============================================================================
 class QTEPullView(discord.ui.View):
     def __init__(self, author: discord.Member, target_dir: str, guild_id: Optional[int] = None):
         super().__init__(timeout=4.5)
@@ -3851,9 +3734,6 @@ class QTEPullView(discord.ui.View):
         return callback
 
 
-# ==============================================================================
-# [KHÔI PHỤC] CĂN CƯỚC CẦN THỦ (PILLOW)
-# ==============================================================================
 def _load_font(size: int, bold: bool = False):
     names = (["DejaVuSans-Bold.ttf", "arialbd.ttf"] if bold else ["DejaVuSans.ttf", "arial.ttf"])
     for base in ("", "/usr/share/fonts/truetype/dejavu/", "C:/Windows/Fonts/"):
@@ -3874,7 +3754,7 @@ def _generate_license_card_sync(avatar_bytes: bytes, name: str, rod_name: str, p
     W, H = 800, 450
     img = Image.new("RGB", (W, H), (12, 38, 66))
     d = ImageDraw.Draw(img)
-    for y in range(H):  # gradient nền
+    for y in range(H):
         k = y / H
         d.line([(0, y), (W, y)], fill=(int(12 + 20 * k), int(38 + 60 * k), int(66 + 70 * k)))
     d.rounded_rectangle((15, 15, W - 15, H - 15), radius=24, outline=(255, 215, 0), width=4)
@@ -3911,9 +3791,6 @@ def _generate_license_card_sync(avatar_bytes: bytes, name: str, rod_name: str, p
     return buf
 
 
-# ==============================================================================
-# [KHÔI PHỤC] GIỎ CÁ CHI TIẾT (PHÂN TRANG + BÁN CÁ ĐƯỢC CHỌN)
-# ==============================================================================
 class FishBagDetailView(discord.ui.View):
     PER_PAGE = 10
 
@@ -4049,9 +3926,6 @@ class FishBagDetailView(discord.ui.View):
         await interaction.response.edit_message(embed=inv.build_embed(u_data.get("coins", 0)), view=inv)
 
 
-# ==============================================================================
-# [KHÔI PHỤC] BẾP NẤU ĂN - 9 MÓN BUFF
-# ==============================================================================
 COOK_RECIPES = {
     "cook_soup_s": {"name": "🍲 Canh Cá May Mắn", "buff": "soup_luck", "dur": 1800, "need": ("common", 3), "desc": "+30 May Mắn / 30 phút"},
     "cook_soup_l": {"name": "🍜 Lẩu Hải Sản Thượng Hạng", "buff": "soup_luck", "dur": 3600, "need": ("rare", 2), "desc": "+30 May Mắn / 60 phút"},
@@ -4080,7 +3954,7 @@ class CookingView(discord.ui.View):
         super().__init__(timeout=240)
         self.author = author
         self.guild_id = guild_id
-        self.menu_mode = "farm"  # "farm": Món kết hợp Nông Trại & Cá, "classic": Món cá truyền thống
+        self.menu_mode = "farm"
         self._refresh_components()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
@@ -4092,7 +3966,6 @@ class CookingView(discord.ui.View):
     def _refresh_components(self):
         self.clear_items()
 
-        # Row 0: Select món ăn theo chế độ
         if self.menu_mode == "farm":
             options = []
             for rid, r in FARM_COOK_RECIPES.items():
@@ -4125,7 +3998,6 @@ class CookingView(discord.ui.View):
             sel.callback = self._cook_classic_callback
             self.add_item(sel)
 
-        # Row 1: Nút chuyển chế độ menu
         toggle_btn = discord.ui.Button(
             label="Chuyển sang: Món Cá Truyền Thống" if self.menu_mode == "farm" else "Chuyển sang: Món Nông Trại & Cá",
             style=discord.ButtonStyle.success if self.menu_mode == "classic" else discord.ButtonStyle.primary,
@@ -4193,7 +4065,6 @@ class CookingView(discord.ui.View):
         farm_data = u_fish.setdefault("farm", {})
         crops = farm_data.setdefault("crops", {})
 
-        # 1. Kiểm tra cá
         fish_to_use = []
         if r.get("req_fish"):
             rarity, f_qty = r["req_fish"]
@@ -4202,25 +4073,21 @@ class CookingView(discord.ui.View):
                 return await interaction.response.send_message(f"❌ Bạn không đủ **{f_qty}x cá {rarity}** trong giỏ! (Hiện có: {len(candidates)})", ephemeral=True)
             fish_to_use = candidates[:f_qty]
 
-        # 2. Kiểm tra nông sản
         for cid, req_cnt in r.get("req_crops", {}).items():
             have_cnt = crops.get(cid, 0)
             c_name = SEEDS_CATALOG.get(cid, {}).get("name", cid)
             if have_cnt < req_cnt:
                 return await interaction.response.send_message(f"❌ Bạn không đủ nông sản **{c_name}**! (Cần: `{req_cnt}`, hiện có: `{have_cnt}` trong kho)", ephemeral=True)
 
-        # 3. Tiêu hao cá và nông sản
         for f in fish_to_use:
             bag.remove(f)
         for cid, req_cnt in r.get("req_crops", {}).items():
             crops[cid] -= req_cnt
 
-        # 4. Kích hoạt hiệu ứng đặc biệt
         now = time.time()
         buffs = u_fish.setdefault("buffs", {})
         buffs[r["buff"]] = max(now, buffs.get(r["buff"], 0) if isinstance(buffs.get(r["buff"]), (int, float)) else 0) + r["dur"]
 
-        # Nếu là Súp cà chua cá tuyết: Hồi phục 100% độ bền cần câu đang cầm
         extra_note = ""
         if rid == "farm_dish_tomato_soup":
             rod_id = u_fish.get("equipped_rod")
@@ -4266,9 +4133,6 @@ class CookingView(discord.ui.View):
         await interaction.response.edit_message(embed=v.build_embed(u_data.get("coins", 0)), view=v)
 
 
-# ==============================================================================
-# [KHÔI PHỤC] SỔ SƯU TẦM (FISHDEX) + NHẬN THƯỞNG MỐC
-# ==============================================================================
 class FishdexView(discord.ui.View):
     PER_PAGE = 8
 
@@ -4277,7 +4141,7 @@ class FishdexView(discord.ui.View):
         self.author = author
         self.guild_id = guild_id
         self.page = 0
-        self.category = category  # "fish", "rod", "bait", "pet", "chest", "troll"
+        self.category = category
         self.all_fish = list(fish_list) + list(event_fish)
         self._refresh_components()
 
@@ -4317,7 +4181,6 @@ class FishdexView(discord.ui.View):
     def _refresh_components(self):
         self.clear_items()
 
-        # Row 0: Chọn danh mục Bách Khoa
         cat_options = [
             discord.SelectOption(label="🐟 Sinh Vật Biển", value="fish", description="Các loài cá và cột mốc phần thưởng", default=(self.category == "fish")),
             discord.SelectOption(label="🎣 Cần Câu", value="rod", description="Bách khoa các loại cần câu", default=(self.category == "rod")),
@@ -4330,7 +4193,6 @@ class FishdexView(discord.ui.View):
         cat_select.callback = self._on_change_category
         self.add_item(cat_select)
 
-        # Row 1: Phân trang
         prev_btn = discord.ui.Button(label="◀", style=discord.ButtonStyle.secondary, row=1, disabled=(self.page == 0))
         prev_btn.callback = self._prev
         self.add_item(prev_btn)
@@ -4340,7 +4202,6 @@ class FishdexView(discord.ui.View):
         next_btn.callback = self._next
         self.add_item(next_btn)
 
-        # Row 2: Nhận thưởng (chỉ khi ở tab cá) + Về túi đồ
         if self.category == "fish":
             m, ready = self._next_milestone()
             claim_btn = discord.ui.Button(
@@ -4504,9 +4365,6 @@ class FishdexView(discord.ui.View):
         await interaction.response.edit_message(embed=v.build_embed(u_data.get("coins", 0)), view=v)
 
 
-# ==============================================================================
-# [KHÔI PHỤC] BẢNG ĐIỀU KHIỂN OWNER
-# ==============================================================================
 class OwnerEventModal(discord.ui.Modal, title="🎉 Mở Sự Kiện Đại Dương"):
     name_in = discord.ui.TextInput(label="Tên sự kiện", default="Lễ Hội Đại Dương", max_length=50)
     luck_in = discord.ui.TextInput(label="May mắn cộng thêm", default="50", max_length=4)
@@ -4692,7 +4550,6 @@ class OwnerAquariumModal(discord.ui.Modal, title="🐠 Quản Trị Thủy Cung 
         action = (self.action_in.value or "xem").strip().lower()
         raw_user = (self.user_in.value or "").strip().replace("<@", "").replace(">", "").replace("!", "")
 
-        # Action: BXH TOP THỦY CUNG
         if action in ("bxh", "top", "leaderboard") or (not raw_user and action == "xem"):
             all_users = fishing_state.get("users", {})
             aquas = []
@@ -4746,7 +4603,6 @@ class OwnerAquariumModal(discord.ui.Modal, title="🐠 Quản Trị Thủy Cung 
             save_fishing_data()
             return await interaction.response.send_message(f"✅ Đã cập nhật Thủy Cung của <@{target_uid}> có `{likes_cnt}` lượt thích!", ephemeral=True)
 
-        # Mặc định: Mở xem Thủy Cung của user
         target_member = self.guild.get_member(target_uid)
         if not target_member:
             try:
@@ -4840,7 +4696,7 @@ class OwnerFishingControlView(discord.ui.View):
     async def _tour_off(self, interaction: discord.Interaction):
         tour = fishing_state.get("tournament", {})
         if tour.get("active"):
-            tour["end_time"] = 0  # tournament_check_task sẽ trao thưởng ở lượt quét kế tiếp
+            tour["end_time"] = 0
         save_fishing_data()
         await interaction.response.edit_message(embed=self.build_embed(), view=self)
 
@@ -4856,11 +4712,7 @@ class OwnerFishingControlView(discord.ui.View):
         await interaction.response.send_modal(OwnerAquariumModal(self.bot, self.guild))
 
 
-# ==============================================================================
 
-# =============================================================================
-# HỆ THỐNG HÔN NHÂN & GIA ĐÌNH (Đã tách sang Command/command_marriage.py)
-# =============================================================================
 from Command.command_marriage import (
     RING_IDS, RING_INFO, PROPERTY_INFO, LOVE_ITEMS,
     _pair_key, _get_couple, _get_user_couple
@@ -4871,8 +4723,6 @@ def _is_event_fish_global(f):
     return bool(f.get("event") or f.get("is_event") or f.get("event_fish") or f.get("source") == "event" or any(isinstance(ef, dict) and str(f.get("name", "")).strip() == str(ef.get("name", "")).strip() for ef in event_fish))
 
 
-# LỚP COG CHÍNH
-# ==============================================================================
 FISHING_ACTIONS = [
     "cast", "inv", "chest", "sell", "license", "aquarium", "upgrade", "cook", "top", "fishdex",
     "shop", "repair", "weather", "tournament", "owner", "setcodechannel", "setup", "zone", "zones",
@@ -4961,7 +4811,6 @@ class FishingCog(commands.Cog, name="Fishing"):
         return ctx.channel.id in allowed_channels
 
     def _calculate_catch(self, total_luck: int, mutation_rate: float, zone_mutation_bonus: float = 0.0):
-        # Thao túng tỉ lệ câu cá & cá đột biến từ Web Admin
         mut_mult = 1.0
         try:
             from data.game_rates import get_game_rates
@@ -5174,7 +5023,6 @@ class FishingCog(commands.Cog, name="Fishing"):
         act = action.lower().strip()
         user_id = ctx.author.id
 
-        # Hỗ trợ truyền thẳng tên vùng câu cá (ví dụ: s!f bien_sau, s!f ran_san_ho,...)
         if act in FISHING_ZONES:
             item = act
             act = "cast"
@@ -5190,14 +5038,12 @@ class FishingCog(commands.Cog, name="Fishing"):
         u_fish = get_user_fishing(user_id)
         u_data = await get_user_data(ctx.guild.id, user_id)
 
-        # 1. OWNER CONTROL
         if act == "owner":
             if ctx.author.id != OWNER_ID:
                 return await ctx.send("⛔ Bạn không phải là Chủ Bot (Owner)!", ephemeral=True)
             owner_view = OwnerFishingControlView(ctx.author, self.bot, ctx.guild)
             return await ctx.send(embed=owner_view.build_embed(), view=owner_view, ephemeral=True)
 
-        # 2. SET KÊNH CODE
         if act == "setcodechannel":
             if not ctx.author.guild_permissions.administrator and ctx.author.id != OWNER_ID:
                 return await ctx.send("⛔ Bạn cần quyền Administrator để thiết lập kênh thông báo code!", ephemeral=True)
@@ -5218,13 +5064,11 @@ class FishingCog(commands.Cog, name="Fishing"):
             )
             return await ctx.send(embed=embed)
 
-        # 3. SHOP
         if act == "shop":
             view = FishingShopView(ctx.author, ctx.guild.id)
             embed = view.build_embed(u_data.get("coins", 0), int(u_data.get("xu", 0)))
             return await ctx.send(embed=embed, view=view)
 
-        # 4. INVENTORY
         if act == "inv":
             target_user = user or ctx.author
             if target_user.id != ctx.author.id:
@@ -5237,7 +5081,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             embed = view.build_embed(u_target_data.get("coins", 0), u_target_data.get("xu", 0))
             return await ctx.send(embed=embed, view=view)
 
-        # 4.5. KHU VỰC CÂU CÁ (ZONES)
         if act in ("zone", "zones"):
             target_zone_id = (item or "").lower().strip()
             user_level = int(u_data.get("level", 0))
@@ -5253,7 +5096,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             view = FishingZoneSelectView(ctx.author, cur_z_id, user_level)
             return await ctx.send(embed=view.build_embed(), view=view)
 
-        # 5. THẢ CÂU CÁ (CAST)
         if act == "cast":
             now = time.time()
             buffs = u_fish.setdefault("buffs", {})
@@ -5262,7 +5104,6 @@ class FishingCog(commands.Cog, name="Fishing"):
                 rem_f = int(buffs["freeze_fishing"] - now)
                 return await ctx.send(f"🧊 Cần câu của bạn đang bị **đóng băng** bởi Bom Băng Giá! Hãy chờ **{rem_f} giây** để rã đông.", ephemeral=True)
 
-            # Kiểm tra HSD vật phẩm
             exp_notifs = check_user_item_expiration(user_id)
             if exp_notifs and not u_fish.get("equipped_rod"):
                 return await ctx.send(f"⚠️ **Cần câu của bạn đã hết hạn sử dụng:**\n" + "\n".join(exp_notifs) + f"\n\n*Dùng `{ctx.prefix}f renew <id_cần>` để gia hạn hoặc vào `{ctx.prefix}inv` đổi cần khác!*", ephemeral=True)
@@ -5302,7 +5143,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             if len(u_fish.get("fish_bag", [])) >= max_bag:
                 return await ctx.send(f"🎒 Giỏ cá đầy (`{len(u_fish['fish_bag'])}/{max_bag}`)! Dùng `{ctx.prefix}inv` để bán hoặc nấu nướng.", ephemeral=True)
 
-            # Xử lý vùng câu cá (Zone)
             target_zone_id = (item or amount or "").lower().strip()
             user_level = int(u_data.get("level", 0))
             if target_zone_id in FISHING_ZONES:
@@ -5326,7 +5166,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             current_weather = self._get_current_weather()
             rod_luck = current_rod.get("luck", 1) + (current_rod.get("refine", 0) * 4) + ench_stats.get("luck", 0)
 
-            # Mồi câu
             bait_luck = 0
             equipped_bait_id = u_fish.get("equipped_bait")
             if equipped_bait_id:
@@ -5340,7 +5179,6 @@ class FishingCog(commands.Cog, name="Fishing"):
                 else:
                     u_fish["equipped_bait"] = None
 
-            # Pet
             pet_luck = 0
             pet_price_multi = 1.0
             equipped_pet_id = u_fish.get("equipped_pet")
@@ -5363,12 +5201,10 @@ class FishingCog(commands.Cog, name="Fishing"):
             is_big_boss = rarity in ("epic", "legendary", "admin") or (chosen_mutation is not None)
             has_auto_qte = buffs.get("auto_qte", 0) > now
 
-            # Xử lý độ bền cần câu (Kiểm tra Đá Trấn Hải & Dòng Bất Hoại)
             sea_stone_charges = buffs.get("relic_sea_stone_charges", 0)
             if sea_stone_charges > 0:
                 buffs["relic_sea_stone_charges"] -= 1
             elif ench_stats.get("durability_save", 0) > 0 and (random.random() * 100.0 < ench_stats["durability_save"]):
-                # Dòng Bất Hoại bảo vệ độ bền cần
                 pass
             else:
                 current_rod["durability"] -= 1
@@ -5409,7 +5245,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             u_fish.setdefault("fish_bag", []).append(fish_entry)
             u_fish["stats"]["total_caught"] = u_fish["stats"].get("total_caught", 0) + 1
 
-            # Câu lên Rác (Tỷ lệ 35%)
             caught_trash_name = None
             if random.random() < 0.35:
                 trash_id = random.choice(list(TRASH_ITEMS.keys()))
@@ -5450,7 +5285,6 @@ class FishingCog(commands.Cog, name="Fishing"):
 
             save_fishing_data()
 
-            # Kích hoạt hệ thống Thành Tựu
             try:
                 from Command.achievement_system import unlock_achievement
                 gid = ctx.guild.id if ctx.guild else 0
@@ -5509,18 +5343,15 @@ class FishingCog(commands.Cog, name="Fishing"):
             embed.set_footer(text=f"Giỏ: {len(u_fish['fish_bag'])}/{max_bag} • Vùng: {current_zone['name']} • May mắn: +{total_luck} • {current_weather['name']}{stone_info}")
             return await ctx.send(embed=embed)
 
-        # 6. THỦY CUNG (CÓ THỂ XEM CỦA NGƯỜI KHÁC VÀ THẢ TIM)
         if act in ("aquarium", "thuycung", "aqua", "baotang", "tc", "faqua"):
             target_user = user or ctx.author
             view = AquariumView(owner=target_user, viewer=ctx.author, guild_id=ctx.guild.id)
             return await ctx.send(embed=view.build_embed(), view=view)
 
-        # 7. BẾP ĂN
         if act == "cook":
             view = CookingView(ctx.author, ctx.guild.id)
             return await ctx.send(embed=view.build_embed(), view=view)
 
-        # 8. BÁCH KHOA TOÀN THƯ (FISHDEX & BÁCH KHOA VẬT PHẨM)
         if act in ("fishdex", "dex", "bachkhoa", "bk"):
             cat = "fish"
             if item:
@@ -5534,7 +5365,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             view = FishdexView(ctx.author, ctx.guild.id, category=cat)
             return await ctx.send(embed=view.build_embed(), view=view)
 
-        # 8.5. GIA HẠN VẬT PHẨM (RENEW)
         if act in ("renew", "giahan"):
             target_item = (item or "").strip()
             if not target_item:
@@ -5544,7 +5374,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             ok, msg = await renew_user_item(user_id, target_item, ctx.guild.id)
             return await ctx.send(msg)
 
-        # 9. MỞ RƯƠNG BÁU (HỖ TRỢ CHÌA KHÓA)
         if act == "chest":
             chests = u_fish.setdefault("chests", {})
             sub = (item or "list").lower().strip()
@@ -5605,7 +5434,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             )
             return await ctx.send(embed=embed)
 
-        # 10. BÁN CÁ THEO PHÂN CẤP
         if act == "sell":
             bag = u_fish.get("fish_bag", [])
             if not bag:
@@ -5647,7 +5475,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             now_ts = time.time()
             buff_notes = []
 
-            # Áp dụng dòng Enchant Hoàng Kim Ngư (+% Giá bán cá)
             equipped_rod_id = u_fish.get("equipped_rod")
             cur_rod = u_fish.get("rods", {}).get(equipped_rod_id, {}) if equipped_rod_id else {}
             ench_stats = get_rod_enchant_stats(cur_rod)
@@ -5673,7 +5500,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             note = "(Lọc ALL mặc định bỏ qua Admin/Event/đột biến để bảo vệ cá quý)" if target_filter == "all" else ""
             return await ctx.send(f"💰 Đã bán **{len(to_sell)}** con cá theo bộ lọc `{filter_display}` thu về **`+{earned:,}` coin**!{note_buff} (Giữ lại {len(kept_bag)} con) {note}")
 
-        # 11. SỬA CẦN
         if act == "repair":
             rod_id = u_fish.get("equipped_rod")
             if not rod_id or rod_id not in u_fish.get("rods", {}):
@@ -5692,7 +5518,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             save_fishing_data()
             return await ctx.send(f"🛠️ Đã sửa chữa cần **{r['name']}** với `{cost:,}` coin!")
 
-        # 12. NÔNG TRẠI (FARM), ENCHANT & CƯỜNG HÓA (+1 ĐẾN +150) & SAO
         if act in ("farm", "nongtrai", "vuon"):
             from Command.farm_system import FarmView
             fv = FarmView(ctx.author, ctx.guild.id)
@@ -5783,7 +5608,6 @@ class FishingCog(commands.Cog, name="Fishing"):
                 refine_note = f" (Đã +{ench_stats['refine_rate']}% từ Bậc Thầy Rèn)" if ench_stats.get("refine_rate", 0) > 0 else ""
                 return await ctx.send(f"💥 **THẤT BẠI!** Bạn mất `{cost:,}` coin phí đập cần (Tỉ lệ: `{success_rate*100:.1f}%`{refine_note}).")
 
-        # 13. CĂN CƯỚC LICENSE
         if act == "license":
             if ctx.interaction:
                 await ctx.interaction.response.defer()
@@ -5818,7 +5642,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             )
             return await ctx.send(file=discord.File(card_buf, filename="angler_license.png"))
 
-        # 14. SETUP KHU CÂU CÁ
         if act == "setup":
             if not ctx.author.guild_permissions.administrator and ctx.author.id != OWNER_ID:
                 return await ctx.send("⛔ Bạn cần quyền Administrator để thiết lập khu vực câu cá!", ephemeral=True)
@@ -5853,7 +5676,6 @@ class FishingCog(commands.Cog, name="Fishing"):
             )
             return await ctx.send(embed=embed)
 
-        # 15. TOP & WEATHER
         if act == "top":
             users_all = fishing_state.get("users", {})
             sorted_by_caught = sorted(users_all.items(), key=lambda x: x[1].get("stats", {}).get("total_caught", 0), reverse=True)[:10]
@@ -5887,9 +5709,6 @@ class FishingCog(commands.Cog, name="Fishing"):
 
     
 
-    # ==========================================================================
-    # CÁC LỆNH TẮT TIỆN ÍCH
-    # ==========================================================================
     @commands.command(name="fhelp", aliases=["fishhelp"])
     async def fhelp_cmd(self, ctx: commands.Context):
         p = ctx.prefix
@@ -5976,7 +5795,6 @@ class FishingCog(commands.Cog, name="Fishing"):
 
     @commands.command(name="faqua", aliases=["thuycung", "baotang"])
     async def faqua_shortcut(self, ctx: commands.Context, target: Optional[discord.Member] = None):
-        # Lệnh Thủy Cung: Tag người khác để xem Thủy Cung người đó và bấm Yêu Thích / Thả Tim bình thường
         target_user = target
         if not target_user and getattr(ctx, "message", None) and ctx.message.mentions:
             target_user = ctx.message.mentions[0]

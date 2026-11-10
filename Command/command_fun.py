@@ -18,7 +18,6 @@ from Command.checks import (
 )
 from Check.i18n import t
 
-# --- CẤU HÌNH XKIRO API ---
 API_KEY = None
 try:
     from config import XKIRO_API_KEY as API_KEY
@@ -144,7 +143,6 @@ class MiniGame(commands.Cog):
         if not questions:
             return await ctx.send(t(ctx.guild, "ALTP_NO_QUESTIONS"))
 
-        # Kiểm tra nếu file json có bọc key "questions"
         if isinstance(questions, dict) and "questions" in questions:
             questions = questions["questions"]
 
@@ -154,7 +152,6 @@ class MiniGame(commands.Cog):
         money = 0
         msg = None
 
-        # Trạng thái các quyền trợ giúp xuyên suốt lượt chơi
         used_5050_global = False
         used_audience_global = False
         used_phone_global = False
@@ -169,7 +166,6 @@ class MiniGame(commands.Cog):
             answers = list(enumerate(q_answers))
             random.shuffle(answers)
 
-            # Lấy vị trí đáp án đúng sau khi đã xáo trộn
             correct_index = next(
                 (i for i, (old_idx, _) in enumerate(answers) if old_idx == q.get("correct")),
                 None,
@@ -197,7 +193,6 @@ class MiniGame(commands.Cog):
                 inline=False,
             )
 
-            # Khởi tạo View mới cho mỗi câu hỏi để hồi phục 30s đếm ngược
             view = MillionaireView(ctx.author)
             view.ctx = ctx
             view.correct_index = correct_index
@@ -205,12 +200,10 @@ class MiniGame(commands.Cog):
             view.current_question = q["question"]
             view.answer = None
 
-            # Đồng bộ các trợ giúp đã sử dụng
             view.used_5050 = used_5050_global
             view.used_audience = used_audience_global
             view.used_phone = used_phone_global
 
-            # Khóa các nút trợ giúp đã tiêu tốn
             for item in view.children:
                 if isinstance(item, discord.ui.Button) and item.label:
                     if "50:50" in item.label and used_5050_global:
@@ -220,7 +213,6 @@ class MiniGame(commands.Cog):
                     elif "Gọi điện" in item.label and used_phone_global:
                         item.disabled = True
 
-            # Gán nhãn các phím đáp án
             for i in range(min(4, len(view.children))):
                 view.children[i].label = letters[i]
 
@@ -232,12 +224,10 @@ class MiniGame(commands.Cog):
             view.message = msg
             await view.wait()
 
-            # Cập nhật quyền trợ giúp sau tương tác
             used_5050_global = view.used_5050
             used_audience_global = view.used_audience
             used_phone_global = view.used_phone
 
-            # Người chơi bấm nút dừng cuộc chơi
             if getattr(view, "ended", False):
                 update_rank(ctx.author.id, money)
                 for item in view.children:
@@ -248,14 +238,12 @@ class MiniGame(commands.Cog):
                     t(ctx.guild, "ALTP_STOPPED", mention=ctx.author.mention, score=score, prize=prize)
                 )
 
-            # Hết thời gian chờ phản hồi
             if view.answer is None:
                 for item in view.children:
                     item.disabled = True
                 await msg.edit(view=view)
                 return await ctx.send(t(ctx.guild, "ALTP_TIMEOUT", score=score))
 
-            # Kiểm tra đáp án
             if view.answer == correct_index:
                 score += 1
                 money = PRIZE_VALUES[min(score - 1, len(PRIZE_VALUES) - 1)]
@@ -275,7 +263,6 @@ class MiniGame(commands.Cog):
                     t(ctx.guild, "ALTP_WRONG", letter=letters[correct_index], score=score)
                 )
 
-        # Trả lời đúng toàn bộ câu hỏi: Lưu tiền thưởng cao nhất vào rank
         update_rank(ctx.author.id, money)
         for item in view.children:
             item.disabled = True
@@ -368,7 +355,6 @@ class MiniGame(commands.Cog):
                     max_tokens=1000,
                 )
 
-                # Giới hạn an toàn 1024 ký tự cho mỗi Field trong Discord Embed
                 val_original = (text[:1020] + "...") if len(text) > 1024 else text
                 val_translated = (translated[:1020] + "...") if len(translated) > 1024 else translated
 

@@ -24,7 +24,6 @@ _server_lang_mtime: float | None = None
 
 DEFAULT_LANG = "vi"
 
-# Metadata mặc định cho các ngôn ngữ phổ biến khi file JSON chưa có trường _meta
 DEFAULT_META = {
     "vi": {"name": "Tiếng Việt", "native": "Tiếng Việt", "flag": "🇻🇳"},
     "en": {"name": "English", "native": "English", "flag": "🇬🇧"},
@@ -38,11 +37,8 @@ DEFAULT_META = {
     "ru": {"name": "Russian", "native": "Русский", "flag": "🇷🇺"},
 }
 
-# Regex bắt mọi biến thể escape của \n hoặc \r\n (ví dụ: \n, \\n, \\\n)
 _ESCAPED_NEWLINE_RE = re.compile(r"(?:\\+r)?\\+n")
-# Regex xóa khoảng trắng thừa ngay trước và sau dấu xuống dòng
 _AROUND_NEWLINE_SPACE_RE = re.compile(r"[ \t]*\n[ \t]*")
-# Regex quét sạch mọi dấu xuống dòng, khoảng trắng hoặc chữ \n còn sót ở ĐẦU và CUỐI chuỗi
 _EDGE_CLEAN_RE = re.compile(r"^(?:[\s\r\n]|\\+n|\\+r)+|(?:[\s\r\n]|\\+n|\\+r)+$")
 
 
@@ -127,7 +123,6 @@ def _save_server_language():
     _server_lang_mtime = os.path.getmtime(SERVER_LANG_FILE)
 
 
-# Tải lần đầu khi import
 _load_server_language()
 
 
@@ -173,7 +168,6 @@ def get_guild_language(guild_or_id) -> str:
     if isinstance(guild_or_id, str) and guild_or_id.lower().strip() in supported:
         return guild_or_id.lower().strip()
 
-    # Nếu truyền interaction hoặc context
     guild = None
     if isinstance(guild_or_id, discord.Interaction):
         guild = guild_or_id.guild
@@ -194,7 +188,6 @@ def get_guild_language(guild_or_id) -> str:
         locale = getattr(guild, "preferred_locale", None)
         if locale is not None:
             locale_str = str(getattr(locale, "value", locale)).lower()
-            # Kiểm tra khớp tiền tố ngôn ngữ (vd: vi, en-US -> en, ja, ko)
             if locale_str.startswith(('zh', 'cn')) and 'cn' in supported:
                 return 'cn'
             for s in supported:
@@ -231,12 +224,10 @@ def t(guild_or_id, key: str, default: Optional[str] = None, **kwargs) -> str:
     data = _load_lang_file(lang)
     text = data.get(key)
 
-    # Fallback về Tiếng Việt nếu ngôn ngữ khác thiếu key
     if text is None and lang != DEFAULT_LANG:
         vi_data = _load_lang_file(DEFAULT_LANG)
         text = vi_data.get(key)
 
-    # Nếu vẫn không có key
     if text is None:
         text = default if default is not None else key
 

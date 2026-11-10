@@ -25,13 +25,11 @@ DATA_DIR = BASE_DIR / "data"
 JAIL_CONFIG_FILE = DATA_DIR / "jail_config.json"
 JAIL_RECORDS_FILE = DATA_DIR / "jail_records.json"
 
-# In-memory caches
 jail_config: Dict[str, Dict[str, Any]] = {}
 jail_records: Dict[str, Dict[str, Dict[str, Any]]] = {}
 
 _jail_lock = asyncio.Lock()
 
-# Multi-language dictionary for localized role names and default texts
 JAIL_ROLE_NAMES = {
     "vi": "Tù Nhân",
     "en": "Prisoner",
@@ -170,7 +168,6 @@ def save_jail_records():
         logger.error(f"Error saving jail_records.json: {e}")
 
 
-# Tải dữ liệu khi import module
 load_jail_data()
 
 
@@ -255,7 +252,6 @@ async def isolate_guild_channels(
         speak=False
     )
 
-    # 1. Cập nhật Category trước
     for category in guild.categories:
         try:
             current = category.overwrites.get(jail_role)
@@ -266,13 +262,11 @@ async def isolate_guild_channels(
         except (discord.Forbidden, discord.HTTPException):
             continue
 
-    # 2. Cập nhật Channels không đồng bộ hoặc không thuộc Category nào
     for ch in guild.channels:
         if ch.id == jail_channel_id:
             continue
         if isinstance(ch, discord.CategoryChannel):
             continue
-        # Nếu channel đã thừa hưởng từ Category đã deny view_channel thì bỏ qua
         if ch.category and ch.permissions_synced:
             cat_ov = ch.category.overwrites.get(jail_role)
             if cat_ov and cat_ov.view_channel is False and cat_ov.connect is False:
@@ -303,7 +297,6 @@ async def ensure_jail_setup(guild: discord.Guild) -> tuple[Optional[discord.Role
     default_role_name = JAIL_ROLE_NAMES.get(lang, "Tù Nhân")
     default_channel_name = JAIL_CHANNEL_NAMES.get(lang, "phòng-giam")
 
-    # 1. Tìm hoặc tạo Role Tù Nhân
     if not jail_role:
         for r in guild.roles:
             if r.name.lower() in [default_role_name.lower(), "tù nhân", "prisoner", "jail", "tu nhan"]:
@@ -323,7 +316,6 @@ async def ensure_jail_setup(guild: discord.Guild) -> tuple[Optional[discord.Role
         if jail_role:
             cfg["role_id"] = jail_role.id
 
-    # 2. Tìm hoặc tạo Kênh Phòng Giam
     if not jail_channel or not isinstance(jail_channel, discord.TextChannel):
         for ch in guild.text_channels:
             if ch.name.lower() in [default_channel_name.lower(), "phòng-giam", "phong-giam", "jail-cell", "jail"]:
@@ -345,11 +337,9 @@ async def ensure_jail_setup(guild: discord.Guild) -> tuple[Optional[discord.Role
 
     save_jail_config()
 
-    # 3. Phân quyền cho Kênh Phòng Giam
     if jail_channel and jail_role and guild.me.guild_permissions.manage_roles and guild.me.guild_permissions.manage_channels:
         await configure_jail_cell(guild, jail_role, jail_channel)
 
-    # 4. Cách ly các kênh còn lại
     isolated_count = 0
     if jail_role:
         isolated_count = await isolate_guild_channels(guild, jail_role, jail_channel)
@@ -436,7 +426,6 @@ class JailCog(commands.Cog, name="Jail"):
         self.check_jail_expiry.cancel()
         logger.info("JailCog unloaded and check_jail_expiry task stopped.")
 
-    # --- BACKGROUND TASK: TỰ ĐỘNG PHÓNG THÍCH KHI HẾT HẠN ---
     @tasks.loop(seconds=15)
     async def check_jail_expiry(self):
         now_ts = time.time()
@@ -476,7 +465,6 @@ class JailCog(commands.Cog, name="Jail"):
         except (RuntimeError, asyncio.CancelledError):
             pass
 
-    # --- EVENT LISTENERS: CHỐNG TRỐN TÙ VÀ CÁCH LY KÊNH MỚI ---
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel):
         """Tự động đặt quyền ẩn với Role tù nhân trên các kênh mới được tạo."""
@@ -521,7 +509,6 @@ class JailCog(commands.Cog, name="Jail"):
 
         if jail_role and guild.me.guild_permissions.manage_roles:
             try:
-                # Tước bất kỳ autorole nào vừa được cấp
                 strip_roles = [
                     r for r in member.roles
                     if not r.is_default() and not r.managed and r < guild.me.top_role and r != jail_role
@@ -533,7 +520,6 @@ class JailCog(commands.Cog, name="Jail"):
             except Exception as e:
                 logger.error(f"Error handling rejoined inmate {member} in {guild.name}: {e}")
 
-    # --- CORE LOGIC: EXECUTE JAIL & UNJAIL ---
     async def execute_jail(
         self,
         guild: discord.Guild,
@@ -547,7 +533,6 @@ class JailCog(commands.Cog, name="Jail"):
         if not jail_role:
             return False, "❌ Bot thiếu quyền `Manage Roles` hoặc `Manage Channels` để thiết lập nhà tù!", None
 
-        # Thu thập các vai trò hiện có cần tạm tước (giữ lại default, managed, booster và roles cao hơn bot)
         saved_role_ids = []
         roles_to_remove = []
         for r in member.roles:
@@ -560,7 +545,6 @@ class JailCog(commands.Cog, name="Jail"):
             saved_role_ids.append(r.id)
             roles_to_remove.append(r)
 
-        # 1. Tước vai trò cũ & cấp Role Tù Nhân
         try:
             if roles_to_remove and guild.me.guild_permissions.manage_roles:
                 await member.remove_roles(*roles_to_remove, reason=f"Tống giam bởi {moderator}: Tạm giữ vai trò")
@@ -568,14 +552,12 @@ class JailCog(commands.Cog, name="Jail"):
         except discord.Forbidden:
             return False, "❌ Bot không đủ quyền quản lý vai trò của thành viên này!", None
 
-        # 2. Ngắt kết nối Voice nếu đang trong kênh thoại
         if member.voice and member.voice.channel and guild.me.guild_permissions.move_members:
             try:
                 await member.move_to(None, reason=f"Tống giam bởi {moderator}")
             except Exception:
                 pass
 
-        # 3. Tính toán thời gian
         now_ts = time.time()
         expires_at = (now_ts + duration_seconds) if duration_seconds else None
 
@@ -586,7 +568,6 @@ class JailCog(commands.Cog, name="Jail"):
             dur_display = get_msg(guild, "PERMANENT")
             dur_extra = "Vô thời hạn"
 
-        # 4. Lưu hồ sơ phạm nhân
         async with _jail_lock:
             g_records = get_guild_jail_records(guild.id)
             g_records[str(member.id)] = {
@@ -601,7 +582,6 @@ class JailCog(commands.Cog, name="Jail"):
             }
             save_jail_records()
 
-        # 5. Gửi log vào Mod/Warn Log Channel
         try:
             await send_mod_log(
                 guild=guild,
@@ -615,7 +595,6 @@ class JailCog(commands.Cog, name="Jail"):
         except Exception as e:
             logger.warning(f"Failed to send mod log for jail: {e}")
 
-        # 6. Gửi DM cho đối tượng
         try:
             await notify_target_dm(
                 member=member,
@@ -627,7 +606,6 @@ class JailCog(commands.Cog, name="Jail"):
         except Exception:
             pass
 
-        # 7. Gửi thông báo chào mừng trong Kênh Phòng Giam
         if jail_channel:
             try:
                 cell_embed = discord.Embed(
@@ -644,7 +622,6 @@ class JailCog(commands.Cog, name="Jail"):
             except Exception:
                 pass
 
-        # 8. Tạo Embed phản hồi kết quả
         res_embed = discord.Embed(
             title=get_msg(guild, "JAIL_TITLE"),
             color=discord.Color.dark_orange(),
@@ -680,14 +657,12 @@ class JailCog(commands.Cog, name="Jail"):
 
         restored_count = 0
         if member and guild.me.guild_permissions.manage_roles:
-            # Gỡ Role Tù Nhân
             if jail_role and jail_role in member.roles:
                 try:
                     await member.remove_roles(jail_role, reason=f"Phóng thích bởi {moderator}")
                 except Exception:
                     pass
 
-            # Khôi phục vai trò đã lưu
             if rec and "saved_roles" in rec:
                 roles_to_restore = []
                 for r_id in rec["saved_roles"]:
@@ -701,7 +676,6 @@ class JailCog(commands.Cog, name="Jail"):
                     except Exception as e:
                         logger.warning(f"Error restoring roles for {member}: {e}")
 
-        # Gửi log vào Mod/Warn Log Channel
         target_str = member.mention if member else f"<@{user_id}>"
         try:
             await send_mod_log(
@@ -716,7 +690,6 @@ class JailCog(commands.Cog, name="Jail"):
         except Exception as e:
             logger.warning(f"Failed to send mod log for unjail: {e}")
 
-        # Gửi DM cho đối tượng nếu còn trong server
         if member:
             try:
                 await notify_target_dm(
@@ -729,7 +702,6 @@ class JailCog(commands.Cog, name="Jail"):
             except Exception:
                 pass
 
-        # Thông báo vào Kênh Phòng Giam nếu có
         ch_id = cfg.get("channel_id")
         if ch_id:
             jail_channel = guild.get_channel(int(ch_id))
@@ -741,7 +713,6 @@ class JailCog(commands.Cog, name="Jail"):
 
         return True, get_msg(guild, "UNJAIL_SUCCESS", target=target_str, count=restored_count), restored_count
 
-    # --- HYBRID COMMAND GROUP (TỐI ƯU HÓA SLASH COMMANDS) ---
 
     @commands.hybrid_group(
         name="jail",
@@ -895,7 +866,6 @@ class JailCog(commands.Cog, name="Jail"):
         count = await isolate_guild_channels(ctx.guild, role, ch if isinstance(ch, discord.TextChannel) else None)
         await ctx.send(get_msg(ctx.guild, "ISOLATE_SUCCESS", count=count))
 
-    # --- PREFIX SHORTCUTS (GIỮ NGUYÊN TIỆN ÍCH DÙNG DẤU CHẤM THAN) ---
 
     @commands.command(name="unjail", aliases=["phongthich", "tha", "anxa"])
     @commands.guild_only()
@@ -908,7 +878,6 @@ class JailCog(commands.Cog, name="Jail"):
     async def prefix_jailstatus(self, ctx: commands.Context, member: Optional[discord.Member] = None):
         await self._process_status(ctx, member)
 
-    # --- SHARED PROCESSORS ---
 
     async def _process_jail(
         self,

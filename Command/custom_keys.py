@@ -62,7 +62,6 @@ def delete_guild_custom_key(guild_id: int | str, key_id: str) -> bool:
         return False
 
     keys = all_data[gid]["keys"]
-    # Check by id or by keyword
     target_id = None
     if key_id in keys:
         target_id = key_id
@@ -74,7 +73,6 @@ def delete_guild_custom_key(guild_id: int | str, key_id: str) -> bool:
 
     if target_id and target_id in keys:
         item = keys.pop(target_id)
-        # Delete attachment file if exists
         file_path = item.get("file_path")
         if file_path:
             p = Path(file_path)
@@ -123,7 +121,6 @@ class CustomKeys(commands.GroupCog, group_name="customkey"):
         file_info = None
 
         if attachment:
-            # Check server max upload limit (default 10MB safe check)
             if attachment.size > 25 * 1024 * 1024:
                 return await interaction.response.send_message("❌ Kích thước tệp vượt quá 25MB!", ephemeral=True)
 
@@ -205,7 +202,6 @@ class CustomKeys(commands.GroupCog, group_name="customkey"):
         if message.author.bot or not message.guild:
             return
 
-        # Bỏ qua nếu tin nhắn là lệnh bot prefix
         content = message.content.strip()
         if not content:
             return

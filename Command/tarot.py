@@ -8,7 +8,6 @@ class Tarot(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # --- SỰ KIỆN LỆNH MỚI: BÓI BÀI TAROT TIÊN TRI ---
     @commands.command(aliases=["tarot", "boibai", "card"])
     async def tarot_draw(self, ctx):
         """Lệnh gọi Menu rút bài bói toán huyền bí"""

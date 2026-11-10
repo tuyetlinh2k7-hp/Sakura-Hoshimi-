@@ -136,7 +136,6 @@ async def notify_target_dm(
 ):
     if getattr(member, "bot", False):
         return
-    # Tuân thủ Top.gg / Discord ToS: Cho phép máy chủ bật/tắt DM tự động để tránh bị cắm cờ Spam DM
     if not is_feature_enabled(guild.id, "mod_dm_notifications", default=True):
         return
     embed = discord.Embed(
@@ -163,7 +162,6 @@ def parse_duration_to_seconds(raw_str: str) -> Optional[int]:
     if not s:
         return None
     if s.isdigit():
-        # Mặc định nhập số thuần là phút
         return int(s) * 60
 
     units = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400, 'w': 604800}
@@ -364,7 +362,6 @@ async def execute_punishment(
             if total_sec > 2419200:
                 return await send_reply("⚠️ Thời gian cấm chat tối đa là **28 ngày** (2419200 giây theo quy định Discord)!")
 
-            # Chuẩn hóa thời điểm hết hạn aware UTC
             until = discord.utils.utcnow() + timedelta(seconds=total_sec)
             await member.timeout(until, reason=audit_reason)
 
@@ -548,7 +545,6 @@ class ChannelResetConfirmView(discord.ui.View):
         await interaction.response.edit_message(content="✅ Đã hủy thao tác làm mới kênh.", embed=None, view=None)
 
 
-# Alias tương thích ngược
 NukeConfirmView = ChannelResetConfirmView
 
 
@@ -615,7 +611,6 @@ async def send_members_list(target: discord.Interaction | commands.Context):
     guild = target.guild
     author = target.user if isinstance(target, discord.Interaction) else target.author
 
-    # Tải danh sách thành viên đầy đủ nếu bot chưa chunk bộ nhớ cache
     if (not getattr(guild, 'chunked', True) or len(guild.members) < (guild.member_count or 0)) and hasattr(guild, 'chunk'):
         try:
             await guild.chunk()
@@ -1264,12 +1259,10 @@ class Manager(commands.Cog):
                             if resp.status != 200:
                                 return await ctx.send("❌ Không thể tải hình ảnh từ đường dẫn đã cung cấp!", ephemeral=True)
 
-                            # Kiểm tra định dạng ảnh hợp lệ
                             content_type = resp.headers.get("Content-Type", "").lower()
                             if not any(t in content_type for t in ("image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp")):
                                 return await ctx.send("❌ Tệp không phải là định dạng hình ảnh hợp lệ (chỉ chấp nhận PNG, JPEG, GIF, WEBP)!", ephemeral=True)
 
-                            # Kiểm tra Content-Length < 10MB
                             content_length = resp.headers.get("Content-Length")
                             if content_length and int(content_length) > 10 * 1024 * 1024:
                                 return await ctx.send("❌ Dung lượng ảnh vượt quá giới hạn cho phép (tối đa 10MB)!", ephemeral=True)
@@ -1327,7 +1320,6 @@ class Manager(commands.Cog):
                 skipped_perm_count = 0
                 total_channels = len(guild.text_channels)
 
-                # Gửi thông báo bắt đầu tiến trình để tránh cảm giác bot bị treo
                 extra_warning = f" (Máy chủ lớn gồm {total_channels} kênh, dự kiến mất ~{int(total_channels * 0.4)}s...)" if total_channels > 50 else ""
                 start_msg_text = f"⏳ **Đang tiến hành {action_word} các kênh công khai, vui lòng đợi trong giây lát...**{extra_warning}"
                 progress_msg = None
@@ -1337,7 +1329,6 @@ class Manager(commands.Cog):
                     progress_msg = await ctx.send(start_msg_text)
 
                 for idx, ch in enumerate(guild.text_channels, 1):
-                    # Tuân thủ Discord ToS: Chỉ can thiệp vào các kênh mà Bot có quyền quản lý quyền hạn (manage_permissions)
                     if not ch.permissions_for(guild.me).manage_permissions:
                         skipped_perm_count += 1
                         continue
@@ -1350,12 +1341,10 @@ class Manager(commands.Cog):
                             try:
                                 await ch.set_permissions(default_role, overwrite=ow, reason=f"Server {act} by {ctx.author} ({ctx.author.id})")
                                 changed_count += 1
-                                # Nghỉ 0.4s giữa các kênh để không bị Discord Rate Limit
                                 await asyncio.sleep(0.4)
                             except (discord.Forbidden, discord.HTTPException):
                                 pass
 
-                    # Cập nhật tiến trình cho server lớn sau mỗi 15 kênh
                     if total_channels > 50 and idx % 15 == 0 and progress_msg:
                         try:
                             await progress_msg.edit(content=f"⏳ **Đang {action_word}... ({idx}/{total_channels} kênh)**")

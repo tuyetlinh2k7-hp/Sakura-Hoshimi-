@@ -9,13 +9,9 @@ from Check.i18n import t
 class ChatDeleteLog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Hàng đợi gom tin nhắn xóa lẻ theo channel_id: {channel_id: [list_of_items]}
         self.delete_queues: dict[int, list[dict]] = {}
-        # Quản lý các task đang đếm ngược theo channel_id
         self.queue_tasks: dict[int, asyncio.Task] = {}
-        # Thời gian chờ gom tin nhắn (giây)
         self.QUEUE_DELAY = 4.0
-        # Giới hạn kích thước mỗi file tải lại (8MB) để tránh quá tải RAM / lỗi upload
         self.MAX_FILE_SIZE = 8 * 1024 * 1024
 
     def cog_unload(self):
@@ -52,10 +48,9 @@ class ChatDeleteLog(commands.Cog):
         trước khi link CDN bị vô hiệu hóa sau khi xóa.
         """
         files = []
-        for att in message.attachments[:5]:  # Giới hạn tối đa 5 file mỗi tin nhắn
+        for att in message.attachments[:5]:
             if att.size <= self.MAX_FILE_SIZE:
                 try:
-                    # use_cached=True giúp tải từ media proxy, tỉ lệ thành công cao hơn khi vừa xóa
                     file_obj = await att.to_file(use_cached=True)
                     files.append(file_obj)
                 except (discord.HTTPException, discord.NotFound):
@@ -81,15 +76,12 @@ class ChatDeleteLog(commands.Cog):
 
         message = payload.cached_message
 
-        # Bỏ qua nếu tin nhắn nằm trong cache và tác giả là Bot
         if message and message.author.bot:
             return
 
-        # Nếu tin nhắn có trong cache: tải ngay file đính kèm và tìm người xóa
         saved_files = []
         deleter = None
         if message:
-            # Chạy song song việc tải file từ cache và quét Audit Log để tiết kiệm thời gian
             saved_files, deleter = await asyncio.gather(
                 self.extract_attachments(message),
                 self.get_deleter(message)
@@ -109,7 +101,6 @@ class ChatDeleteLog(commands.Cog):
             "deleted_at": discord.utils.utcnow()
         })
 
-        # Reset bộ đếm thời gian chờ (Debounce)
         if channel_id in self.queue_tasks and not self.queue_tasks[channel_id].done():
             self.queue_tasks[channel_id].cancel()
 
@@ -145,7 +136,6 @@ class ChatDeleteLog(commands.Cog):
         log_channel: discord.TextChannel,
         item: dict
     ):
-        # TRƯỜNG HỢP 1A: Tin nhắn cũ không nằm trong bộ nhớ đệm (Uncached)
         if not item["cached"]:
             embed = discord.Embed(
                 title=t(guild, "LOG_DELETE_TITLE"),
@@ -163,7 +153,6 @@ class ChatDeleteLog(commands.Cog):
                 pass
             return
 
-        # TRƯỜNG HỢP 1B: Tin nhắn có đầy đủ trong bộ nhớ đệm (Cached)
         message: discord.Message = item["message"]
         deleter: discord.abc.User | None = item["deleter"]
         files: list[discord.File] = item["files"]
@@ -191,7 +180,6 @@ class ChatDeleteLog(commands.Cog):
             inline=True
         )
 
-        # Thông tin người xóa
         if deleter and deleter.id != message.author.id:
             deleter_str = f"{deleter.mention} (`{deleter.id}`)"
         else:
@@ -203,7 +191,6 @@ class ChatDeleteLog(commands.Cog):
             inline=False
         )
 
-        # Ngữ cảnh Reply (Nếu tin nhắn bị xóa đang trả lời một tin nhắn khác)
         if message.reference and message.reference.message_id:
             ref_url = f"https://discord.com/channels/{guild.id}/{message.channel.id}/{message.reference.message_id}"
             embed.add_field(
@@ -212,7 +199,6 @@ class ChatDeleteLog(commands.Cog):
                 inline=False
             )
 
-        # Nội dung văn bản
         content = (
             message.content[:1000]
             if message.content
@@ -224,7 +210,6 @@ class ChatDeleteLog(commands.Cog):
             inline=False
         )
 
-        # Thông tin Nhãn dán (Stickers)
         if message.stickers:
             sticker_info = "\n".join(
                 [f"• **{s.name}** (`{s.id}`) - [Link ảnh]({s.url})" for s in message.stickers]
@@ -234,11 +219,9 @@ class ChatDeleteLog(commands.Cog):
                 value=sticker_info[:1024],
                 inline=False
             )
-            # Nếu không có ảnh đính kèm nào khác, hiển thị luôn ảnh Sticker lên Embed
             if not files:
                 embed.set_thumbnail(url=message.stickers[0].url)
 
-        # Thông tin Tệp đính kèm (Attachments)
         if message.attachments:
             att_lines = []
             for att in message.attachments[:5]:
@@ -251,7 +234,6 @@ class ChatDeleteLog(commands.Cog):
                 inline=False
             )
 
-            # Nếu file tải lại đầu tiên là hình ảnh, gắn trực tiếp vào trong khung Embed
             if files and files[0].filename.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".webp")):
                 embed.set_image(url=f"attachment://{files[0].filename}")
 
@@ -297,7 +279,6 @@ class ChatDeleteLog(commands.Cog):
             inline=True
         )
 
-        # Thống kê Mod/Admin xóa
         deleters = {
             i["deleter"]
             for i in cached_items
@@ -355,7 +336,6 @@ class ChatDeleteLog(commands.Cog):
                 text=t(guild, "LOG_DELETE_BULK_FOOTER", remaining=len(items) - len(preview))
             )
 
-        # Tạo file .txt chi tiết và gom các file ảnh/đính kèm đã tải lại (tối đa 10 file trong 1 lần gửi của Discord)
         log_lines = []
         upload_files = []
 
@@ -378,7 +358,6 @@ class ChatDeleteLog(commands.Cog):
                 f"{msg_content}{sticker_info}{att_info}"
             )
 
-            # Gom thêm các file đã cứu được (chừa 1 chỗ cho file .txt tổng hợp, tức tối đa 9 file đính kèm)
             for f in item["files"]:
                 if len(upload_files) < 9:
                     upload_files.append(f)

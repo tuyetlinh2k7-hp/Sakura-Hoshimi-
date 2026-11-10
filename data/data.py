@@ -1,8 +1,5 @@
 import discord
 
-# =============================================================================
-# CẦN CÂU & MỒI CÂU CƠ BẢN
-# =============================================================================
 fishing_rods = {
     "🎣 Cần Câu Gỗ": {
         "level": 1,
@@ -69,9 +66,6 @@ RARITY_COLORS = {
     "admin": discord.Color.red()
 }
 
-# =============================================================================
-# CÁ SỰ KIỆN THEO MÙA MỞ RỘNG (EVENT FISH - ĐÃ TĂNG GIÁ GẤP 9 - 11 LẦN)
-# =============================================================================
 event_fish = [
     {"name": "🎄 Cá Noel Băng Giá", "price": 500000, "chance": 0.5, "rarity": "legendary", "description": "Cá chỉ xuất hiện mùa Giáng Sinh tuyết trắng phủ ngọn sóng."},
     {"name": "🎃 Cá Bí Ngô Ám Ảnh", "price": 420000, "chance": 0.7, "rarity": "epic", "description": "Cá Halloween ma mị với nụ cười bí ngô phát sáng bí ẩn."},
@@ -93,9 +87,6 @@ event_fish = [
     {"name": "🃏 Cá Trêu Đùa (Cá Tháng Tư)", "price": 404404, "chance": 0.6, "rarity": "epic", "description": "Bơi giật lùi và đánh lừa thị giác của mọi cần thủ bất cẩn."}
 ]
 
-# =============================================================================
-# HỆ THỐNG ĐỘT BIẾN GEN (MUTATIONS)
-# =============================================================================
 mutations = [
     {"name": "🔥 Lửa Rực Cháy", "price_multi": 2.0},
     {"name": "❄️ Băng Giá Vĩnh Cửu", "price_multi": 2.0},
@@ -139,13 +130,7 @@ mutations = [
     {"name": "👑 Thần Vương Tối Thượng", "price_multi": 50.0}
 ]
 
-# =============================================================================
-# BÁCH KHOA TOÀN THƯ SINH VẬT BIỂN (ĐÃ TĂNG GIÁ GẤP 9 - 11 LẦN)
-# =============================================================================
 fish_list = [
-    # -------------------------------------------------------------------------
-    # ⚪ COMMON (THƯỜNG - GIÁ GỐC 8-30 COIN ➜ NÂNG LÊN 90 - 320 COIN)
-    # -------------------------------------------------------------------------
     {"name": "🐟 Cá Chép", "price": 100, "chance": 100, "rarity": "common", "description": "Loài cá nước ngọt phổ biến quen thuộc."},
     {"name": "🐠 Cá Hề", "price": 160, "chance": 95, "rarity": "common", "description": "Cá nhỏ thích ẩn náu trong các bụi hải quỳ rạn san hô."},
     {"name": "🐟 Cá Rô Đồng", "price": 120, "chance": 95, "rarity": "common", "description": "Cá đồng khỏe khoắn, thích nghi tốt."},
@@ -207,9 +192,6 @@ fish_list = [
     {"name": "🦐 Tôm Tít Cỡ Vừa", "price": 250, "chance": 55, "rarity": "common", "description": "Càng búa gõ vỏ ốc lách cách dưới đáy biển."},
     {"name": "🦀 Ghẹ Xanh Cửa Biển", "price": 270, "chance": 51, "rarity": "common", "description": "Ghẹ xanh tươi rói hai mái chèo bơi thoăn thoắt."},
 
-    # -------------------------------------------------------------------------
-    # 🔵 RARE (HIẾM - GIÁ GỐC 150-950 COIN ➜ NÂNG LÊN 1,500 - 10,000 COIN)
-    # -------------------------------------------------------------------------
     {"name": "🐡 Cá Nóc Gai Độc", "price": 1500, "chance": 25, "rarity": "rare", "description": "Phồng tròn gai góc chứa chất độc nhưng thịt siêu đắt."},
     {"name": "🦑 Mực Khổng Lồ", "price": 2200, "chance": 20, "rarity": "rare", "description": "Thân mềm với những giác bám và xúc tu khỏe khoắn."},
     {"name": "🐙 Bạch Tuộc Đốm Xanh", "price": 2800, "chance": 18, "rarity": "rare", "description": "Bạch tuộc độc có vòng đốm xanh cảnh báo nguy hiểm."},
@@ -261,9 +243,6 @@ fish_list = [
     {"name": "🐟 Cá Cương Thi Biển Sâu", "price": 8900, "chance": 5, "rarity": "rare", "description": "Làn da nhợt nhạt và hàm răng chìa ra rùng rợn."},
     {"name": "🦀 Cua Lông Thượng Hải", "price": 7700, "chance": 7, "rarity": "rare", "description": "Lớp lông nâu mịn ở càng, gạch béo ngậy nức tiếng."},
 
-    # -------------------------------------------------------------------------
-    # 🟣 EPIC (SỬ THI - GIÁ GỐC 4,500-21,000 COIN ➜ NÂNG LÊN 45,000 - 210,000 COIN)
-    # -------------------------------------------------------------------------
     {"name": "🦈 Cá Mập Trắng Khổng Lồ", "price": 45000, "chance": 4.0, "rarity": "epic", "description": "Cỗ máy săn mồi hoàn hảo đứng đầu chuỗi thức ăn đại dương."},
     {"name": "🐬 Cá Heo Lưng Xám Thần Tốc", "price": 52000, "chance": 3.2, "rarity": "epic", "description": "Bơi lượn xé toạc ngọn sóng với trí tuệ vượt bậc."},
     {"name": "🐋 Cá Voi Xanh Đại Dương", "price": 80000, "chance": 2.0, "rarity": "epic", "description": "Sinh vật có kích thước vĩ đại nhất từng tồn tại trên Trái Đất."},
@@ -307,9 +286,6 @@ fish_list = [
     {"name": "🦈 Cá Mập Vây Đen Biển Đỏ", "price": 148000, "chance": 0.85, "rarity": "epic", "description": "Tốc độ bứt phá kinh hoàng ở những eo biển hẹp hiểm trở."},
     {"name": "🪼 Sứa Hộp Chết Chóc Chironex", "price": 162000, "chance": 0.65, "rarity": "epic", "description": "Nọc độc làm tê liệt tim trong vài giây trôi dạt trong suốt."},
 
-    # -------------------------------------------------------------------------
-    # 🟡 LEGENDARY (HUYỀN THOẠI - GIÁ GỐC 60,000-2,600,000 COIN ➜ NÂNG LÊN 600,000 - 26,000,000 COIN)
-    # -------------------------------------------------------------------------
     {"name": "🐉 Hắc Long Hải Thần", "price": 600000, "chance": 0.8, "rarity": "legendary", "description": "Rồng đen trấn giữ long mạch biển sâu ngàn năm."},
     {"name": "🐙 Thủy Quái Kraken Bắc Hải", "price": 850000, "chance": 0.5, "rarity": "legendary", "description": "Cơn ác mộng kinh hoàng nhất của mọi thuyền trưởng từng ra khơi."},
     {"name": "🐋 Thủy Thần Leviathan", "price": 1200000, "chance": 0.3, "rarity": "legendary", "description": "Cự thú đại dương có thân hình to lớn như cả một hòn đảo di động."},
@@ -343,9 +319,6 @@ fish_list = [
     {"name": "🦚 Cá Khổng Tước Thần Hải", "price": 23000000, "chance": 0.0035, "rarity": "legendary", "description": "Đuôi xòe như chim khổng tước phát ra âm thanh du dương ru ngủ đại dương."},
     {"name": "⚔️ Kiếm Thần Ngư Excalibur", "price": 26000000, "chance": 0.0028, "rarity": "legendary", "description": "Mũi kiếm đúc từ thiên thạch rèn bởi các pháp sư hoàng gia cổ đại."},
 
-    # -------------------------------------------------------------------------
-    # 🔴 ADMIN (THẦN THOẠI TỐI CAO - GIÁ GỐC 5M-999M ➜ NÂNG LÊN 50M - 9.9 TỶ COIN)
-    # -------------------------------------------------------------------------
     {"name": "👑 Cá Thần Tối Thượng", "price": 50000000, "chance": 0.003, "rarity": "admin", "description": "Sinh vật tôn quý tối thượng cai quản toàn bộ sinh linh biển cả."},
     {"name": "🌌 Cá Hư Không Vĩnh Cửu", "price": 100000000, "chance": 0.0015, "rarity": "admin", "description": "Sinh vật vượt ra ngoài ranh giới không gian và thời gian 3 chiều."},
     {"name": "👾 Discord Leviathan Nguyên Bản", "price": 250000000, "chance": 0.0008, "rarity": "admin", "description": "Được tạo nên từ hàng tỷ dòng code và năng lượng máy chủ Discord."},
@@ -374,7 +347,6 @@ fish_list = [
     {"name": "🔥 Phượng Hoàng Lửa Bất Diệt Solaris", "price": 6800000000, "chance": 0.000012, "rarity": "admin", "description": "Hóa tro tàn sau mỗi 1000 năm rồi hồi sinh từ ngọn lửa đáy biển."}
 ]
 
-# Tải thêm cá tùy chỉnh tạo từ Admin Web nếu có
 try:
     import json
     from pathlib import Path
@@ -387,9 +359,6 @@ try:
 except Exception:
     pass
 
-# =============================================================================
-# CỬA HÀNG VẬT PHẨM & NÂNG CẤP
-# =============================================================================
 shop_items = {
     "rename_card": {
         "name": "📝 Thẻ Đổi Tên",
@@ -536,7 +505,6 @@ shop_items = {
         "fish_slots": 999,
         "description": "Kho chứa cá vô hạn."
     },
-    # Cần câu
     "rod_wood": {
         "name": "🎣 Cần Câu Gỗ",
         "price": 2500,
@@ -627,7 +595,6 @@ shop_items = {
         "durability": 99999,
         "rarity": "admin"
     },
-    # Mồi câu
     "bait_normal": {
         "name": "🪱 Mồi Thường",
         "price": 300,
@@ -680,9 +647,6 @@ shop_items = {
 
 market = {}
 
-# =============================================================================
-# DỮ LIỆU CUNG HOÀNG ĐẠO (ZODIAC)
-# =============================================================================
 ZODIAC_DATA = [
     {
         "name": "Bảo Bình (Aquarius)", "emoji": "♒", "dates": "20/01 - 18/02", "start_code": 120, "end_code": 218, "color": 0x2980b9,
@@ -758,11 +722,7 @@ ZODIAC_DATA = [
     }
 ]
 
-# =============================================================================
-# DỮ LIỆU BÀI TAROT (78 LÁ)
-# =============================================================================
 TAROT_DECK = {
-    # 22 Lá Ẩn Chính (Major Arcana)
     "0. The Fool (Chàng Khờ)": {"upright": "Khởi đầu mới, tự do, ngây thơ, phiêu lưu, tự phát.", "reversed": "Liều lĩnh, bất cẩn, trì hoãn, sợ rủi ro, ngây ngô."},
     "I. The Magician (Nhà Ảo Thuật)": {"upright": "Sức mạnh ý chí, khéo léo, tài năng, chủ động, hiện thực hóa ước mơ.", "reversed": "Thao túng, lừa dối, lãng phí tiềm năng, ảo tưởng sức mạnh."},
     "II. The High Priestess (Nữ Tư Tế)": {"upright": "Trực giác, bí ẩn, tiềm thức, sự thông thái, tĩnh lặng.", "reversed": "Bí mật bị lộ, lờ đi tiếng nói bên trong, hời hợt, bồn chồn."},
@@ -786,7 +746,6 @@ TAROT_DECK = {
     "XX. Judgement (Phán Xét)": {"upright": "Thức tỉnh, tiếng gọi lương tri, tha thứ, quyết định quan trọng.", "reversed": "Nghi ngờ bản thân, đổ lỗi, trốn tránh quyết định."},
     "XXI. The World (Thế Giới)": {"upright": "Hoàn thành, trọn vẹn, thành tựu, tự do, kết thúc mỹ mãn.", "reversed": "Chưa hoàn tất, thiếu kiên nhẫn, mục tiêu dang dở."},
 
-    # Bộ Gậy (Wands)
     "Ace of Wands": {"upright": "Cơ hội mới, cảm hứng dồi dào, đam mê bùng cháy.", "reversed": "Trì hoãn khởi đầu, thiếu động lực, lãng phí ý tưởng."},
     "Two of Wands": {"upright": "Lên kế hoạch, định hướng tương lai, đưa ra lựa chọn.", "reversed": "Thiếu chuẩn bị, sợ hãi bước ra vùng an toàn."},
     "Three of Wands": {"upright": "Mở rộng tầm nhìn, chờ đợi thành quả, thám hiểm.", "reversed": "Thất vọng, dự án bị đình trệ, tầm nhìn ngắn hạn."},
@@ -802,7 +761,6 @@ TAROT_DECK = {
     "Queen of Wands": {"upright": "Tự tin, quyến rũ, quảng giao, độc lập, ấm áp.", "reversed": "Ghen tị, thao túng, nóng nảy, tự ti thầm kín."},
     "King of Wands": {"upright": "Nhà lãnh đạo, tầm nhìn lớn, bản lĩnh, kinh doanh giỏi.", "reversed": "Độc tài, bốc đồng, kỳ vọng quá cao, ích kỷ."},
 
-    # Bộ Cốc (Cups)
     "Ace of Cups": {"upright": "Tình yêu mới, cảm xúc dâng trào, trực giác nhạy bén.", "reversed": "Cảm xúc dồn nén, thất tình, trống rỗng."},
     "Two of Cups": {"upright": "Kết nối, tình cảm đôi lứa, đối tác ăn ý, hòa hợp.", "reversed": "Bất hòa, rạn nứt tình cảm, mất cân bằng quan hệ."},
     "Three of Cups": {"upright": "Tình bạn, tụ tập, ăn mừng, chia sẻ niềm vui.", "reversed": "Người thứ ba, tiệc tùng quá đà, cô lập khỏi nhóm."},
@@ -818,7 +776,6 @@ TAROT_DECK = {
     "Queen of Cups": {"upright": "Giàu tình cảm, thấu cảm, người mẹ hiền, trực giác tốt.", "reversed": "Thao túng cảm xúc, quá nhạy cảm, ghen tuông vô cớ."},
     "King of Cups": {"upright": "Kiểm soát cảm xúc giỏi, thông thái, điềm tĩnh, bao dung.", "reversed": "Lạnh lùng, bạo lực lạnh, giả tạo cảm xúc."},
 
-    # Bộ Kiếm (Swords)
     "Ace of Swords": {"upright": "Ý tưởng đột phá, sự thật, tư duy sắc bén, chiến thắng.", "reversed": "Nhầm lẫn, phán đoán sai, giao tiếp thất bại."},
     "Two of Swords": {"upright": "Tiến thoái lưỡng nan, bế tắc, né tránh quyết định.", "reversed": "Mông lung, buộc phải chọn, sự thật đau lòng phơi bày."},
     "Three of Swords": {"upright": "Tổn thương, đau lòng, chia tay, thất vọng tràn trề.", "reversed": "Chữa lành tổn thương, tha thứ, giải phóng u uất."},
@@ -834,7 +791,6 @@ TAROT_DECK = {
     "Queen of Swords": {"upright": "Sắc sảo, độc lập, lý trí, thẳng thắn, rạch ròi.", "reversed": "Lạnh lùng, độc miệng, định kiến, thù dai."},
     "King of Swords": {"upright": "Thẩm phán, tư duy logic cao, chân lý, kỷ luật, uy quyền.", "reversed": "Tàn nhẫn, thao túng luật lệ, ích kỷ, độc đoán."},
 
-    # Bộ Tiền (Pentacles)
     "Ace of Pentacles": {"upright": "Cơ hội tài chính, tài lộc, khởi đầu thực tế, may mắn tiền bạc.", "reversed": "Bỏ lỡ cơ hội đầu tư, hao tài tốn của, tính toán sai."},
     "Two of Pentacles": {"upright": "Cân bằng tài chính, xoay xở nhiều việc, linh hoạt.", "reversed": "Mất cân bằng, ôm đồm quá nhiều việc dẫn đến đổ bể."},
     "Three of Pentacles": {"upright": "Hợp tác đội nhóm, kỹ năng tốt, xây dựng nền tảng.", "reversed": "Làm việc nhóm kém, thiếu liên kết, chuyên môn yếu."},

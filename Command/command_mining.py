@@ -20,14 +20,10 @@ try:
 except Exception:
     ENCHANT_AFFIXES = []
 
-# ==============================================================================
-# HỆ THỐNG ĐÀO KHOÁNG SẢN (MINING SYSTEM - SAKURA BOT)
-# ==============================================================================
 
 MINING_DATA_FILE = Path("data/mining_data.json")
 mining_state: Dict[str, Any] = {"users": {}}
 
-# --- 1. DANH MỤC CUỐC ĐÀO (PICKS CATALOG) ---
 PICKS_CATALOG: Dict[str, Dict[str, Any]] = {
     "pick_wooden": {
         "id": "pick_wooden", "name": "Cuốc Gỗ Sơ Cấp", "icon": "🪵", "rarity": "common",
@@ -71,41 +67,33 @@ PICKS_CATALOG: Dict[str, Dict[str, Any]] = {
     }
 }
 
-# --- 2. DANH MỤC KHOÁNG SẢN & ĐÁ QUÝ (ORES CATALOG) ---
 ORES_CATALOG: Dict[str, Dict[str, Any]] = {
-    # COMMON
     "ore_stone": {"id": "ore_stone", "name": "Đá Hoa Cương", "icon": "🪨", "rarity": "common", "price": 50, "weight_range": (1.0, 4.0), "desc": "Đá thô thông thường dưới lòng đất."},
     "ore_coal": {"id": "ore_coal", "name": "Than Đá Hắc Thạch", "icon": "⬛", "rarity": "common", "price": 140, "weight_range": (1.2, 5.0), "desc": "Nhiên liệu đốt quan trọng."},
     "ore_copper": {"id": "ore_copper", "name": "Đồng Thô Cổ Điển", "icon": "🟫", "rarity": "common", "price": 320, "weight_range": (2.0, 7.5), "desc": "Quặng đồng mang ánh đỏ ánh vàng."},
     
-    # UNCOMMON
     "ore_iron": {"id": "ore_iron", "name": "Quặng Sắt Tôi Rèn", "icon": "⚙️", "rarity": "uncommon", "price": 680, "weight_range": (3.0, 10.0), "desc": "Kim loại kiên cố phục vụ chế tác."},
     "ore_silver": {"id": "ore_silver", "name": "Bạc Ánh Trăng", "icon": "🥈", "rarity": "uncommon", "price": 1450, "weight_range": (2.5, 9.0), "desc": "Quặng bạc lấp lánh như trăng rằm."},
     "ore_lapis": {"id": "ore_lapis", "name": "Lapis Thần Bí", "icon": "🧿", "rarity": "uncommon", "price": 2200, "weight_range": (1.5, 6.0), "desc": "Khoáng thạch xanh thẳm tích tụ ma lực lòng đất."},
 
-    # RARE
     "ore_gold": {"id": "ore_gold", "name": "Vàng Khối Tinh Khiết", "icon": "🪙", "rarity": "rare", "price": 3800, "weight_range": (4.0, 14.0), "desc": "Khối vàng tự nhiên lấp lánh ánh kim."},
     "gem_amethyst": {"id": "gem_amethyst", "name": "Thạch Anh Tím Hoàng Triều", "icon": "🟣", "rarity": "rare", "price": 5600, "weight_range": (1.0, 5.0), "desc": "Pha lê tím huyền bí tỏa sáng trong bóng tối."},
     "gem_topaz": {"id": "gem_topaz", "name": "Hoàng Ngọc Topaz", "icon": "🔶", "rarity": "rare", "price": 7500, "weight_range": (1.2, 6.0), "desc": "Viên đá quý màu hổ phách ấm áp."},
 
-    # EPIC
     "gem_emerald": {"id": "gem_emerald", "name": "Ngọc Lục Bảo Đế Vương", "icon": "🟢", "rarity": "epic", "price": 13500, "weight_range": (1.0, 4.5), "desc": "Viên ngọc màu xanh lục bảo tượng trưng cho sự thịnh vượng."},
     "gem_ruby": {"id": "gem_ruby", "name": "Hồng Ngọc Huyết Long", "icon": "🔴", "rarity": "epic", "price": 19000, "weight_range": (1.2, 5.5), "desc": "Viên đá đỏ rực như máu rồng thức tỉnh."},
     "gem_sapphire": {"id": "gem_sapphire", "name": "Lam Ngọc Biển Cả", "icon": "🔷", "rarity": "epic", "price": 26000, "weight_range": (1.5, 6.0), "desc": "Viên ngọc xanh biếc mang linh hồn đại dương."},
     "gem_diamond": {"id": "gem_diamond", "name": "Kim Cương Tinh Khiết", "icon": "💎", "rarity": "epic", "price": 38000, "weight_range": (1.0, 7.0), "desc": "Khoáng vật cứng nhất tự nhiên, khúc xạ ánh sáng đa sắc."},
 
-    # LEGENDARY
     "ore_obsidian": {"id": "ore_obsidian", "name": "Hắc Diện Thạch Hắc Ám", "icon": "🔲", "rarity": "legendary", "price": 65000, "weight_range": (8.0, 30.0), "desc": "Dung nham đông cứng tạo thành khối đá đen tuyền bất hoại."},
     "fossil_ancient": {"id": "fossil_ancient", "name": "Hóa Thạch Rồng Tiền Sử", "icon": "🦖", "rarity": "legendary", "price": 110000, "weight_range": (15.0, 45.0), "desc": "Dấu tích hóa thạch cổ xưa của loài rồng ngàn năm tuổi."},
     "ore_meteorite": {"id": "ore_meteorite", "name": "Mảnh Thiên Thạch Vũ Trụ", "icon": "☄️", "rarity": "legendary", "price": 185000, "weight_range": (6.0, 25.0), "desc": "Vụn vẫn thạch rơi từ khoảng không vũ trụ hàng triệu năm trước."},
     "ore_netherite": {"id": "ore_netherite", "name": "Kim Loại Netherite Địa Ngục", "icon": "🧱", "rarity": "legendary", "price": 320000, "weight_range": (10.0, 35.0), "desc": "Mảnh phế tích cổ đại được nén chặt dưới tầng dung nham sâu."},
 
-    # MYTHIC & GODLY
     "heart_of_earth": {"id": "heart_of_earth", "name": "Trái Tim Địa Mẫu Gaia", "icon": "❤️‍🔥", "rarity": "mythic", "price": 750000, "weight_range": (20.0, 60.0), "desc": "Khối tinh hoa magma ấm nóng nuôi dưỡng linh khí cả hành tinh."},
     "void_singularity": {"id": "void_singularity", "name": "Hạt Nhân Hư Không The End", "icon": "🌌", "rarity": "godly", "price": 2000000, "weight_range": (35.0, 100.0), "desc": "Vật thể kỳ dị bẻ cong không thời gian, báu vật tối thượng của người khai mỏ."}
 }
 
-# --- 3. VÙNG KHAI THÁC MỎ (MINING ZONES) ---
 MINING_ZONES: Dict[str, Dict[str, Any]] = {
     "hang_dat": {
         "id": "hang_dat", "name": "Hang Đất Đồi Cỏ", "icon": "🌿", "min_level": 0,
@@ -133,7 +121,6 @@ MINING_ZONES: Dict[str, Dict[str, Any]] = {
     }
 }
 
-# --- 4. ĐỘT BIẾN KHOÁNG SẢN (MINING MUTATIONS) ---
 MINING_MUTATIONS: List[Dict[str, Any]] = [
     {"id": "gold_vein", "name": "Mạch Kim Quang", "prefix": "✨ [Kim Quang]", "price_multi": 1.5, "weight": 40, "desc": "Quặng nhiễm bụi vàng lấp lánh (+50% giá)."},
     {"id": "radioactive", "name": "Phóng Xạ Lục Huỳnh", "prefix": "☢️ [Phóng Xạ]", "price_multi": 2.2, "weight": 25, "desc": "Phát ra ánh sáng huỳnh quang xanh (+120% giá)."},
@@ -142,7 +129,6 @@ MINING_MUTATIONS: List[Dict[str, Any]] = [
     {"id": "celestial", "name": "Thiên Thể Tinh Thần", "prefix": "🌠 [Thiên Thể]", "price_multi": 7.0, "weight": 5, "desc": "Hạt nhân sao trời giáng thế, giá trị tăng gấp 7 lần!"}
 ]
 
-# --- 5. DÒNG ENCHANT CUỐC (MINING AFFIXES) ---
 MINING_ENCHANTS: List[Dict[str, Any]] = [
     {"id": "luck_vein", "name": "Cảm Ứng Mạch Vàng", "icon": "🍀", "stat": "luck", "min_val": 20, "max_val": 80, "val_range": (20, 80), "fmt": "+{val} May Mắn", "desc": "Tăng vận may đào trúng khoáng sản quý"},
     {"id": "fast_strike", "name": "Nhát Búa Thần Tốc", "icon": "⚡", "stat": "mine_speed", "min_val": 10, "max_val": 40, "val_range": (10, 40), "fmt": "-{val}% Hồi chiêu đào", "desc": "Giảm thời gian hồi chiêu giữa mỗi lần vung cuốc"},
@@ -152,7 +138,6 @@ MINING_ENCHANTS: List[Dict[str, Any]] = [
     {"id": "refine_touch", "name": "Bậc Thầy Đập Cuốc", "icon": "🔨", "stat": "refine_rate", "min_val": 5, "max_val": 18, "val_range": (5, 18), "fmt": "+{val}% Tỉ lệ đập đồ", "desc": "Tăng tỷ lệ thành công khi cường hóa +150 & thăng sao"}
 ]
 
-# --- 6. VẬT PHẨM HỖ TRỢ (DYNAMITE & BUFFS) ---
 MINING_SUPPLIES: Dict[str, Dict[str, Any]] = {
     "tnt_small": {"id": "tnt_small", "name": "Kíp Nổ Dynamite Mini", "icon": "🧨", "price": 4500, "desc": "Gây nổ hầm mỏ tức thì, văng thêm 1 viên quặng ngẫu nhiên."},
     "tnt_large": {"id": "tnt_large", "name": "Khối Thuốc Nổ TNT Thượng Hạng", "icon": "💣", "price": 25000, "desc": "Sức công phá mạnh mẽ, khai quật cùng lúc 3 khoáng sản."},
@@ -175,7 +160,6 @@ RARITY_ICONS = {
     "epic": "🟣", "legendary": "🟡", "mythic": "🔴", "godly": "🌟"
 }
 
-# --- PERSISTENCE HELPERS ---
 CUSTOM_MINING_FILE = Path("data/custom_mining_items.json")
 
 def load_custom_mining_items():
@@ -275,9 +259,6 @@ def get_pick_enchant_stats(pick_data: dict) -> dict:
                     stats[st] += val
     return stats
 
-# ==============================================================================
-# VIEW: QTE ĐẬP MẠCH KHOÁNG HIẾM (MINING QTE VIEW)
-# ==============================================================================
 class MiningQTEView(discord.ui.View):
     def __init__(self, author: discord.Member, target_action: str, guild_id: Optional[int] = None):
         super().__init__(timeout=4.5)
@@ -317,9 +298,6 @@ class MiningQTEView(discord.ui.View):
             self.stop()
         return callback
 
-# ==============================================================================
-# VIEW: ĐỊA CHẤT VIỆN BẢO TÀNG (MINING MUSEUM VIEW)
-# ==============================================================================
 class MiningMuseumView(discord.ui.View):
     def __init__(self, owner: discord.User, viewer: discord.User, guild_id: int):
         super().__init__(timeout=240)
@@ -536,15 +514,12 @@ class MiningMuseumView(discord.ui.View):
         u_data = await get_user_data(self.guild_id, self.owner.id)
         await interaction.response.edit_message(embed=inv.build_embed(u_data.get("coins", 0)), view=inv)
 
-# ==============================================================================
-# VIEW: TÚI ĐỒ ĐÀO KHOÁNG (MINING INVENTORY VIEW - 5 TABS)
-# ==============================================================================
 class MiningInventoryView(discord.ui.View):
     def __init__(self, author: discord.Member, guild_id: int):
         super().__init__(timeout=240)
         self.author = author
         self.guild_id = guild_id
-        self.tab = 0  # 0: Cuốc & Giỏ Quặng, 1: Thuốc nổ & Đồ chơi, 2: Cường Hóa +150 & Sao, 3: Enchant Khảm Ngoc, 4: Địa chất viện
+        self.tab = 0
         self._build_components()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
@@ -588,7 +563,6 @@ class MiningInventoryView(discord.ui.View):
         u_mine = get_user_mining(self.author.id)
 
         if self.tab == 0:
-            # Chọn cuốc trang bị
             picks = u_mine.get("picks", {})
             if picks:
                 p_opts = []
@@ -664,7 +638,6 @@ class MiningInventoryView(discord.ui.View):
         )
 
         if self.tab == 0:
-            # Cuốc & Giỏ
             dur_str = f"`{cur_pick.get('durability', 0)}/{cur_pick.get('max_durability', 100)}`" if cur_pick else "`0/0`"
             ref_str = f" +{cur_pick.get('refine',0)}" if cur_pick.get("refine",0) > 0 else ""
             star_str = f" ⭐x{cur_pick.get('stars',0)}" if cur_pick.get("stars",0) > 0 else ""
@@ -681,7 +654,6 @@ class MiningInventoryView(discord.ui.View):
                 f"• Sức chứa giỏ: **`{len(bag)}/{max_bag}` ô** (Tổng trị giá: **`{total_val:,}` coin**)\n"
             )
 
-            # Danh sách quặng gần đây
             if bag:
                 lines = []
                 for i, o in enumerate(bag[-12:], 1):
@@ -825,14 +797,12 @@ class MiningInventoryView(discord.ui.View):
             u_mine.setdefault("buffs", {})[buff_key] = max(now, u_mine.setdefault("buffs", {}).get(buff_key, 0)) + dur
             msg = f"✨ Đã sử dụng **{s_info['name']}**! Kích hoạt hiệu ứng trong **{dur//60} phút**."
         elif s_id == "tnt_small":
-            # Nổ văng 1 quặng
             ore_id = random.choice(list(ORES_CATALOG.keys())[:8])
             o = ORES_CATALOG[ore_id]
             w = round(random.uniform(*o["weight_range"]), 2)
             u_mine.setdefault("ore_bag", []).append({"id": o["id"], "name": o["name"], "rarity": o["rarity"], "price": o["price"], "weight": w, "mutation": None})
             msg = f"🧨 **BÙNG!** Kíp nổ phá đá văng ra **{o['name']}** (`{w}kg`) vào giỏ!"
         elif s_id == "tnt_large":
-            # Nổ văng 3 quặng
             added = []
             for _ in range(3):
                 ore_id = random.choice(list(ORES_CATALOG.keys())[:12])
@@ -871,7 +841,6 @@ class MiningInventoryView(discord.ui.View):
         success_rate = max(0.01, 1.0 - (ref * 0.015)) + (ench_stats.get("refine_rate", 0) / 100.0)
         success_rate = min(0.95, success_rate)
 
-        # Thao túng tỉ lệ đập đồ từ Web Admin hoặc Auto 100% cho Owner / Web Admin
         is_admin_or_owner = False
         try:
             from config import OWNER_ID
@@ -892,7 +861,7 @@ class MiningInventoryView(discord.ui.View):
                 pass
 
         if is_admin_or_owner:
-            success_rate = 1.0  # Owner / Admin Web auto đập 100% lên!
+            success_rate = 1.0
         else:
             try:
                 from data.game_rates import calculate_refine_rate
@@ -935,7 +904,6 @@ class MiningInventoryView(discord.ui.View):
         await update_user_coins(self.guild_id, self.author.id, -cost)
         star_rate = max(0.15, 0.55 - (stars * 0.03))
 
-        # Thao túng tỉ lệ thăng sao từ Web Admin
         try:
             from data.game_rates import calculate_star_rate
             star_rate = calculate_star_rate(star_rate)
@@ -944,7 +912,7 @@ class MiningInventoryView(discord.ui.View):
 
         if random.random() <= star_rate:
             cur_pick["stars"] += 1
-            cur_pick["refine"] = 0  # ĐẶT LẠI VỀ +0 ĐỂ NGƯỜI DÙNG TIẾP TỤC ĐẬP TIẾP LÊN SAO TIẾP THEO
+            cur_pick["refine"] = 0
             cur_pick["luck"] = cur_pick.get("luck", 5) + 80
             msg = f"🌟 **TIẾN CẤP SAO THÀNH CÔNG!** Cuốc đã thăng hoa lên **⭐ {cur_pick['stars']} SAO** (+80 May Mắn)! Cấp cường hóa đã được đặt lại về **+0** để tiếp tục đập lên các cấp sao tiếp theo!"
         else:
@@ -1009,9 +977,6 @@ class MiningInventoryView(discord.ui.View):
         mus_view = MiningMuseumView(self.author, self.author, self.guild_id)
         await interaction.response.edit_message(embed=mus_view.build_embed(), view=mus_view)
 
-# ==============================================================================
-# VIEW: CỬA HÀNG KHAI KHOÁNG (MINING SHOP VIEW)
-# ==============================================================================
 class MiningShopView(discord.ui.View):
     def __init__(self, author: discord.Member, guild_id: int):
         super().__init__(timeout=180)
@@ -1135,9 +1100,6 @@ class MiningShopView(discord.ui.View):
         await interaction.response.edit_message(embed=self.build_embed(new_data.get("coins", 0)), view=self)
         await interaction.followup.send(f"🎒 Đã mở rộng sức chứa giỏ khoáng sản lên **{u_mine['max_bag']} ô**!", ephemeral=True)
 
-# ==============================================================================
-# VIEW: CHỌN MỎ KHOÁNG (MINING ZONE VIEW)
-# ==============================================================================
 class MiningZoneSelectView(discord.ui.View):
     def __init__(self, author: discord.Member, current_zone: str, user_level: int, guild_id: Optional[int] = None):
         super().__init__(timeout=120)
@@ -1184,9 +1146,6 @@ class MiningZoneSelectView(discord.ui.View):
             res = f"⛏️ Relocated to **{z_info['name']}** (+{z_info['luck_bonus']} Luck, +{int(z_info['mutation_bonus']*100)}% Mutation)!"
         await interaction.response.edit_message(content=res, embed=None, view=None)
 
-# ==============================================================================
-# COG: COMMAND MINING (HỆ THỐNG ĐÀO KHOÁNG ĐẦY ĐỦ)
-# ==============================================================================
 class MiningCog(commands.Cog, name="Mining"):
     """Hệ thống khai thác mỏ & khoáng sản quy mô lớn, song hành cùng câu cá."""
 
@@ -1195,7 +1154,6 @@ class MiningCog(commands.Cog, name="Mining"):
 
     def _calculate_mine_catch(self, total_luck: int, zone_mut_bonus: float) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
         """Tính toán quặng đào trúng dựa theo tổng may mắn và tỉ lệ đột biến."""
-        # Thao túng tỉ lệ đào khoáng & quặng quý từ Web Admin
         rare_mult = 1.0
         mut_mult = 1.0
         try:
@@ -1222,7 +1180,6 @@ class MiningCog(commands.Cog, name="Mining"):
 
         chosen_ore = random.choices(ore_pool, weights=weights, k=1)[0]
 
-        # Kiểm tra đột biến
         mut_chance = min(1.0, (0.08 + zone_mut_bonus + (total_luck * 0.0002)) * mut_mult)
         chosen_mut = None
         if random.random() < mut_chance:
@@ -1240,7 +1197,6 @@ class MiningCog(commands.Cog, name="Mining"):
         u_mine = get_user_mining(user_id)
         u_data = await get_user_data(ctx.guild.id, user_id)
 
-        # 1. CỬA HÀNG (SHOP)
         if act in ("shop", "cuahang", "mshop"):
             from Command.command_fishing import FishingShopView
             v = FishingShopView(ctx.author, ctx.guild.id)
@@ -1249,7 +1205,6 @@ class MiningCog(commands.Cog, name="Mining"):
             v._refresh_components()
             return await ctx.send(embed=v.build_embed(u_data.get("coins", 0), int(u_data.get("xu", 0))), view=v)
 
-        # 2. TÚI ĐỒ (INV)
         if act in ("inv", "bag", "tuido", "minv"):
             target_user = ctx.author
             if getattr(ctx, "message", None) and ctx.message.mentions:
@@ -1266,18 +1221,15 @@ class MiningCog(commands.Cog, name="Mining"):
             v = FishingInventoryView(target_user, ctx.guild.id, inv_page=5, enhance_target="pick")
             return await ctx.send(embed=v.build_embed(u_target_data.get("coins", 0), int(u_target_data.get("xu", 0))), view=v)
 
-        # 3. CHỌN MỎ KHOÁNG (ZONE)
         if act in ("zone", "mo", "mzone"):
             v = MiningZoneSelectView(ctx.author, u_mine.get("zone", "hang_dat"), int(u_data.get("level", 0)), guild_id=ctx.guild.id)
             header = "📍 **BẢNG CHỌN MỎ KHOÁNG SẢN:**" if is_vietnamese(ctx.guild.id) else "📍 **MINING ZONE SELECTION:**"
             return await ctx.send(header, view=v)
 
-        # 4. ĐỊA CHẤT VIỆN BẢO TÀNG (MUSEUM)
         if act in ("museum", "baotang", "khoangvien"):
             v = MiningMuseumView(owner=ctx.author, viewer=ctx.author, guild_id=ctx.guild.id)
             return await ctx.send(embed=v.build_embed(), view=v)
 
-        # 5. BÁN KHOÁNG SẢN (SELL)
         if act in ("sell", "ban", "msell"):
             bag = u_mine.setdefault("ore_bag", [])
             vi = is_vietnamese(ctx.guild.id)
@@ -1306,7 +1258,6 @@ class MiningCog(commands.Cog, name="Mining"):
                 bonus_msg = f" (✨ +{bonus_pct}% from Pickaxe & Furnace)" if bonus_pct > 0 else ""
                 return await ctx.send(f"💰 Sold **{count}** ores for **`+{earned:,}` coins**!{bonus_msg}")
 
-        # 6. SỬA CUỐC (REPAIR)
         if act in ("repair", "sua"):
             eq_id = u_mine.get("equipped_pick")
             cur_pick = u_mine.get("picks", {}).get(eq_id)
@@ -1325,14 +1276,12 @@ class MiningCog(commands.Cog, name="Mining"):
             save_mining_data()
             return await ctx.send(f"🔧 Đã sửa chữa hoàn toàn độ bền cho **{cur_pick['name']}** (-`{cost:,}` coin)!" if vi else f"🔧 Fully repaired durability for **{cur_pick['name']}** (-`{cost:,}` coins)!")
 
-        # 7. CƯỜNG HÓA CUỐC (UPGRADE) & ENCHANT
         if act in ("upgrade", "dap", "cuonghoa", "enchant", "gandong"):
             from Command.command_fishing import FishingInventoryView
             tab = 4 if act in ("enchant", "gandong") else 3
             v = FishingInventoryView(ctx.author, ctx.guild.id, inv_page=tab, enhance_target="pick")
             return await ctx.send(embed=v.build_embed(u_data.get("coins", 0), int(u_data.get("xu", 0))), view=v)
 
-        # 8. MẶC ĐỊNH: VUNG CUỐC ĐÀO KHOÁNG (MINE)
         vi = is_vietnamese(ctx.guild.id)
         now = time.time()
         eq_id = u_mine.get("equipped_pick")
@@ -1348,7 +1297,6 @@ class MiningCog(commands.Cog, name="Mining"):
         buffs = u_mine.setdefault("buffs", {})
         ench_stats = get_pick_enchant_stats(current_pick)
 
-        # Tính hồi chiêu đào
         base_cooldown = 10
         if buffs.get("fast_mine", 0) > now:
             base_cooldown = 4
@@ -1366,7 +1314,6 @@ class MiningCog(commands.Cog, name="Mining"):
             msg = f"🎒 Giỏ quặng đầy (`{len(u_mine['ore_bag'])}/{max_bag}`)! Dùng `{ctx.prefix}mine sell` để bán hoặc cất vào bảo tàng." if vi else f"🎒 Ore bag is full (`{len(u_mine['ore_bag'])}/{max_bag}`)! Use `{ctx.prefix}mine sell` to sell or store in museum."
             return await ctx.send(msg, ephemeral=True)
 
-        # Khu vực đào
         z_id = u_mine.get("zone", "hang_dat")
         if z_id not in MINING_ZONES:
             z_id = "hang_dat"
@@ -1375,7 +1322,6 @@ class MiningCog(commands.Cog, name="Mining"):
 
         u_mine["last_mine"] = now
 
-        # Tính toán May Mắn
         pick_luck = current_pick.get("luck", 5) + (current_pick.get("refine", 0) * 4) + ench_stats["luck"]
         lamp_luck = 60 if buffs.get("miner_luck", 0) > now else 0
         total_luck = pick_luck + zone["luck_bonus"] + lamp_luck
@@ -1387,9 +1333,8 @@ class MiningCog(commands.Cog, name="Mining"):
         is_rare_boss = rarity in ("epic", "legendary", "mythic", "godly") or (chosen_mut is not None)
         has_auto_qte = current_pick.get("auto_qte") or (buffs.get("auto_mine_qte", 0) > now)
 
-        # Tiêu hao độ bền
         if ench_stats.get("durability_save", 0) > 0 and (random.random() * 100.0 < ench_stats["durability_save"]):
-            pass # Dòng enchant bảo toàn độ bền
+            pass
         elif current_pick.get("save_durability", 0) > 0 and (random.random() * 100.0 < current_pick["save_durability"]):
             pass
         else:
@@ -1398,7 +1343,6 @@ class MiningCog(commands.Cog, name="Mining"):
                 u_mine["stats"]["broken_picks"] = u_mine["stats"].get("broken_picks", 0) + 1
                 u_mine["equipped_pick"] = None
 
-        # Mini-game QTE nếu gặp mạch quý
         if is_rare_boss and not has_auto_qte:
             acts = ["left", "down", "right"]
             target_act = random.choice(acts)
@@ -1412,7 +1356,6 @@ class MiningCog(commands.Cog, name="Mining"):
                 fail_msg = "💥 **GÃY LƯỠI CUỐC!** Bạn vung sai hướng, mạch đá sụp đổ làm vỡ vụn khối quặng quý..." if vi else "💥 **PICKAXE SNAPPED!** You swung the wrong way, the rock collapsed crushing the precious ore..."
                 return await qmsg.edit(content=fail_msg, view=None)
 
-        # Khối lượng và giá bán
         weight = round(random.uniform(*chosen_ore["weight_range"]), 2)
         price_multi = chosen_mut.get("price_multi", 1.0) if chosen_mut else 1.0
         pick_sell_bonus = current_pick.get("sell_bonus", 0) / 100.0
@@ -1430,7 +1373,6 @@ class MiningCog(commands.Cog, name="Mining"):
         u_mine.setdefault("ore_bag", []).append(ore_item)
         u_mine["stats"]["total_mined"] = u_mine["stats"].get("total_mined", 0) + 1
 
-        # Cập nhật oredex
         dex = u_mine.setdefault("oredex", {})
         if chosen_ore["name"] not in dex:
             dex[chosen_ore["name"]] = {"count": 1, "max_weight": weight, "rarity": rarity}
@@ -1440,7 +1382,6 @@ class MiningCog(commands.Cog, name="Mining"):
 
         save_mining_data()
 
-        # Kích hoạt thành tựu Đào Khoáng
         try:
             from Command.achievement_system import unlock_achievement
             gid = ctx.guild.id if ctx.guild else 0
@@ -1466,7 +1407,6 @@ class MiningCog(commands.Cog, name="Mining"):
         except Exception:
             pass
 
-        # Tạo embed thông báo khai thác
         icon = RARITY_ICONS.get(rarity, "💎")
         if vi:
             title = f"{icon} Khai Quật Thành Công: {chosen_ore['name']}!"

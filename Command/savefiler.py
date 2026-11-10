@@ -8,7 +8,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-# Cấu hình danh sách loại trừ
 IGNORED_DIRS = {
     ".git",
     "__pycache__",
@@ -23,7 +22,7 @@ IGNORED_DIRS = {
 }
 
 IGNORED_FILES = {
-    ".env",  # Tuyệt đối không leak token
+    ".env",
     ".DS_Store",
     "bot_backup.zip",
 }
@@ -42,7 +41,7 @@ IGNORED_EXTS = {
     ".wav",
 }
 
-MAX_FILE_SIZE_MB = 8.0  # Bỏ qua các file đơn lẻ lớn hơn mức này
+MAX_FILE_SIZE_MB = 8.0
 
 
 def _create_zip_worker(root_dir: str) -> tuple[io.BytesIO, list[str]]:
@@ -55,7 +54,6 @@ def _create_zip_worker(root_dir: str) -> tuple[io.BytesIO, list[str]]:
             buffer, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1
         ) as zf:
             for current_root, dirs, files in os.walk(root_dir):
-                # Bỏ qua thư mục rác và thư mục ẩn
                 dirs[:] = [
                     d
                     for d in dirs
@@ -74,7 +72,6 @@ def _create_zip_worker(root_dir: str) -> tuple[io.BytesIO, list[str]]:
                     relative_path = os.path.relpath(full_path, root_dir)
 
                     try:
-                        # Kiểm tra kích thước file
                         if (
                             os.path.getsize(full_path) / (1024 * 1024)
                             > MAX_FILE_SIZE_MB
@@ -84,7 +81,6 @@ def _create_zip_worker(root_dir: str) -> tuple[io.BytesIO, list[str]]:
                             )
                             continue
 
-                        # Snapshot an toàn cho file SQLite DB tránh lỗi file đang bị ghi
                         if ext.lower() in {".db", ".sqlite", ".sqlite3"}:
                             safe_db_copy = os.path.join(
                                 temp_dir, f"safe_{filename}"
@@ -96,7 +92,7 @@ def _create_zip_worker(root_dir: str) -> tuple[io.BytesIO, list[str]]:
                                 zf.write(safe_db_copy, arcname=relative_path)
                                 continue
                             except Exception:
-                                pass  # Nếu không snapshot được, fallback đọc bình thường
+                                pass
 
                         zf.write(full_path, arcname=relative_path)
 
@@ -114,10 +110,9 @@ class SystemBackup(commands.Cog, name="SystemBackup"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Xác định thư mục gốc của bot
         try:
             self.root_dir = os.path.dirname(
-                os.path.abspath(self.bot.__file__)  # type: ignore
+                os.path.abspath(self.bot.__file__)
             )
         except (AttributeError, TypeError):
             self.root_dir = os.path.abspath(".")
@@ -129,7 +124,7 @@ class SystemBackup(commands.Cog, name="SystemBackup"):
         )
         size_mb = len(zip_buffer.getvalue()) / (1024 * 1024)
 
-        if size_mb > 24.0:  # Ngưỡng file upload của Discord
+        if size_mb > 24.0:
             return (
                 None,
                 f"File nén quá lớn (`{size_mb:.2f} MB`), vượt quá giới hạn tải lên của Discord.",
@@ -142,7 +137,6 @@ class SystemBackup(commands.Cog, name="SystemBackup"):
         file = discord.File(fp=zip_buffer, filename="bot_full_backup.zip")
         return file, report
 
-    # 1. Prefix command dạng Group: `!system backup` hoặc `!sys backup` (Tránh trùng với `!backup` của server)
     @commands.group(
         name="system",
         aliases=["sys", "botadmin"],
@@ -165,7 +159,6 @@ class SystemBackup(commands.Cog, name="SystemBackup"):
         await ctx.send(content=report, file=file)
         await msg.delete()
 
-    # 2. Slash command dạng Group: `/dev backup` (Hiển thị Ephemeral chỉ bạn thấy)
     dev_group = app_commands.Group(
         name="dev", description="Lệnh quản trị dành riêng cho Developer"
     )
@@ -175,7 +168,6 @@ class SystemBackup(commands.Cog, name="SystemBackup"):
         description="Đóng gói mã nguồn và dữ liệu bot (Chỉ Owner)",
     )
     async def slash_backup(self, interaction: discord.Interaction):
-        # Kiểm tra quyền Owner cho slash command
         if not await self.bot.is_owner(interaction.user):
             await interaction.response.send_message(
                 "Bạn không có quyền thực hiện lệnh này!", ephemeral=True
@@ -192,6 +184,5 @@ class SystemBackup(commands.Cog, name="SystemBackup"):
         await interaction.followup.send(content=report, file=file, ephemeral=True)
 
 
-# Entrypoint để bot load file này thành extension
 async def setup(bot: commands.Bot):
     await bot.add_cog(SystemBackup(bot))

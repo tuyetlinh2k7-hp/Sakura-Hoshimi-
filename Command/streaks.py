@@ -14,7 +14,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 DATA_FILE = DATA_DIR / "streks.json" if (DATA_DIR / "streks.json").exists() else DATA_DIR / "streaks.json"
 
-# --- BỘ NHỚ ĐỆM TRÊN RAM (CACHE) ---
 _streak_cache: dict = {}
 
 
@@ -68,7 +67,6 @@ def get_streak_emoji(streak: int) -> str:
 
 
 def get_current_vn_date() -> datetime.date:
-    # Múi giờ Việt Nam UTC+7
     return (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).date()
 
 

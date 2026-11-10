@@ -6,7 +6,6 @@ import copy
 from datetime import datetime
 from Check.i18n import t
 
-# Import các hàm và biến quản lý dữ liệu tập trung
 from Check.data import save_data, guild_settings, get_guild_settings
 
 class SetupCog(commands.Cog):

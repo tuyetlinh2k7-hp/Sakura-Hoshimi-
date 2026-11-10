@@ -11,7 +11,6 @@ from config import OWNER_ID
 from Check.mod import admin_roles, save_admin_roles, has_admin_role
 from Check.i18n import t
 
-# Danh sách 28 quyền quan trọng dùng cho quản lý và autocomplete
 PERMS_LIST = [
     "administrator", "manage_guild", "manage_channels", "manage_roles",
     "manage_messages", "kick_members", "ban_members", "mention_everyone",
@@ -22,14 +21,12 @@ PERMS_LIST = [
     "use_external_emojis", "add_reactions", "connect", "speak", "stream"
 ]
 
-# Các quyền nhạy cảm cần đánh dấu cảnh báo bảo mật
 DANGEROUS_PERMS = {
     "administrator", "manage_guild", "manage_roles", "manage_channels",
     "ban_members", "kick_members", "manage_webhooks", "mention_everyone",
     "manage_messages", "moderate_members"
 }
 
-# Bảng màu gợi ý (Color Presets) cho Autocomplete
 COLOR_PRESETS = {
     "🌸 Hồng Sakura (#FFB7C5)": "#FFB7C5",
     "💎 Xanh Ngọc Bích (#00FFCC)": "#00FFCC",
@@ -45,9 +42,6 @@ COLOR_PRESETS = {
 }
 
 
-# =========================================================================
-# CÁC HÀM PHỤ TRỢ (HELPER FUNCTIONS)
-# =========================================================================
 
 def parse_Color(color_str: Optional[str]) -> Optional[discord.Color]:
     """Chuyển đổi chuỗi mã HEX, tên màu, hoặc preset thành discord.Color."""
@@ -176,9 +170,6 @@ def build_permissions_embed(role: discord.Role, author: discord.abc.User) -> dis
     return embed
 
 
-# =========================================================================
-# CÁC GIAO DIỆN TƯƠNG TÁC (DISCORD UI VIEWS)
-# =========================================================================
 
 class ConfirmDeleteRoleView(discord.ui.View):
     """Hộp thoại xác nhận trước khi xóa vĩnh viễn 1 Role."""
@@ -237,7 +228,6 @@ class PermissionEditView(discord.ui.View):
         enabled_perms = sorted([p for p, v in current_perms.items() if v and p in PERMS_LIST])
         disabled_perms = sorted([p for p in PERMS_LIST if not current_perms.get(p, False)])
 
-        # Menu chọn bật nhiều quyền cùng lúc
         if disabled_perms:
             enable_opts = [
                 discord.SelectOption(
@@ -258,7 +248,6 @@ class PermissionEditView(discord.ui.View):
             enable_sel.callback = self.handle_selection
             self.add_item(enable_sel)
 
-        # Menu chọn tắt nhiều quyền cùng lúc
         if enabled_perms:
             disable_opts = [
                 discord.SelectOption(
@@ -279,7 +268,6 @@ class PermissionEditView(discord.ui.View):
             disable_sel.callback = self.handle_selection
             self.add_item(disable_sel)
 
-        # Nút Cấp tất cả & Xóa tất cả
         btn_all = discord.ui.Button(label="⚡ Cấp toàn bộ (All)", style=discord.ButtonStyle.success, row=2)
         btn_all.callback = self.grant_all_perms
         self.add_item(btn_all)
@@ -309,7 +297,6 @@ class PermissionEditView(discord.ui.View):
         try:
             current_perms = dict(iter(self.role.permissions))
             for p in selected_perms:
-                # Chỉ người có quyền Administrator mới được bật quyền administrator cho Role
                 if p == "administrator" and is_enabling and not interaction.user.guild_permissions.administrator:
                     continue
                 current_perms[p] = is_enabling
@@ -530,21 +517,16 @@ class EmptyRolesCleanupView(discord.ui.View):
         )
 
 
-# =========================================================================
-# COG CHÍNH: QUẢN LÝ TOÀN DIỆN ROLE (GỘP 4 FILE)
-# =========================================================================
 
 class RoleManager(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Quản lý các task thu hồi Temp Role: {(guild_id, user_id, role_id): asyncio.Task}
         self.temp_role_tasks: dict[tuple[int, int, int], asyncio.Task] = {}
 
     def cog_unload(self):
         for task in self.temp_role_tasks.values():
             task.cancel()
 
-    # --- AUTOCOMPLETE ---
     async def perm_autocomplete(self, interaction: discord.Interaction, current: str):
         return [
             app_commands.Choice(name=f"{'⚠️ ' if p in DANGEROUS_PERMS else ''}{p}", value=p)
@@ -558,9 +540,6 @@ class RoleManager(commands.Cog):
             if current.lower() in label.lower() or current.lower() in hex_val.lower()
         ][:25]
 
-    # =====================================================================
-    # NHÓM LỆNH CHÍNH: /role (Và !role)
-    # =====================================================================
 
     @commands.hybrid_group(name="role", description="🎭 Hệ thống quản lý và tra cứu Vai trò (Role) toàn diện.")
     @commands.guild_only()
@@ -607,9 +586,6 @@ class RoleManager(commands.Cog):
             )
             await ctx.send(embed=embed, ephemeral=True)
 
-    # ---------------------------------------------------------------------
-    # 1. NHÓM TRA CỨU: INFO, MEMBERS, PERMS, LIST, COMPARE, EMPTY
-    # ---------------------------------------------------------------------
 
     @role_group.command(name="info", description="🔍 Xem thông tin chi tiết của một Role kèm nút thao tác nhanh.")
     @app_commands.describe(role="Chọn Role bạn muốn xem thông tin")
@@ -650,7 +626,6 @@ class RoleManager(commands.Cog):
             inline=False
         )
 
-        # Cảnh báo nếu Role có quyền nhạy cảm
         danger_active = [p for p, v in iter(role.permissions) if v and p in DANGEROUS_PERMS]
         if danger_active:
             embed.add_field(
@@ -759,9 +734,6 @@ class RoleManager(commands.Cog):
         view = EmptyRolesCleanupView(ctx.author, empty_roles)
         await ctx.send(embed=embed, view=view, ephemeral=True)
 
-    # ---------------------------------------------------------------------
-    # 2. NHÓM CẤP / GỠ ROLE CHO THÀNH VIÊN: ADD (TEMP ROLE), REMOVE, TOGGLE, MASS
-    # ---------------------------------------------------------------------
 
     @role_group.command(name="add", description="➕ Cấp một Role cho thành viên (Hỗ trợ cấp có thời hạn: 30m, 2h, 7d).")
     @app_commands.describe(
@@ -915,16 +887,13 @@ class RoleManager(commands.Cog):
                 else:
                     await m.remove_roles(role, reason=f"Mass {action} by {ctx.author}")
                 success_count += 1
-                await asyncio.sleep(0.3)  # Tránh dính Rate Limit của Discord
+                await asyncio.sleep(0.3)
             except (discord.Forbidden, discord.HTTPException):
                 pass
 
         act_vi = "cấp" if action == "add" else "gỡ"
         await ctx.send(f"✅ Đã {act_vi} Role {role.mention} thành công cho **{success_count}/{len(targets)}** thành viên (`{target}`)!")
 
-    # ---------------------------------------------------------------------
-    # 3. NHÓM TẠO / SỬA / XÓA / NHÂN BẢN ROLE: CREATE, CLONE, EDIT, COLOR, POS, DEL, SET, BULK
-    # ---------------------------------------------------------------------
 
     @role_group.command(name="create", description="🆕 Tạo một Role mới cho Server (Có gợi ý màu sắc đẹp).")
     @app_commands.describe(
@@ -1167,9 +1136,6 @@ class RoleManager(commands.Cog):
             ephemeral=True
         )
 
-    # ---------------------------------------------------------------------
-    # 4. QUẢN LÝ ROLE ADMIN CỦA BOT (GỘP TỪ ROLEADMIN.PY)
-    # ---------------------------------------------------------------------
 
     @role_group.command(name="admin", description="👑 Quản lý danh sách các Role có quyền Admin của Bot.")
     @app_commands.describe(
@@ -1251,7 +1217,6 @@ class RoleManager(commands.Cog):
                     valid_roles.append(f"• {r_obj.mention} (`{r_obj.id}`)")
                     cleaned_ids.append(r_obj.id)
 
-            # Tự động dọn các ID Role đã bị xóa khỏi server
             if len(cleaned_ids) != len(admin_roles[guild_id]):
                 admin_roles[guild_id] = cleaned_ids
                 save_admin_roles()

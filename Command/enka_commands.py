@@ -11,7 +11,6 @@ import aiosqlite
 from openai import AsyncOpenAI
 from Check.i18n import t
 
-# --- CẤU HÌNH XKIRO API ---
 API_KEY = None
 try:
     from config import XKIRO_API_KEY as API_KEY
@@ -56,9 +55,6 @@ ELEMENT_ICONS = {
 }
 
 
-# ==========================================
-# 1. VIEW CHỌN UID ĐÃ LƯU
-# ==========================================
 class UIDSelect(discord.ui.Select):
     def __init__(self, cog_instance, command_name: str, original_ctx, saved_uids: dict, extra_arg: str = None):
         self.cog_instance = cog_instance
@@ -112,9 +108,6 @@ class UIDSelect(discord.ui.Select):
             await self.original_ctx.invoke(self.cog_instance.enka_zzz_build, uid_or_alias=selected_uid, character_name=self.extra_arg)
 
 
-# ==========================================
-# 2. VIEW ĐIỀU KHIỂN BUILD, SNAPSHOT, AI & ẢNH
-# ==========================================
 class CharacterSelect(discord.ui.Select):
     def __init__(self, parent_view: "CharacterBuildView"):
         self.parent_view = parent_view
@@ -319,9 +312,6 @@ class CharacterBuildView(discord.ui.View):
         await interaction.followup.send(embed=team_embed)
 
 
-# ==========================================
-# 3. COG CHÍNH: ENKA NETWORK (SQLite & AI Team)
-# ==========================================
 class EnkaCog(commands.Cog, name="Enka Network"):
     def __init__(self, bot):
         self.bot = bot
@@ -349,9 +339,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         if self.session and not self.session.closed:
             await self.session.close()
 
-    # ==========================================
-    # CƠ SỞ DỮ LIỆU SQLITE (ASYNC ENGINE)
-    # ==========================================
     async def _init_database(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         async with aiosqlite.connect(self.db_path) as db:
@@ -388,7 +375,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         old_history_path = "data/build_history.json"
 
         async with aiosqlite.connect(self.db_path) as db:
-            # 1. Chuyển UID
             if os.path.exists(old_uids_path):
                 try:
                     with open(old_uids_path, 'r', encoding='utf-8') as f:
@@ -413,7 +399,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
                 except Exception as e:
                     print(f"⚠️ Lỗi chuyển đổi user_uids.json: {e}")
 
-            # 2. Chuyển Lịch sử build
             if os.path.exists(old_history_path):
                 try:
                     with open(old_history_path, 'r', encoding='utf-8') as f:
@@ -615,9 +600,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         except Exception as e:
             print(f"❌ Lỗi nạp từ điển Genshin: {e}")
 
-    # ==========================================
-    # TRUY VẤN API ENKA & AKASHA.CV
-    # ==========================================
     async def _fetch_enka_data(self, uid: str, game: str = 'gi', use_cache: bool = True) -> dict:
         self._purge_expired_cache()
         cache_key = (game, uid)
@@ -921,9 +903,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         embed.set_footer(text="Dữ liệu cung cấp bởi Enka.Network", icon_url="https://enka.network/favicon.ico")
         return embed
 
-    # ==========================================
-    # 4. HỆ THỐNG RENDER ẢNH BUILD CARD (PILLOW)
-    # ==========================================
     async def _download_image_bytes(self, url: str) -> bytes:
         try:
             async with self.session.get(url, timeout=10) as resp:
@@ -1098,9 +1077,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
 
         return await asyncio.to_thread(_draw)
 
-    # ==========================================
-    # 5. AI ĐÁNH GIÁ BUILD & ĐỘI HÌNH (XKIRO - MISTRAL LARGE 4.0)
-    # ==========================================
     def _detect_guild_language(self, guild: discord.Guild) -> str:
         if guild:
             loc = str(guild.preferred_locale).lower()
@@ -1256,9 +1232,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         embed.set_footer(text=f"AI Team Synergy Engine • xKiro ({AI_MODEL})")
         return embed
 
-    # ==========================================
-    # CÁC HÀM LẤY PROFILE (TRẢ VỀ EMBED + DATA)
-    # ==========================================
     async def get_gi_profile_with_data(self, uid: str):
         response = await self._fetch_enka_data(uid, 'gi')
         data = response.get("data")
@@ -1376,9 +1349,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         embed.set_footer(text="Dữ liệu cung cấp bởi Enka.Network", icon_url="https://enka.network/favicon.ico")
         return embed, data
 
-    # ==========================================
-    # ⌨️ HỆ THỐNG LỆNH PREFIX (.enka ...)
-    # ==========================================
     @commands.group(name="enka", invoke_without_command=True)
     async def enka_group(self, ctx, *, args: str = None):
         prefix = ctx.prefix
@@ -1575,7 +1545,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         await loading_msg.delete()
         await ctx.send(embed=embed)
 
-    # --- PREFIX HONKAI: STAR RAIL ---
     @enka_group.group(name="hsr", invoke_without_command=True)
     async def enka_hsr(self, ctx, uid_or_alias: str = None):
         saved_uids = await self.get_user_uids_dict(ctx.author.id, "hsr")
@@ -1665,7 +1634,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         await msg.delete()
         await ctx.send(embed=embed)
 
-    # --- PREFIX ZENLESS ZONE ZERO ---
     @enka_group.group(name="zzz", invoke_without_command=True)
     async def enka_zzz(self, ctx, uid_or_alias: str = None):
         saved_uids = await self.get_user_uids_dict(ctx.author.id, "zzz")
@@ -1732,7 +1700,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         view = CharacterBuildView(self, ctx.author.id, uid, "zzz", raw_data, initial_char_idx=target_idx)
         await ctx.send(embed=embed, view=view)
 
-    # --- LƯU, XÓA & XEM DANH SÁCH UID (SQLITE) ---
     @enka_group.command(name="save", aliases=["add", "link"])
     async def enka_save(self, ctx, game: str, alias: str, uid: str = None):
         if uid is None:
@@ -1773,9 +1740,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
 
         await ctx.send(embed=embed)
 
-    # ==========================================
-    # ⌨️ HỆ THỐNG LỆNH SLASH (/enka ...)
-    # ==========================================
     enka_slash = app_commands.Group(name="enka", description="Tra cứu Enka.Network cho Genshin, HSR, ZZZ")
 
     gi_slash = app_commands.Group(name="gi", description="Các lệnh cho Genshin Impact", parent=enka_slash)
@@ -1854,7 +1818,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         embed = await self._generate_ai_team_embed(interaction.guild, target_uid, "gi", data)
         await interaction.followup.send(embed=embed)
 
-    # --- Slash Honkai: Star Rail ---
     hsr_slash = app_commands.Group(name="hsr", description="Các lệnh cho Honkai: Star Rail", parent=enka_slash)
 
     @hsr_slash.command(name="profile", description="Xem tổng quan hồ sơ người chơi Honkai: Star Rail")
@@ -1913,7 +1876,6 @@ class EnkaCog(commands.Cog, name="Enka Network"):
         embed = await self._generate_ai_team_embed(interaction.guild, target_uid, "hsr", raw_data)
         await interaction.followup.send(embed=embed)
 
-    # --- Slash Zenless Zone Zero ---
     zzz_slash = app_commands.Group(name="zzz", description="Các lệnh cho Zenless Zone Zero", parent=enka_slash)
 
     @zzz_slash.command(name="profile", description="Xem tổng quan hồ sơ Zenless Zone Zero")

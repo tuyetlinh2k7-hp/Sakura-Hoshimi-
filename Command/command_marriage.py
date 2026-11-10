@@ -14,9 +14,6 @@ from Check.i18n import t, get_guild_language
 from data.database import get_user_data, update_user_coins, get_user_currency
 VN_TZ = timezone(timedelta(hours=7))
 
-# =============================================================================
-# HỆ THỐNG DANH MỤC VẬT PHẨM HÔN NHÂN & BẤT ĐỘNG SẢN
-# =============================================================================
 
 RING_IDS = ["ring_bronze", "ring_silver", "ring_gold", "ring_diamond"]
 
@@ -34,7 +31,7 @@ RING_INFO = {
         "id": "ring_silver",
         "name": "💍 Nhẫn Bạc Tình Yêu",
         "price": 15000870,
-        "buff_affection": 10,  # +10% điểm tình cảm
+        "buff_affection": 10,
         "emoji": "💍",
         "color": 0xc0c0c0,
         "desc": "Nhẫn bạc tinh tế, tăng +10% điểm tình cảm khi tương tác."
@@ -43,7 +40,7 @@ RING_INFO = {
         "id": "ring_gold",
         "name": "💍 Nhẫn Vàng Vĩnh Cửu",
         "price": 75009800,
-        "buff_affection": 25,  # +25% điểm tình cảm
+        "buff_affection": 25,
         "emoji": "💍",
         "color": 0xffd700,
         "desc": "Nhẫn vàng sang trọng, tăng +25% điểm tình cảm khi tương tác."
@@ -52,7 +49,7 @@ RING_INFO = {
         "id": "ring_diamond",
         "name": "💎 Nhẫn Kim Cương",
         "price": 500000000,
-        "buff_affection": 50,  # +50% điểm tình cảm
+        "buff_affection": 50,
         "emoji": "💎",
         "color": 0x00ffff,
         "desc": "Nhẫn kim cương huyền thoại, tăng +50% điểm tình cảm & mở khóa thiệp cưới VIP."
@@ -96,9 +93,6 @@ LOVE_ITEMS = {
     "love_date": {"name": "🕯️ Vé Hẹn Hò Lãng Mạn", "pts": 20, "cost": 80000}
 }
 
-# =============================================================================
-# HELPER FUNCTIONS (TRUY VẤN VÀ ĐỒNG BỘ DỮ LIỆU)
-# =============================================================================
 
 def _pair_key(guild_id: int, a: int, b: int) -> str:
     """Tạo key duy nhất cho cặp đôi trong cùng máy chủ theo thứ tự ID."""
@@ -265,9 +259,6 @@ async def _check_duration_achievements(guild_id: int, couple: dict, channel: Opt
         print(f"[Marriage] ⚠️ Lỗi trao mốc thành tựu kỷ niệm: {e}")
 
 
-# =============================================================================
-# GIAO DIỆN CHUẨN BỊ & CẦU HÔN (VIEWS)
-# =============================================================================
 
 class WeddingSetupView(discord.ui.View):
     """
@@ -285,7 +276,6 @@ class WeddingSetupView(discord.ui.View):
         self.public: bool = True
         self.blesser_id: Optional[int] = None
 
-        # 1. Nếu chưa có người được chọn, thêm UserSelect
         if not self.target:
             self.user_select = discord.ui.UserSelect(
                 placeholder="💞 Chọn người thương trong server để cầu hôn...",
@@ -296,7 +286,6 @@ class WeddingSetupView(discord.ui.View):
             self.user_select.callback = self._on_user_select
             self.add_item(self.user_select)
 
-        # 2. Chọn nhẫn cưới
         ring_options = []
         for r_id in RING_IDS:
             info = RING_INFO[r_id]
@@ -318,7 +307,6 @@ class WeddingSetupView(discord.ui.View):
         self.ring_select.callback = self._on_ring_select
         self.add_item(self.ring_select)
 
-        # 3. Nút bật tắt công khai
         self.visibility_btn = discord.ui.Button(
             label="Chế độ: Công khai",
             emoji="📣",
@@ -328,7 +316,6 @@ class WeddingSetupView(discord.ui.View):
         self.visibility_btn.callback = self._toggle_visibility
         self.add_item(self.visibility_btn)
 
-        # 4. Nút gửi lời cầu hôn
         self.submit_btn = discord.ui.Button(
             label="Gửi Lời Cầu Hôn",
             emoji="💌",
@@ -367,7 +354,6 @@ class WeddingSetupView(discord.ui.View):
 
     async def _on_user_select(self, interaction: discord.Interaction):
         selected_user = self.user_select.values[0]
-        # Lấy member trong guild
         member = interaction.guild.get_member(selected_user.id) or selected_user
         if member.id == self.author.id:
             return await interaction.response.send_message("❌ Bạn không thể tự cầu hôn chính mình!", ephemeral=True)
@@ -392,13 +378,11 @@ class WeddingSetupView(discord.ui.View):
             return await interaction.response.send_message("❌ Vui lòng chọn đối tượng cầu hôn trước!", ephemeral=True)
 
         gid = interaction.guild_id
-        # Kiểm tra trạng thái hôn nhân hiện tại
         if _get_user_couple(gid, self.author.id)[1]:
             return await interaction.response.send_message("❌ Bạn đang trong một cuộc hôn nhân! Cần ly hôn trước nếu muốn kết hôn với người khác.", ephemeral=True)
         if _get_user_couple(gid, self.target.id)[1]:
             return await interaction.response.send_message(f"❌ {self.target.display_name} hiện đã kết hôn với người khác!", ephemeral=True)
 
-        # Kiểm tra và trừ nhẫn cưới
         ring = RING_INFO[self.ring_id]
         if not _deduct_ring(self.author.id, self.ring_id):
             return await interaction.response.send_message(
@@ -406,7 +390,6 @@ class WeddingSetupView(discord.ui.View):
                 ephemeral=True
             )
 
-        # Tạo Proposal View gửi tới đối phương
         prop_view = WeddingProposalView(self.cog, self.author, self.target, self.ring_id, self.blesser_id, self.public, gid)
         proposal_embed = prop_view.build_proposal_embed()
 
@@ -429,7 +412,6 @@ class WeddingSetupView(discord.ui.View):
                 prop_view.message = sent_msg
                 await interaction.response.send_message(f"💌 Đã gửi lời cầu hôn kín đáo tới DM của **{self.target.display_name}**!", ephemeral=True)
             except discord.Forbidden:
-                # Hoàn trả lại nhẫn nếu không gửi được DM
                 _refund_ring(self.author.id, self.ring_id)
                 return await interaction.response.send_message(
                     "❌ Không thể gửi tin nhắn DM cho đối phương (Chặn tin nhắn người lạ). **Chiếc nhẫn cưới đã được hoàn trả lại vào túi đồ của bạn!**",
@@ -445,7 +427,7 @@ class WeddingProposalView(discord.ui.View):
     - [Timeout] -> Hoàn trả lại nhẫn cưới nếu hết hạn mà không phản hồi.
     """
     def __init__(self, cog, proposer: discord.Member, target: discord.Member, ring_id: str, blesser_id: Optional[int], public: bool, guild_id: int):
-        super().__init__(timeout=86400) # Cho phép phản hồi trong 24 giờ
+        super().__init__(timeout=86400)
         self.cog = cog
         self.proposer = proposer
         self.target = target
@@ -487,7 +469,6 @@ class WeddingProposalView(discord.ui.View):
         self.resolved = True
         gid = self.guild_id
 
-        # Kiểm tra lại xem trong lúc chờ có ai kết hôn với người khác không
         if _get_user_couple(gid, self.proposer.id)[1] or _get_user_couple(gid, self.target.id)[1]:
             _refund_ring(self.proposer.id, self.ring_id)
             for child in self.children:
@@ -510,7 +491,7 @@ class WeddingProposalView(discord.ui.View):
             "ring": self.ring_id,
             "married_at": now,
             "public": self.public,
-            "affection": 10,  # Điểm tình cảm khởi đầu
+            "affection": 10,
             "weekly": {},
             "monthly": {},
             "daily": {},
@@ -520,7 +501,6 @@ class WeddingProposalView(discord.ui.View):
             "tax_paid_at": now
         }
 
-        # Lưu dữ liệu đồng bộ
         fishing_state.setdefault("couples", {})[key] = couple_data
         fishing_state.setdefault("marriages", {})[str(self.proposer.id)] = self.target.id
         fishing_state["marriages"][str(self.target.id)] = self.proposer.id
@@ -530,7 +510,6 @@ class WeddingProposalView(discord.ui.View):
         for child in self.children:
             child.disabled = True
 
-        # Embed chứng nhận kết hôn đẹp mắt
         cert_embed = discord.Embed(
             title="💒 HÔN LỄ THÀNH CÔNG · GIẤY CHỨNG NHẬN KẾT HÔN 💒",
             description=(
@@ -551,7 +530,6 @@ class WeddingProposalView(discord.ui.View):
 
         await interaction.response.edit_message(content=None, embed=cert_embed, view=self)
 
-        # Mở khóa thành tựu
         await _trigger_marriage_achievements(gid, self.proposer.id, self.target.id, interaction.channel)
 
         if self.public:
@@ -565,7 +543,6 @@ class WeddingProposalView(discord.ui.View):
     @discord.ui.button(label="Từ Chối", emoji="💔", style=discord.ButtonStyle.danger)
     async def reject(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.resolved = True
-        # HOÀN TRẢ NHẪN CƯỚI CHO PROPOSER
         _refund_ring(self.proposer.id, self.ring_id)
         for child in self.children:
             child.disabled = True
@@ -580,7 +557,6 @@ class WeddingProposalView(discord.ui.View):
     async def on_timeout(self):
         if not self.resolved:
             self.resolved = True
-            # HOÀN TRẢ NHẪN KHI HẾT THỜI GIAN CHỜ
             _refund_ring(self.proposer.id, self.ring_id)
             for child in self.children:
                 child.disabled = True
@@ -595,9 +571,6 @@ class WeddingProposalView(discord.ui.View):
                     pass
 
 
-# =============================================================================
-# GIAO DIỆN HỒ SƠ CẶP ĐÔI & TƯƠNG TÁC (VIEWS)
-# =============================================================================
 
 class CoupleActionsView(discord.ui.View):
     """Bảng điều khiển tương tác nhanh của cặp đôi."""
@@ -707,7 +680,6 @@ class DivorceConsentView(discord.ui.View):
         properties = list(couple.get("properties", []))
         coins = int(couple.get("common_coins", 0))
 
-        # Phân chia tài sản
         if self.mode in ("divide", "court"):
             share_req = coins // 2
             share_part = coins - share_req
@@ -716,7 +688,6 @@ class DivorceConsentView(discord.ui.View):
             if share_part > 0:
                 await update_user_coins(self.guild_id, self.partner_id, share_part)
         elif self.mode == "leave_empty":
-            # Ra đi tay trắng: toàn bộ quỹ chung chuyển cho đối phương
             if coins > 0:
                 await update_user_coins(self.guild_id, self.partner_id, coins)
 
@@ -843,9 +814,6 @@ class PairingView(discord.ui.View):
         await interaction.response.edit_message(content="💔 Lượt ghép đôi đã được hủy bỏ. Bạn có thể thử lại vào ngày mai.", view=self)
 
 
-# =============================================================================
-# COG CHÍNH: HỆ THỐNG HÔN NHÂN & GIA ĐÌNH (MARRIAGE COG)
-# =============================================================================
 
 class MarriageCog(commands.Cog, name="Marriage"):
     """
@@ -873,7 +841,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
 
         tax_total = sum(PROPERTY_INFO.get(p, {}).get("tax", 0) for p in props)
 
-        # Tính toán thanh đo độ thân mật (Progress bar)
         level = min(10, affection // 100 + 1)
         progress_in_lvl = affection % 100
         filled = min(10, progress_in_lvl // 10)
@@ -918,9 +885,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         embed.set_footer(text="🌸 Dùng /cplove, /giftlove mỗi ngày để nâng cao chỉ số tình cảm!")
         return embed
 
-    # --------------------------------------------------------------------------
-    # NHÓM LỆNH HYBRID /marry (Tối ưu hóa Slash Commands)
-    # --------------------------------------------------------------------------
 
     @commands.hybrid_group(name="marry", aliases=["honnhan"], description="Hệ thống hôn nhân & cặp đôi / Marriage & Couple system")
     @commands.guild_only()
@@ -939,9 +903,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
     async def marry_profile(self, ctx: commands.Context, member: Optional[discord.Member] = None):
         await self.couple_cmd(ctx, member)
 
-    # --------------------------------------------------------------------------
-    # 1. LỆNH CẦU HÔN & ĐÁM CƯỚI (WEDDING / MARRY) - PREFIX
-    # --------------------------------------------------------------------------
 
     @commands.command(name="wedding", aliases=["damcuoi", "cauhon"], description="Propose to someone or prepare a wedding / Cầu hôn hoặc chuẩn bị đám cưới")
     @commands.guild_only()
@@ -961,9 +922,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         embed = view.build_embed()
         await ctx.send(embed=embed, view=view)
 
-    # --------------------------------------------------------------------------
-    # 2. XEM HỒ SƠ HÔN NHÂN (COUPLE) - PREFIX
-    # --------------------------------------------------------------------------
 
     @commands.command(name="couple", aliases=["capdoi"], description="View couple marriage profile & shared assets / Xem hồ sơ hôn nhân & tài sản chung")
     @commands.guild_only()
@@ -982,7 +940,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         if not couple.get("public", True) and ctx.author.id not in (a, b) and ctx.author.id != OWNER_ID:
             return await ctx.send("🔒 Hồ sơ hôn nhân này đang được đặt ở chế độ riêng tư.", ephemeral=True)
 
-        # Kiểm tra và trừ thuế bất động sản tự động từ quỹ chung
         now = time.time()
         last = float(couple.get("tax_paid_at", now))
         days_unpaid = int((now - last) // 86400)
@@ -996,16 +953,12 @@ class MarriageCog(commands.Cog, name="Marriage"):
             couple["tax_paid_at"] = last + days_unpaid * 86400
             save_fishing_data()
 
-        # Kiểm tra và trao mốc thành tựu kỷ niệm 7, 30, 100 ngày
         await _check_duration_achievements(ctx.guild.id, couple, ctx.channel)
 
         embed = self.build_couple_embed(ctx.guild, key, couple)
         view = CoupleActionsView(self, ctx.guild.id, key, couple)
         await ctx.send(embed=embed, view=view)
 
-    # --------------------------------------------------------------------------
-    # 3. BỒI DƯỠNG TÌNH CẢM (CPLOVE / YEUTHUONG / CP_LOVE)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="cplove", aliases=["yeuthuong", "cp_love", "marrylove", "cpdate"], description="Express affection to your spouse / Thể hiện tình cảm với vợ/chồng")
     @commands.guild_only()
@@ -1019,7 +972,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         partner_id = b if ctx.author.id == a else a
 
         if member and member.id != partner_id:
-            # Tán tỉnh người khác khi đang có gia đình bị trừ điểm
             couple["affection"] = max(0, int(couple.get("affection", 0)) - 2)
             save_fishing_data()
             return await ctx.send(f"💔 **Ghen tuông!** Bạn thể hiện tình cảm với người khác khiến điểm tình cảm gia đình bị trừ **2** điểm! Hiện còn `{couple['affection']}` điểm.")
@@ -1035,7 +987,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         act = action.lower().strip()
         bonus_base = {"kiss": 3, "love": 2, "hug": 2, "date": 5}.get(act, 2)
 
-        # Tính buff từ nhẫn cưới và nhà
         ring = RING_INFO.get(couple.get("ring"), RING_INFO["ring_bronze"])
         buff_pct = ring.get("buff_affection", 0)
         for p in couple.get("properties", []):
@@ -1065,9 +1016,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
             f"✨ Điểm tình cảm: **+{total_gain}** (Buff tổng: `+{buff_pct}%`) • Lượt hôm nay: `{used + 1}/{max_cap}`."
         )
 
-    # --------------------------------------------------------------------------
-    # 4. TẶNG QUÀ TÌNH YÊU (GIFTLOVE / TANGHOA / TANGQUA / LOVEGIFT)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="giftlove", aliases=["tanghoa", "lovegift", "cpgift", "tangqua"], description="Gift a romantic item to your spouse / Tặng quà tình cảm cho bạn đời")
     @commands.guild_only()
@@ -1097,7 +1045,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         if used >= max_cap:
             return await ctx.send(f"🌙 Hai bạn đã dùng hết `{max_cap}/{max_cap}` lượt tình cảm hôm nay. Hãy để dành quà cho ngày mai nhé!", ephemeral=True)
 
-        # Kiểm tra kho đồ cá nhân
         inv = get_user_fishing(ctx.author.id)
         items = inv.setdefault("items", {})
         q_info = LOVE_ITEMS[item_id]
@@ -1125,9 +1072,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
             f"💖 Điểm tình cảm tăng thêm **+{gain}** điểm! (Lượt hôm nay: `{used + 1}/{max_cap}`)."
         )
 
-    # --------------------------------------------------------------------------
-    # 5. QUẢN LÝ QUỸ CHUNG (COUPLECOIN)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="couplecoin", aliases=["quychung", "cplcoin"], description="Deposit or withdraw coins from shared couple fund / Nạp hoặc rút tiền quỹ chung")
     @commands.guild_only()
@@ -1165,9 +1109,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
             save_fishing_data()
             await ctx.send(f"🏦 {ctx.author.mention} đã rút **{amount:,}** 🪙 từ Quỹ chung về ví cá nhân!\n💰 Số dư còn lại trong quỹ: **{couple['common_coins']:,}** coin.")
 
-    # --------------------------------------------------------------------------
-    # 6. BẤT ĐỘNG SẢN GIA VIÊN (COUPLEHOUSE)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="couplehouse", aliases=["nhachung", "cplhouse"], description="Add a purchased property into couple estate / Đưa nhà vào tài sản chung của cặp đôi")
     @commands.guild_only()
@@ -1210,9 +1151,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
             f"⚖️ Thuế duy trì: `{p_info['tax']:,}` coin/ngày tự động trích từ Quỹ chung."
         )
 
-    # --------------------------------------------------------------------------
-    # 7. LY HÔN (DIVORCE)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="divorce", aliases=["lyhon", "ly_hon"], description="Initiate divorce or legal separation / Bắt đầu thủ tục ly hôn")
     @commands.guild_only()
@@ -1251,9 +1189,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
             view=view
         )
 
-    # --------------------------------------------------------------------------
-    # 8. BẢNG XẾP HẠNG CẶP ĐÔI (COUPLETOP / TOPCOUPLE)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="coupletop", aliases=["topcouple", "bxhcapdoi", "loveleaderboard"], description="Top couples leaderboard by affection points / Bảng xếp hạng cặp đôi hạnh phúc")
     @commands.guild_only()
@@ -1274,7 +1209,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         couples = fishing_state.setdefault("couples", {})
 
         for key, data in couples.items():
-            # Loại trừ tài khoản test của Owner
             if str(data.get("a", "")) == str(OWNER_ID) or str(data.get("b", "")) == str(OWNER_ID):
                 continue
             if sc == "server" and int(data.get("guild_id", 0)) != ctx.guild.id:
@@ -1311,9 +1245,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         embed.set_footer(text="SakuraBot Couple Rankings • Cùng bồi đắp tình cảm mỗi ngày!")
         await ctx.send(embed=embed)
 
-    # --------------------------------------------------------------------------
-    # 9. GHÉP ĐÔI ĐƯỜNG PHỐ (PAIRUP / BLINDDATE)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="pairup", aliases=["ghepdoi", "blinddate"], description="Find a random dating match in the server / Ghép đôi tìm hiểu ngẫu nhiên trong server")
     @commands.guild_only()
@@ -1354,9 +1285,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
             view=view
         )
 
-    # --------------------------------------------------------------------------
-    # 10. TÒA ÁN HÔN NHÂN (COURT)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="court", aliases=["toaan", "kien"], description="Open a family court petition for disputes / Mở hồ sơ tòa án hôn nhân")
     @commands.guild_only()
@@ -1398,9 +1326,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         )
         await ctx.send(embed=embed, view=CourtCaseView(case_id))
 
-    # --------------------------------------------------------------------------
-    # 11. HƯỚNG DẪN TOÀN TẬP (MARRIAGEHELP)
-    # --------------------------------------------------------------------------
 
     @commands.command(name="marriagehelp", aliases=["mhelp", "huongdancuoi"], description="Comprehensive guide to marriage and family features / Hướng dẫn hệ thống hôn nhân")
     async def marriage_help_cmd(self, ctx: commands.Context):
@@ -1455,9 +1380,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         embed.set_footer(text="SakuraBot Marriage System • Gắn kết yêu thương")
         await ctx.send(embed=embed)
 
-    # --------------------------------------------------------------------------
-    # 12. SỰ KIỆN TIN NHẮN TƯƠNG TÁC (LISTENER)
-    # --------------------------------------------------------------------------
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -1472,7 +1394,6 @@ class MarriageCog(commands.Cog, name="Marriage"):
         a, b = int(couple["a"]), int(couple["b"])
         partner_id = b if int(couple["a"]) == message.author.id else a
 
-        # Chỉ tính khi người gửi tag chính xác người bạn đời của mình
         if any(m.id == partner_id for m in message.mentions):
             today = datetime.now(VN_TZ).date().isoformat()
             daily = couple.setdefault("daily", {})

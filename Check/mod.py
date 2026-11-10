@@ -32,11 +32,9 @@ def save_admin_roles():
         json.dump(admin_roles, f, indent=4, ensure_ascii=False)
 
 
-# Tải dữ liệu ngay khi import module
 load_admin_roles()
 
 
-# --- CÁC HÀM KIỂM TRA QUYỀN HẠN (CHECKS) ---
 
 def _check_is_admin(user: discord.Member | discord.User, guild: discord.Guild | None) -> bool:
     if user.id == OWNER_ID:

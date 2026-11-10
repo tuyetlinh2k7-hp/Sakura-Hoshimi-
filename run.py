@@ -1,7 +1,7 @@
 import traceback
 from config import OWNER_ID
 import discord
-import Check.dave_patch  # Kích hoạt bản vá DAVE E2EE 0.2.0 cho discord.py 2.7.1
+import Check.dave_patch
 from discord.ext import commands
 from Check.prefix_handler import get_prefix, load_prefixes
 from Check.server_member import update_stats
@@ -16,10 +16,8 @@ from Database.database import Database
 from data.database import init_db
 from Check.owner_notifier import install_live_console_tee, notify_owner_bot_online, notify_owner_bot_error
 
-# Kích hoạt Live Console Stream để chuyển tiếp toàn bộ terminal sang Web Dashboard
 install_live_console_tee()
 
-# --- Lớp màu cho Terminal ---
 class Colors:
     HEADER = '\033[95m'
     BLUE = '\033[94m'
@@ -46,15 +44,12 @@ bot.db = Database()
 
 @bot.check
 async def _server_config_check(ctx):
-    # Admin-Only Mode per-guild (Cài đặt chung) — giữ tương thích, chỉ chặn khi bật
     try:
         if ctx.guild:
             from Check.server_config import is_admin_only
             if is_admin_only(ctx.guild.id):
-                # chỉ cho Administrator
                 if ctx.author.guild_permissions.administrator or ctx.author.id == OWNER_ID:
                     return True
-                # lặng lẽ chặn, báo nhẹ nếu là prefix command
                 if ctx.command and not ctx.interaction:
                     try: await ctx.send("🔒 Server đang ở Admin-Only Mode — chỉ Administrator được dùng lệnh.", ephemeral=True)
                     except: pass
@@ -89,7 +84,6 @@ async def setup_hook():
                 import traceback; traceback.print_exc()
         print(f"{Colors.GREEN}✅ Đã nạp {loaded}/{len(extensions)} extensions loại '{ext_type}'.{Colors.ENDC}")
 
-    # Khởi động Sakura Web Dashboard tích hợp với bot
     try:
         from web.server import start_web_dashboard
         import config
@@ -98,7 +92,6 @@ async def setup_hook():
     except Exception as e:
         print(f"{Colors.WARNING}⚠️ Không thể khởi động Web Dashboard: {e}{Colors.ENDC}")
 
-    # Khởi động API để plugin Minecraft gửi mã xác thực liên kết
     try:
         from mc_link_system import start_link_server
         bot.link_server_runner = await start_link_server("127.0.0.1", 5001)
@@ -117,7 +110,6 @@ async def setup_hook():
         print(f"{Colors.FAIL}❌ Lỗi khởi tạo Database: {e}{Colors.ENDC}")
         import traceback; traceback.print_exc()
 
-    # Bắt lỗi toàn cục cho Slash Commands và gửi DM cho Owner
     async def _global_app_command_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
         orig = getattr(error, 'original', error)
         if isinstance(orig, (discord.app_commands.CommandOnCooldown, discord.app_commands.CheckFailure)):
@@ -153,13 +145,11 @@ async def setup_hook():
 
     bot.tree.on_error = _global_app_command_error
 
-# --- Lệnh setlang per-guild (đã sửa lại) ---
 @bot.hybrid_command(name="setlang", description="Change bot language for this server (vi/en) / Đổi ngôn ngữ bot cho server này")
 @discord.app_commands.describe(lang="Language / Ngôn ngữ: vi or en")
 async def setlang(ctx: commands.Context, lang: str):
     """Đổi ngôn ngữ per-guild. Mặc định tự động theo Discord server language nếu chưa set."""
     from Check.i18n import set_guild_language, get_guild_language, t
-    # Kiểm tra quyền: cần Manage Server hoặc là Owner bot
     from config import OWNER_ID
     is_owner = ctx.author.id == OWNER_ID
     has_perm = False
@@ -169,14 +159,12 @@ async def setlang(ctx: commands.Context, lang: str):
         has_perm = is_owner
 
     if not has_perm:
-        # Dùng i18n để trả về đúng ngôn ngữ hiện tại
         msg = t(ctx, "LANG_NEED_ADMIN")
         return await ctx.send(msg, ephemeral=True)
 
     lang = lang.lower().strip()
     if lang not in ['vi', 'en']:
         msg = t(ctx, "LANG_SET_INVALID")
-        # Gợi ý thêm
         help_msg = t(ctx, "LANG_HELP", prefix=ctx.prefix if hasattr(ctx, 'prefix') else 's!')
         return await ctx.send(f"{msg}\n{help_msg}", ephemeral=True)
 
@@ -185,11 +173,9 @@ async def setlang(ctx: commands.Context, lang: str):
 
     set_guild_language(ctx.guild.id, lang)
     lang_name = "Tiếng Việt" if lang == "vi" else "English"
-    # Lấy chuỗi đã dịch sau khi set
     title = t(ctx.guild, "LANG_SET_SUCCESS", lang=lang.upper())
     desc = t(ctx.guild, "LANG_SET_SUCCESS_DESC", lang_name=lang_name)
     embed = discord.Embed(title=title, description=desc, color=discord.Color.green())
-    # Thêm hint autodetect
     embed.set_footer(text=t(ctx.guild, "SETLANG_AUTODETECT"))
     await ctx.send(embed=embed)
 
@@ -208,12 +194,10 @@ async def update_stats_loop():
     for guild in bot.guilds:
         await update_stats(guild)
 
-# READY
 
 @bot.event
 async def on_ready():
 
-    # --- Giao diện khởi động ASCII ART ---
     sakura_art = f"""
 {Colors.HEADER}
     ███████╗ █████╗ ██╗  ██╗██╗   ██╗██████╗  █████╗ 
@@ -236,7 +220,7 @@ async def on_ready():
     print(f"{Colors.GREEN}   - Web Panel:  {Colors.BOLD}http://localhost:{getattr(bot, 'web_port', 8080)}{Colors.ENDC}")
     print(f"{Colors.CYAN}{'='*50}{Colors.ENDC}\n")
 
-    await bot.tree.sync() # Đồng bộ lệnh slash command toàn cầu
+    await bot.tree.sync()
     print(f"{Colors.GREEN}🚀 Lệnh Slash đã được đồng bộ hóa và sẵn sàng sử dụng!{Colors.ENDC}")
 
     update_stats_loop.start()
@@ -251,7 +235,6 @@ async def on_ready():
         activity=stream
     )
 
-    # Gửi thông báo DM tới Owner khi Bot Online thành công
     try:
         await notify_owner_bot_online(bot)
     except Exception as e_on:

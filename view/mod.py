@@ -6,9 +6,9 @@ from Check.i18n import t
 
 class ConfirmModerationView(discord.ui.View):
     def __init__(self, author: discord.User):
-        super().__init__(timeout=30) # Tự động hủy sau 30 giây nếu không ai bấm
+        super().__init__(timeout=30)
         self.author = author
-        self.value = None # Lưu kết quả lựa chọn (True = Xác nhận, False = Hủy)
+        self.value = None
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.author.id:

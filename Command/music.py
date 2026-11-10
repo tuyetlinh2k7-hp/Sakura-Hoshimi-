@@ -183,7 +183,6 @@ class MusicControlView(discord.ui.View):
 
         try:
             from Check.tts_checks import voice_text_channels, tts_playing, play_announcement
-            # Dừng nhạc và ngắt kết nối Wavelink CustomPlayer triệt để
             self.player.queue.clear()
             self.player.auto_tracks_pool.clear()
             await self.player.cleanup_panel()
@@ -205,7 +204,6 @@ class MusicControlView(discord.ui.View):
                 pass
             await asyncio.sleep(0.4)
 
-            # Kết nối lại bằng discord.VoiceClient chuẩn cho TTS
             try:
                 await target_voice.connect(timeout=30, reconnect=True, self_deaf=True)
             except discord.ClientException:
@@ -424,7 +422,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
         if not player or not player.connected:
             return
 
-        # 1. Ưu tiên phát tiếp các bài trong hàng đợi của người dùng
         while not player.queue.is_empty:
             try:
                 next_track = player.queue.get()
@@ -434,7 +431,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
                 logger.warning(f"Không thể phát bài từ hàng đợi: {e}")
                 continue
 
-        # 2. Nếu hàng đợi người dùng đã hết và bật autoplay
         if player.autoplay_enabled:
             if not player.auto_tracks_pool and player.history:
                 last_track = player.history[-1]
@@ -449,7 +445,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
                     logger.warning(f"Lỗi khi phát bài autoplay: {e}")
                     continue
 
-        # 3. Không còn bài nào trong hàng đợi, đếm ngược tự động rời phòng
         asyncio.create_task(self._auto_disconnect_empty(player))
 
     @commands.Cog.listener()
@@ -467,7 +462,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
                 pass
 
         if player.queue.mode == wavelink.QueueMode.loop_all and payload.track:
-            # Chỉ đưa lại vào hàng đợi ưu tiên nếu là bài do User yêu cầu
             if getattr(payload.track, "requester", None) is not None:
                 await player.queue.put_wait(payload.track)
 
@@ -501,7 +495,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
         try:
             from Check.tts_checks import voice_text_channels, tts_playing
             vc = guild.voice_client
-            # Chỉ chặn nếu đang là VoiceClient thường của TTS (không phải CustomPlayer của Wavelink)
             if vc and isinstance(vc, discord.VoiceClient) and not isinstance(vc, CustomPlayer) and vc.is_connected():
                 if guild.id in voice_text_channels or tts_playing.get(guild.id, False):
                     return True
@@ -515,7 +508,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
             await ctx.send(embed=embed, ephemeral=True)
             return None
 
-        # ƯU TIÊN TTS: Chặn phát nhạc nếu TTS đang hoạt động trong server
         if self._is_tts_active(ctx.guild):
             embed = discord.Embed(
                 title="🌸 Hệ Thống TTS Đang Được Ưu Tiên",
@@ -532,7 +524,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
             await ctx.send(embed=embed, ephemeral=True)
             return None
 
-        # Kiểm tra quyền truy cập kênh thoại của bot trước khi kết nối
         voice_channel = ctx.author.voice.channel
         guild_me = ctx.guild.me if ctx.guild else None
         if guild_me:
@@ -562,7 +553,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
                 await ctx.send(embed=embed, ephemeral=True)
                 return None
 
-        # Nếu có kết nối VoiceClient thường còn sót lại (khi TTS đã tắt), ngắt kết nối trước khi tạo CustomPlayer
         if ctx.voice_client and not isinstance(ctx.voice_client, CustomPlayer):
             try:
                 await ctx.voice_client.disconnect(force=True)
@@ -769,7 +759,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
                 track = tracks[0]
                 track.requester = ctx.author
                 
-                # Đưa bài hát vào cuối hàng đợi ưu tiên của người dùng (FIFO: thêm trước phát trước, luôn đứng trước Autoplay)
                 await player.queue.put_wait(track)
                 pos = len(player.queue)
                 
@@ -796,7 +785,6 @@ class MusicControllerCog(commands.Cog, name="Music"):
             if not player.playing and not player.queue.is_empty:
                 await player.play(player.queue.get())
             elif player.playing and player.current and player.bound_channel:
-                # Cập nhật lại panel để hiển thị ngay bài tiếp theo và số lượng hàng đợi mới
                 embed_np = player.build_now_playing_embed(player.current)
                 await player.safe_edit_panel(embed_np)
             return

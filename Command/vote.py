@@ -12,9 +12,8 @@ from typing import Optional, Union
 VOTE_FILE = "data/votes.json"
 BOT_ID = "1504825128499019807"
 TOPGG_VOTE_URL = f"https://top.gg/bot/{BOT_ID}/vote"
-VOTE_DURATION = 43200  # 12 giờ (43,200 giây) theo chu kỳ Top.gg
+VOTE_DURATION = 43200
 
-# Danh sách các lệnh cao cấp yêu cầu Vote Top.gg để mở khóa
 VOTE_LOCKED_COMMANDS = [
     {"name": "/music volume (hoặc nút Vol - / Vol +)", "desc": "Tăng / giảm âm lượng phát nhạc bot trong Voice", "icon": "🔊"},
     {"name": "/math (hoặc s!math, s!calc)", "desc": "Máy tính thông minh giải biểu thức, hàm toán học & phần trăm", "icon": "🧮"},
@@ -59,11 +58,11 @@ def set_vote_required_enabled(enabled: bool):
 def has_voted(user_id: Union[int, str]) -> bool:
     """Kiểm tra xem người dùng đã bình chọn trên Top.gg trong 12 giờ qua chưa."""
     if not is_vote_required_enabled():
-        return True  # Hệ thống vote đang tắt
+        return True
 
     uid = str(user_id)
     if is_bot_owner(uid):
-        return True  # Owner luôn mở khóa toàn bộ
+        return True
 
     votes = load_vote_data()
     if uid in votes:
@@ -164,7 +163,6 @@ async def send_vote_success_dm(bot: Optional[commands.Bot] = None, user_id: Unio
     ]
     desc_text = "\n".join(desc_lines)
 
-    # 1. Thử gửi qua Bot Client (nếu bot có sẵn)
     if bot:
         try:
             uid = int(uid_str)
@@ -218,7 +216,6 @@ async def send_vote_success_dm(bot: Optional[commands.Bot] = None, user_id: Unio
         except Exception as e:
             print(f"Lỗi gửi DM qua Bot client: {e}")
 
-    # 2. Fallback sang Discord REST API trực tiếp bằng Bot Token
     try:
         from config import TOKEN
         token = TOKEN or os.getenv("DISCORD_TOKEN", "")
@@ -233,7 +230,6 @@ async def send_vote_success_dm(bot: Optional[commands.Bot] = None, user_id: Unio
                 "Content-Type": "application/json",
                 "User-Agent": "DiscordBot (https://sakurabot.top, 1.0)"
             }
-            # Mở DM channel
             ch_req = urllib.request.Request(
                 "https://discord.com/api/v10/users/@me/channels",
                 data=json.dumps({"recipient_id": uid_str}).encode("utf-8"),
@@ -417,7 +413,6 @@ async def require_vote_or_notify(interaction_or_ctx, command_name: Optional[str]
     if has_voted(user.id):
         return True
 
-    # Thử check nhanh Top.gg API phòng trường hợp webhook chưa tới
     try:
         api_res = await check_topgg_api(user.id, bot=bot)
         if api_res.get("voted") or api_res.get("newly_rewarded"):
@@ -478,7 +473,6 @@ class VoteCog(commands.Cog, name="Vote"):
     async def _show_vote_menu(self, ctx: commands.Context):
         user_id = ctx.author.id
 
-        # Tự động đồng bộ và kiểm tra từ Top.gg REST API
         newly_rewarded = False
         try:
             api_res = await check_topgg_api(user_id, bot=self.bot)

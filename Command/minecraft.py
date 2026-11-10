@@ -10,8 +10,8 @@ import json
 import os
 import websockets
 import io
-import aiohttp  # Dùng để gọi API đến Pika Hosting công khai
-from PIL import Image # Thư viện xử lý ảnh
+import aiohttp
+from PIL import Image
 from config import PKMC_API_KEY, OWNER_ID
 from Check.minecraft import is_mc_admin, mc_admin_ids, save_mc_admins, mc_whitelist, save_mc_whitelist
 from Check.i18n import t
@@ -30,12 +30,10 @@ from data.database import (
     MC_COIN_RATE
 )
 
-# --- CẤU HÌNH SERVER MINECRAFT TRÊN PIKA HOSTING ---
 MINECRAFT_HOST = "snow.pikamc.vn"
 MINECRAFT_PORT = 25365
-QUERY_PORT = 25355 # Port này phải được mở trên Pika và cấu hình trong server.properties
+QUERY_PORT = 25355
 
-# Cấu hình RCON mặc định
 RCON_HOST = "snow.pikamc.vn"
 RCON_PORT = 25025
 RCON_PASSWORD = "testserver123"
@@ -58,7 +56,6 @@ def get_guild_rcon_config(guild_id=None):
         except Exception:
             pass
 
-    # Kiểm tra cấu hình server.properties của Minecraft server cục bộ nếu có
     sp_file = "server/server.properties"
     if os.path.exists(sp_file):
         try:
@@ -125,12 +122,10 @@ async def send_rcon_command(command: str, host: str = None, port: int = None, pa
     ok, res = await loop.run_in_executor(None, send_rcon_command_sync, command, host, port, password, guild_id)
     return res if ok else f"Lỗi: {res}"
 
-# Cấu hình Pterodactyl API (Pika Hosting)
 PANEL_URL = "https://cp.pikamc.vn/"  
 SERVER_ID = "749c34cf"               
 PANEL_API_KEY = PKMC_API_KEY         
 
-# --- CẤU HÌNH LOG MINECRAFT ---
 MC_LOG_CONFIG_FILE = "data/minecraft_log_config.json"
 
 def load_mc_log_config():
@@ -145,13 +140,12 @@ def save_mc_log_config(data):
     with open(MC_LOG_CONFIG_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-# --- MÀU SẮC & HELPER EMBED MINECRAFT ---
-MC_GREEN = discord.Color.from_rgb(83, 166, 73)    # Xanh lá cỏ cây Minecraft
-MC_GOLD = discord.Color.from_rgb(250, 204, 21)     # Vàng gold / thành tựu / tiền tệ
-MC_RED = discord.Color.from_rgb(239, 68, 68)       # Đỏ lỗi / ban / stop
-MC_ORANGE = discord.Color.from_rgb(249, 115, 22)   # Cam cảnh báo / kick
-MC_BLUE = discord.Color.from_rgb(59, 130, 246)     # Xanh dương info / channel / list
-MC_DARK = discord.Color.from_rgb(31, 41, 55)       # Đen xám console / rcon
+MC_GREEN = discord.Color.from_rgb(83, 166, 73)
+MC_GOLD = discord.Color.from_rgb(250, 204, 21)
+MC_RED = discord.Color.from_rgb(239, 68, 68)
+MC_ORANGE = discord.Color.from_rgb(249, 115, 22)
+MC_BLUE = discord.Color.from_rgb(59, 130, 246)
+MC_DARK = discord.Color.from_rgb(31, 41, 55)
 MC_GRASS_ICON = "https://minotar.net/cube/grass/32.png"
 
 def make_mc_embed(
@@ -189,7 +183,6 @@ class StatusView(discord.ui.View):
         await interaction.response.defer()
         embed, file = await self.cog.get_server_status_data()
         
-        # Sửa lỗi gửi kèm file khi làm mới trong Ephemeral Message
         if file:
             await interaction.edit_original_response(embed=embed, view=self, attachments=[file])
         else:
@@ -200,7 +193,6 @@ class StatusView(discord.ui.View):
         """Nút hiển thị danh sách người chơi (Sửa lỗi crash Ephemeral Context)."""
         await interaction.response.defer(ephemeral=True)
         
-        # Gọi trực tiếp logic xử lý RCON thay vì tạo fake_ctx bị lỗi
         response = await self.cog.execute_rcon_command("list")
         if "Lỗi" in response:
             embed = make_mc_embed(
@@ -222,7 +214,7 @@ class WhitelistPlayerModal(discord.ui.Modal, title="Quản lý Whitelist"):
     def __init__(self, cog_instance, action_type: str):
         super().__init__()
         self.cog = cog_instance
-        self.action_type = action_type # "add" or "remove"
+        self.action_type = action_type
 
         self.player_name = discord.ui.TextInput(
             label="Tên người chơi Minecraft",
@@ -285,7 +277,7 @@ class BanKickPlayerModal(discord.ui.Modal):
     def __init__(self, cog_instance, action_type: str):
         super().__init__(title=f"{action_type.title()} Người chơi")
         self.cog = cog_instance
-        self.action_type = action_type # "ban" or "kick"
+        self.action_type = action_type
 
         self.player_name = discord.ui.TextInput(
             label="Tên người chơi Minecraft",
@@ -453,7 +445,6 @@ class MinecraftPanelView(discord.ui.View):
                 footer="Pika Hosting Pterodactyl API"
             )
             await interaction.followup.send(embed=embed, ephemeral=True)
-        # Tự động làm mới panel sau khi thực hiện
         await asyncio.sleep(5)
         embed, file = await self.cog.get_server_status_data()
         await interaction.edit_original_response(embed=embed, view=self, attachments=[file] if file else [])
@@ -585,7 +576,7 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
             embed = discord.Embed(
                 title=t(ctx.guild, "MC_PANEL_TITLE"),
                 description=t(ctx.guild, "MC_PANEL_DESC"),
-                color=discord.Color.from_rgb(83, 166, 73) # Màu xanh lá của Minecraft
+                color=discord.Color.from_rgb(83, 166, 73)
             )
             if self.bot.user.avatar:
                 embed.set_thumbnail(url=self.bot.user.avatar.url)
@@ -593,14 +584,11 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
             embed.add_field(
                 name=t(ctx.guild, "MC_PANEL_FIELD_STATUS"),
                 value=t(ctx.guild, "MC_PANEL_FIELD_STATUS_VALUE", prefix=prefix),
-                      #f"`{prefix}mc panel` - Mở bảng điều khiển server.",
                 inline=False
             )
             embed.add_field(
                 name=t(ctx.guild, "MC_PANEL_FIELD_MANAGE"),
                 value=t(ctx.guild, "MC_PANEL_FIELD_MANAGE_VALUE", prefix=prefix),
-                      #f"`{prefix}mc admin <add/remove/list>` - Quản lý người dùng có quyền MC Admin.\n"
-                      #f"`{prefix}mc panel` - Mở bảng điều khiển quản lý server.",
                 inline=False
             )
             embed.add_field(
@@ -648,8 +636,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
 
     async def _execute_kick_command(self, player_name: str, reason: str) -> str:
         """Thực thi lệnh kick qua RCON."""
-        # Minecraft kick command doesn't usually take a reason in the command itself,
-        # but it's good practice to log it.
         return await self.execute_rcon_command(f"kick {player_name} {reason}")
 
     async def _execute_pardon_command(self, player_name: str) -> str:
@@ -663,7 +649,7 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         elif action == "deop" and player_name:
             return await self.execute_rcon_command(f"deop {player_name}")
         elif action == "list":
-            return await self.execute_rcon_command("op list") # Thử lệnh phổ biến, có thể không hoạt động trên mọi server
+            return await self.execute_rcon_command("op list")
         return "Lỗi: Hành động OP không hợp lệ."
 
     async def send_panel_power_signal(self, signal: str) -> bool:
@@ -685,7 +671,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
             except Exception:
                 return False
     
-    # --- HỆ THỐNG LOG CONSOLE MINECRAFT ---
     def cog_unload(self):
         """Dừng task khi cog được gỡ."""
         if self._log_task:
@@ -733,7 +718,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
 
     async def parse_and_send_log(self, log_line: str):
         """Phân tích một dòng log và gửi đến kênh Discord nếu khớp."""
-        # SỬA LỖI: Tìm kênh log dựa trên ID của server Discord, không phải ID server game
         guild_id_str = next((gid for gid, cid in self.log_configs.items()), None)
         if not guild_id_str: return
 
@@ -750,22 +734,16 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
 
         embed = None
 
-        # 1. Log Chat: Tìm đoạn "[TEAM] [RANK] <name_player> » <message>" (<MCPE.name_player> nếu là người chơi PE)
         chat_match = re.search(r"^(?:\[Not Secure\]\s*)?((?:\[.*?\]\s)+)?([a-zA-Z0-9_]{3,16})\s»\s(.*)", cleaned_line)
         
-        # 2. Player Join: Tìm đoạn "name_player joined the game"
         join_match = re.search(r"([a-zA-Z0-9_\.\* ]{3,20}) joined the game", cleaned_line)
         
-        # 3. Player Leave: Tìm đoạn "name_player left the game"
         leave_match = re.search(r"([a-zA-Z0-9_\.\* ]{3,20}) left the game", cleaned_line)
         
-        # 4. Advancement: Tìm đoạn "name_player has made the advancement [Tên_Thành_Tựu]"
         adv_match = re.search(r"([a-zA-Z0-9_\.\* ]{3,20}) has made the advancement \[([^\]]+)\]", cleaned_line)
 
-        # 5. Player Death: Tìm các thông báo chết
         death_match = re.search(r"([a-zA-Z0-9_]{3,16}) (was slain by .*|was shot by .*|drowned|fell .*|blew up|hit the ground too hard|froze to death|starved to death|suffocated in a wall|tried to swim in lava.*|went up in flames|burned to death)", cleaned_line)
 
-        # Phân nhánh xử lý logic và thiết kế embed sinh động, chuyên nghiệp
         if chat_match:
             prefix_tags, player_name, message = chat_match.groups()
             prefix_str = f"[{prefix_tags.strip()}] " if prefix_tags else ""
@@ -889,22 +867,18 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
             except Exception as e:
                 print(f"[MC Log] Lỗi khi gửi log: {e}")
 
-    # --- TÍNH NĂNG CHAT BRIDGE: DISCORD TO MINECRAFT ---
     @commands.Cog.listener("on_message")
     async def discord_to_minecraft_bridge(self, message: discord.Message):
         """Lắng nghe tin nhắn từ kênh Discord và đồng bộ vào game qua Plugin hoặc RCON."""
-        # Bỏ qua tin nhắn từ bot, tin nhắn riêng tư, hoặc tin nhắn là lệnh
         if message.author.bot or not message.guild:
             return
 
-        # Bỏ qua nếu tin nhắn là một lệnh
         prefix = await self.bot.get_prefix(message)
         if isinstance(prefix, str) and message.content.startswith(prefix):
             return
         if isinstance(prefix, (list, tuple)) and any(message.content.startswith(p) for p in prefix):
             return
 
-        # 1. Hỗ trợ Server Minecraft kết nối qua Plugin của Guild này
         try:
             mc_serv = await get_mc_server_by_guild(message.guild.id)
             if mc_serv:
@@ -916,7 +890,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         except Exception as e:
             print(f"[Plugin Chat Bridge Error]: {e}")
 
-        # 2. Hỗ trợ kênh log cũ qua RCON nếu có
         log_channel_id = self.log_configs.get(str(message.guild.id))
         if log_channel_id and message.channel.id == log_channel_id:
             author_name = message.author.display_name
@@ -942,10 +915,8 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         await self.bot.wait_until_ready()
         
         while not self.bot.is_closed():
-            # SỬA LỖI: Chỉ cần có bất kỳ cấu hình nào là chạy, không cần check theo SERVER_ID
             if self.log_configs:
                 
-                # DI CHUYỂN VÀO TRONG VÒNG LẶP: Luôn lấy token mới trước mỗi lần connect
                 ws_details = await self.get_websocket_details()
                 if not ws_details:
                     print("[MC Log] Không thể lấy thông tin websocket, thử lại sau 30s.")
@@ -956,7 +927,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
                 auth_token = ws_details['data']['token']
 
                 try:
-                    # Kết nối tới websocket với các tham số giữ kết nối (ping/pong)
                     async with websockets.connect(
                         socket_url, 
                         origin="https://cp.pikamc.vn",
@@ -965,21 +935,18 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
                         open_timeout=20
                     ) as websocket:
                         
-                        # Gửi auth token để xác thực
                         await websocket.send(json.dumps({"event": "auth", "args": [auth_token]}))
                         print(f"[MC Log] Đã kết nối tới websocket của server {SERVER_ID}.")
 
-                        # Vòng lặp nhận tin nhắn từ websocket
                         async for message in websocket:
                             try:
                                 data = json.loads(message)
                                 if data.get("event") == "console output":
                                     await self.parse_and_send_log(data["args"][0])
                                     
-                                # THÊM VÀO: Lắng nghe sự kiện token sắp hết hạn từ Pterodactyl (nếu có)
                                 elif data.get("event") == "token expiring" or data.get("event") == "token expired":
                                     print("[MC Log] Token hết hạn, đang chủ động ngắt để lấy token mới...")
-                                    break # Thoát vòng lặp nhận tin nhắn để chạy lại vòng lặp chính (lấy token mới)
+                                    break
                                     
                             except json.JSONDecodeError:
                                 pass
@@ -996,7 +963,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
                     print(f"[MC Log] Lỗi websocket không xác định: {e}. Thử lại sau 30 giây...")
                     await asyncio.sleep(30)
             else:
-                # Nếu chưa cấu hình kênh log, ngủ 30s rồi kiểm tra lại
                 await asyncio.sleep(30)
 
     async def get_server_resources(self) -> dict | None:
@@ -1034,7 +1000,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
             embed.add_field(name="Ping", value=f"`{stats.latency:.2f} ms`", inline=True)
             embed.add_field(name="Người chơi", value=f"`{stats.players.online}/{stats.players.max}`", inline=True)
 
-            # --- Lấy thông tin tài nguyên từ Pika API ---
             resources = await self.get_server_resources()
             if resources and 'attributes' in resources:
                 res_attr = resources['attributes']
@@ -1050,7 +1015,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
                 embed.add_field(name="CPU", value=f"`{cpu_usage:.2f}%`", inline=True)
                 embed.add_field(name="RAM", value=f"`{ram_mb:.2f} MB`", inline=True)
 
-            # --- Lấy danh sách người chơi và tạo ảnh skin đầu ---
             players_online = []
             world_name = "Không rõ"
             plugins_list = []
@@ -1062,22 +1026,19 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
                 plugins_list = query.software.plugins
             except Exception:
                 rcon_response = await self.execute_rcon_command("list")
-                # Phân tích chuỗi từ RCON: "There are 2/20 players online: player1, player2"
                 match = re.search(r'online: (.*)', rcon_response)
                 if match:
                     players_online = [p.strip() for p in match.group(1).split(',')]
 
             if players_online:
-                # Hiển thị tên người chơi dưới dạng text
                 player_list_str = ", ".join(f"`{p}`" for p in players_online)
                 embed.add_field(name=f"Danh sách online ({len(players_online)})", value=player_list_str, inline=False)
             else:
                 embed.add_field(name="Danh sách online", value="`Không có ai.`", inline=False)
 
-            # Thêm thông tin World và Plugins
             embed.add_field(name="🗺️ Thế giới (World)", value=f"`{world_name}`", inline=True)
             if plugins_list:
-                plugins_str = ", ".join(f"`{p}`" for p in plugins_list[:5]) # Giới hạn 5 plugin
+                plugins_str = ", ".join(f"`{p}`" for p in plugins_list[:5])
                 if len(plugins_list) > 5:
                     plugins_str += f" và {len(plugins_list) - 5} cái khác..."
                 embed.add_field(name=f"🔌 Plugins ({len(plugins_list)})", value=plugins_str, inline=False)
@@ -1123,7 +1084,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
     @commands.has_permissions(administrator=True)
     async def set_log_channel(self, ctx: commands.Context, channel: discord.TextChannel):
         """Thiết lập kênh log cho server Minecraft."""
-        # SỬA LỖI: Lưu cấu hình theo ID của server Discord hiện tại, không phải ID server game
         self.log_configs[str(ctx.guild.id)] = channel.id
         save_mc_log_config(self.log_configs)
         embed = make_mc_embed(
@@ -1136,7 +1096,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
             ]
         )
         await ctx.send(embed=embed, ephemeral=True)
-        # Khởi động lại task nếu nó chưa chạy hoặc đã dừng
         if self._log_task and self._log_task.done():
             self._log_task = self.bot.loop.create_task(self.log_listener_task())
 
@@ -1149,12 +1108,10 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         player_heads_file = None
         
         try:
-            # Ưu tiên dùng Query để lấy danh sách người chơi
             query_server = await JavaServer.async_lookup(f"{MINECRAFT_HOST}:{QUERY_PORT}")
             query = await query_server.async_query()
             players_online = query.players.names
         except Exception as e:
-            # Nếu Query thất bại, dùng RCON
             rcon_response = await self.execute_rcon_command("list")
             if "Lỗi" not in rcon_response:
                 match = re.search(r'online: (.*)', rcon_response)
@@ -1198,7 +1155,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         )
         await ctx.send(embed=embed, ephemeral=True)
 
-    # --- NHÓM LỆNH QUẢN LÝ MC ADMIN ---
     @mc.group(name="admin", description="Quản lý danh sách quản trị viên Minecraft.")
     async def mc_admin(self, ctx: commands.Context):
         if ctx.invoked_subcommand is None:
@@ -1312,7 +1268,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
             )
             await ctx.send(embed=embed, ephemeral=True)
 
-    # BỔ SUNG: Lệnh restart bằng text/slash command phòng trường hợp không bấm nút
     @mc.command(name="restart", description="Khởi động lại server Minecraft trên Pika Hosting (Chỉ Owner).")
     @is_mc_admin()
     async def restart_server(self, ctx: commands.Context):
@@ -1335,9 +1290,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
             )
             await ctx.send(embed=embed, ephemeral=True)
 
-    # ==============================================================================
-    # HỆ THỐNG MINECRAFT PLUGIN - LIÊN KẾT SERVER & ĐIỀU KHIỂN
-    # ==============================================================================
 
     @mc.command(name="servers", description="Xem danh sách các máy chủ Minecraft đang kết nối với bot qua Plugin.")
     async def list_servers_cmd(self, ctx: commands.Context):
@@ -1382,7 +1334,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
     @mc.command(name="linkserver", description="Nối máy chủ Minecraft với Discord Server này bằng mã link (Chỉ Owner/Admin).")
     @commands.guild_only()
     async def link_server_cmd(self, ctx: commands.Context, code: str):
-        # Yêu cầu có quyền owner để nối server với server mc
         if not (ctx.author.id == ctx.guild.owner_id or ctx.author.guild_permissions.administrator):
             embed = make_mc_embed(
                 title="⛔ Quyền Hạn Bị Từ Chối",
@@ -1500,7 +1451,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
     @mc.command(name="cmd", aliases=["console"], description="Gửi lệnh console tới server Minecraft đã liên kết (Chỉ Quản lý Guild).")
     @commands.guild_only()
     async def cmd_server_cmd(self, ctx: commands.Context, *, lenh: str):
-        # Yêu cầu chỉ có người quản lý của guild đấy mới có quyền thao tác gửi lệnh
         if not (ctx.author.id == ctx.guild.owner_id or ctx.author.guild_permissions.administrator or ctx.author.guild_permissions.manage_guild):
             embed = make_mc_embed(
                 title="⛔ Quyền Hạn Bị Từ Chối",
@@ -1521,7 +1471,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         clean_cmd = lenh.strip().lstrip("/")
         await queue_mc_command(serv["server_key"], clean_cmd, f"{ctx.author.name} (ID: {ctx.author.id})")
 
-        # RCON fallback nếu có
         rcon_resp = ""
         try:
             rcon_resp = await self.execute_rcon_command(clean_cmd)
@@ -1621,7 +1570,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         if not player_name_or_code:
             return await self.account_status_cmd(ctx)
         val = player_name_or_code.strip()
-        # 1. Thử xác thực theo mã code liên kết (do /discord link in-game tạo)
         try:
             from data.database import link_mc_user_by_code
             db_res = await link_mc_user_by_code(val, ctx.author.id)
@@ -1642,7 +1590,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         except Exception:
             pass
 
-        # Tra cứu mã liên kết PENDING_LINKS nếu có
         try:
             from mc_link_system import PENDING_LINKS
             pdata = PENDING_LINKS.get(val.upper())
@@ -1666,7 +1613,6 @@ class MinecraftCog(commands.Cog, name="Minecraft Manager"):
         except Exception:
             pass
 
-        # Gán trực tiếp qua tên người chơi
         await link_mc_user(ctx.author.id, val.lower(), val)
         embed = make_mc_embed(
             title="✅ LIÊN KẾT TÀI KHOẢN THÀNH CÔNG!",

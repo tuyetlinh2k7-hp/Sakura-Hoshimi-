@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from Check.i18n import t
 
 BACKUP_DIR = "data/backups"
-MAX_BACKUPS_PER_GUILD = 15  # Tối đa 15 bản backup gần nhất cho mỗi server
+MAX_BACKUPS_PER_GUILD = 15
 
 
 class CreateBackupModal(discord.ui.Modal, title="Tạo bản sao lưu mới"):
@@ -50,7 +50,7 @@ class ConfirmLoadView(discord.ui.View):
         self.author_id = author_id
         self.cog = cog_instance
         self.filename = filename
-        self.sync_mode = False        # Mặc định False (Wipe cũ tạo mới), Bật True (Đồng bộ không xóa kênh cũ)
+        self.sync_mode = False
         self.restore_member_roles = True
         self.create_safety_backup = True
 
@@ -480,7 +480,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
             with open(file_path, 'r', encoding='utf-8') as f:
                 backup_data = json.load(f)
 
-            # 1. XÓA HOẶC ĐỒNG BỘ CẤU TRÚC
             if not sync_mode:
                 for channel in list(guild.channels):
                     try:
@@ -497,7 +496,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                     except Exception:
                         pass
 
-            # 2. TẠO LẠI / CẬP NHẬT ROLES
             role_map = {guild.id: guild.default_role}
             for role_data in reversed(backup_data.get("roles", [])):
                 if role_data.get("is_default"):
@@ -507,7 +505,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                         pass
                     continue
 
-                # Kiểm tra nếu ở chế độ Sync mà role đã tồn tại theo tên
                 existing_role = discord.utils.get(guild.roles, name=role_data["name"]) if sync_mode else None
                 if existing_role:
                     if role_data.get("id"):
@@ -539,7 +536,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                     except Exception:
                         pass
 
-            # Chuẩn hóa channels
             all_channels = backup_data.get("channels", [])
             if not all_channels:
                 for c in backup_data.get("text_channels", []):
@@ -551,7 +547,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
 
             first_text_channel = None
 
-            # 3. TẠO LẠI CATEGORIES & CHANNELS
             for cat_data in sorted(backup_data.get("categories", []), key=lambda c: c.get("position", 0)):
                 existing_cat = discord.utils.get(guild.categories, name=cat_data["name"]) if sync_mode else None
                 cat_overwrites = self._build_overwrites(guild, cat_data.get("overwrites", []), role_map)
@@ -579,13 +574,12 @@ class BackupCog(commands.Cog, name="BackupCog"):
                 ]
                 for chan_data in sorted(cat_channels, key=lambda x: x.get("position", 0)):
                     if sync_mode and discord.utils.get(new_cat.channels, name=chan_data["name"]):
-                        continue  # Bỏ qua nếu kênh đã tồn tại để giữ tin nhắn cũ
+                        continue
                     created = await self._restore_channel(guild, chan_data, role_map, category=new_cat)
                     if isinstance(created, discord.TextChannel) and first_text_channel is None:
                         first_text_channel = created
                     await asyncio.sleep(0.2)
 
-            # 4. KÊNH KHÔNG THUỘC CATEGORY
             uncategorized = [c for c in all_channels if not c.get("category_id") and not c.get("category")]
             for chan_data in sorted(uncategorized, key=lambda x: x.get("position", 0)):
                 if sync_mode and discord.utils.get(guild.text_channels + guild.voice_channels, name=chan_data["name"]):
@@ -595,7 +589,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                     first_text_channel = created
                 await asyncio.sleep(0.2)
 
-            # 5. KHÔI PHỤC BAN (Danh sách cấm)
             for ban_info in backup_data.get("bans", []):
                 try:
                     user_obj = await self.bot.fetch_user(ban_info["user_id"])
@@ -604,7 +597,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                 except Exception:
                     pass
 
-            # 6. GÁN LẠI ROLE CHO THÀNH VIÊN
             if restore_members and not sync_mode:
                 for member_id_str, old_role_ids in backup_data.get("member_roles", {}).items():
                     member = guild.get_member(int(member_id_str))
@@ -621,7 +613,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                         except Exception:
                             pass
 
-            # 7. THÔNG BÁO HOÀN TẤT
             success_msg = t(guild, "BACKUP_RESTORE_SUCCESS")
             if first_text_channel:
                 try:
@@ -659,7 +650,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                 "bans": []
             }
 
-            # Sao lưu Roles
             for role in sorted(guild.roles, key=lambda r: r.position, reverse=True):
                 if role.is_bot_managed() or role.is_premium_subscriber():
                     continue
@@ -669,7 +659,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                     "position": role.position, "is_default": role.is_default()
                 })
 
-            # Sao lưu Categories & Channels
             for category in sorted(guild.categories, key=lambda c: c.position):
                 backup_data["categories"].append({
                     "id": category.id, "name": category.name, "position": category.position,
@@ -681,7 +670,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
                     continue
                 backup_data["channels"].append(self._channel_to_dict(channel))
 
-            # Sao lưu Bans (Danh sách người bị cấm)
             try:
                 async for ban_entry in guild.bans():
                     backup_data["bans"].append({
@@ -691,7 +679,6 @@ class BackupCog(commands.Cog, name="BackupCog"):
             except Exception:
                 pass
 
-            # Sao lưu Member Roles
             for member in guild.members:
                 if member.bot:
                     continue

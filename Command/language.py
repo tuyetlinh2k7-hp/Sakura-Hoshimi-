@@ -52,7 +52,6 @@ class LanguageCog(commands.Cog, name="Language"):
         meta = get_languages_metadata()
 
         if not lang:
-            # Liệt kê các ngôn ngữ đang hỗ trợ
             current = get_guild_language(guild)
             lines = []
             for code in sorted(supported):

@@ -24,11 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FISHING_DATA_FILE = BASE_DIR / "data" / "fishing_inventory.json"
 MARKET_DATA_FILE = BASE_DIR / "data" / "p2p_market.json"
 
-# ==============================================================================
-# QUẢN LÝ DỮ LIỆU CHỢ & PHÍ SÀN
-# ==============================================================================
 market_state = {
-    "listings": [],  # Danh sách đơn hàng
+    "listings": [],
     "merchant_rates": {},
     "hourly_sold_volume": {},
     "last_rate_update": 0,
@@ -148,9 +145,6 @@ def refund_listing_item(u_fish: dict, listing: dict):
         u_fish.setdefault("trash_bag", {})[tid] = u_fish.setdefault("trash_bag", {}).get(tid, 0) + payload["count"]
 
 
-# ==============================================================================
-# MODAL ĐĂNG BÁN ĐẦY ĐỦ THỜI GIAN TREO & PHÍ ƯU TIÊN
-# ==============================================================================
 class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Người Chơi"):
     item_type = discord.ui.TextInput(
         label="Loại (fish/rod/bait/chest/item/trash)",
@@ -202,7 +196,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
         except ValueError:
             return await interaction.response.send_message("❌ Số lượng và giá bán phải là số nguyên dương hợp lệ (giá tối thiểu 100c)!", ephemeral=True)
 
-        # Phân tích tùy chọn Thời gian treo và Phí ưu tiên VIP
         opt_parts = self.listing_options.value.strip().split("|")
         raw_hours = opt_parts[0].strip() if len(opt_parts) > 0 else "24"
         raw_vip = opt_parts[1].strip().lower() if len(opt_parts) > 1 else "no"
@@ -214,15 +207,10 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
         is_priority = raw_vip in ("yes", "y", "true", "1")
         priority_fee = 10000 if is_priority else 0
 
-        # Kiểm tra tiền để trả phí ưu tiên nếu bật VIP
         u_data = await get_user_data(self.guild_id, self.author.id)
         if is_priority and u_data.get("coins", 0) < priority_fee:
             return await interaction.response.send_message(f"❌ Bạn không đủ tiền trả phí đẩy VIP ưu tiên! Cần **`{priority_fee:,}` coin**.", ephemeral=True)
 
-        # Tính toán tỷ lệ phí sàn (Fee: 5% - 20% tùy theo thời gian treo)
-        # Treo 12h: phí sàn 5%
-        # Treo 24h: phí sàn 10%
-        # Treo 48h: phí sàn 15% (nếu giá trị siêu khủng > 1M coin: 20%)
         if hours == 12:
             fee_pct = 5
         elif hours == 24:
@@ -237,7 +225,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
         listed_item_payload = None
         item_display_name = ""
 
-        # 1. Bán Cá
         if itype in ("fish", "cá"):
             bag = u_fish.get("fish_bag", [])
             if not ident.isdigit() or int(ident) < 1 or int(ident) > len(bag):
@@ -247,7 +234,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
             mut_str = f" [{fish_obj['mutation']}]" if fish_obj.get("mutation") else ""
             item_display_name = f"{fish_obj['name']}{mut_str} ({fish_obj.get('weight', 0)}kg)"
 
-        # 2. Bán Cần Câu
         elif itype in ("rod", "cần"):
             rods = u_fish.get("rods", {})
             if ident not in rods:
@@ -259,7 +245,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
             ref_str = f" (+{rod_obj.get('refine', 0)})" if rod_obj.get("refine", 0) > 0 else ""
             item_display_name = f"{rod_obj['name']}{ref_str} (Bền: {rod_obj.get('durability', 0)})"
 
-        # 3. Bán Mồi Câu
         elif itype in ("bait", "mồi"):
             baits = u_fish.get("baits", {})
             if baits.get(ident, 0) < qty:
@@ -272,7 +257,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
             listed_item_payload = {"id": ident, "count": qty}
             item_display_name = f"{qty}x {ident}"
 
-        # 4. Bán Rương
         elif itype in ("chest", "rương"):
             chests = u_fish.get("chests", {})
             if chests.get(ident, 0) < qty:
@@ -281,7 +265,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
             listed_item_payload = {"id": ident, "count": qty}
             item_display_name = f"{qty}x {ident}"
 
-        # 5. Bán Vật phẩm / Chìa khóa
         elif itype in ("item", "vật phẩm", "key"):
             items = u_fish.get("items", {})
             if items.get(ident, 0) < qty:
@@ -290,7 +273,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
             listed_item_payload = {"id": ident, "count": qty}
             item_display_name = f"{qty}x {ident}"
 
-        # 6. Bán Rác Biển
         elif itype in ("trash", "rác"):
             trash = u_fish.get("trash_bag", {})
             if trash.get(ident, 0) < qty:
@@ -306,7 +288,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
 
         save_fishing_users(users)
 
-        # Lưu thông tin bài đăng
         listing_id = int(time.time() * 1000)
         now = time.time()
         market_state.setdefault("listings", []).append({
@@ -337,9 +318,6 @@ class PostListingModal(discord.ui.Modal, title="📦 Đăng Bán Lên Chợ Ngư
         )
 
 
-# ==============================================================================
-# VIEW CHỢ NGƯỜI CHƠI (TỰ ĐỘNG ƯU TIÊN HÀNG VIP ĐẦU DANH SÁCH)
-# ==============================================================================
 class P2PMarketView(discord.ui.View):
     def __init__(self, author: discord.Member, guild_id: int):
         super().__init__(timeout=240)
@@ -366,7 +344,6 @@ class P2PMarketView(discord.ui.View):
         else:
             filtered = list(listings)
 
-        # SẮP XẾP: Hàng VIP có phí ưu tiên (is_priority=True) LUÔN ĐƯỢC XẾP ĐẦU DANH SÁCH
         filtered.sort(key=lambda x: (not x.get("is_priority", False), -x.get("created_at", 0)))
         return filtered
 
@@ -379,7 +356,6 @@ class P2PMarketView(discord.ui.View):
         current_items = filtered[start:start + self.per_page]
 
         vi = is_vietnamese(self.guild_id)
-        # Row 0: Nút mua các món từ [1] đến [5]
         for idx, it in enumerate(current_items):
             is_seller = (it["seller_id"] == self.author.id)
             if is_seller:
@@ -394,7 +370,6 @@ class P2PMarketView(discord.ui.View):
             btn.callback = self._create_buy_callback(it)
             self.add_item(btn)
 
-        # Row 1: Menu lọc danh mục
         filter_options = [
             discord.SelectOption(label="Tất cả hàng hóa" if vi else "All Items", value="all", default=(self.filter_type == "all"), emoji="🌐"),
             discord.SelectOption(label="Cá đại dương" if vi else "Ocean Fish", value="fish", default=(self.filter_type == "fish"), emoji="🐟"),
@@ -407,7 +382,6 @@ class P2PMarketView(discord.ui.View):
         cat_select.callback = self._filter_callback
         self.add_item(cat_select)
 
-        # Row 2: Điều hướng trang & Đăng bán
         prev_btn = discord.ui.Button(label="◀ Trước" if vi else "◀ Prev", style=discord.ButtonStyle.secondary, disabled=(self.page == 0), row=2)
         prev_btn.callback = self._prev
         self.add_item(prev_btn)
@@ -423,7 +397,6 @@ class P2PMarketView(discord.ui.View):
         post_btn.callback = self._open_post_modal
         self.add_item(post_btn)
 
-        # Row 3: Chuyển sang Lái Buôn Biển Sâu
         merchant_btn = discord.ui.Button(label="Ghé Tiệm Lái Buôn Biển Sâu (Bán Nhanh)", style=discord.ButtonStyle.secondary, emoji="🚢", row=3)
         merchant_btn.callback = self._goto_merchant
         self.add_item(merchant_btn)
@@ -476,7 +449,6 @@ class P2PMarketView(discord.ui.View):
             buyer_id = str(self.author.id)
             price = listing["price"]
 
-            # Người bán tự hủy đơn hàng
             if listing["seller_id"] == self.author.id:
                 listings.remove(listing)
                 save_market_data()
@@ -490,12 +462,10 @@ class P2PMarketView(discord.ui.View):
                 await interaction.response.edit_message(embed=self.build_embed(u_data.get("coins", 0)), view=self)
                 return await interaction.followup.send(f"🗑️ Đã hủy bán và hoàn trả **{listing['item_name']}** vào túi đồ!", ephemeral=True)
 
-            # Người mua mua hàng
             buyer_data = await get_user_data(self.guild_id, self.author.id)
             if buyer_data.get("coins", 0) < price:
                 return await interaction.response.send_message(f"❌ Bạn không đủ tiền! Cần **`{price:,}` coin**.", ephemeral=True)
 
-            # Trừ phí sàn (5% - 20%) và chuyển tiền cho người bán
             fee_pct = listing.get("fee_pct", 10)
             seller_receive = int(price * (1 - (fee_pct / 100)))
 
@@ -505,7 +475,6 @@ class P2PMarketView(discord.ui.View):
             listings.remove(listing)
             save_market_data()
 
-            # Chuyển đồ sang người mua
             buyer_fish = get_user_fishing_data(self.author.id)
             refund_listing_item(buyer_fish, listing)
             save_fishing_users(users)
@@ -554,9 +523,6 @@ class P2PMarketView(discord.ui.View):
         await interaction.response.edit_message(embed=merchant_view.build_embed(u_data.get("coins", 0)), view=merchant_view)
 
 
-# ==============================================================================
-# VIEW LÁI BUÔN BIỂN SÂU
-# ==============================================================================
 class DeepSeaMerchantView(discord.ui.View):
     def __init__(self, author: discord.Member, guild_id: int):
         super().__init__(timeout=180)
@@ -697,9 +663,6 @@ class DeepSeaMerchantView(discord.ui.View):
         await interaction.response.edit_message(embed=p2p_view.build_embed(u_data.get("coins", 0)), view=p2p_view)
 
 
-# ==============================================================================
-# LỚP COG CHÍNH (MARKET COG)
-# ==============================================================================
 class MarketCog(commands.Cog, name="Market"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -708,7 +671,6 @@ class MarketCog(commands.Cog, name="Market"):
     def cog_unload(self):
         self.market_cleanup_task.cancel()
 
-    # TASK TỰ ĐỘNG QUÉT HOÀN TRẢ ĐƠN HÀNG HẾT HẠN (MỖI 5 PHÚT)
     @tasks.loop(minutes=5)
     async def market_cleanup_task(self):
         now = time.time()

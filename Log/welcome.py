@@ -23,7 +23,6 @@ class WelcomeLog(commands.Cog):
         if not channel:
             return
 
-        # Kiểm tra quyền hạn của bot trong kênh chào mừng
         bot_member = member.guild.me
         if not bot_member:
             return
@@ -45,7 +44,6 @@ class WelcomeLog(commands.Cog):
             minutes, _ = divmod(remainder, 60)
             age_str = t(member.guild, "LOG_WELCOME_AGE_HOURS", hours=hours, minutes=minutes)
 
-        # hỗ trợ custom welcome từ web (Welcome / Goodbye panel) — {user} {server}
         custom_msg = settings.get("welcome")
         if not isinstance(custom_msg, str):
             custom_msg = ""
@@ -53,7 +51,6 @@ class WelcomeLog(commands.Cog):
         if not isinstance(custom_img, str):
             custom_img = ""
 
-        # nếu web để trống thì dùng mặc định i18n
         if custom_msg:
             desc = custom_msg.replace("{user}", str(member.mention)).replace("{server}", member.guild.name).replace("{user_name}", member.display_name)
         else:
@@ -72,7 +69,6 @@ class WelcomeLog(commands.Cog):
         embed.set_footer(text=t(member.guild, "LOG_WELCOME_FOOTER", id=member.id))
 
         content = t(member.guild, "LOG_WELCOME_CONTENT", mention=member.mention)
-        # nếu custom_msg có @user thì không cần content mention riêng
         if custom_msg and "{user}" in custom_msg:
             content = None
 
@@ -80,7 +76,6 @@ class WelcomeLog(commands.Cog):
             if perms.embed_links:
                 await channel.send(content=content, embed=embed)
             else:
-                # Fallback gửi tin nhắn chữ nếu thiếu quyền Embed Links
                 plain_text = f"{content or ''}\n\n🎉 **{member.display_name}** vừa tham gia {member.guild.name}!\nThành viên thứ: `{member.guild.member_count}`\nTuổi tài khoản: `{age_str}`".strip()
                 await channel.send(content=plain_text)
         except (discord.Forbidden, discord.HTTPException) as e:

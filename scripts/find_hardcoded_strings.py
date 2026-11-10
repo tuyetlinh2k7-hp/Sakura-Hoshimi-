@@ -14,8 +14,6 @@ for idx, line in enumerate(lines, start=1):
     stripped = line.strip()
     if stripped.startswith('#') or stripped.startswith('"""') or stripped.startswith('*'):
         continue
-    # Check if this line is just defining a default in t(...)
-    # If it is inside t(lang, "KEY", default="..."), that's acceptable fallback, BUT is the key defined in en/ja/cn?
     if vn_chars.search(line):
         hardcoded.append((idx, stripped))
 

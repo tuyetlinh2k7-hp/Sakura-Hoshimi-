@@ -8,7 +8,6 @@ from config import OWNER_ID
 from Command.command_blacklist import blacklist_users, save_blacklist
 from Check.i18n import t, is_vietnamese
 
-# --- MODALS (CỬA SỔ POPUP) ---
 
 class UserActionModal(discord.ui.Modal):
     """Modal chung cho các hành động cần nhập liệu như Mute, Rename."""
@@ -60,7 +59,6 @@ class UserActionModal(discord.ui.Modal):
                 await interaction.response.send_message(f"❌ Lỗi khi đổi tên: {e}", ephemeral=True)
 
 
-# --- VIEWS (BỘ NÚT BẤM) ---
 
 class ConfirmView(discord.ui.View):
     """View xác nhận cho các hành động nguy hiểm như Ban, Kick."""
@@ -112,7 +110,7 @@ class RoleManageView(discord.ui.View):
             try:
                 if self.action == "add":
                     await self.target_user.add_roles(role, reason=f"Thêm bởi {interaction.user}")
-                else: # remove
+                else:
                     await self.target_user.remove_roles(role, reason=f"Xóa bởi {interaction.user}")
                 success_roles.append(role.mention)
             except discord.Forbidden:
@@ -124,12 +122,9 @@ class RoleManageView(discord.ui.View):
         if failed_roles:
             response_msg += f"❌ Thất bại với các role (thiếu quyền hoặc role cao hơn bot): {', '.join(failed_roles)}."
 
-        # Chỉnh sửa tin nhắn gốc để hiển thị kết quả và xóa các nút bấm
-        # thay vì cố gắng xóa một tin nhắn ephemeral (gây lỗi 10008)
-        # SỬA LỖI: Không thể edit tin nhắn ephemeral. Thay vào đó, gửi một tin nhắn followup mới.
-        await interaction.response.defer() # Đánh dấu đã nhận tương tác
+        await interaction.response.defer()
         await interaction.followup.send(response_msg or "Không có thay đổi nào được thực hiện.", ephemeral=True)
-        await interaction.message.delete() # Xóa tin nhắn có nút chọn role đi
+        await interaction.message.delete()
         self.stop()
 
 class UserPanelView(discord.ui.View):
@@ -139,8 +134,6 @@ class UserPanelView(discord.ui.View):
         self.target = target
 
         vi = is_vietnamese(getattr(author, "guild", None))
-        # --- Logic thêm/bớt nút dựa trên quyền và trạng thái ---
-        # Quyền cơ bản
         if author.guild_permissions.kick_members:
             self.add_item(self.create_button("Kick", self.kick_callback, style=discord.ButtonStyle.danger, emoji="👢", row=0))
         if author.guild_permissions.ban_members:
@@ -159,7 +152,6 @@ class UserPanelView(discord.ui.View):
             self.add_item(self.create_button(add_role_lbl, self.add_role_callback, style=discord.ButtonStyle.success, emoji="➕", row=1))
             self.add_item(self.create_button(rem_role_lbl, self.remove_role_callback, style=discord.ButtonStyle.danger, emoji="➖", row=1))
 
-        # Quyền trong kênh thoại
         if target.voice:
             if author.guild_permissions.move_members:
                 self.add_item(self.create_button("Move", self.move_callback, style=discord.ButtonStyle.primary, emoji="🚀", row=2))
@@ -170,7 +162,6 @@ class UserPanelView(discord.ui.View):
                 deaf_lbl = "Tắt Âm" if vi else "Deafen"
                 self.add_item(self.create_button(deaf_lbl, self.deafen_voice_callback, style=discord.ButtonStyle.primary, emoji="🎧", row=2))
 
-        # Quyền Owner
         if author.id == OWNER_ID:
             self.add_item(self.create_button("Blacklist", self.blacklist_callback, style=discord.ButtonStyle.grey, emoji="⛔", row=3))
             self.add_item(self.create_button("Un-Blacklist", self.unblacklist_callback, style=discord.ButtonStyle.grey, emoji="✅", row=3))
@@ -184,14 +175,11 @@ class UserPanelView(discord.ui.View):
         if interaction.user.id != self.author.id:
             await interaction.response.send_message(t(interaction.guild, "LEVEL_NOT_YOURS"), ephemeral=True)
             return False
-        # Kiểm tra lại quyền hạn của người dùng trước khi thực hiện hành động
-        # (Phòng trường hợp quyền bị thay đổi sau khi lệnh được gọi)
-        if not interaction.user.guild_permissions.administrator: # Một check đơn giản, có thể làm chi tiết hơn
+        if not interaction.user.guild_permissions.administrator:
              await interaction.response.send_message(t(interaction.guild, "USERPANEL_NO_PERM"), ephemeral=True)
              return False
         return True
 
-    # --- Callbacks cho các nút ---
     async def kick_callback(self, interaction: discord.Interaction):
         await self.confirm_and_execute(interaction, "kick", f"Bạn có chắc muốn **Kick** {self.target.mention} không?")
 
@@ -220,7 +208,6 @@ class UserPanelView(discord.ui.View):
         await interaction.response.send_message("Vui lòng chọn các vai trò bạn muốn xóa:", view=view, ephemeral=True)
 
     async def move_callback(self, interaction: discord.Interaction):
-        # Logic cho move: Cần một Select Menu để chọn kênh voice
         voice_channels = interaction.guild.voice_channels
         if not voice_channels:
             return await interaction.response.send_message("Server không có kênh thoại nào để chuyển.", ephemeral=True)
@@ -285,7 +272,6 @@ class UserPanelView(discord.ui.View):
             await interaction.followup.send(t(interaction.guild, "USERPANEL_CANCELLED"), ephemeral=True)
 
 
-# --- COG CHÍNH ---
 
 class UserPanelCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -293,11 +279,10 @@ class UserPanelCog(commands.Cog):
 
     @commands.hybrid_command(name="userpanel", aliases=["upanel"], description="Xem thông tin và quản lý thành viên.")
     @app_commands.describe(thanh_vien="Người bạn muốn xem.")
-    @commands.has_permissions(kick_members=True) # Yêu cầu quyền tối thiểu để dùng lệnh
+    @commands.has_permissions(kick_members=True)
     async def user_panel(self, ctx: commands.Context, thanh_vien: discord.Member):
         """Hiển thị bảng điều khiển quản lý cho một thành viên."""
         
-        # Tạo embed thông tin người dùng (tương tự lệnh userinfo)
         embed = discord.Embed(
             title=f"👤 Bảng điều khiển cho {thanh_vien.display_name}",
             color=thanh_vien.top_role.color if thanh_vien.top_role.color != discord.Color.default() else discord.Color.blue(),
@@ -326,16 +311,9 @@ class UserPanelCog(commands.Cog):
         except Exception:
             pass
 
-        # Tạo và gửi view với các nút điều khiển
         view = UserPanelView(ctx.author, thanh_vien)
         await ctx.send(embed=embed, view=view, ephemeral=True)
 
-    #@user_panel.error
-    #async def user_panel_error(self, ctx: commands.Context, error):
-        #if isinstance(error, commands.MissingPermissions):
-            #await ctx.send("❌ Bạn không có quyền `Kick Members` để sử dụng lệnh này.", ephemeral=True)
-        #else:
-            #await ctx.send(f"Đã xảy ra lỗi: {error}", ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(UserPanelCog(bot))

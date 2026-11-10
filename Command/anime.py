@@ -193,7 +193,6 @@ class MediaCog(commands.Cog, name="Media"):
         session = self._get_session()
         m_type_upper = "ANIME" if media_type == "anime" else "MANGA"
 
-        # 1. API chính: AniList GraphQL (Nhanh, không chặn IP, thông tin chi tiết)
         try:
             gql_query = """
             query ($search: String, $type: MediaType) {
@@ -238,7 +237,6 @@ class MediaCog(commands.Cog, name="Media"):
         except Exception:
             pass
 
-        # 2. API dự phòng 1: Jikan (MyAnimeList)
         params_jikan = {"q": query, "limit": 1}
         if True:
             params_jikan["sfw"] = "true"
@@ -252,7 +250,6 @@ class MediaCog(commands.Cog, name="Media"):
         except Exception:
             pass
 
-        # 3. API dự phòng 2: Kitsu
         try:
             headers_kitsu = {"Accept": "application/vnd.api+json"}
             async with session.get(f"https://kitsu.io/api/edge/{media_type}", params={"filter[text]": query, "page[limit]": 1}, headers=headers_kitsu) as resp:
@@ -272,7 +269,6 @@ class MediaCog(commands.Cog, name="Media"):
         image_url = None
         source_note = ""
 
-        # 1. API chính (Nekos.best với header)
         try:
             headers = {"User-Agent": "SakuraBot/1.0 (DiscordBot)"}
             async with session.get(f"https://nekos.best/api/v2/{endpoint}", headers=headers, timeout=5) as resp:
@@ -284,7 +280,6 @@ class MediaCog(commands.Cog, name="Media"):
         except Exception:
             pass
 
-        # 2. API dự phòng 1: waifu.im (Cực kỳ ổn định và nhanh)
         if not image_url:
             try:
                 tag = "waifu" if endpoint == "waifu" else "maid"
@@ -297,7 +292,6 @@ class MediaCog(commands.Cog, name="Media"):
             except Exception:
                 pass
 
-        # 3. API dự phòng 2: Waifu.pics
         if not image_url:
             try:
                 async with session.get(f"https://api.waifu.pics/sfw/{endpoint}", timeout=5) as resp:
@@ -318,7 +312,6 @@ class MediaCog(commands.Cog, name="Media"):
 
     async def _fetch_image(self, ctx: commands.Context, query: str):
         session = self._get_session()
-        # 1. API chính (Wikimedia Commons)
         try:
             params = {
                 "action": "query",
@@ -343,7 +336,6 @@ class MediaCog(commands.Cog, name="Media"):
         except Exception:
             pass
 
-        # 2. API dự phòng (LoremFlickr)
         try:
             encoded = urllib.parse.quote(query)
             random_id = random.randint(1, 1000)
@@ -393,7 +385,6 @@ class MediaCog(commands.Cog, name="Media"):
         raw_action = (action or "anime").lower().strip()
         KNOWN_ACTIONS = ("anime", "manga", "random", "waifu", "neko", "image")
         
-        # Xử lý khi người dùng gõ lệnh prefix như: s!anime naruto
         if raw_action not in KNOWN_ACTIONS:
             if query:
                 query = f"{action} {query}".strip()
@@ -418,7 +409,6 @@ class MediaCog(commands.Cog, name="Media"):
 
         if act == "random":
             session = self._get_session()
-            # 1. Jikan Random
             params = {"sfw": "true"}
             try:
                 async with session.get("https://api.jikan.moe/v4/random/anime", params=params, timeout=4) as resp:
@@ -430,7 +420,6 @@ class MediaCog(commands.Cog, name="Media"):
             except Exception:
                 pass
 
-            # 2. AniList Random Page
             try:
                 random_page = random.randint(1, 100)
                 gql_query = """

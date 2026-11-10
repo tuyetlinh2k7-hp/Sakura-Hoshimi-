@@ -13,7 +13,6 @@ OLD_LEVELS_FILE = DATA_DIR / "levels.json"
 async def init_db():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     async with aiosqlite.connect(DB_PATH) as db:
-        # Tối ưu hóa hiệu năng SQLite: WAL Mode, Temp Memory và Cache lớn giảm lag tối đa cho Hosting CPU/Disk
         try:
             await db.execute("PRAGMA journal_mode=WAL;")
             await db.execute("PRAGMA synchronous=NORMAL;")
@@ -37,7 +36,6 @@ async def init_db():
                 PRIMARY KEY (guild_id, user_id)
             )
         """)
-        # Migration: Bảng tài chính toàn cục (Coins & Xu & Bank đồng bộ giữa tất cả các Server)
         await db.execute("""
             CREATE TABLE IF NOT EXISTS global_economy (
                 user_id TEXT PRIMARY KEY,
@@ -49,7 +47,6 @@ async def init_db():
                 work_last REAL DEFAULT 0
             )
         """)
-        # Tự động đồng bộ số dư cao nhất từ users sang global_economy nếu chưa có
         await db.execute("""
             INSERT OR IGNORE INTO global_economy (user_id, coins, bank, xu, daily_last, daily_streak, work_last)
             SELECT user_id, MAX(coins), MAX(bank), MAX(xu), MAX(daily_last), MAX(daily_streak), MAX(work_last)
@@ -57,7 +54,6 @@ async def init_db():
             GROUP BY user_id
         """)
 
-        # Migration: Kiểm tra và bổ sung cột xu nếu bảng đã tồn tại từ trước
         async with db.execute("PRAGMA table_info(users)") as cursor:
             columns = [row[1] for row in await cursor.fetchall()]
             if "xu" not in columns:
@@ -75,7 +71,6 @@ async def init_db():
             )
         """)
 
-        # Bảng quản lý Minecraft Servers kết nối qua Plugin
         await db.execute("""
             CREATE TABLE IF NOT EXISTS mc_servers (
                 server_key TEXT PRIMARY KEY,
@@ -99,7 +94,6 @@ async def init_db():
             )
         """)
 
-        # Bảng mã liên kết server (do admin MC tạo để liên kết với Discord)
         await db.execute("""
             CREATE TABLE IF NOT EXISTS mc_server_link_codes (
                 code TEXT PRIMARY KEY,
@@ -110,7 +104,6 @@ async def init_db():
             )
         """)
 
-        # Bảng mã liên kết người chơi Discord <-> Minecraft
         await db.execute("""
             CREATE TABLE IF NOT EXISTS mc_user_link_codes (
                 code TEXT PRIMARY KEY,
@@ -121,7 +114,6 @@ async def init_db():
             )
         """)
 
-        # Bảng liên kết tài khoản Discord <-> Minecraft
         await db.execute("""
             CREATE TABLE IF NOT EXISTS mc_user_links (
                 discord_id TEXT PRIMARY KEY,
@@ -132,7 +124,6 @@ async def init_db():
             )
         """)
 
-        # Bảng hàng đợi lệnh thực thi trong Minecraft
         await db.execute("""
             CREATE TABLE IF NOT EXISTS mc_pending_commands (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -146,7 +137,6 @@ async def init_db():
             )
         """)
 
-        # Bảng hàng đợi tin nhắn chat 2 chiều Discord <-> Minecraft
         await db.execute("""
             CREATE TABLE IF NOT EXISTS mc_chat_queue (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -159,7 +149,6 @@ async def init_db():
             )
         """)
 
-        # Bảng lưu trữ tài khoản HoYoLAB và Cookie an toàn trong Database SQLite
         await db.execute("""
             CREATE TABLE IF NOT EXISTS hoyolab_accounts (
                 user_id TEXT,
@@ -181,7 +170,6 @@ async def init_db():
 
         await db.commit()
 
-        # Tự động di chuyển dữ liệu từ hoyolab_cookies.json sang SQLite Database nếu có
         HOYO_COOKIE_FILE = DATA_DIR / "hoyolab_cookies.json"
         if HOYO_COOKIE_FILE.exists():
             try:
@@ -248,7 +236,6 @@ async def get_user_data(guild_id: int, user_id: int) -> dict:
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
 
-        # 1. Lấy Level & XP riêng của Server này
         async with db.execute("SELECT * FROM users WHERE guild_id = ? AND user_id = ?", (gid, uid)) as cursor:
             row_user = await cursor.fetchone()
             if not row_user:
@@ -261,7 +248,6 @@ async def get_user_data(guild_id: int, user_id: int) -> dict:
             else:
                 row_user = dict(row_user)
 
-        # 2. Lấy Coins, Xu, Bank Toàn Cục (Đồng bộ mọi server)
         await db.execute("""
             CREATE TABLE IF NOT EXISTS global_economy (
                 user_id TEXT PRIMARY KEY,
@@ -295,7 +281,6 @@ async def get_user_data(guild_id: int, user_id: int) -> dict:
             else:
                 row_econ = dict(row_econ)
 
-        # Kết hợp: Level & XP của Guild, Coins & Xu & Bank Toàn Cục
         res = {
             "guild_id": gid,
             "user_id": uid,
@@ -474,18 +459,14 @@ async def get_guild_level_and_economy_stats(guild_id: str | int) -> dict:
     gid = str(guild_id)
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
-        # Count users with xp > 0
         async with db.execute("SELECT COUNT(*) FROM users WHERE guild_id = ? AND xp > 0", (gid,)) as cur:
             row = await cur.fetchone()
             cnt_level = row[0] if row else 0
-        # Count users with coins > 0 or bank > 0 or xu > 0
         async with db.execute("SELECT COUNT(*) FROM users WHERE guild_id = ? AND (coins > 0 OR bank > 0 OR xu > 0)", (gid,)) as cur:
             row = await cur.fetchone()
             cnt_econ = row[0] if row else 0
-        # Top 5 level
         async with db.execute("SELECT user_id, xp, level FROM users WHERE guild_id = ? AND user_id != '1144785664458637394' ORDER BY level DESC, xp DESC LIMIT 5", (gid,)) as cur:
             top_level = [dict(r) for r in await cur.fetchall()]
-        # Top 5 rich (coins + bank)
         async with db.execute("SELECT user_id, coins, bank, xu, (coins + bank) AS total FROM users WHERE guild_id = ? AND user_id != '1144785664458637394' ORDER BY total DESC, coins DESC LIMIT 5", (gid,)) as cur:
             top_rich = [dict(r) for r in await cur.fetchall()]
         return {
@@ -533,7 +514,6 @@ async def update_user_level_stats(user_id: str | int, guild_id: str | int | None
     await get_user_data(int(gid or 0), int(uid))
     async with aiosqlite.connect(DB_PATH) as db:
         if gid:
-            # Lấy bản ghi hiện tại nếu có
             async with db.execute("SELECT coins, bank, xu FROM users WHERE guild_id = ? AND user_id = ?", (gid, uid)) as cur:
                 existing = await cur.fetchone()
             cur_coins = existing[0] if existing else 0
@@ -555,7 +535,6 @@ async def update_user_level_stats(user_id: str | int, guild_id: str | int | None
                     xu = excluded.xu
             """, (gid, uid, level, xp, final_coins, final_bank, final_xu))
 
-            # Đồng bộ sang global_economy nếu có thay đổi kinh tế
             if coins is not None or bank is not None or xu is not None:
                 await db.execute("""
                     UPDATE global_economy SET coins = ?, bank = ?, xu = ? WHERE user_id = ?
@@ -603,10 +582,7 @@ async def update_user_level_stats(user_id: str | int, guild_id: str | int | None
         return True
 
 
-# ==============================================================================
-# HỆ THỐNG MINECRAFT PLUGIN & SERVER MANAGEMENT
-# ==============================================================================
-MC_COIN_RATE = 1000  # 1 MC Coin = 1,000 Discord Coins
+MC_COIN_RATE = 1000
 
 
 async def get_mc_server(server_key: str) -> dict | None:
@@ -741,7 +717,7 @@ async def create_mc_server_link_code(server_key: str, server_name: str = "") -> 
     raw = secrets.token_hex(3).upper()
     code = f"MCLINK-{raw}"
     now = int(time.time())
-    expires_at = now + 900  # 15 phút
+    expires_at = now + 900
 
     if not server_name:
         s_obj = await get_mc_server(server_key)
@@ -784,7 +760,6 @@ async def link_mc_server_to_guild(code: str, guild_id: str | int, user_id: str |
         server_key = row_code["server_key"]
         server_name = row_code["server_name"] or server_key
 
-        # Đảm bảo record server tồn tại trong mc_servers
         async with db.execute("SELECT server_key FROM mc_servers WHERE server_key = ?", (server_key,)) as cur:
             exists = await cur.fetchone()
 
@@ -1059,7 +1034,6 @@ async def sync_mc_user_coins(discord_id: str | int, action: str, amount: int, fr
         return {"ok": False, "error": "Số lượng coin chuyển đổi phải lớn hơn 0"}
 
     if action == "to_mc":
-        # Chuyển từ Discord sang Minecraft (amount là số MC coins muốn nhận)
         req_discord_coins = amount * MC_COIN_RATE
         if discord_coins < req_discord_coins:
             return {
@@ -1084,8 +1058,6 @@ async def sync_mc_user_coins(discord_id: str | int, action: str, amount: int, fr
         }
 
     elif action == "to_discord":
-        # Chuyển từ Minecraft về Discord (amount là số MC coins muốn rút)
-        # Nếu yêu cầu xuất phát từ plugin in-game, Vault đã kiểm tra và trừ tiền in-game thực tế
         if not from_plugin and mc_coins < amount:
             return {
                 "ok": False,
@@ -1118,7 +1090,7 @@ async def create_mc_user_link_code(player_name: str, player_uuid: str = "") -> s
     import secrets
     code = secrets.token_hex(3).upper()
     now = int(time.time())
-    expires_at = now + 600  # 10 phút
+    expires_at = now + 600
 
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("""
@@ -1203,9 +1175,6 @@ async def link_mc_user_by_code(code: str, discord_id: str | int) -> dict:
     return res
 
 
-# ==============================================================================
-# HỆ THỐNG LƯU TRỮ TÀI KHOẢN & COOKIE HOYOLAB VÀO SQLITE DATABASE
-# ==============================================================================
 
 async def db_get_hoyolab_accounts(user_id: str = None) -> list[dict] | dict[str, list[dict]]:
     """

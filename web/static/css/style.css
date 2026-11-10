@@ -1,13 +1,8 @@
-/* =========================================================
-   🌸 SAKURA BOT DASHBOARD - MODERN GLASSMORPHISM THEME
-   Supports Light & Dark Modes + Sakura Swaying & Petals FX
-   ========================================================= */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* =========================================================
-   THEME VARIABLES (DARK / LIGHT)
-   ========================================================= */
+
 :root,
 [data-theme="dark"] {
   --bg-primary: #07090e;
@@ -22,7 +17,7 @@
   --border-glass-hover: rgba(255, 121, 198, 0.45);
   --border-subtle: rgba(255, 255, 255, 0.08);
 
-  /* Sakura Palette */
+  
   --sakura-pink: #ff79c6;
   --sakura-glow: #ff2a85;
   --sakura-light: #ffb8e2;
@@ -30,7 +25,7 @@
   --sakura-card-gradient: linear-gradient(145deg, rgba(255, 121, 198, 0.08) 0%, rgba(189, 147, 249, 0.03) 100%);
   --sakura-aura: rgba(255, 121, 198, 0.35);
 
-  /* Accent Colors */
+  
   --accent-purple: #bd93f9;
   --accent-cyan: #8be9fd;
   --accent-green: #50fa7b;
@@ -38,14 +33,14 @@
   --accent-red: #ff5555;
   --accent-orange: #ffb86c;
 
-  /* Typography */
+  
   --text-main: #f8f9fc;
   --text-muted: #94a3b8;
   --text-dim: #64748b;
   --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Layout */
+  
   --sidebar-width: 270px;
   --header-height: 74px;
   --radius-sm: 8px;
@@ -53,20 +48,18 @@
   --radius-lg: 20px;
   --radius-full: 9999px;
 
-  /* Shadows */
+  
   --shadow-glow: 0 0 25px rgba(255, 121, 198, 0.25);
   --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
   --shadow-pop: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 121, 198, 0.25);
 
-  /* Body background gradients */
+  
   --body-gradient-1: radial-gradient(circle at 10% 20%, rgba(255, 121, 198, 0.09) 0%, transparent 40%);
   --body-gradient-2: radial-gradient(circle at 90% 80%, rgba(189, 147, 249, 0.09) 0%, transparent 40%);
   --body-gradient-3: radial-gradient(circle at 50% 50%, rgba(139, 233, 253, 0.04) 0%, transparent 60%);
 }
 
-/* =========================================================
-   LIGHT THEME (Pastel Sakura Japanese Aesthetic)
-   ========================================================= */
+
 [data-theme="light"] {
   --bg-primary: #fdf5f8;
   --bg-secondary: #ffffff;
@@ -80,7 +73,7 @@
   --border-glass-hover: rgba(255, 60, 150, 0.5);
   --border-subtle: rgba(220, 180, 205, 0.4);
 
-  /* Sakura Palette */
+  
   --sakura-pink: #d81b60;
   --sakura-glow: #e91e63;
   --sakura-light: #fce4ec;
@@ -88,7 +81,7 @@
   --sakura-card-gradient: linear-gradient(145deg, rgba(255, 230, 240, 0.6) 0%, rgba(245, 235, 255, 0.3) 100%);
   --sakura-aura: rgba(233, 30, 99, 0.25);
 
-  /* Accent Colors */
+  
   --accent-purple: #7b1fa2;
   --accent-cyan: #0288d1;
   --accent-green: #2e7d32;
@@ -96,23 +89,23 @@
   --accent-red: #c2185b;
   --accent-orange: #e65100;
 
-  /* Typography */
+  
   --text-main: #1e1428;
   --text-muted: #5e526c;
   --text-dim: #8b8099;
 
-  /* Shadows */
+  
   --shadow-glow: 0 0 25px rgba(233, 30, 99, 0.18);
   --shadow-card: 0 10px 30px -10px rgba(180, 100, 140, 0.15), 0 4px 12px rgba(0, 0, 0, 0.04);
   --shadow-pop: 0 15px 35px -5px rgba(180, 100, 140, 0.22), 0 0 15px rgba(255, 105, 180, 0.25);
 
-  /* Body background gradients */
+  
   --body-gradient-1: radial-gradient(circle at 10% 20%, rgba(255, 182, 193, 0.35) 0%, transparent 45%);
   --body-gradient-2: radial-gradient(circle at 90% 80%, rgba(230, 190, 255, 0.3) 0%, transparent 45%);
   --body-gradient-3: radial-gradient(circle at 50% 50%, rgba(255, 240, 245, 0.5) 0%, transparent 60%);
 }
 
-/* Global Reset & Base */
+
 * {
   margin: 0;
   padding: 0;
@@ -139,7 +132,7 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Background Wallpaper (Sakura Blossom Ambient) */
+
 body::before {
   content: "";
   position: fixed;
@@ -180,13 +173,13 @@ body::after {
   background: radial-gradient(circle at 50% 25%, transparent 20%, rgba(253, 245, 248, 0.4) 85%);
 }
 
-/* Theme transitioning helper */
+
 .theme-transitioning,
 .theme-transitioning * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
 }
 
-/* Custom Scrollbar */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -205,9 +198,7 @@ body::after {
   background: var(--sakura-pink);
 }
 
-/* =========================================================
-   🌸 SAKURA DECOR: SWAYING BRANCHES & PARTICLES CANVAS
-   ========================================================= */
+
 .sakura-branch-container {
   position: fixed;
   inset: 0;
@@ -265,9 +256,7 @@ body::after {
   z-index: 99999;
 }
 
-/* =========================================================
-   ✨ ANIMATED BOT AVATARS & GLOW AURAS
-   ========================================================= */
+
 .avatar-aura-wrapper {
   position: relative;
   display: inline-flex;
@@ -324,9 +313,7 @@ body::after {
   }
 }
 
-/* =========================================================
-   🌓 THEME TOGGLE BUTTON
-   ========================================================= */
+
 .theme-toggle-btn {
   display: inline-flex;
   align-items: center;
@@ -378,9 +365,7 @@ body::after {
   transform: rotate(20deg) scale(1.15);
 }
 
-/* =========================================================
-   LANGUAGE SWITCHER (i18n)
-   ========================================================= */
+
 .lang-switch-dropdown {
   position: relative;
   display: inline-flex;
@@ -535,15 +520,13 @@ body::after {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 14px rgba(255, 121, 198, 0.25) !important;
 }
 
-/* App Container */
+
 .app-container {
   display: flex;
   min-height: 100vh;
 }
 
-/* =========================================================
-   SIDEBAR NAVIGATION
-   ========================================================= */
+
 .sidebar {
   width: var(--sidebar-width);
   background: var(--bg-glass);
@@ -601,7 +584,7 @@ body::after {
   letter-spacing: 0.5px;
 }
 
-/* Navigation Links */
+
 .nav-menu {
   flex: 1;
   padding: 20px 14px;
@@ -675,7 +658,7 @@ body::after {
   box-shadow: 0 0 10px var(--sakura-pink);
 }
 
-/* Sidebar Footer */
+
 .sidebar-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--border-subtle);
@@ -734,9 +717,7 @@ body::after {
   font-weight: 600;
 }
 
-/* =========================================================
-   MAIN CONTENT AREA
-   ========================================================= */
+
 .main-wrapper {
   flex: 1;
   margin-left: var(--sidebar-width);
@@ -745,7 +726,7 @@ body::after {
   min-height: 100vh;
 }
 
-/* Top Header — cố định không đổi khi lướt */
+
 .top-header {
   height: var(--header-height);
   padding: 0 32px;
@@ -795,7 +776,7 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   gap: 14px;
 }
 
-/* Status Badges */
+
 .header-stat-pill {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-subtle);
@@ -817,7 +798,7 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   font-family: var(--font-mono);
 }
 
-/* Quick Action Buttons */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -887,13 +868,13 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   border-radius: var(--radius-sm);
 }
 
-/* Content Container */
+
 .content-body {
   padding: 32px;
   flex: 1;
 }
 
-/* Tab Panels */
+
 .tab-content {
   display: none;
   animation: fadeIn 0.3s ease-in-out;
@@ -915,9 +896,7 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   }
 }
 
-/* =========================================================
-   CARDS & GRIDS
-   ========================================================= */
+
 .card-grid-4 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -962,7 +941,7 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   opacity: 0.6;
 }
 
-/* Stat Metric Card */
+
 .stat-card {
   display: flex;
   align-items: center;
@@ -1003,7 +982,7 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   margin-top: 2px;
 }
 
-/* Card Header */
+
 .card-header {
   display: flex;
   align-items: center;
@@ -1025,16 +1004,14 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   color: var(--sakura-pink);
 }
 
-/* Charts Container */
+
 .chart-box {
   position: relative;
   width: 100%;
   height: 240px;
 }
 
-/* =========================================================
-   GUILDS / SERVERS LIST
-   ========================================================= */
+
 .guilds-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1077,7 +1054,7 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   margin-bottom: 4px;
 }
 
-/* MEE6-style server picker */
+
 .guild-card.mee {
   padding: 0;
   overflow: hidden;
@@ -1183,7 +1160,7 @@ body.has-marquee .main-wrapper{padding-top:calc(var(--header-height) + 28px)}
   color: var(--accent-green);
 }
 
-/* Forms & Inputs */
+
 .form-group {
   margin-bottom: 16px;
 }
@@ -1219,9 +1196,7 @@ textarea.form-control {
   min-height: 90px;
 }
 
-/* =========================================================
-   TABLES
-   ========================================================= */
+
 .custom-table-container {
   overflow-x: auto;
   border-radius: var(--radius-md);
@@ -1253,9 +1228,7 @@ textarea.form-control {
   background: var(--bg-hover);
 }
 
-/* =========================================================
-   CONSOLE & LOG VIEWER
-   ========================================================= */
+
 .console-wrapper {
   background: linear-gradient(180deg, #0b0e14 0%, #0e121b 100%);
   border: 1px solid rgba(255, 121, 198, 0.25);
@@ -1437,9 +1410,7 @@ textarea.form-control {
   font-size: 0.8rem;
 }
 
-/* =========================================================
-   MODALS & TOASTS
-   ========================================================= */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1516,7 +1487,7 @@ textarea.form-control {
   }
 }
 
-/* ================= Drawer per-server (MEE6 style) ================ */
+
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -1684,7 +1655,7 @@ textarea.form-control {
 .member-option:hover{background:var(--bg-hover)!important; border-color:var(--border-glass)!important}
 .drawer-mobile-tabs{display:none}
 
-/* Mobile menu button */
+
 .mobile-menu-btn {
   display: none;
   width: 42px;
@@ -1712,9 +1683,7 @@ textarea.form-control {
   display: block;
 }
 
-/* =========================================================
-   RESPONSIVE DESIGN
-   ========================================================= */
+
 @media (max-width: 992px) {
   .sidebar {
     transform: translateX(-100%);
@@ -1853,7 +1822,7 @@ textarea.form-control {
     padding: 14px;
   }
   .module-card{padding:14px; margin-bottom:12px}
-  .module-card .form-group input, .module-card .form-group select, .module-card .form-group textarea{font-size:16px; min-height:44px} /* tránh zoom iOS */
+  .module-card .form-group input, .module-card .form-group select, .module-card .form-group textarea{font-size:16px; min-height:44px} 
   .switch{width:52px; height:30px}
   .switch::after{width:24px; height:24px}
   .switch.on::after{transform:translateX(22px)}
@@ -1941,7 +1910,7 @@ textarea.form-control {
   }
 }
 
-/* Top marquee running text */
+
 .sakura-marquee{position:fixed; top:0; left:0; right:0; height:28px; background:var(--sakura-gradient); color:#fff; display:flex; align-items:center; overflow:hidden; z-index:200; font-size:.82rem; font-weight:600; letter-spacing:.2px}
 .sakura-marquee-track{display:flex; align-items:center; gap:32px; white-space:nowrap; animation:marqueeScroll 25s linear infinite; will-change:transform}
 .sakura-marquee:hover .sakura-marquee-track{animation-play-state:paused}
@@ -1954,7 +1923,7 @@ body.has-marquee .top-header{top:28px}
 body.has-marquee .sakura-branch-container{top:28px}
 @media(max-width:768px){.sakura-marquee{font-size:.78rem; height:26px} body.has-marquee{padding-top:26px} body.has-marquee .drawer-header{top:26px}}
 
-/* Floating chat widget */
+
 .chat-fab{
   position:fixed; right:20px; bottom:20px; width:56px; height:56px; border-radius:50%;
   background:var(--sakura-gradient); color:#fff; border:none; cursor:pointer;
@@ -1986,7 +1955,7 @@ body.has-marquee .sakura-branch-container{top:28px}
 .chat-input{flex:1; background:var(--bg-input); border:1px solid var(--border-subtle); color:var(--text-main); padding:10px 12px; border-radius:12px; font-size:.9rem; outline:none}
 .chat-input:focus{border-color:var(--sakura-pink); box-shadow:0 0 0 3px rgba(255,121,198,0.15)}
 .chat-send{width:40px; height:40px; border-radius:12px; border:none; background:var(--sakura-gradient); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.1rem}
-/* ========== Auto-Moderation Pastel Pink (như hình) ========== */
+
 #panel-moderation .module-card{border:1.5px solid rgba(255,182,193,0.55); background: linear-gradient(180deg, rgba(255,248,250,0.95) 0%, rgba(255,255,255,0.98) 100%);}
 [data-theme="dark"] #panel-moderation .module-card{border-color: var(--border-glass); background: var(--bg-card);}
 #panel-moderation .module-card h3{color:#d81b60; font-weight:800; font-size:1.02rem;}
@@ -2009,7 +1978,7 @@ body.has-marquee .sakura-branch-container{top:28px}
 .am-badge-pink{background:rgba(255,121,198,0.12);color:#d81b60;border:1px solid rgba(255,121,198,0.25);padding:4px 8px;border-radius:999px;font-size:.75rem;font-weight:600}
 [data-theme="dark"] .am-badge-pink{background:rgba(255,121,198,0.15);color:var(--sakura-pink)}
 
-/* ========== DarkMode cho TempVoice & Confession & Audit Logs (khắc phục inline #fff) ========== */
+
 [data-theme="dark"] #panel-tempvoice .module-card,
 [data-theme="dark"] #panel-confession .module-card,
 [data-theme="dark"] #panel-logging .module-card{
@@ -2070,7 +2039,7 @@ body.has-marquee .sakura-branch-container{top:28px}
   border-color: #ffeab3 !important;
   color: var(--text-muted) !important;
 }
-/* DarkMode cho Blacklist (pastel -> dark) */
+
 [data-theme="dark"] #panel-blacklist .module-card{
   background: var(--bg-card) !important;
   border-color: var(--border-glass) !important;
@@ -2095,7 +2064,7 @@ body.has-marquee .sakura-branch-container{top:28px}
   color: var(--text-muted) !important;
 }
 
-/* DarkMode bổ sung cho AutoMod (đồng nhất) */
+
 [data-theme="dark"] #panel-moderation div[style*="background:#fff"]{
   background: var(--bg-card) !important;
   border-color: var(--border-subtle) !important;
@@ -2104,7 +2073,7 @@ body.has-marquee .sakura-branch-container{top:28px}
   border-color: var(--border-subtle) !important;
 }
 
-/* ========== Danh sách chọn kênh dễ nhìn (Confession / TempVoice / AutoMod / Audit Logs) ========== */
+
 #panel-tempvoice select.form-control,
 #panel-confession select.form-control,
 #panel-moderation select.form-control,
@@ -2182,7 +2151,7 @@ body.has-marquee .sakura-branch-container{top:28px}
   background: #1e1428 !important;
   color: var(--text-main) !important;
 }
-/* Chip kênh chọn – to, rõ */
+
 .am-chip{
   padding: 7px 12px !important;
   font-size: .84rem !important;
@@ -2203,14 +2172,12 @@ body.has-marquee .sakura-branch-container{top:28px}
 }
 [data-theme="dark"] .am-chip .am-chip-cat{ background: rgba(255,121,198,0.18); }
 
-/* Hiển thị loại kênh trong option bằng emoji + tên + id hint */
+
 .channel-opt-prefix{ opacity: .9; }
 
 @media(max-width:480px){.chat-fab{right:14px; bottom:14px; width:52px; height:52px}.chat-widget{right:12px; bottom:78px; width:calc(100vw - 24px)}}
 
-/* =========================================================
-   BOT COMMANDS GRID & PILLS (SYNCHRONIZED WITH BOT)
-   ========================================================= */
+
 .search-input-wrapper {
   position: relative;
   display: flex;
@@ -2412,9 +2379,7 @@ body.has-marquee .sakura-branch-container{top:28px}
   color: var(--text-dim);
 }
 
-/* =========================================================
-   MOBILE PHONE UX ENHANCEMENTS (iOS & Android)
-   ========================================================= */
+
 @media (max-width: 768px) {
   html, body {
     overflow-x: hidden !important;
@@ -2422,7 +2387,7 @@ body.has-marquee .sakura-branch-container{top:28px}
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Command Pills horizontal scroll with smooth swipe */
+  
   .category-pills {
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
@@ -2446,12 +2411,12 @@ body.has-marquee .sakura-branch-container{top:28px}
     padding: 14px;
   }
 
-  /* Inputs prevent iOS zoom */
+  
   input[type="text"], input[type="password"], input[type="number"], select, textarea {
     font-size: 16px !important;
   }
 
-  /* Modals on phones */
+  
   .modal-box {
     width: 95% !important;
     max-height: 90vh !important;
@@ -2459,7 +2424,7 @@ body.has-marquee .sakura-branch-container{top:28px}
     padding: 16px !important;
   }
 
-  /* Drawer on phones */
+  
   .drawer {
     width: 100vw !important;
     height: 100dvh !important;
@@ -2475,9 +2440,7 @@ body.has-marquee .sakura-branch-container{top:28px}
   }
 }
 
-/* =========================================================
-   MOBILE DRAWER & TOP HEADER REFINEMENTS
-   ========================================================= */
+
 .mobile-close-btn {
   display: none;
   width: 36px;
@@ -2570,7 +2533,7 @@ body.has-marquee .sakura-branch-container{top:28px}
     justify-content: center;
   }
 
-  /* Fixed compact single-row Top Header on mobile */
+  
   .top-header {
     height: 58px !important;
     min-height: 58px !important;
@@ -2630,7 +2593,7 @@ body.has-marquee .sakura-branch-container{top:28px}
     flex-shrink: 0 !important;
   }
 
-  /* Hide bulky items from header bar on mobile */
+  
   .top-header .header-stat-pill,
   .top-header .header-admin-btn,
   .top-header .admin-only {
@@ -2652,9 +2615,7 @@ body.has-marquee .sakura-branch-container{top:28px}
   }
 }
 
-/* =========================================================
-   LANDING PAGE MOBILE NAV & DRAWER
-   ========================================================= */
+
 .landing-mobile-nav-actions {
   display: none;
 }
@@ -2810,6 +2771,6 @@ body.has-marquee .sakura-branch-container{top:28px}
   }
 }
 
-/* Admin System Diagnostics Animation */
+
 @keyframes spinFast { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .rotating { animation: spinFast 0.8s linear infinite; display: inline-block; }

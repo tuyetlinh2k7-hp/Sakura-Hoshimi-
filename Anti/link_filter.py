@@ -10,11 +10,9 @@ from typing import Literal
 from Check.i18n import t
 
 
-# Import các hàm kiểm tra và biến cấu hình cần thiết
 from config import OWNER_ID
 from Check.mod import has_admin_role, admin_roles, is_owner
 
-# --- Quản lý dữ liệu ---
 ALLOWED_LINKS_FILE = "data/allowed_links.json"
 LINK_WARNINGS_FILE = "data/link_warnings.json"
 LINK_SETTINGS_FILE = "data/link_filter_settings.json"
@@ -25,10 +23,10 @@ DEFAULT_ALLOWED_LINKS = {
     "facebook.com", "twitter.com", "instagram.com", "tiktok.com", "douyin.com"
 }
 
-allowed_links = {} # Sẽ là dict: {guild_id: set_of_domains}
+allowed_links = {}
 link_warnings = {}
 link_settings = {}
-global_link_filter_enabled = False # Trạng thái toàn cục (Owner)
+global_link_filter_enabled = False
 
 def load_link_data():
     """Tải tất cả dữ liệu liên quan đến link filter."""
@@ -37,7 +35,6 @@ def load_link_data():
     if os.path.exists(ALLOWED_LINKS_FILE):
         with open(ALLOWED_LINKS_FILE, 'r') as f:
             try:
-                # Chuyển đổi từ dict của list (trong file) sang dict của set (trong code)
                 loaded_data = json.load(f)
                 allowed_links = {guild_id: set(domains) for guild_id, domains in loaded_data.items()}
             except (json.JSONDecodeError, AttributeError):
@@ -53,14 +50,12 @@ def load_link_data():
             try: link_settings = json.load(f)
             except json.JSONDecodeError: link_settings = {}
     
-    # Tải trạng thái bật/tắt toàn cục, mặc định là False (tắt)
     global_link_filter_enabled = link_settings.get("__global__", {}).get("enabled", False)
 
 def save_allowed_links():
     """Lưu danh sách các tên miền được phép vào file JSON."""
     os.makedirs(os.path.dirname(ALLOWED_LINKS_FILE), exist_ok=True)
     with open(ALLOWED_LINKS_FILE, 'w') as f:
-        # Chuyển đổi từ dict của set (trong code) sang dict của list (để lưu file)
         data_to_save = {guild_id: list(domains) for guild_id, domains in allowed_links.items()}
         json.dump(data_to_save, f, indent=4)
 
@@ -73,7 +68,6 @@ def save_link_warnings():
 def save_link_settings():
     """Lưu cài đặt của bộ lọc link."""
     os.makedirs(os.path.dirname(LINK_SETTINGS_FILE), exist_ok=True)
-    # Lưu trạng thái bật/tắt toàn cục
     if "__global__" not in link_settings:
         link_settings["__global__"] = {}
     link_settings["__global__"]["enabled"] = global_link_filter_enabled
@@ -81,7 +75,6 @@ def save_link_settings():
     with open(LINK_SETTINGS_FILE, 'w') as f:
         json.dump(link_settings, f, indent=4)
 
-# --- MODAL VÀ VIEW CHO BẢNG ĐIỀU KHIỂN ---
 
 class AddDomainModal(discord.ui.Modal):
     """Cửa sổ popup để nhập tên miền muốn cho phép."""
@@ -116,11 +109,9 @@ class LinkFilterControlView(discord.ui.View):
         super().__init__(timeout=120)
         self.author_id = author_id
         self.guild_ref = guild
-        # Set button labels bilingual
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 cid = child.custom_id or child.label
-                # Map by original label
                 if child.style == discord.ButtonStyle.success:
                     child.label = t(guild, "ANTI_LINK_BTN_ON")
                 elif child.style == discord.ButtonStyle.danger:
@@ -175,7 +166,6 @@ class LinkFilterControlView(discord.ui.View):
             if hasattr(child, 'label'):
                 if child.label in ["Bật", "Tắt", "Thêm Link", "Xem Link", t(None, "ANTI_LINK_BTN_ON"), t(None, "ANTI_LINK_BTN_OFF")]:
                     pass
-        # Actually set after init
         for item in self.children:
             if isinstance(item, discord.ui.Button):
                 if item.emoji and str(item.emoji) == "🟢":
@@ -201,7 +191,6 @@ class LinkFilterCog(commands.Cog, name="Link Filter"):
 
         await message.delete()
 
-        # Xử lý hệ thống cảnh cáo và mute
         warning_limit = link_settings.get(guild_id_str, {}).get("warning_limit", 5)
         if guild_id_str not in link_warnings: link_warnings[guild_id_str] = {}
         user_warnings = link_warnings[guild_id_str].get(user_id_str, 0)
@@ -213,7 +202,7 @@ class LinkFilterCog(commands.Cog, name="Link Filter"):
                 await message.author.timeout(duration, reason=f"Vi phạm quy định về link ({reason}) quá nhiều lần.")
                 mute_embed = discord.Embed(title=t(message.guild, "ANTI_LINK_AUTOMUTE_TITLE"), description=t(message.guild, "ANTI_LINK_AUTOMUTE_DESC", mention=message.author.mention, limit=warning_limit), color=discord.Color.dark_red())
                 await message.channel.send(embed=mute_embed)
-                link_warnings[guild_id_str][user_id_str] = 0 # Reset cảnh cáo
+                link_warnings[guild_id_str][user_id_str] = 0
             except discord.Forbidden:
                 await message.channel.send(t(message.guild, "ANTI_LINK_MUTE_FORBIDDEN", mention=message.author.mention), delete_after=10)
         else:
@@ -232,47 +221,38 @@ class LinkFilterCog(commands.Cog, name="Link Filter"):
         if not message.guild or message.author.bot or not message.content:
             return
 
-        # 1. Kiểm tra Global Toggle (Owner)
         if not global_link_filter_enabled:
             return
-        # 2. Kiểm tra Server Toggle (Admin), mặc định là Tắt nếu chưa cài đặt
         guild_setting = link_settings.get(str(message.guild.id), {}).get("enabled_guild", False)
         if not guild_setting:
             return
 
-        # Bỏ qua cho Owner và Admin
         if message.author.id == OWNER_ID:
             return
         
-        # Kiểm tra vai trò admin của người gửi
         guild_admin_roles = admin_roles.get(str(message.guild.id), [])
         user_role_ids = {role.id for role in message.author.roles}
         if any(admin_role_id in user_role_ids for admin_role_id in guild_admin_roles):
             return
 
-        # Tìm tất cả các URL trong tin nhắn
         urls = re.findall(r'https?://[^\s/$.?#].[^\s]*', message.content)
         if not urls:
             return
 
-        # Kiểm tra từng URL
         for url in urls:
             try:
                 guild_id_str = str(message.guild.id)
                 domain = urlparse(url).netloc.lower()
-                # Chuẩn hóa domain (xóa www.)
                 if domain.startswith('www.'):
                     domain = domain[4:]
                 
-                # Lấy danh sách cho phép của guild, nếu không có thì dùng mặc định
                 guild_allowed_links = allowed_links.get(guild_id_str, DEFAULT_ALLOWED_LINKS)
 
                 if domain not in guild_allowed_links:
-                    # Bỏ qua link discord.gg để file invite_filter xử lý
                     if domain == "discord.gg":
                         continue
                     await self.handle_violation(message, t(message.guild, "ANTI_LINK_REASON_FORBIDDEN"))
-                    return # Dừng lại ngay khi phát hiện link không hợp lệ đầu tiên
+                    return
             except Exception as e:
                 print(f"[Link Filter] Lỗi khi phân tích URL '{url}': {e}")
 
@@ -302,7 +282,6 @@ class LinkFilterCog(commands.Cog, name="Link Filter"):
             )
             embed.set_footer(text=t(ctx.guild, "ANTI_LINK_FOOTER_ADMIN_ONLY"))
             view = LinkFilterControlView(ctx.author.id, guild=ctx.guild)
-            # fix labels
             for item in view.children:
                 if isinstance(item, discord.ui.Button):
                     if item.emoji and str(item.emoji) == "🟢":
@@ -343,7 +322,7 @@ class LinkFilterCog(commands.Cog, name="Link Filter"):
         if status.lower() == "on":
             global_link_filter_enabled = True
             msg = t(ctx.guild, "ANTI_LINK_GLOBAL_ON")
-        else: # off
+        else:
             global_link_filter_enabled = False
             msg = t(ctx.guild, "ANTI_LINK_GLOBAL_OFF")
         save_link_settings()
@@ -372,14 +351,13 @@ class LinkFilterCog(commands.Cog, name="Link Filter"):
         guild_id_str = str(ctx.guild.id)
         domain = domain.lower().strip()
 
-        # Lấy danh sách của guild, nếu chưa có thì tạo mới từ danh sách mặc định
         guild_allowed_links = allowed_links.get(guild_id_str, DEFAULT_ALLOWED_LINKS.copy())
 
         if domain in guild_allowed_links:
             return await ctx.send(t(ctx.guild, "ANTI_LINK_DOMAIN_EXISTS", domain=domain), ephemeral=True)
         
         guild_allowed_links.add(domain)
-        allowed_links[guild_id_str] = guild_allowed_links # Cập nhật lại vào dict chính
+        allowed_links[guild_id_str] = guild_allowed_links
         save_allowed_links()
         await ctx.send(t(ctx.guild, "ANTI_LINK_DOMAIN_ADDED", domain=domain), ephemeral=True)
 
@@ -390,14 +368,13 @@ class LinkFilterCog(commands.Cog, name="Link Filter"):
         guild_id_str = str(ctx.guild.id)
         domain = domain.lower().strip()
 
-        # Lấy danh sách của guild, nếu chưa có thì tạo mới từ danh sách mặc định
         guild_allowed_links = allowed_links.get(guild_id_str, DEFAULT_ALLOWED_LINKS.copy())
 
         if domain not in guild_allowed_links:
             return await ctx.send(t(ctx.guild, "ANTI_LINK_DOMAIN_NOT_FOUND", domain=domain), ephemeral=True)
             
         guild_allowed_links.remove(domain)
-        allowed_links[guild_id_str] = guild_allowed_links # Cập nhật lại vào dict chính
+        allowed_links[guild_id_str] = guild_allowed_links
         save_allowed_links()
         await ctx.send(t(ctx.guild, "ANTI_LINK_DOMAIN_REMOVED", domain=domain), ephemeral=True)
 

@@ -17,15 +17,9 @@ from Check.mod import has_admin_role
 from config import OWNER_ID
 from Check.i18n import t, is_vietnamese
 
-# Thư mục tạm để xử lý file (tự động xóa ngay sau khi gửi)
 TEMP_DOWNLOADS_DIR = "downloads"
-# File lưu trữ cấu hình Bật/Tắt và Chế độ của từng Server / Kênh
 CONFIG_FILE = "data/download_config.json"
 
-# Mở rộng Regex hỗ trợ:
-# Video/Social: TikTok, Douyin, YouTube, Facebook, Instagram, X/Twitter, Reddit, Threads, Bilibili
-# Ảnh/Art: Pinterest, Pixiv
-# Audio/Music: SoundCloud, Spotify
 ALLOWED_DOMAINS_REGEX = re.compile(
     r'https?://(?:www\.|m\.|vt\.|v\.|vm\.|on\.|open\.)?'
     r'(?:tiktok\.com|douyin\.com|youtube\.com|youtu\.be|facebook\.com|fb\.watch|'
@@ -52,7 +46,7 @@ class DownloadActionView(discord.ui.View):
         show_gif_btn: bool = True,
         guild=None
     ):
-        super().__init__(timeout=600)  # Nút có hiệu lực trong 10 phút
+        super().__init__(timeout=600)
         self.cog = cog
         self.author_id = author_id
         self.original_url = original_url
@@ -76,7 +70,6 @@ class DownloadActionView(discord.ui.View):
 
         self.delete_msg.label = "🗑️ Xóa" if vi else "🗑️ Delete"
 
-        # Thêm nút dẫn thẳng tới Link gốc
         link_lbl = "🔗 Link gốc" if vi else "🔗 Source Link"
         self.add_item(discord.ui.Button(label=link_lbl, url=original_url, style=discord.ButtonStyle.link))
 
@@ -105,7 +98,6 @@ class DownloadActionView(discord.ui.View):
         file_path = None
 
         try:
-            # Ưu tiên 1: Nếu có sẵn link nhạc trực tiếp từ API
             if self.direct_audio_url:
                 session = await self.cog.get_session()
                 try:
@@ -121,7 +113,6 @@ class DownloadActionView(discord.ui.View):
                     await interaction.message.edit(view=self)
                     return await interaction.followup.send(f"❌ {ve}", ephemeral=True)
 
-            # Ưu tiên 2: Dùng yt-dlp để trích xuất âm thanh từ link gốc (hoặc Spotify search)
             target_url = await self.cog._resolve_spotify_to_ytsearch(self.original_url) or self.original_url
             os.makedirs(TEMP_DOWNLOADS_DIR, exist_ok=True)
             unique_prefix = f"mp3_{interaction.id}"
@@ -189,7 +180,6 @@ class DownloadActionView(discord.ui.View):
         gif_path = os.path.join(TEMP_DOWNLOADS_DIR, f"gif_{interaction.id}.gif")
 
         try:
-            # Bước 1: Lấy nguồn video (ưu tiên link trực tiếp nếu có, nếu không thì tải qua yt-dlp)
             if self.direct_video_url:
                 session = await self.cog.get_session()
                 video_bytes = await self.cog._fetch_media_safe(session, self.direct_video_url, max_size, timeout=30)
@@ -216,7 +206,6 @@ class DownloadActionView(discord.ui.View):
                 await interaction.message.edit(view=self)
                 return await interaction.followup.send("❌ Không thể lấy dữ liệu video gốc để tạo GIF.", ephemeral=True)
 
-            # Bước 2: Dùng FFmpeg cắt 8s đầu, scale 360p, 12fps và tối ưu bảng màu GIF
             ffmpeg_cmd = [
                 "ffmpeg", "-y",
                 "-t", "8",
@@ -296,19 +285,15 @@ class TikTokVideoPreviewView(discord.ui.View):
         wm_url = data.get("wmplay")
         music_url = data.get("music") or (data.get("music_info") or {}).get("play")
 
-        # Nút Link gốc
         self.add_item(discord.ui.Button(label="🔗 Link Gốc", url=original_url, style=discord.ButtonStyle.link, row=1))
 
-        # Nếu không có HD thì vô hiệu hóa nút HD
         if not hd_url:
             self.btn_hd.disabled = True
             self.btn_hd.label = "🎬 HD (Không khả dụng)"
 
-        # Nếu không có Watermark thì vô hiệu hóa nút Watermark
         if not wm_url:
             self.btn_wm.disabled = True
 
-        # Nếu không có audio
         if not music_url:
             self.btn_mp3.disabled = True
 
@@ -339,7 +324,7 @@ class TikTokVideoPreviewView(discord.ui.View):
         embed = discord.Embed(
             title=f"🎬 {title}",
             url=self.original_url,
-            color=discord.Color.from_rgb(254, 44, 85)  # TikTok Red/Pink
+            color=discord.Color.from_rgb(254, 44, 85)
         )
         author_display = f"**{nickname}**" + (f" (@{unique_id})" if unique_id else "")
         embed.description = (
@@ -543,13 +528,10 @@ class TikTokPhotoPreviewView(discord.ui.View):
         self.guild = guild
         self.message: discord.Message | None = None
 
-        # Nút Link gốc
         self.add_item(discord.ui.Button(label="🔗 Link Gốc", url=original_url, style=discord.ButtonStyle.link, row=1))
 
-        # Cập nhật trạng thái nút điều hướng ban đầu
         self._update_nav_buttons()
 
-        # Kiểm tra xem có nhạc nền không
         music_url = data.get("music") or (data.get("music_info") or {}).get("play")
         if not music_url:
             self.btn_dl_music.disabled = True
@@ -583,7 +565,7 @@ class TikTokPhotoPreviewView(discord.ui.View):
         embed = discord.Embed(
             title=f"📸 {title}",
             url=self.original_url,
-            color=discord.Color.from_rgb(37, 244, 238)  # TikTok Cyan
+            color=discord.Color.from_rgb(37, 244, 238)
         )
         author_display = f"**{nickname}**" + (f" (@{unique_id})" if unique_id else "")
         embed.description = (
@@ -739,16 +721,14 @@ class Dowload(commands.Cog):
         self.bot = bot
         self.session: aiohttp.ClientSession | None = None
         self.config = self._load_config()
-        # Giới hạn tối đa 3 luồng yt-dlp / ffmpeg chạy song song để bảo vệ CPU & RAM
         self.ytdl_semaphore = asyncio.Semaphore(3)
 
-    # --- QUẢN LÝ CẤU HÌNH BẬT/TẮT & CHẾ ĐỘ KÊNH LƯU FILE JSON ---
     def _load_config(self) -> dict:
         default_cfg = {
             "global_enabled": True,
             "disabled_guilds": [],
             "disabled_channels": [],
-            "channel_modes": {}  # Lưu dạng {"channel_id_str": "image" | "audio"}
+            "channel_modes": {}
         }
         if os.path.exists(CONFIG_FILE):
             try:
@@ -826,14 +806,12 @@ class Dowload(commands.Cog):
             file_path = ydl.prepare_filename(info)
             return info, file_path
 
-    # --- HỖNG TRỢ CHUYỂN ĐỔI LINK SPOTIFY SANG TÌM KIẾM YOUTUBE ---
     async def _resolve_spotify_to_ytsearch(self, url: str) -> str | None:
         """Đọc tên bài hát + nghệ sĩ từ link Spotify và chuyển thành truy vấn ytsearch1: cho yt-dlp."""
         if "spotify.com" not in url.lower():
             return None
         session = await self.get_session()
         try:
-            # Ưu tiên gọi oEmbed API chính thức của Spotify (nhanh và không bị chặn)
             oembed_url = f"https://open.spotify.com/oembed?url={url}"
             async with session.get(oembed_url, timeout=10) as resp:
                 if resp.status == 200:
@@ -842,7 +820,6 @@ class Dowload(commands.Cog):
                     if title:
                         return f"ytsearch1:{title} official audio"
 
-            # Dự phòng quét thẻ OpenGraph trên trang web
             async with session.get(url, timeout=10) as resp:
                 if resp.status == 200:
                     soup = BeautifulSoup(await resp.text(), "html.parser")
@@ -856,7 +833,6 @@ class Dowload(commands.Cog):
             pass
         return None
 
-    # --- XỬ LÝ CHUYÊN BIỆT CHO PINTEREST & PIXIV (HẠNG MỤC 1) ---
     async def _handle_pinterest_pixiv(self, message: discord.Message, url: str, msg: discord.Message, mode: str, max_size: int) -> bool:
         """Trích xuất ảnh gốc / GIF / Video từ Pinterest và Pixiv."""
         if mode == "audio":
@@ -866,7 +842,6 @@ class Dowload(commands.Cog):
         session = await self.get_session()
         lower_url = url.lower()
 
-        # 1. Xử lý Pixiv qua API JSON của Phixiv / Ajax Pixiv
         if "pixiv.net" in lower_url:
             await msg.edit(content="🎨 Đang trích xuất tác phẩm từ Pixiv...")
             artwork_match = re.search(r'artworks/(\d+)', url)
@@ -914,7 +889,6 @@ class Dowload(commands.Cog):
             except Exception:
                 pass
 
-        # 2. Xử lý Pinterest (Hỗ trợ cả Ảnh, GIF và Video Pin)
         if "pinterest.com" in lower_url or "pin.it" in lower_url:
             await msg.edit(content="📌 Đang trích xuất nội dung từ Pinterest...")
             try:
@@ -931,14 +905,12 @@ class Dowload(commands.Cog):
                         image_url = og_image["content"] if og_image and og_image.get("content") else None
                         video_url = og_video["content"] if og_video and og_video.get("content") else None
 
-                        # Nâng cấp link ảnh Pinterest lên độ phân giải gốc (originals)
                         if image_url:
                             image_url = re.sub(r'/\d+x/', '/originals/', image_url)
 
                         embed = discord.Embed(title=f"📌 {title}", url=url, color=discord.Color.red())
                         embed.set_footer(text=f"Yêu cầu bởi {message.author.display_name}", icon_url=message.author.display_avatar.url)
 
-                        # Nếu Pin là Video và kênh không bị khóa ở chế độ chỉ tải ảnh
                         if video_url and mode == "all":
                             video_bytes = await self._fetch_media_safe(session, video_url, max_size, timeout=30)
                             if video_bytes:
@@ -954,7 +926,6 @@ class Dowload(commands.Cog):
                                 await self._suppress_source_embed(message)
                                 return True
 
-                        # Nếu Pin là Ảnh hoặc GIF (hoặc kênh đang ở chế độ chỉ tải ảnh)
                         if image_url:
                             ext = "gif" if ".gif" in image_url.lower() else "jpg"
                             img_bytes = await self._fetch_media_safe(session, image_url, max_size, timeout=20)
@@ -979,11 +950,10 @@ class Dowload(commands.Cog):
 
         return False
 
-    # --- XỬ LÝ ALBUM NHIỀU ẢNH / VIDEO CHO X (TWITTER) QUA VXTWITTER API (HẠNG MỤC 2) ---
     async def _handle_twitter_carousel(self, message: discord.Message, url: str, msg: discord.Message, mode: str, max_size: int) -> bool:
         """Hỗ trợ tải trọn bộ nhiều ảnh (Gallery) hoặc Video từ X/Twitter."""
         if mode == "audio":
-            return False  # Để yt-dlp xử lý tách MP3
+            return False
 
         tweet_match = re.search(r'(?:twitter\.com|x\.com)/([^/]+)/status/(\d+)', url)
         if not tweet_match:
@@ -1023,7 +993,6 @@ class Dowload(commands.Cog):
             images = [m["url"] for m in media_list if m.get("type") == "image" and m.get("url")]
             videos = [m["url"] for m in media_list if m.get("type") in ("video", "gif") and m.get("url")]
 
-            # Nếu kênh chuyên Ảnh hoặc bài đăng chứa bộ ảnh
             if images and (mode == "image" or not videos):
                 await msg.edit(content=f"🖼️ Đang tải {len(images)} ảnh từ X/Twitter...")
                 tasks = [
@@ -1040,7 +1009,6 @@ class Dowload(commands.Cog):
                     await self._suppress_source_embed(message)
                     return True
 
-            # Nếu bài đăng chứa Video và kênh ở chế độ 'all'
             if videos and mode == "all":
                 await msg.edit(content="⏳ Đang tải video từ X/Twitter...")
                 video_url = videos[0]
@@ -1069,7 +1037,6 @@ class Dowload(commands.Cog):
 
         return False
 
-    # --- NHÓM LỆNH HYBRID /dl (TỐI ƯU HÓA SLASH COMMANDS) ---
     @commands.hybrid_group(name="dl", aliases=["download", "download_toggle"], description="Quản lý Bật/Tắt và Tải phương tiện mạng xã hội")
     async def dl_group(self, ctx: commands.Context):
         """Xem bảng cấu hình tải phương tiện khi không truyền lệnh con."""
@@ -1121,7 +1088,6 @@ class Dowload(commands.Cog):
     async def slash_dl_config(self, ctx: commands.Context, scope: str = None, mode: str = None):
         await self.download_toggle(ctx, scope, mode)
 
-    # --- HÀM XỬ LÝ CẤU HÌNH TẢI / PREFIX !dl ---
     @has_admin_role()
     async def download_toggle(self, ctx: commands.Context, scope: str = None, mode: str = None):
         """
@@ -1141,7 +1107,6 @@ class Dowload(commands.Cog):
             scope = scope.lower()
             mode = mode.lower() if mode else None
 
-        # Tự động nhận diện nếu người dùng chọn trực tiếp mode image/audio/all trong Slash Command
         if mode in ("image", "audio", "all") and scope not in ("mode", "chedo", "type"):
             scope = "mode"
 
@@ -1152,7 +1117,6 @@ class Dowload(commands.Cog):
         }
         current_ch_mode = self.get_channel_mode(channel_id)
 
-        # Hiển thị bảng trạng thái nếu không truyền đủ tham số
         if scope is None or mode is None:
             global_st = "🟢 Đang Bật" if self.config.get("global_enabled", True) else "🔴 Đang Tắt"
             server_st = "🔴 Đang Tắt" if (guild_id in self.config.get("disabled_guilds", [])) else "🟢 Đang Bật"
@@ -1180,7 +1144,6 @@ class Dowload(commands.Cog):
             embed.set_footer(text=f"Yêu cầu bởi {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
             return await ctx.send(embed=embed)
 
-        # Xử lý cài đặt Chế độ kênh (!dl mode <all|image|audio>)
         if scope in ("mode", "chedo", "type"):
             channel_modes = self.config.setdefault("channel_modes", {})
             if mode in ("image", "img", "photo", "anh", "pic"):
@@ -1203,7 +1166,6 @@ class Dowload(commands.Cog):
 
         enable = (mode == "on")
 
-        # 1. Phạm vi Toàn cục (Chỉ Owner)
         if scope == "global":
             if ctx.author.id != OWNER_ID:
                 return await ctx.send("❌ Chỉ Chủ Bot mới có quyền bật/tắt trên toàn hệ thống!")
@@ -1212,7 +1174,6 @@ class Dowload(commands.Cog):
             status_text = "🟢 ĐÃ BẬT" if enable else "🔴 ĐÃ TẮT"
             return await ctx.send(f"🌐 Hệ thống tải tự động toàn cục: **{status_text}**.")
 
-        # 2. Phạm vi Kênh hiện tại
         elif scope in ("channel", "chan", "kenh"):
             disabled_channels = self.config.setdefault("disabled_channels", [])
             if enable and channel_id in disabled_channels:
@@ -1223,7 +1184,6 @@ class Dowload(commands.Cog):
             status_text = "🟢 ĐÃ BẬT" if enable else "🔴 ĐÃ TẮT"
             return await ctx.send(f"💬 Tự động tải tại kênh {ctx.channel.mention}: **{status_text}**.")
 
-        # 3. Phạm vi Server hiện tại
         elif scope in ("server", "guild", "sv"):
             if not guild_id:
                 return await ctx.send("❌ Không thể dùng lệnh này trong tin nhắn riêng (DM).")
@@ -1241,14 +1201,12 @@ class Dowload(commands.Cog):
         session = await self.get_session()
         canonical_url = url.strip()
 
-        # 1. Giải phóng link rút gọn nếu là vt.tiktok.com, vm.tiktok.com, v.douyin.com...
         try:
             async with session.head(canonical_url, allow_redirects=True, timeout=10) as head_resp:
                 canonical_url = str(head_resp.url)
         except Exception:
             pass
 
-        # 2. Truy vấn API TikWM với tham số hd=1
         try:
             async with session.post("https://www.tikwm.com/api/", data={"url": canonical_url, "hd": 1}, timeout=20) as resp:
                 if resp.status == 200:
@@ -1258,7 +1216,6 @@ class Dowload(commands.Cog):
         except Exception:
             pass
 
-        # 3. Dự phòng: Thử lại không kèm tham số hd
         try:
             async with session.post("https://www.tikwm.com/api/", data={"url": canonical_url}, timeout=20) as resp:
                 if resp.status == 200:
@@ -1268,7 +1225,6 @@ class Dowload(commands.Cog):
         except Exception:
             pass
 
-        # 4. Dự phòng 2: Trích xuất thông tin qua yt-dlp
         try:
             ydl_opts = {'quiet': True, 'noplaylist': True, 'cookiefile': 'cookies.txt'}
             info, _ = await asyncio.to_thread(self._run_ytdl_sync, canonical_url, ydl_opts, False)
@@ -1324,7 +1280,6 @@ class Dowload(commands.Cog):
                 content="❌ Không thể lấy dữ liệu từ liên kết TikTok này. Vui lòng kiểm tra lại đường dẫn hoặc trạng thái bài viết (có thể ở chế độ riêng tư hoặc đã bị xóa)."
             )
 
-        # 1. Trường hợp bài đăng là Bộ ảnh trình chiếu (Photo Slideshow)
         images = data.get("images") or []
         if images and isinstance(images, list):
             view = TikTokPhotoPreviewView(self, ctx.author.id, canonical_url, data, images, guild=ctx.guild)
@@ -1332,7 +1287,6 @@ class Dowload(commands.Cog):
             view.message = await msg.edit(content=None, embed=embed, view=view)
             return
 
-        # 2. Trường hợp bài đăng là Video (Cho phép xem trước, chọn chất lượng HD / SD / Có logo / MP3 / GIF)
         view = TikTokVideoPreviewView(self, ctx.author.id, canonical_url, data, guild=ctx.guild)
         embed = view.get_embed()
         view.message = await msg.edit(content=None, embed=embed, view=view)
@@ -1440,19 +1394,16 @@ class Dowload(commands.Cog):
         if msg is None:
             msg = await message.channel.send("⏳ Đang phân tích liên kết...")
 
-        # 1. Nếu là link Pinterest hoặc Pixiv -> Chuyển qua bộ xử lý Ảnh/Art chuyên biệt
         if any(d in lower_url for d in ("pinterest.com", "pin.it", "pixiv.net")):
             handled = await self._handle_pinterest_pixiv(message, url, msg, mode, max_size)
             if handled:
                 return True
 
-        # 2. Nếu là link X / Twitter -> Ưu tiên thử vxtwitter API để bắt trọn bộ nhiều ảnh (Carousel) hoặc Video nhanh
         if any(d in lower_url for d in ("twitter.com", "x.com")) and mode != "audio":
             handled = await self._handle_twitter_carousel(message, url, msg, mode, max_size)
             if handled:
                 return True
 
-        # 3. Nếu là link nhạc (Spotify / SoundCloud) -> Tự động ép sang chế độ tải Audio (MP3)
         is_music_platform = any(d in lower_url for d in ("spotify.com", "soundcloud.com"))
         if is_music_platform:
             if mode == "image":
@@ -1477,7 +1428,6 @@ class Dowload(commands.Cog):
 
         file_path = None
         try:
-            # --- CHẾ ĐỘ 1: CHỈ TẢI ẢNH (Lấy Thumbnail/Ảnh gốc không cần tải video) ---
             if mode == "image":
                 async with self.ytdl_semaphore:
                     data, _ = await asyncio.to_thread(self._run_ytdl_sync, target_url, None, False)
@@ -1506,7 +1456,6 @@ class Dowload(commands.Cog):
                 await self._suppress_source_embed(message)
                 return True
 
-            # --- CHẾ ĐỘ 2 & 3: CHỈ TẢI AUDIO HOẶC TẢI VIDEO ---
             os.makedirs(TEMP_DOWNLOADS_DIR, exist_ok=True)
             unique_prefix = f"{mode}_{message.id}"
 
@@ -1583,7 +1532,6 @@ class Dowload(commands.Cog):
                 await msg.edit(content=f"❌ Nội dung vượt quá giới hạn dung lượng của máy chủ (`{max_size / 1024 / 1024:.1f} MB`).")
                 return False
 
-            # Dự phòng quét ảnh Instagram hoặc HTML Video cho Owner
             if "instagram.com" in lower_url:
                 try:
                     session = await self.get_session()
@@ -1693,7 +1641,6 @@ class Dowload(commands.Cog):
         if message.author.bot or (not message.guild and not is_owner):
             return
 
-        # Kiểm tra chuẩn xác xem tin nhắn có phải là một lệnh hợp lệ của Bot hay không
         ctx = await self.bot.get_context(message)
         if ctx.valid:
             return
@@ -1711,7 +1658,6 @@ class Dowload(commands.Cog):
         user_id = message.author.id
         channel_mode = self.get_channel_mode(message.channel.id)
 
-        # Kiểm tra Cooldown
         if not is_owner:
             now = time.time()
             if user_id in download_cooldown:
@@ -1729,7 +1675,6 @@ class Dowload(commands.Cog):
 
         session = await self.get_session()
 
-        # --- XỬ LÝ NHANH CHO TIKTOK / DOUYIN QUA API ---
         if "tiktok.com" in actual_url or "douyin.com" in actual_url:
             await msg.edit(content="🎵 Đang xử lý link TikTok/Douyin...")
             tikwm_failed = False
@@ -1762,7 +1707,6 @@ class Dowload(commands.Cog):
                                 embed.add_field(name="🎶 Âm nhạc", value=music_info.get('title', 'N/A'), inline=False)
                             embed.set_footer(text=f"Yêu cầu bởi {message.author.display_name}", icon_url=message.author.display_avatar.url)
 
-                            # 1. NẾU KÊNH Ở CHẾ ĐỘ CHỈ TẢI AUDIO (MP3)
                             if channel_mode == "audio":
                                 if not direct_audio_url:
                                     tikwm_failed = True
@@ -1780,7 +1724,6 @@ class Dowload(commands.Cog):
                                     else:
                                         tikwm_failed = True
 
-                            # 2. NẾU KÊNH Ở CHẾ ĐỘ CHỈ TẢI ẢNH (IMAGE)
                             elif channel_mode == "image":
                                 view = DownloadActionView(self, message.author.id, actual_url, direct_audio_url=direct_audio_url, show_gif_btn=False)
                                 if "images" in post_data and post_data["images"]:
@@ -1815,9 +1758,7 @@ class Dowload(commands.Cog):
                                             return
                                     return await msg.edit(content="⚠️ Kênh này chỉ cho phép tải hình ảnh (Link bạn gửi là Video không có ảnh trượt).")
 
-                            # 3. NẾU KÊNH Ở CHẾ ĐỘ MẶC ĐỊNH (ALL)
                             else:
-                                # Bài đăng dạng Slide nhiều ảnh (Ẩn nút tạo GIF vì là ảnh tĩnh)
                                 if "images" in post_data and post_data["images"]:
                                     view = DownloadActionView(
                                         self,
@@ -1844,7 +1785,6 @@ class Dowload(commands.Cog):
                                     else:
                                         await msg.edit(content="❌ Không tải được ảnh nào.")
 
-                                # Bài đăng dạng Video (Hiển thị đầy đủ cả nút Tải MP3 và Tạo GIF)
                                 elif direct_video_url:
                                     view = DownloadActionView(
                                         self,
@@ -1869,7 +1809,6 @@ class Dowload(commands.Cog):
             except Exception:
                 tikwm_failed = True
 
-            # Dự phòng 1: ssstik.io (Chỉ dùng khi chế độ kênh là 'all')
             if tikwm_failed:
                 if channel_mode == "all":
                     await msg.edit(content="⏳ API chính bận, đang thử API dự phòng (ssstik.io)...")
@@ -1914,7 +1853,6 @@ class Dowload(commands.Cog):
                 else:
                     await self._handle_video_download(message, actual_url, msg=msg, mode=channel_mode)
 
-        # --- XỬ LÝ CÁC NỀN TẢNG KHÁC (YouTube, FB, IG, X/Twitter, Reddit, Threads, Bilibili, Pinterest, Pixiv, SoundCloud, Spotify) ---
         else:
             await self._handle_video_download(message, actual_url, msg=msg, mode=channel_mode)
 

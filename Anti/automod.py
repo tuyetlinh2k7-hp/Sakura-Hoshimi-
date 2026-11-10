@@ -10,9 +10,7 @@ AUTOMOD_FILE = "data/automod_detailed.json"
 WARN_FILE = "data/automod_warns.json"
 SERVER_CONFIG_FILE = "data/server_config.json"
 
-# in-memory spam history {guild_id:{user_id:deque[(ts,content)]}}
 spam_history = defaultdict(lambda: defaultdict(deque))
-# warns {guild_id:{user_id:count}}
 warns_data = {}
 
 def load_automod():
@@ -50,7 +48,6 @@ def is_exempt_channel(cfg, channel_id):
     return str(channel_id) in (cfg.get("exempt_channels") or [])
 
 def is_bypass(cfg, channel_id, key):
-    # words/spam bypass
     if key=="words":
         if not cfg.get("words_bypass_enabled"): return False
         return str(channel_id) in (cfg.get("words_bypass_channels") or [])
@@ -71,7 +68,6 @@ def check_word(content, words):
             if txt.lower().strip() and txt.lower().strip() in cl:
                 return txt
         elif t=="exact":
-            # chỉ chặn khi tin nhắn CHÍNH XÁC bằng cụm từ (trim, case-insensitive) -> như mô tả hình
             if cl.strip()==txt.lower().strip():
                 return txt
         elif t=="regex":
@@ -79,7 +75,6 @@ def check_word(content, words):
                 if re.search(txt, content, flags=re.IGNORECASE):
                     return txt
             except re.error:
-                # fallback contains
                 if txt.lower() in cl:
                     return txt
     return None
@@ -100,25 +95,20 @@ def _get_adv_settings(cfg):
 async def check_advanced(content, message, cfg, bot=None):
     adv=cfg.get("advanced") or {}
     advs=_get_adv_settings(cfg)
-    # anti_invite
     if adv.get("anti_invite"):
         m=re.search(r'discord\.gg/(?P<code>\S+)|discord\.com/invite/(?P<code2>\S+)|discordapp\.com/invite/(?P<code3>\S+)', content, re.I)
         if m:
             code=(m.group('code') or m.group('code2') or m.group('code3') or '').strip().split('/')[0].split('?')[0].split('#')[0]
-            # nếu cho phép invite của server này thì thử kiểm tra
             if advs["invite_allow_own"] and bot and code:
                 try:
-                    # thử fetch invites của guild để so sánh
                     guild_invites=[]
                     try:
-                        # cache guild invites nếu bot có quyền
                         if message.guild.me.guild_permissions.manage_guild:
                             guild_invites=await message.guild.invites()
                     except: pass
                     if any(inv.code==code for inv in guild_invites):
-                        pass # là invite của server -> không chặn
+                        pass
                     else:
-                        # thử fetch invite để xem guild id có trùng không (nếu fetch được)
                         try:
                             inv=await bot.fetch_invite(code)
                             if inv.guild and inv.guild.id==message.guild.id:
@@ -135,7 +125,6 @@ async def check_advanced(content, message, cfg, bot=None):
         urls=re.findall(r'https?://[^\s]+', content)
         if urls:
             wl=set(advs["link_whitelist"])
-            # mặc định whitelist nếu rỗng thì chặn hết, nếu có thì chỉ chặn khi domain không nằm trong whitelist
             blocked=False
             for url in urls:
                 try:
@@ -144,7 +133,6 @@ async def check_advanced(content, message, cfg, bot=None):
                     if domain.startswith('www.'): domain=domain[4:]
                     domain=domain.split(':')[0]
                     if not domain: continue
-                    # kiểm tra whitelist: cho phép nếu domain == whitelist hoặc endswith .whitelist
                     allowed=False
                     for w in wl:
                         if domain==w or domain.endswith('.'+w):
@@ -185,7 +173,6 @@ async def check_advanced(content, message, cfg, bot=None):
         combining=sum(1 for ch in content if 0x0300 <= ord(ch) <= 0x036f)
         if combining>=advs["zalgo_limit"]:
             return "zalgo"
-        # thêm check nặng
         zalgo_len=len(re.findall(r'[\u0300-\u036f]{3,}', content))
         if zalgo_len>=1 and combining>=advs["zalgo_limit"]:
             return "zalgo"
@@ -206,13 +193,10 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
         warn_need=int(warn_cfg.get("warns",5)) if warn_cfg else 5
         timeout=int(warn_cfg.get("timeout",5)) if warn_cfg else 5
         if warn_cfg and not warn_cfg.get("warn_enabled", True):
-            # only delete + warn message, no timeout unless explicitly
             try:
                 await member.timeout(timedelta(minutes=0))
             except: pass
-            # if we still want timeout when threshold reached? spec says "dù ngưỡng thì timeout" for advanced => but for words/spam if warn_enabled off, maybe still timeout? We'll still timeout when threshold reached if timeout_min>0
             pass
-        # check threshold
         if cur >= warn_need:
             try:
                 await member.timeout(timedelta(minutes=timeout), reason=f"AutoMod: {reason} - đủ {warn_need} warns")
@@ -230,7 +214,6 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
     async def on_message(self, message: discord.Message):
         if not message.guild or message.author.bot or not message.content:
             return
-        # Kiểm tra bật/tắt toàn cục hệ thống Anti
         if os.path.exists("data/anti_global.json"):
             try:
                 with open("data/anti_global.json", "r", encoding="utf-8") as f:
@@ -238,7 +221,6 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
                         return
             except Exception:
                 pass
-        # ignore owner/admin? we respect same as other anti: skip if has admin role
         try:
             from Check.mod import admin_roles
             from config import OWNER_ID
@@ -247,7 +229,6 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
             admin_ids=admin_roles.get(gid,[])
             if admin_ids and any(r.id in admin_ids for r in message.author.roles):
                 return
-            # also ignore if user has manage_guild / administrator
             perms=message.author.guild_permissions
             if perms.administrator or perms.manage_guild:
                 return
@@ -255,28 +236,22 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
 
         cfg=load_automod().get(str(message.guild.id))
         if not cfg: return
-        # check global toggle
         sc=load_server_config().get(str(message.guild.id),{})
         if sc and sc.get("automod_enabled") is False:
             return
-        # exempt channel
         if is_exempt_channel(cfg, message.channel.id):
             return
 
         content=message.content
         reason=None
         warn_cfg=None
-        # prepare spam history tracking
         gid=str(message.guild.id); uid=str(message.author.id)
         now=time.time()
-        # ensure dq
         dq=spam_history[gid][uid]
         dq.append((now, content))
-        # cleanup old by window max 120s
         while dq and now - dq[0][0] > 120:
             dq.popleft()
 
-        # 1) words filter (bypass check)
         if not is_bypass(cfg, message.channel.id, "words"):
             words=cfg.get("words") or []
             matched=check_word(content, words)
@@ -300,26 +275,20 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
                 except: pass
                 return
 
-        # 2) spam (threshold/window)
         if not is_bypass(cfg, message.channel.id, "spam"):
             sp=cfg.get("spam") or {}
             thresh=int(sp.get("threshold",5))
             window=int(sp.get("window",5))
-            # count messages in window
             cnt=sum(1 for ts,_ in dq if now - ts <= window)
             if cnt >= thresh:
                 reason=f"spam {cnt} tin trong {window}s"
                 warn_cfg=sp.get("violation") or {"warn_enabled":True,"warns":5,"timeout":5}
-                # purge recent spam
                 try:
-                    # delete last messages by same user in window
-                    # use purge check
                     def check(m): return m.author.id==message.author.id
                     await message.channel.purge(limit=cnt+5, check=check)
                 except:
                     try: await message.delete()
                     except: pass
-                # clear history after handling
                 dq.clear()
                 timed, cur = await self.increment_warn(message.guild, message.author, reason, warn_cfg.get("timeout",5), warn_cfg)
                 embed=discord.Embed(
@@ -335,11 +304,8 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
                 except: pass
                 return
 
-        # 3) advanced filters
         adv_reason=await check_advanced(content, message, cfg, bot=self.bot)
         if adv_reason:
-            # advanced always uses same violation as words? spec says "vi phạm sẽ bị xóa + cảnh cáo (đủ ngưỡng thì timeout)" -> use words_violation or spam? We'll use words_violation as default for advanced
-            # try to find advanced_warn config? reuse words_violation
             warn_cfg=cfg.get("words_violation") or {"warn_enabled":True,"warns":5,"timeout":5}
             reason_map={"invite":"link mời Discord","link":"link","mention_spam":"tag quá nhiều","caps":"Caps quá nhiều","emoji_spam":"emoji spam","duplicate":"trùng lặp","zalgo":"ký tự rối"}
             reason=reason_map.get(adv_reason, adv_reason)
@@ -364,14 +330,11 @@ class AutoModCog(commands.Cog, name="Auto-Mod"):
     async def automod_test(self, ctx: commands.Context, *, content: str):
         cfg=load_automod().get(str(ctx.guild.id))
         if not cfg: return await ctx.send(t(ctx.guild, "AUTOMOD_TEST_NO_CONFIG"), ephemeral=True)
-        # check word
         matched=check_word(content, cfg.get("words") or [])
         if matched: return await ctx.send(t(ctx.guild, "AUTOMOD_TEST_BLOCKED_WORD", word=matched), ephemeral=True)
-        # spam can't test single
         adv=await check_advanced(content, ctx.message, cfg, bot=self.bot)
         if adv: 
             advs=_get_adv_settings(cfg)
-            # hiển thị chi tiết ngưỡng
             detail=""
             if adv=="mention_spam": detail=f" (≥{advs['mention_limit']} mentions)"
             elif adv=="caps": detail=f" (≥{advs['caps_min']} ký tự, {advs['caps_percent']}% caps)"

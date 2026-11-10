@@ -3,7 +3,6 @@ from discord.ext import commands
 from Check.mod import has_admin_role, log_if_admin_or_owner
 from Check.i18n import t
 
-# --- MODAL NHẬP LIỆU EMBED ---
 class EmbedBuilderModal(discord.ui.Modal, title="🎨 Thiết Kế Discord Embed"):
     embed_title = discord.ui.TextInput(
         label="Tiêu đề (Title)", 
@@ -34,7 +33,6 @@ class EmbedBuilderModal(discord.ui.Modal, title="🎨 Thiết Kế Discord Embed
 
     def __init__(self, guild=None):
         super().__init__(title=t(guild, "EMBED_MODAL_TITLE"))
-        # override labels with i18n if guild provided
         try:
             self.embed_title.label = t(guild, "EMBED_LABEL_TITLE")
             self.embed_title.placeholder = t(guild, "EMBED_PLACEHOLDER_TITLE")
@@ -77,7 +75,6 @@ class EmbedBuilderModal(discord.ui.Modal, title="🎨 Thiết Kế Discord Embed
             pass
 
 
-# --- VIEW CHỨA NÚT BẤM KÍCH HOẠT ---
 class EmbedBuilderView(discord.ui.View):
     def __init__(self, author: discord.Member):
         super().__init__(timeout=60)
@@ -95,7 +92,6 @@ class EmbedBuilderView(discord.ui.View):
             item.disabled = True
 
 
-# --- EXTENSION COG CHÍNH ---
 class EmbedBuilder(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -110,7 +106,6 @@ class EmbedBuilder(commands.Cog):
             description=t(ctx.guild, "EMBED_PANEL_DESC"),
             color=0xffb6c1
         )
-        # update button label with i18n
         view = EmbedBuilderView(ctx.author)
         for child in view.children:
             if hasattr(child, 'label'):

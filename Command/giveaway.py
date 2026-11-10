@@ -23,9 +23,6 @@ def parse_duration(time_str: str) -> int | None:
     return int(val) * multipliers[unit]
 
 
-# ==========================================
-# 1. QUẢN LÝ CƠ SỞ DỮ LIỆU SQLITE
-# ==========================================
 class Database:
     @staticmethod
     def init():
@@ -110,9 +107,6 @@ class Database:
             return conn.execute("SELECT COUNT(*) FROM participants WHERE message_id = ?", (msg_id,)).fetchone()[0]
 
 
-# ==========================================
-# 2. VIEW THAM GIA VĨNH VIỄN (PERSISTENT VIEW)
-# ==========================================
 class PersistentGiveawayView(discord.ui.View):
     def __init__(self, guild=None):
         super().__init__(timeout=None)
@@ -131,7 +125,6 @@ class PersistentGiveawayView(discord.ui.View):
             await interaction.response.send_message("❌ Giveaway này đã kết thúc hoặc không còn hiệu lực!", ephemeral=True)
             return
 
-        # Kiểm tra Role yêu cầu từ DB
         req_roles = json.loads(gw["required_role_ids"])
         if req_roles:
             user_roles = {r.id for r in interaction.user.roles}
@@ -154,13 +147,9 @@ class PersistentGiveawayView(discord.ui.View):
             pass
 
 
-# Alias for backward compatibility / web imports
 GiveawayView = PersistentGiveawayView
 
 
-# ==========================================
-# 3. MODAL & VIEWS XÁC NHẬN NHẬN QUÀ
-# ==========================================
 class GameClaimModal(discord.ui.Modal, title="Thông Tin Nhận Quà Game"):
     uid_input = discord.ui.TextInput(label="UID Game & Server", placeholder="VD: 812345678 - Server Asia (Bắt buộc)", required=True, max_length=100)
     acc_input = discord.ui.TextInput(label="Tài khoản (Không bắt buộc)", placeholder="Để trống nếu nạp trực tiếp qua UID", required=False, max_length=100)
@@ -293,9 +282,6 @@ async def handle_winner_claim_slot(channel: discord.TextChannel, winner: discord
     return result
 
 
-# ==========================================
-# 4. GIAO DIỆN SETUP VÀ MODAL TẠO GIVEAWAY
-# ==========================================
 class GiveawayInfoModal(discord.ui.Modal, title="Thông Tin Giveaway"):
     prize_input = discord.ui.TextInput(label="Phần thưởng", placeholder="VD: Thẻ tháng Genshin, Nitro...", required=True)
     duration_input = discord.ui.TextInput(label="Thời gian diễn ra", placeholder="VD: 30s, 10m, 2h, 1d", required=True)
@@ -351,11 +337,9 @@ class GiveawayInfoModal(discord.ui.Modal, title="Thông Tin Giveaway"):
         embed.description = desc
         embed.set_footer(text="Chúc các bạn may mắn!")
 
-        # Gửi tin nhắn chứa Persistent View
         view = PersistentGiveawayView()
         gw_msg = await self.target_channel.send(embed=embed, view=view)
 
-        # Lưu ngay vào SQLite
         Database.add_giveaway(
             msg_id=gw_msg.id,
             ch_id=self.target_channel.id,
@@ -437,26 +421,20 @@ class GiveawaySetupView(discord.ui.View):
         )
 
 
-# ==========================================
-# 5. COG ĐIỀU HÀNH CHÍNH & VÒNG LẶP NỀN
-# ==========================================
 class GiveawayCog(commands.Cog, name="Giveaway"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         Database.init()
-        # Đăng ký View vĩnh viễn vào hệ thống bot khi khởi động
         self.bot.add_view(PersistentGiveawayView())
         self.check_giveaways.start()
 
     def cog_unload(self):
         self.check_giveaways.cancel()
 
-    # Vòng lặp kiểm tra CSDL mỗi 5 giây
     @tasks.loop(seconds=5)
     async def check_giveaways(self):
         expired_list = Database.get_expired_giveaways()
         for gw in expired_list:
-            # Đổi trạng thái sang processing để không bị quét lặp lại
             Database.set_status(gw["message_id"], "processing")
             asyncio.create_task(self.finalize_giveaway(gw))
 
@@ -476,7 +454,6 @@ class GiveawayCog(commands.Cog, name="Giveaway"):
             Database.set_status(gw["message_id"], "ended")
             return
 
-        # Khóa nút tham gia
         view = PersistentGiveawayView()
         for child in view.children:
             child.disabled = True

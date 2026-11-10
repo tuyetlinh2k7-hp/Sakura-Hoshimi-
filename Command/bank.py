@@ -15,9 +15,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 BANK_DATA_FILE = BASE_DIR / "data" / "bank_system.json"
 VN_TZ = timezone(timedelta(hours=7))
 
-# ==============================================================================
-# CẤU HÌNH KỲ HẠN TIẾT KIỆM & VAY VỐN & ẢNH BANNER
-# ==============================================================================
 BANK_BANNER_URL = "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?q=80&w=1200&auto=format&fit=crop"
 BANK_THUMB_URL = "https://cdn-icons-png.flaticon.com/512/2830/2830284.png"
 
@@ -83,7 +80,7 @@ LOAN_TERMS = {
     },
 }
 
-EARLY_WITHDRAW_PENALTY_RATE = 0.05  # Phạt 5% trên tiền gốc nếu tất toán trước hạn
+EARLY_WITHDRAW_PENALTY_RATE = 0.05
 
 bank_storage = {}
 
@@ -214,9 +211,6 @@ class BankHistoryView(View):
         await interaction.response.edit_message(embed=embed, view=self.parent_view)
 
 
-# ==============================================================================
-# VIEW GỬI TIỀN & MỞ SỔ KỲ HẠN
-# ==============================================================================
 class DepositFlowView(View):
     def __init__(self, author: discord.Member, parent_view: "BankMainView"):
         super().__init__(timeout=120)
@@ -227,7 +221,6 @@ class DepositFlowView(View):
 
         vi = is_vietnamese(parent_view.guild_id)
 
-        # Update button labels
         self.amt_2m.label = "2 Triệu" if vi else "2 Million"
         self.amt_all.label = "Tất Cả Ví" if vi else "All Wallet"
         self.amt_custom.label = "Nhập Tùy Ý" if vi else "Custom Amount"
@@ -415,9 +408,6 @@ class DepositFlowView(View):
         await interaction.response.edit_message(embed=embed, view=self.parent_view)
 
 
-# ==============================================================================
-# VIEW QUẢN LÝ VÀ RÚT SỔ TIẾT KIỆM (CÓ PHẠT RÚT TRƯỚC HẠN)
-# ==============================================================================
 class SettleDepositSelectView(View):
     def __init__(self, author: discord.Member, parent_view: "BankMainView"):
         super().__init__(timeout=90)
@@ -533,9 +523,6 @@ class SettleDepositSelectView(View):
         await interaction.response.edit_message(embed=embed, view=self.parent_view)
 
 
-# ==============================================================================
-# VIEW VAY TÍN DỤNG
-# ==============================================================================
 class LoanFlowView(View):
     def __init__(self, author: discord.Member, parent_view: "BankMainView", max_limit: int):
         super().__init__(timeout=120)
@@ -730,9 +717,6 @@ class LoanFlowView(View):
         await interaction.response.edit_message(embed=embed, view=self.parent_view)
 
 
-# ==============================================================================
-# GIAO DIỆN CHÍNH (BANK MAIN VIEW)
-# ==============================================================================
 class BankMainView(View):
     def __init__(self, author: discord.Member, guild_id: int):
         super().__init__(timeout=180)
@@ -740,7 +724,6 @@ class BankMainView(View):
         self.guild_id = guild_id
         vi = is_vietnamese(guild_id)
 
-        # Update button labels according to guild language
         self.deposit_btn.label = "Gửi Tiền" if vi else "Deposit"
         self.withdraw_cash_btn.label = "Rút Tiền Ví" if vi else "Withdraw"
         self.settle_deposit_btn.label = "Tất Toán Sổ Tiết Kiệm" if vi else "Settle Savings"

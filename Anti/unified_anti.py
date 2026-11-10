@@ -16,7 +16,6 @@ from Check.i18n import t, is_vietnamese
 CONFIG_PATH = "data/anti_system_config.json"
 STRIKES_PATH = "data/anti_strikes.json"
 
-# Phishing / Scam keywords & known scam domains
 SCAM_DOMAINS = [
     "dlscord.gg", "dlscord.com", "discrod-app.com", "discorcl.com", "discorcl-app.com",
     "discord-nitro", "free-nitro", "steamcommuniity.com", "steamcommunlty.com",
@@ -42,11 +41,11 @@ DEFAULT_GUILD_CONFIG = {
     "exempt_channels": [],
     "anti_raid": {
         "enabled": True,
-        "join_threshold": 4,      # 4 joins within 10 seconds
+        "join_threshold": 4,
         "timeframe": 10,
-        "min_account_age_days": 3, # flag accounts < 3 days old during burst
+        "min_account_age_days": 3,
         "block_default_avatar": True,
-        "action": "kick",         # kick / ban / timeout
+        "action": "kick",
         "auto_lockdown": False
     },
     "anti_nuke": {
@@ -58,13 +57,13 @@ DEFAULT_GUILD_CONFIG = {
         "role_create_limit": 4,
         "ban_limit": 3,
         "kick_limit": 3,
-        "action": "strip_and_ban"  # strip_and_ban / strip_and_kick / strip_only
+        "action": "strip_and_ban"
     },
     "anti_spam": {
         "enabled": True,
-        "max_messages": 5,        # 5 messages in 4s
+        "max_messages": 5,
         "timeframe": 4,
-        "fuzzy_check": True,      # detect slight changes in repeated messages
+        "fuzzy_check": True,
         "max_mentions": 5,
         "max_emojis": 8,
         "max_caps_percent": 75,
@@ -84,7 +83,7 @@ DEFAULT_GUILD_CONFIG = {
     },
     "adaptive_punishment": {
         "enabled": True,
-        "strike_decay_hours": 24, # strikes reset after 24h
+        "strike_decay_hours": 24,
         "strike_actions": {
             "1": "warn",
             "2": "timeout_5m",
@@ -135,16 +134,14 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
         self.config = load_config()
         self.strikes = load_strikes()
 
-        # In-memory tracking
-        self.join_history = defaultdict(deque)  # guild_id: deque[timestamp]
-        self.msg_history = defaultdict(lambda: defaultdict(deque))  # guild_id: {user_id: deque[(timestamp, content)]}
-        self.nuke_history = defaultdict(lambda: defaultdict(lambda: defaultdict(deque))) # guild_id: {user_id: {action: deque[ts]}}
-        self.lockdown_cache = {}  # guild_id: {channel_id: overwrites}
+        self.join_history = defaultdict(deque)
+        self.msg_history = defaultdict(lambda: defaultdict(deque))
+        self.nuke_history = defaultdict(lambda: defaultdict(lambda: defaultdict(deque)))
+        self.lockdown_cache = {}
 
     def get_guild_cfg(self, guild_id: int) -> dict:
         gid = str(guild_id)
         if gid not in self.config:
-            # Deep copy default
             self.config[gid] = json.loads(json.dumps(DEFAULT_GUILD_CONFIG))
             save_config(self.config)
         return self.config[gid]
@@ -205,7 +202,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
         now = time.time()
         user_strikes = self.strikes.setdefault(gid, {}).setdefault(uid, {"count": 0, "last_strike": 0})
         
-        # Reset if decay time passed (24h)
         decay_sec = cfg.get("adaptive_punishment", {}).get("strike_decay_hours", 24) * 3600
         if now - user_strikes["last_strike"] > decay_sec:
             user_strikes["count"] = 0
@@ -256,7 +252,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
             discord.Color.orange()
         )
 
-    # ================= LISTENER: MESSAGE SHIELD =================
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if not message.guild or message.author.bot:
@@ -273,7 +268,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
         author = message.author
         now = time.time()
 
-        # 1. Quét File Đính Kèm Độc Hại (.exe, .scr, .bat...)
         if cfg.get("anti_link", {}).get("block_executables", True):
             for att in message.attachments:
                 fn = att.filename.lower()
@@ -285,7 +279,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                     await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_EXE", filename=att.filename), message.channel)
                     return
 
-        # 2. Quét Link Lừa Đảo / Phishing / IP Grabber
         if cfg.get("anti_link", {}).get("block_scam_phishing", True):
             content_lower = content.lower()
             for scam_kw in SCAM_DOMAINS:
@@ -297,13 +290,11 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                     await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_PHISHING", domain=scam_kw), message.channel)
                     return
 
-        # 3. Quét Discord Invite (Trừ invite chính server)
         if cfg.get("anti_link", {}).get("block_discord_invites", True):
             invite_pattern = r"(discord\.gg/|discord\.com/invite/|discordapp\.com/invite/)([a-zA-Z0-9\-]+)"
             match = re.search(invite_pattern, content)
             if match:
                 code = match.group(2)
-                # Kiểm tra xem có phải invite của chính server này không
                 is_own_invite = False
                 try:
                     if message.guild.me.guild_permissions.manage_guild:
@@ -321,10 +312,8 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                     await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_INVITE", code=code), message.channel)
                     return
 
-        # 4. Quét Toàn Bộ Link (Nếu block_all_links bật)
         if cfg.get("anti_link", {}).get("block_all_links", False):
             if re.search(r"https?://\S+", content):
-                # Bỏ qua whitelist domains
                 whitelisted = False
                 for wd in cfg.get("anti_link", {}).get("whitelist_domains", DEFAULT_WHITELIST_DOMAINS):
                     if wd.lower() in content.lower():
@@ -338,7 +327,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                     await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_UNAPPROVED_LINK", domain="link"), message.channel)
                     return
 
-        # 5. Quét Từ Cấm (Anti-Words)
         if cfg.get("anti_words", {}).get("enabled", True):
             words = cfg.get("anti_words", {}).get("words", [])
             content_clean = re.sub(r"[^\w\s]", "", content.lower())
@@ -351,10 +339,8 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                     await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_BAD_WORD", word=w), message.channel)
                     return
 
-        # 6. Quét Spam Thông Minh (Burst Rate & Fuzzy Duplicate)
         spam_cfg = cfg.get("anti_spam", {})
         if spam_cfg.get("enabled", True):
-            # 6.1 Mass Mentions
             max_mentions = spam_cfg.get("max_mentions", 5)
             if len(message.mentions) + len(message.role_mentions) > max_mentions:
                 try:
@@ -364,7 +350,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                 await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_MASS_MENTION"), message.channel)
                 return
 
-            # 6.2 Zalgo Text
             if spam_cfg.get("anti_zalgo", True):
                 zalgo_matches = re.findall(r"[\u0300-\u036f\u0483-\u0489\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]", content)
                 if len(zalgo_matches) > 6:
@@ -375,7 +360,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                     await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_ZALGO"), message.channel)
                     return
 
-            # 6.3 Burst Speed Tracker
             user_history = self.msg_history[message.guild.id][author.id]
             timeframe = spam_cfg.get("timeframe", 4)
             while user_history and now - user_history[0][0] > timeframe:
@@ -392,7 +376,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                 await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_FAST_SPAM", rate=">5"), message.channel)
                 return
 
-            # 6.4 Fuzzy Duplicate Spam (Detect slight modifications: "free nitro 1", "free nitro 2")
             if spam_cfg.get("fuzzy_check", True) and len(content) > 6:
                 recent_msgs = [c for ts, c in user_history if now - ts < 12 and c != content]
                 for old_msg in recent_msgs:
@@ -405,7 +388,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                         await self.apply_strike(author, t(message.guild, "ANTI_UNIFIED_REASON_DUPLICATE"), message.channel)
                         return
 
-    # ================= LISTENER: SMART RAID SHIELD =================
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         guild = member.guild
@@ -426,12 +408,10 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
 
         history.append(now)
 
-        # Tính tuổi tài khoản
         account_age_days = (datetime.datetime.now(datetime.timezone.utc) - member.created_at).total_seconds() / 86400.0
         min_age = raid_cfg.get("min_account_age_days", 3)
         has_default_avatar = member.avatar is None
 
-        # Kiểm tra ngưỡng tràn vào
         threshold = raid_cfg.get("join_threshold", 4)
         is_raid_detected = len(history) >= threshold
         is_suspicious_account = (account_age_days < min_age) or (has_default_avatar and account_age_days < 7)
@@ -463,11 +443,9 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                 discord.Color.red()
             )
 
-            # Auto-Lockdown nếu được cấu hình
             if raid_cfg.get("auto_lockdown", False) and is_raid_detected:
                 await self.trigger_lockdown(guild, True, reason="Tự động khóa khẩn cấp do phát hiện Raid tràn vào ồ ạt!")
 
-    # ================= LISTENER: SMART ANTI-NUKE SHIELD =================
     async def _handle_nuke_action(self, guild: discord.Guild, action_type: str, limit_key: str):
         cfg = self.get_guild_cfg(guild.id)
         if not cfg.get("enabled", True):
@@ -482,7 +460,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
         now = time.time()
 
         try:
-            # Tra cứu Audit Log để tìm thủ phạm
             action_map = {
                 "channel_delete": discord.AuditLogAction.channel_delete,
                 "channel_create": discord.AuditLogAction.channel_create,
@@ -504,7 +481,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                 if member and self.is_exempt(member):
                     return
 
-                # Đếm số hành vi trong timeframe
                 user_acts = self.nuke_history[guild.id][user.id][action_type]
                 while user_acts and now - user_acts[0] > timeframe:
                     user_acts.popleft()
@@ -516,7 +492,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                     action = nuke_cfg.get("action", "strip_and_ban")
                     status_log = ""
 
-                    # 1. Tước mọi quyền quản trị ngay lập tức
                     if member:
                         try:
                             dangerous_roles = [r for r in member.roles if r.permissions.administrator or r.permissions.manage_guild or r.permissions.manage_channels or r.permissions.manage_roles or r.permissions.ban_members]
@@ -526,7 +501,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                         except Exception as e:
                             status_log += f"{t(guild, 'ANTI_UNIFIED_NUKE_STRIP_ERR', err=str(e))}\n"
 
-                    # 2. Xử phạt (Ban hoặc Kick)
                     try:
                         if "ban" in action:
                             await guild.ban(user, reason=f"[Sakura Anti-Nuke] Phá hoại server ({action_type} vượt quá ngưỡng {limit}/{timeframe}s)")
@@ -570,10 +544,8 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        # Có thể là kick
         await self._handle_nuke_action(member.guild, "kick", "kick_limit")
 
-    # ================= LOCKDOWN / PANIC MODE =================
     async def trigger_lockdown(self, guild: discord.Guild, lock: bool = True, reason: str = "") -> int:
         """Khóa hoặc mở khóa tạm thời các kênh chat khi có báo động khẩn cấp."""
         affected = 0
@@ -607,7 +579,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
 
         return affected
 
-    # ================= EMBED FACTORY =================
     def build_dashboard_embed(self, guild: discord.Guild) -> discord.Embed:
         cfg = self.get_guild_cfg(guild.id)
         is_on = cfg.get("enabled", True)
@@ -682,7 +653,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
         embed.set_footer(text="Chọn module bên dưới hoặc dùng nút bấm thao tác nhanh 1 chạm.")
         return embed
 
-    # ================= THE MASTER SLASH COMMAND =================
     @commands.hybrid_group(name="anti", description="Quản lý toàn bộ hệ sinh thái bảo mật & anti của SakuraBot.")
     @commands.has_permissions(administrator=True)
     async def anti_cmd(self, ctx: commands.Context):
@@ -758,7 +728,6 @@ class UnifiedAntiCog(commands.Cog, name="UnifiedAnti"):
                 await ctx.send(t(ctx.guild, "ANTI_UNIFIED_WL_NOT_FOUND", target=target.mention), ephemeral=True)
 
 
-# ================= DASHBOARD UI VIEWS =================
 class AntiMasterDashboardView(discord.ui.View):
     def __init__(self, cog: UnifiedAntiCog, guild: discord.Guild, author_id: int):
         super().__init__(timeout=300)

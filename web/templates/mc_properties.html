@@ -188,7 +188,7 @@
 
 <body class="mc-hosting-body">
   <div class="mc-layout">
-    <!-- Sidebar -->
+    
     <aside class="mc-sidebar" id="mcSidebar">
       <div class="mc-brand">
         <img src="https://cdn.discordapp.com/avatars/1504825128499019807/dea9d2725b620317b25b9da8f36d129a?size=256"
@@ -238,7 +238,7 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
+    
     <main class="mc-main">
       <header class="mc-topbar">
         <div class="mc-topbar-left">
@@ -264,15 +264,15 @@
       </header>
 
       <div class="mc-content-body">
-        <!-- MODE: GUI FORM -->
+        
         <div id="guiModeContainer">
-          <!-- NHÓM ICON MÁY CHỦ & MOTD PREVIEW (Yêu cầu mới) -->
+          
           <div class="prop-group" style="border: 1px solid rgba(255, 121, 198, 0.3)">
             <div class="prop-group-title">
               <span>🖼️</span> Icon Máy Chủ & Lời Chào (MOTD Preview Trực Quan)
             </div>
 
-            <!-- Bảng Xem Trước Như Trong Danh Sách Server Minecraft Thật -->
+            
             <div style="font-size:0.82rem;font-weight:700;color:var(--mc-text-muted);margin-bottom:8px">Xem Trước Danh
               Sách Máy Chủ (Minecraft Server List Preview):</div>
             <div class="mc-server-preview-box">
@@ -294,12 +294,12 @@
                     </div>
                   </div>
                 </div>
-                <!-- Render MOTD với màu và font Minecraft -->
+                
                 <div class="mc-motd-render" id="motdRenderOutput">A Minecraft Server</div>
               </div>
             </div>
 
-            <!-- Chỉnh Sửa Icon Máy Chủ -->
+            
             <div class="prop-row">
               <div>
                 <div class="prop-label">Icon Máy Chủ (server-icon.png)</div>
@@ -317,7 +317,7 @@
               </div>
             </div>
 
-            <!-- Chỉnh Sửa MOTD & Bảng Mã Màu -->
+            
             <div class="prop-row" style="align-items:flex-start">
               <div>
                 <div class="prop-label">Soạn Thảo MOTD</div>
@@ -330,7 +330,7 @@
                   style="resize:vertical;font-family:var(--mc-font-mono)" oninput="updateMotdPreview()"
                   placeholder="A Minecraft Server"></textarea>
 
-                <!-- Bảng Palette Màu Minecraft -->
+                
                 <div style="margin-top:10px">
                   <div style="font-size:0.75rem;font-weight:700;color:var(--mc-text-muted);margin-bottom:6px">Bảng Mã
                     Màu Minecraft (Nhấp để chèn §):</div>
@@ -369,7 +369,7 @@
                       onclick="insertColorCode('prop_motd', '§f')" title="§f Trắng">§f</button>
                   </div>
 
-                  <!-- Bảng Định Dạng -->
+                  
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <button type="button" class="format-btn" onclick="insertColorCode('prop_motd', '§l')"><b>§l
                         Đậm</b></button>
@@ -389,7 +389,7 @@
             </div>
           </div>
 
-          <!-- NHÓM GÓI TÀI NGUYÊN (RESOURCE PACK - Yêu cầu mới) -->
+          
           <div class="prop-group">
             <div class="prop-group-title">
               <span>📦</span> Gói Tài Nguyên Máy Chủ (Server Resource Pack)
@@ -460,7 +460,7 @@
             </div>
           </div>
 
-          <!-- Nhóm 1: Mạng & Hiển thị -->
+          
           <div class="prop-group">
             <div class="prop-group-title">
               <span>🌐</span> Mạng & Kết Nối Máy Chủ
@@ -530,7 +530,7 @@
             </div>
           </div>
 
-          <!-- Nhóm 2: Lối chơi & Gameplay -->
+          
           <div class="prop-group">
             <div class="prop-group-title">
               <span>🎮</span> Lối Chơi & Thế Giới Gameplay
@@ -625,7 +625,7 @@
             </div>
           </div>
 
-          <!-- Nhóm 3: Hiệu năng & RCON -->
+          
           <div class="prop-group">
             <div class="prop-group-title">
               <span>⚡</span> Hiệu Năng & Kết Nối RCON
@@ -681,7 +681,7 @@
           </div>
         </div>
 
-        <!-- MODE: RAW TEXT -->
+        
         <div id="rawModeContainer" style="display:none">
           <div class="prop-group" style="padding:0;overflow:hidden">
             <textarea id="rawPropsTextarea" class="mc-code-textarea" style="height:650px;border:none;border-radius:14px"

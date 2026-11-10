@@ -16,9 +16,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 ACHIEVEMENTS_FILE = DATA_DIR / "user_achievements.json"
 
-# ==============================================================================
-# DANH SÁCH 210 THÀNH TỰU MINIGAME TOÀN NĂNG SAKURA BOT (>200 THÀNH TỰU)
-# ==============================================================================
 ACHIEVEMENTS_CATALOG: Dict[str, Dict[str, Any]] = {}
 
 def _register(ach_id: str, name: str, category: str, desc: str, coins: int, xu: int = 0, title: str = "", icon: str = "🏆"):
@@ -33,9 +30,6 @@ def _register(ach_id: str, name: str, category: str, desc: str, coins: int, xu: 
         "icon": icon
     }
 
-# ------------------------------------------------------------------------------
-# 1. CÂU CÁ & THỦY CUNG (40 Thành Tựu)
-# ------------------------------------------------------------------------------
 _register("fish_first", "Nhát Giật Đầu Đời", "fishing", "Câu thành công chú cá đầu tiên", 5000, 0, "Tập Sự Thả Câu", "🎣")
 _register("fish_10", "Ngư Dân Mới Vào Nghề", "fishing", "Câu tích lũy được 10 con cá", 10000, 0, "", "🐟")
 _register("fish_50", "Tay Lưới Điêu Luyện", "fishing", "Câu tích lũy được 50 con cá", 25000, 1, "Thợ Săn Ven Bờ", "🎣")
@@ -84,9 +78,6 @@ _register("fish_cook_first", "Bếp Trưởng Hải Sản", "fishing", "Chế bi
 _register("fish_cook_10", "Bữa Tiệc Thịnh Soạn", "fishing", "Nấu thành công 10 món ẩm thực ngư dân", 80000, 3, "Bếp Trưởng 5 Sao", "🍱")
 _register("fish_all_zones", "Vượt Mọi Trùng Khơi", "fishing", "Khám phá và thả câu ở tất cả 6 vùng biển", 150000, 8, "Nhà Du Hành Biển Cả", "🧭")
 
-# ------------------------------------------------------------------------------
-# 2. ĐÀO KHOÁNG & HẦM MỎ (35 Thành Tựu)
-# ------------------------------------------------------------------------------
 _register("mine_first", "Nhát Cuốc Đầu Tiên", "mining", "Đào thành công quặng khoáng sản đầu tiên", 5000, 0, "Thợ Mỏ Tập Sự", "⛏️")
 _register("mine_10", "Người Khai Mỏ", "mining", "Đào được 10 viên khoáng sản", 10000, 0, "", "🪨")
 _register("mine_50", "Phu Mỏ Chăm Chỉ", "mining", "Đào được 50 viên khoáng sản", 25000, 1, "", "⛏️")
@@ -128,9 +119,6 @@ _register("museum_slots_18", "Khoáng Vật Đại Hội", "mining", "Mở khóa
 _register("museum_revenue_50k", "Vé Xem Đá Quý", "mining", "Thu được 50,000 coins tiền vé tham quan bảo tàng", 60000, 3, "", "🎟️")
 _register("mine_all_zones", "Hành Trình Lòng Đất", "mining", "Đặt chân và khai thác tại tất cả 6 tầng hầm mỏ", 150000, 8, "Kẻ Khai Mở Địa Giới", "🗺️")
 
-# ------------------------------------------------------------------------------
-# 3. NÔNG TRẠI & ĐỒNG ÁNG (35 Thành Tựu)
-# ------------------------------------------------------------------------------
 _register("farm_plant_first", "Mầm Sống Đầu Tiên", "farming", "Gieo hạt giống đầu tiên xuống ô đất", 5000, 0, "Bác Nông Dân Trẻ", "🌱")
 _register("farm_harvest_first", "Mùa Gặt Khởi Đầu", "farming", "Thu hoạch nông sản chín đầu tiên", 5000, 0, "", "🌾")
 _register("farm_harvest_50", "Nông Trại Đầy Ắp", "farming", "Thu hoạch tích lũy 50 nông sản", 25000, 1, "Lão Nông Chăm Chỉ", "🥕")
@@ -169,9 +157,6 @@ _register("farm_season_summer", "Hè Sang Trái Ngọt", "farming", "Thu hoạch
 _register("farm_season_autumn", "Thu Vàng Lúa Chín", "farming", "Thu hoạch cây trồng trong Mùa Thu", 20000, 1, "", "🍂")
 _register("farm_season_winter", "Đông Về Tuyết Phủ", "farming", "Chăm sóc cây sống sót qua Mùa Đông giá rét", 30000, 2, "Bất Khuất Trước Giá Lạnh", "❄️")
 
-# ------------------------------------------------------------------------------
-# 4. SÒNG BẠC, GACHA & VẬN MAY (30 Thành Tựu)
-# ------------------------------------------------------------------------------
 _register("casino_first_play", "Tập Tành Đỏ Đen", "casino_gacha", "Chơi ván casino hoặc gacha đầu tiên", 5000, 0, "", "🎲")
 _register("casino_win_first", "Thần May Mắn Mỉm Cười", "casino_gacha", "Thắng ván cược đầu tiên", 10000, 0, "", "🍀")
 _register("casino_win_streak_3", "Chuỗi Thắng Tam Phát", "casino_gacha", "Thắng 3 ván cược liên tiếp", 30000, 1, "", "🔥")
@@ -205,9 +190,6 @@ _register("coin_transfer_1m", "Nhà Tài Trợ Bạc Triệu", "casino_gacha", "
 _register("coin_bank_deposit", "Gửi Tiết Kiệm An Toàn", "casino_gacha", "Gửi tiền vào Ngân Hàng Sakura", 15000, 0, "", "🏦")
 _register("coin_bank_10m", "Tỷ Phú Ngân Hàng", "casino_gacha", "Số dư ngân hàng đạt trên 10,000,000 coins", 300000, 15, "Đại Gia Ngân Hàng", "💳")
 
-# ------------------------------------------------------------------------------
-# 5. NỐI TỪ & ĐỐ VUI TRÍ TUỆ (30 Thành Tựu)
-# ------------------------------------------------------------------------------
 _register("wc_first_word", "Chữ Đầu Khởi Sắc", "words_trivia", "Nối thành công từ ngữ đầu tiên trong trò nối chữ", 5000, 0, "", "🧵")
 _register("wc_words_10", "Vốn Từ Phong Phú", "words_trivia", "Nối thành công 10 từ", 15000, 0, "", "📖")
 _register("wc_words_50", "Nhà Ngôn Ngữ Học", "words_trivia", "Nối thành công 50 từ", 50000, 2, "Cây Bút Trẻ", "✍️")
@@ -232,9 +214,6 @@ _register("xo_win_5", "Kỳ Thủ Đẳng Cấp", "words_trivia", "Thắng 5 vá
 _register("chess_play_first", "Kỳ Nghệ Tinh Hoa", "words_trivia", "Chơi ván Cờ Vua AI đầu tiên trên Web", 20000, 1, "", "♟️")
 _register("chess_checkmate", "Chiếu Bí Đỉnh Cao", "words_trivia", "Chiếu bí đối thủ trong ván cờ vua", 50000, 2, "Đại Kiện Tướng Cờ Vua", "👑")
 
-# ------------------------------------------------------------------------------
-# 6. XÃ HỘI, LEVEL, STREAK & HÔN NHÂN (40 Thành Tựu)
-# ------------------------------------------------------------------------------
 _register("streak_3", "Giữ Vững Phong Độ", "social_level", "Điểm danh liên tục 3 ngày", 10000, 0, "", "🔥")
 _register("streak_7", "Tuần Lễ Hoàn Hảo", "social_level", "Điểm danh liên tục 7 ngày (1 tuần)", 30000, 1, "Người Kiên Trì", "🗓️")
 _register("streak_30", "Một Tháng Đồng Hành", "social_level", "Điểm danh liên tục 30 ngày (1 tháng)", 150000, 5, "Thành Viên Trung Kiên", "🌙")
@@ -266,9 +245,6 @@ _register("global_chat_send", "Kết Nối Xuyên Biên Giới", "social_level",
 _register("help_view", "Khám Phá Tính Năng", "social_level", "Xem danh mục trợ giúp của bot qua lệnh s!help", 5000, 0, "", "📖")
 
 
-# ==============================================================================
-# QUẢN LÝ DỮ LIỆU THÀNH TỰU NGƯỜI CHƠI
-# ==============================================================================
 
 CUSTOM_ACH_FILE = DATA_DIR / "custom_achievements.json"
 
@@ -304,7 +280,7 @@ def get_user_ach_data(user_id: int | str) -> Dict[str, Any]:
     all_data = load_user_achievements()
     if uid not in all_data:
         all_data[uid] = {
-            "unlocked": {}, # ach_id -> timestamp
+            "unlocked": {},
             "titles": [],
             "stats": {}
         }
@@ -323,7 +299,7 @@ async def unlock_achievement(guild_id: int, user_id: int, ach_id: str, channel: 
     unlocked = u_data.setdefault("unlocked", {})
 
     if ach_id in unlocked:
-        return None # Đã nhận rồi
+        return None
 
     unlocked[ach_id] = int(time.time())
     if ach.get("reward_title") and ach["reward_title"] not in u_data.setdefault("titles", []):
@@ -331,7 +307,6 @@ async def unlock_achievement(guild_id: int, user_id: int, ach_id: str, channel: 
 
     save_user_achievements(all_data)
 
-    # Thưởng Coin và Xu
     reward_coins = ach.get("reward_coins", 0)
     reward_xu = ach.get("reward_xu", 0)
     if reward_coins > 0:
@@ -339,7 +314,6 @@ async def unlock_achievement(guild_id: int, user_id: int, ach_id: str, channel: 
     if reward_xu > 0:
         await update_user_xu(guild_id, user_id, reward_xu)
 
-    # Nếu có channel thì gửi thông báo chúc mừng
     if channel:
         try:
             embed = discord.Embed(
@@ -363,9 +337,6 @@ async def unlock_achievement(guild_id: int, user_id: int, ach_id: str, channel: 
     return ach
 
 
-# ==============================================================================
-# GIAO DIỆN XEM THÀNH TỰU DISCORD (ACHIEVEMENT VIEW)
-# ==============================================================================
 
 CATEGORY_LABELS_VI = {
     "all": ("Tất Cả", "🌟"),
@@ -413,7 +384,6 @@ class AchievementView(discord.ui.View):
 
         vi = is_vietnamese(self.guild_id)
         cat_dict = CATEGORY_LABELS_VI if vi else CATEGORY_LABELS_EN
-        # Row 0: Dropdown chọn danh mục
         options = []
         for cat_k, (label, em) in cat_dict.items():
             options.append(discord.SelectOption(
@@ -427,7 +397,6 @@ class AchievementView(discord.ui.View):
         sel.callback = self._on_select_cat
         self.add_item(sel)
 
-        # Row 1: Phân trang & Nút
         prev_lbl = "Trang Trước" if vi else "Previous"
         next_lbl = "Trang Sau" if vi else "Next"
         page_lbl = f"Trang {self.page + 1}/{self.total_pages}" if vi else f"Page {self.page + 1}/{self.total_pages}"
@@ -450,7 +419,6 @@ class AchievementView(discord.ui.View):
         total_user = len(unlocked)
         pct = (total_user / total_all) * 100 if total_all else 0
 
-        # Thanh tiến trình
         filled = int(pct / 10)
         bar = "▰" * filled + "▱" * (10 - filled)
 
@@ -540,9 +508,6 @@ class AchievementView(discord.ui.View):
             await interaction.response.edit_message(embed=self.build_embed(), view=self)
 
 
-# ==============================================================================
-# COG LỆNH DISCORD
-# ==============================================================================
 
 class AchievementCog(commands.Cog):
     def __init__(self, bot: commands.Bot):

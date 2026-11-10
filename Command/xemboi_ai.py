@@ -8,7 +8,6 @@ from openai import AsyncOpenAI
 
 from Check.i18n import t
 
-# --- CẤU HÌNH XKIRO API ---
 API_KEY = None
 try:
     from config import XKIRO_API_KEY as API_KEY

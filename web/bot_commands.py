@@ -14,7 +14,6 @@ CATEGORIES = {
 }
 
 BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
-    # === CÂU CÁ ĐẠI DƯƠNG (SAKURA FISHING) ===
     {
         "name": "fishing cast",
         "category": "fishing",
@@ -169,7 +168,6 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "permissions": "Member"
     },
 
-    # === CỐT LÕI (CORE & INFO) ===
     {
         "name": "ping",
         "category": "core",
@@ -216,7 +214,6 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "permissions": "Member"
     },
 
-    # === KINH TẾ & CẤP ĐỘ (ECONOMY & LEVELING) ===
     {
         "name": "leveling rank",
         "category": "economy",
@@ -317,7 +314,6 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "permissions": "Chủ Bot"
     },
 
-    # === ÂM NHẠC (MUSIC LAVALINK 24/7) ===
     {
         "name": "music play",
         "category": "music",
@@ -409,7 +405,6 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "permissions": "Phòng Voice"
     },
 
-    # === QUẢN TRỊ SERVER (MODERATION) ===
     {
         "name": "mod panel",
         "category": "moderation",
@@ -492,7 +487,6 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "permissions": "Quản trị viên"
     },
 
-    # === TIỆN ÍCH (UTILITY & TOOLS) ===
     {
         "name": "userinfo",
         "category": "utility",
@@ -602,7 +596,6 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "permissions": "Phòng Voice"
     },
 
-    # === TRÒ CHƠI & ANIME (GAMES & FUN) ===
     {
         "name": "anime",
         "category": "games",
@@ -740,7 +733,6 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "permissions": "Member"
     },
 
-    # === BẢO MẬT & ANTI-RAID (SECURITY) ===
     {
         "name": "anti setup",
         "category": "anti",
@@ -805,7 +797,6 @@ BOT_COMMANDS_CATALOG: List[Dict[str, Any]] = [
         "permissions": "Chủ Server"
     },
 
-    # === DÀNH RIÊNG CHO CHỦ BOT (OWNER ONLY) ===
     {
         "name": "owner panel",
         "category": "owner",
@@ -875,17 +866,14 @@ def get_all_bot_commands(bot_instance=None) -> List[Dict[str, Any]]:
     """Lấy danh sách lệnh đầy đủ, đã lọc bỏ hoàn toàn các lệnh Minecraft"""
     commands_list = [dict(c) for c in BOT_COMMANDS_CATALOG]
     
-    # Nếu có BOT_INSTANCE online, kiểm tra bổ sung các lệnh prefix/slash đang chạy
     if bot_instance:
         existing_names = {c["name"].lower() for c in commands_list}
-        # Thêm các prefix commands từ bot
         try:
             for cmd in bot_instance.commands:
                 if cmd.hidden:
                     continue
                 cmd_name = cmd.name.lower()
                 cog_name = (cmd.cog_name or "").lower()
-                # Loại trừ Minecraft
                 if "minecraft" in cog_name or cmd_name.startswith("mc") or cmd_name in ["link", "whitelist"]:
                     continue
                 if cmd_name not in existing_names:
@@ -912,7 +900,6 @@ def get_all_bot_commands(bot_instance=None) -> List[Dict[str, Any]]:
         except Exception:
             pass
 
-    # Đảm bảo lọc sạch lần cuối (không có minecraft)
     filtered = []
     for c in commands_list:
         n = c.get("name", "").lower()

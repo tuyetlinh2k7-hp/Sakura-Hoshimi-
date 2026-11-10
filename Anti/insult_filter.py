@@ -8,17 +8,13 @@ import re
 from typing import Optional
 from Check.i18n import t
 
-# Import các thành phần dùng chung
 from config import OWNER_ID
 from Check.mod import has_admin_role, is_owner
 from Check.data import groq_client
 
-# --- Quản lý dữ liệu cho Bộ lọc Xúc phạm ---
 INSULT_SETTINGS_FILE = "data/insult_filter_settings.json"
 INSULT_VIOLATIONS_FILE = "data/insult_violations.json"
 
-# Danh sách các từ khóa/mẫu regex để phát hiện xúc phạm
-# \b để đảm bảo khớp từ hoàn chỉnh
 DEFAULT_INSULT_PATTERNS = [
     r"\bbot\b.*\bngu\b", r"\bbot\b.*\bdở\b", r"\bbot\b.*\bcùi\b", r"\bbot\b.*\blởm\b", r"\bbot\b.*\bóc chó\b",
     r"\bsakura\b.*\bngu\b", r"\bsakura\b.*\bdở\b", r"\bsakura\b.*\bxấu\b",
@@ -30,9 +26,7 @@ DEFAULT_INSULT_PATTERNS = [
     r"chủ lồn", r"chủ cặc", r"owner lồn", r"owner cặc"
 ]
 
-# Cấu trúc: {guild_id: {"enabled_channels": [id1, id2], "patterns": ["...", "..."]}}
 insult_settings = {}
-# Cấu trúc: {guild_id: {user_id: violation_count}}
 insult_violations = {}
 
 def load_insult_data():
@@ -71,7 +65,6 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
     async def _generate_ai_rebuttal(self, member: discord.Member, violation_count: int, insult: str) -> str:
         """Sử dụng AI để tạo ra một lời phản bác thông minh và tự nhiên."""
         try:
-            # Xác định mức độ "tức giận" của AI dựa trên số lần vi phạm
             if violation_count == 1:
                 mood = "buồn và thất vọng một chút"
             elif violation_count == 2:
@@ -100,7 +93,7 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
             return chat_completion.choices[0].message.content
         except Exception as e:
             print(f"[Anti-Insult AI] Lỗi khi tạo phản hồi: {e}")
-            return t(member.guild, "ANTI_INSULT_FALLBACK", mention=member.mention) # Fallback
+            return t(member.guild, "ANTI_INSULT_FALLBACK", mention=member.mention)
 
     async def handle_insult_violation(self, message: discord.Message, found_insult: str):
         """Xử lý khi phát hiện vi phạm, với hình phạt tăng dần."""
@@ -109,7 +102,6 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
 
         await message.delete()
 
-        # --- Xử lý vi phạm và hình phạt tăng dần ---
         if guild_id_str not in insult_violations:
             insult_violations[guild_id_str] = {}
         
@@ -117,7 +109,6 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
         insult_violations[guild_id_str][user_id_str] = user_violations
         save_insult_violations()
 
-        # Mặc định hình phạt
         mute_duration_minutes = 0
         embed_title = ""
         embed_color = discord.Color.default()
@@ -130,15 +121,13 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
             mute_duration_minutes = 30
             embed_title = t(message.guild, "ANTI_INSULT_TITLE_WARN2")
             embed_color = discord.Color.orange()
-        else: # Từ lần thứ 3 trở đi
+        else:
             mute_duration_minutes = 60
             embed_title = t(message.guild, "ANTI_INSULT_TITLE_SEVERE")
             embed_color = discord.Color.dark_red()
 
-        # Tạo lời phản bác bằng AI
         ai_rebuttal = await self._generate_ai_rebuttal(message.author, user_violations, message.content)
         
-        # Thêm thông tin hình phạt vào cuối lời phản bác của AI
         full_rebuttal_message = (
             f"{t(message.guild, 'ANTI_INSULT_REBUTTAL_HEADER', mention=message.author.mention)}\n"
             f"{ai_rebuttal}\n\n"
@@ -146,7 +135,6 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
             f"{t(message.guild, 'ANTI_INSULT_VIOLATION_COUNT', count=user_violations)}"
         )
 
-        # Áp dụng hình phạt
         try:
             duration = timedelta(minutes=mute_duration_minutes)
             await message.author.timeout(duration, reason=f"Xúc phạm bot/chủ bot (lần {user_violations})")
@@ -168,7 +156,6 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
         if not message.guild or message.author.bot or not message.content:
             return
 
-        # Bỏ qua owner và admin
         if message.author.id == OWNER_ID or message.author.guild_permissions.administrator:
             return
 
@@ -176,7 +163,6 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
         guild_settings = insult_settings.get(guild_id_str, {})
         enabled_channels = guild_settings.get("enabled_channels", [])
 
-        # Chỉ quét các kênh đã được bật
         if message.channel.id not in enabled_channels:
             return
 
@@ -187,7 +173,7 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
             try:
                 if re.search(pattern, content_lower):
                     await self.handle_insult_violation(message, pattern)
-                    return # Dừng lại sau khi xử lý vi phạm đầu tiên
+                    return
             except re.error as e:
                 print(f"[Anti-Insult] Lỗi regex: {e} với mẫu: {pattern}")
                 continue
@@ -210,10 +196,8 @@ class InsultFilterCog(commands.Cog, name="Anti-Insult"):
                 color=discord.Color.blue()
             )
 
-            # Thêm thông tin về số lần vi phạm
             guild_violations = insult_violations.get(guild_id_str, {})
             if guild_violations:
-                # Sắp xếp người dùng theo số lần vi phạm giảm dần và lấy top 10
                 sorted_violations = sorted(guild_violations.items(), key=lambda item: item[1], reverse=True)[:10]
                 
                 violation_list = []

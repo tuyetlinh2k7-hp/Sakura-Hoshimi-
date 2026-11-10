@@ -9,14 +9,11 @@ from Check.i18n import t
 
 
 class VoiceLog(commands.Cog):
-    # Thời gian chờ (giây) giữa 2 lần tạo phòng liên tiếp của 1 thành viên
     CREATE_COOLDOWN = 10.0
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Lưu mốc thời gian bắt đầu vào voice: {(guild_id, member_id): timestamp}
         self._join_times: dict[tuple[int, int], float] = {}
-        # Lưu mốc thời gian tạo phòng gần nhất để chống spam: {(guild_id, member_id): timestamp}
         self._create_cooldowns: dict[tuple[int, int], float] = {}
 
     async def _get_log_channel(self, guild: discord.Guild) -> discord.abc.Messageable | None:
@@ -91,7 +88,6 @@ class VoiceLog(commands.Cog):
                     if not member.bot:
                         self._join_times.setdefault((guild.id, member.id), now)
 
-            # Dọn các kênh Temp Voice không còn người thật nào bên trong
             for chan_id in list(temp_channels.keys()):
                 channel = guild.get_channel(chan_id)
                 if channel and len(self._get_human_members(channel)) == 0:
@@ -105,7 +101,6 @@ class VoiceLog(commands.Cog):
     async def on_voice_state_update(
         self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState
     ):
-        # Bỏ qua các sự kiện bật/tắt mic, loa, camera, stream
         if before.channel == after.channel:
             return
 
@@ -114,9 +109,6 @@ class VoiceLog(commands.Cog):
         raw_create_id = CREATE_CHANNEL_ID.get(guild_id)
         create_voice_id = int(raw_create_id) if raw_create_id else None
 
-        # =========================
-        # 1. THỐNG KÊ THỜI GIAN VOICE (VOICE STATS)
-        # =========================
         session_duration = 0
         if not member.bot:
             if before.channel is None and after.channel is not None:
@@ -124,9 +116,6 @@ class VoiceLog(commands.Cog):
             elif before.channel is not None and after.channel is None:
                 session_duration = self._record_voice_time(guild_id, member.id)
 
-        # =========================
-        # 2. HỆ THỐNG VOICE LOG (CHỈ LOG KÊNH)
-        # =========================
         log_channel = await self._get_log_channel(guild)
         if log_channel:
             embed = None
@@ -181,9 +170,6 @@ class VoiceLog(commands.Cog):
                 except (discord.Forbidden, discord.HTTPException):
                     pass
 
-        # =========================
-        # 3. XỬ LÝ PHÒNG TEMP VOICE CŨ (LOẠI TRỪ BOT NHẠC & TỰ CHUYỂN CHỦ PHÒNG)
-        # =========================
         if before.channel and before.channel.id in temp_channels:
             old_channel_id = before.channel.id
             await asyncio.sleep(1)
@@ -191,7 +177,6 @@ class VoiceLog(commands.Cog):
 
             if channel:
                 human_members = self._get_human_members(channel)
-                # Nếu không còn người thật nào (kể cả khi vẫn còn Bot nhạc treo trong phòng) -> Xóa phòng ngay
                 if len(human_members) == 0:
                     temp_channels.pop(channel.id, None)
                     try:
@@ -199,7 +184,6 @@ class VoiceLog(commands.Cog):
                     except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                         pass
 
-                # Nếu chủ phòng rời đi nhưng vẫn còn người thật -> Tự động chuyển quyền chủ phòng
                 elif temp_channels.get(channel.id) == member.id:
                     new_owner = human_members[0]
                     temp_channels[channel.id] = new_owner.id
@@ -217,23 +201,17 @@ class VoiceLog(commands.Cog):
                     except (discord.Forbidden, discord.HTTPException):
                         pass
 
-        # =========================
-        # 4. TẠO TEMP VOICE MỚI (CÓ CHỐNG SPAM COOLDOWN)
-        # =========================
         if not create_voice_id or after.channel is None or after.channel.id != create_voice_id:
             return
 
-        # Không cho phép Bot tự tạo phòng Temp Voice
         if member.bot:
             return
 
-        # Kiểm tra Cooldown chống spam tạo phòng
         now = time.time()
         cooldown_key = (guild.id, member.id)
         last_created = self._create_cooldowns.get(cooldown_key, 0.0)
 
         if now - last_created < self.CREATE_COOLDOWN:
-            # Nếu đang trong thời gian Cooldown -> Ngắt kết nối khỏi sảnh chờ để tránh kẹt
             try:
                 await member.move_to(None, reason="Temp voice creation cooldown active")
             except (discord.Forbidden, discord.HTTPException):
@@ -286,7 +264,6 @@ class VoiceLog(commands.Cog):
                 pass
             return
 
-        # Gửi Bảng điều khiển (VoicePanel)
         embed = discord.Embed(
             title=t(guild, "LOG_VOICE_PANEL_TITLE"),
             description=t(guild, "LOG_VOICE_PANEL_DESC"),

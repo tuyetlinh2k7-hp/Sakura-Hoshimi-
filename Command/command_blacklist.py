@@ -9,17 +9,14 @@ from config import OWNER_ID
 from Check.i18n import t, is_vietnamese
 
 blacklist_users = set()
-# Per-guild blacklist: {guild_id_str: set(user_ids)}
 guild_blacklist = {}
 appeal_cooldown = {}
 APPEAL_CHANNEL_ID = 1505854802645487696
 BLACKLIST_FILE = "data/blacklist.json"
 
-# Tự động tạo thư mục data nếu chưa tồn tại nhằm tránh lỗi FileNotFoundError
 os.makedirs(os.path.dirname(BLACKLIST_FILE), exist_ok=True)
 
 def save_blacklist():
-    # Lưu dạng mới {global:[], guilds:{}} để hỗ trợ blacklist theo server, vẫn tương thích bản cũ (list flat)
     try:
         data = {"global": sorted(list(blacklist_users)), "guilds": {gid: sorted(list(s)) for gid, s in guild_blacklist.items() if s}}
         with open(BLACKLIST_FILE, "w", encoding="utf-8") as f:
@@ -34,7 +31,6 @@ def load_blacklist():
             with open(BLACKLIST_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, list):
-                    # file cũ dạng list phẳng -> coi như global
                     blacklist_users = set(int(x) for x in data if str(x).isdigit())
                     guild_blacklist = {}
                 elif isinstance(data, dict):
@@ -77,14 +73,12 @@ def remove_guild_blacklist(guild_id, user_id):
         return True
     return False
 
-# Load danh sách cấm ngay khi khởi động file
 load_blacklist()
 
 
-# --- INTERACTIVE BUTTONS FOR APPEAL ---
 class AppealView(discord.ui.View):
     def __init__(self, target_user: discord.User, is_blacklisted: bool, guild=None):
-        super().__init__(timeout=None) # Giữ nút bấm hoạt động vĩnh viễn (Persistent View)
+        super().__init__(timeout=None)
         self.target_user = target_user
         self.is_blacklisted = is_blacklisted
         vi = is_vietnamese(guild)
@@ -132,15 +126,12 @@ class AppealView(discord.ui.View):
             await interaction.response.send_message(t(interaction.guild, "BLACKLIST_ERROR", error=e), ephemeral=True)
 
 
-# --- MAIN COG CLASS ---
 class BlackList(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        # Đăng ký một Global Check cho bot ngay khi Cog được khởi tạo
         self.bot.add_check(self.blacklist_global_check)
 
     def cog_unload(self):
-        # Hủy đăng ký check khi Cog bị reload/unload để tránh lỗi trùng lặp check
         self.bot.remove_check(self.blacklist_global_check)
 
     async def blacklist_global_check(self, ctx):
@@ -285,7 +276,6 @@ class BlackList(commands.Cog):
         if not ctx.guild:
             return await ctx.send("❌ Chỉ dùng trong server.", ephemeral=True)
         if action is None:
-            # help embed
             gid=str(ctx.guild.id)
             lst=guild_blacklist.get(gid, set())
             cnt=len(lst)
@@ -299,10 +289,8 @@ class BlackList(commands.Cog):
             if user is None: return await ctx.send("❌ Cần @user.", ephemeral=True)
             if user.id==ctx.author.id: return await ctx.send("❌ Không tự cấm mình.", ephemeral=True)
             if is_blacklisted(user.id, gid):
-                # kiểm tra đã trong guild chưa
                 if user.id in guild_blacklist.get(gid, set()):
                     return await ctx.send(f"⚠️ {user.mention} đã bị cấm ở server này rồi.", ephemeral=True)
-                # nếu đã global thì vẫn báo
                 if user.id in blacklist_users:
                     return await ctx.send(f"⚠️ {user.mention} đã bị cấm toàn cục rồi.", ephemeral=True)
             add_guild_blacklist(gid, user.id)

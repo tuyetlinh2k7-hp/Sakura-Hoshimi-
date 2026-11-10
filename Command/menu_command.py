@@ -150,7 +150,6 @@ class MenuSelect(discord.ui.Select):
         if self.bot.user and self.bot.user.display_avatar:
             embed.set_thumbnail(url=self.bot.user.display_avatar.url)
 
-        # 1. BASIC
         if category == "basic":
             embed.title = t(guild, "MENU_BASIC_TITLE")
             commands_list = [
@@ -173,7 +172,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 2. FUN
         elif category == "fun":
             embed.title = t(guild, "MENU_FUN_TITLE")
             commands_list = [
@@ -199,7 +197,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 3. UTILITY
         elif category == "utility":
             embed.title = t(guild, "MENU_UTILITY_TITLE")
             commands_list = [
@@ -216,7 +213,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 4. GAME LOOKUP
         elif category == "game":
             embed.title = t(guild, "MENU_GAME_TITLE")
             commands_list = [
@@ -235,7 +231,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 5. OCEAN FISHING (Names of fish stay in Vietnamese)
         elif category == "fishing":
             embed.title = t(guild, "MENU_FISHING_TITLE")
             commands_list = [
@@ -262,7 +257,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 6. MINING (Names of minerals stay in Vietnamese)
         elif category == "mining":
             embed.title = t(guild, "MENU_MINING_TITLE")
             commands_list = [
@@ -275,7 +269,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 7. FARM
         elif category == "farm":
             embed.title = t(guild, "MENU_FARM_TITLE")
             commands_list = [
@@ -288,7 +281,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 8. MARRIAGE
         elif category == "marriage":
             embed.title = t(guild, "MENU_MARRIAGE_TITLE")
             commands_list = [
@@ -301,7 +293,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 9. ACHIEVEMENTS
         elif category == "achievements":
             embed.title = t(guild, "MENU_ACHIEVEMENTS_TITLE")
             commands_list = [
@@ -311,7 +302,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 10. CASINO
         elif category == "casino":
             embed.title = t(guild, "MENU_CASINO_TITLE")
             commands_list = [
@@ -324,7 +314,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 11. TTS
         elif category == "tts":
             embed.title = t(guild, "MENU_TTS_TITLE")
             commands_list = [
@@ -338,7 +327,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 12. MUSIC
         elif category == "music":
             embed.title = t(guild, "MENU_MUSIC_TITLE")
             commands_list = [
@@ -358,7 +346,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 13. MODERATION
         elif category == "mod":
             embed.title = t(guild, "MENU_MOD_TITLE")
             commands_list = [
@@ -385,7 +372,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 14. LOGS
         elif category == "logs":
             embed.title = t(guild, "MENU_LOGS_TITLE")
             commands_list = [
@@ -396,7 +382,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 15. ANTI-RAID
         elif category == "anti":
             embed.title = t(guild, "MENU_ANTI_TITLE")
             commands_list = [
@@ -411,7 +396,6 @@ class MenuSelect(discord.ui.Select):
             ]
             embed.description = "\n".join(commands_list)
 
-        # 16. OWNER ONLY (Giữ nguyên tiếng Việt theo yêu cầu)
         elif category == "owner":
             embed.title = "👑 LỆNH DÀNH CHO CHỦ SỞ HỮU (OWNER ONLY)"
             commands_list = [
@@ -461,7 +445,6 @@ class MenuView(discord.ui.View):
         self.select_menu = MenuSelect(bot, author, guild, prefix)
         self.add_item(self.select_menu)
 
-        # Dynamic bilingual button labels
         self.home_button.label = t(guild, "MENU_BTN_HOME")
         self.close_button.label = t(guild, "MENU_BTN_CLOSE")
 

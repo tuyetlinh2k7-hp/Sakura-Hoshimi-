@@ -22,14 +22,12 @@ try:
 except:
     from security import limiter, check_rate, security_headers_middleware, sanitize_text, validate_avatar, record_failed, clear_failed, SECURITY_HEADERS
 
-# Đường dẫn thư mục
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 SERVER_DIR = BASE_DIR / "server"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
-# Đảm bảo project root trong sys.path khi chạy tách riêng (python web/server.py)
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
@@ -70,24 +68,20 @@ except ImportError:
         handle_api_database_query
     )
 
-# Shared in-memory log buffer for live console streaming (Bot)
 LOG_BUFFER: List[Dict[str, Any]] = []
 MAX_LOG_ENTRIES = 500
 WS_CLIENTS = set()
-# Dedicated Minecraft server terminal buffer (tách riêng khỏi console web của bot)
 MC_LOG_BUFFER: List[Dict[str, Any]] = []
 MC_WS_CLIENTS = set()
 MC_LOG_FILE = SERVER_DIR / "logs" / "latest.log"
 MC_LOG_OFFSET = 0
-# Global chat giữa các TK web (cần login) — lưu data/web_global_chat.json + WS
 WEB_GLOBAL_FILE = DATA_DIR / "web_global_chat.json"
 WEB_GLOBAL_WS = set()
 BOT_INSTANCE = None
 SERVER_START_TIME = time.time()
-BOT_PROCESS = None  # subprocess handle khi web quản lý bot riêng
+BOT_PROCESS = None
 BOT_PID_FILE = DATA_DIR / "bot.pid"
 
-# Import auth helpers (after path defined)
 try:
     from web.auth import (
         load_users, save_users, verify_session, create_session, destroy_session,
@@ -98,7 +92,6 @@ try:
     from web.auth import ensure_default_admin
     ensure_default_admin()
 except Exception as e:
-    # Fallback khi chạy trực tiếp: thử import từ web package đã thêm vào path
     try:
         import importlib
         auth_mod = importlib.import_module("web.auth")
@@ -119,7 +112,6 @@ except Exception as e:
         ensure_default_admin()
     except Exception as e2:
         print(f"[Web] Auth import error: {e} / {e2}")
-    # fallback stubs
     def verify_session(t): return None
     def create_session(*a, **kw): return "stub"
     def destroy_session(t): pass
@@ -167,7 +159,6 @@ def add_log(level: str, message: str):
 root_logger = logging.getLogger()
 root_logger.addHandler(LogStreamHandler())
 
-# --- Per-guild Reine-style config helpers ---
 def _load_server_config():
     return load_json(DATA_DIR / "server_config.json", {})
 def _save_server_config(d): return save_json(DATA_DIR / "server_config.json", d)
@@ -211,7 +202,6 @@ def _save_welcome_to_data(gid: str, cfg: dict):
     gs["goodbye_image"] = cfg.get("goodbye_image","") or ""
     return save_json(DATA_DIR / "data.json", data)
 def _load_audit_config(gid: str):
-    # Ưu tiên file riêng audit_config.json (5 nhóm rõ ràng) -> fallback data.json cũ
     audit = load_json(DATA_DIR / "audit_config.json", {})
     if str(gid) in audit:
         c=audit[str(gid)]
@@ -223,7 +213,6 @@ def _load_audit_config(gid: str):
             "server": c.get("server"),
         }
     data = load_json(DATA_DIR / "data.json", {})
-    # map 5 nhóm Reine -> các key log (fallback)
     return {
         "message": data.get("delete_log_channels",{}).get(str(gid)) or data.get("chat_log_channels",{}).get(str(gid)),
         "member": data.get("member_log_channels",{}).get(str(gid)),
@@ -232,7 +221,6 @@ def _load_audit_config(gid: str):
         "server": data.get("server_log_channels",{}).get(str(gid)),
     }
 def _save_audit_config(gid: str, cfg: dict):
-    # Lưu file riêng rõ ràng 5 nhóm
     audit = load_json(DATA_DIR / "audit_config.json", {})
     clean={
         "message": int(cfg.get("message")) if cfg.get("message") and str(cfg.get("message")).isdigit() else (None if not cfg.get("message") or str(cfg.get("message")) in ("","0", None) else cfg.get("message")),
@@ -241,13 +229,11 @@ def _save_audit_config(gid: str, cfg: dict):
         "voice": int(cfg.get("voice")) if cfg.get("voice") and str(cfg.get("voice")).isdigit() else (None if not cfg.get("voice") or str(cfg.get("voice")) in ("","0", None) else cfg.get("voice")),
         "server": int(cfg.get("server")) if cfg.get("server") and str(cfg.get("server")).isdigit() else (None if not cfg.get("server") or str(cfg.get("server")) in ("","0", None) else cfg.get("server")),
     }
-    # None = Tắt
     for k,v in list(clean.items()):
         if v is None:
             clean[k]=None
     audit[str(gid)]=clean
     save_json(DATA_DIR / "audit_config.json", audit)
-    # Đồng bộ sang data.json để bot cũ (Log) vẫn đọc được
     data = load_json(DATA_DIR / "data.json", {})
     sync_map=[("message","delete_log_channels"),("member","member_log_channels"),("join","join_log_channels"),("voice","voice_log_channels"),("server","server_log_channels")]
     for k, key in sync_map:
@@ -257,17 +243,13 @@ def _save_audit_config(gid: str, cfg: dict):
             data[key].pop(str(gid), None)
         else:
             data[key][str(gid)] = int(val) if str(val).isdigit() else val
-    # Giữ tương thích: join cũng ghi vào member nếu chưa có? không, để riêng
     save_json(DATA_DIR / "data.json", data)
-    # Cập nhật Check.data memory nếu đang chạy embedded
     try:
         from Check.data import join_log_channels, delete_log_channels, member_log_channels, voice_log_channels, server_log_channels
-        # patch in-memory
         for k,key in sync_map:
             if key=="delete_log_channels": target=delete_log_channels
             elif key=="member_log_channels": target=member_log_channels
             elif key=="join_log_channels": 
-                # nếu Check chưa có join_log_channels thì tạo động
                 import Check.data as dmod
                 if not hasattr(dmod, "join_log_channels"):
                     dmod.join_log_channels={}
@@ -282,7 +264,6 @@ def _save_audit_config(gid: str, cfg: dict):
     except: pass
     return True
 
-# --- Minecraft dedicated terminal helpers ---
 def add_mc_log(level: str, message: str):
     entry = {"time": datetime.datetime.now().strftime("%H:%M:%S"), "level": level.upper(), "message": message}
     MC_LOG_BUFFER.append(entry)
@@ -300,7 +281,6 @@ def add_mc_log(level: str, message: str):
 async def tail_mc_log_file():
     """Poll server/logs/latest.log và đẩy dòng mới vào MC_LOG_BUFFER"""
     global MC_LOG_OFFSET
-    # Khởi tạo offset ở cuối file nếu đã tồn tại
     try:
         if MC_LOG_FILE.exists():
             MC_LOG_OFFSET = MC_LOG_FILE.stat().st_size
@@ -314,7 +294,7 @@ async def tail_mc_log_file():
             has_new_data = False
             if MC_LOG_FILE.exists():
                 size = MC_LOG_FILE.stat().st_size
-                if size < MC_LOG_OFFSET:  # file bị rotate / xóa
+                if size < MC_LOG_OFFSET:
                     MC_LOG_OFFSET = 0
                 if size > MC_LOG_OFFSET:
                     has_new_data = True
@@ -325,12 +305,10 @@ async def tail_mc_log_file():
                     for line in new_data.splitlines():
                         line=line.strip()
                         if line:
-                            # Giữ nguyên màu MC (§) nhưng cũng clean nhẹ để hiển thị web
                             lvl="INFO"
                             if "ERROR" in line or "Exception" in line: lvl="ERROR"
                             elif "WARN" in line: lvl="WARN"
                             add_mc_log(lvl, line)
-            # Tối ưu CPU hosting: Khi không có dữ liệu mới thì nghỉ 3s thay vì 1s
             await asyncio.sleep(1.0 if has_new_data else 3.0)
         except asyncio.CancelledError:
             break
@@ -338,7 +316,6 @@ async def tail_mc_log_file():
             print(f"[MC Tail] {e}")
             await asyncio.sleep(4.0)
 
-# --- Helper functions cho JSON ---
 def load_json(filepath: Path, default=None):
     if default is None:
         default = {}
@@ -361,9 +338,7 @@ def save_json(filepath: Path, data: Any):
         print(f"[Web Dashboard] Lỗi lưu {filepath.name}: {e}")
         return False
 
-# ========== AUTH HELPERS ==========
 def get_token_from_request(request: web.Request) -> str:
-    # Priority: Authorization Bearer -> cookie -> query
     auth_header = request.headers.get("Authorization", "")
     if auth_header.startswith("Bearer "):
         return auth_header[7:].strip()
@@ -373,7 +348,6 @@ def get_token_from_request(request: web.Request) -> str:
     token_param = request.query.get("token", "")
     if token_param:
         return token_param.strip()
-    # legacy WEB_PASSWORD compat: if token equals WEB_PASSWORD allow?
     return ""
 
 def get_session(request: web.Request) -> Optional[Dict[str, Any]]:
@@ -383,7 +357,6 @@ def get_session(request: web.Request) -> Optional[Dict[str, Any]]:
     sess = verify_session(token)
     if sess:
         return sess
-    # Legacy fallback: if WEB_PASSWORD set and token matches
     try:
         import config
         legacy = getattr(config, "WEB_PASSWORD", "")
@@ -439,13 +412,10 @@ def get_manageable_guild_ids_for_session(sess: Dict[str, Any]) -> Optional[List[
     """None = admin full access, [] = no access, list = allowed guild ids"""
     if is_admin_session(sess):
         return None
-    # user role
     discord_id = sess.get("discord_id")
     extra = sess.get("extra", {})
-    # if we stored manage_guild_ids from oauth
     if extra and extra.get("manage_guild_ids"):
         return [str(x) for x in extra["manage_guild_ids"]]
-    # try to infer via bot guild membership
     if discord_id and BOT_INSTANCE and getattr(BOT_INSTANCE, "is_ready", lambda: False)():
         allowed = []
         try:
@@ -457,7 +427,6 @@ def get_manageable_guild_ids_for_session(sess: Dict[str, Any]) -> Optional[List[
                     if perms.administrator or perms.manage_guild:
                         allowed.append(str(g.id))
                 else:
-                    # fallback: check owner
                     if str(g.owner_id) == str(discord_id):
                         allowed.append(str(g.id))
         except Exception as e:
@@ -473,7 +442,6 @@ def can_access_guild(sess: Dict[str, Any], guild_id: str) -> bool:
         return True
     return str(guild_id) in allowed
 
-# ========== Bot Process Manager (tách web panel mở riêng) ==========
 _BOT_CACHE = {"time": 0, "data": {"running": False, "mode": "none", "pid": None}}
 
 def _find_bot_process():
@@ -489,10 +457,8 @@ def _find_bot_process():
                 if "python" not in name:
                     continue
                 cmdline = p.info.get('cmdline') or []
-                # kiểm tra file run.py thực sự trong cmdline, không phải chuỗi trong -c
                 if any(pathlib.Path(c).name == "run.py" for c in cmdline):
                     return p
-                # fallback: check join nhưng loại trừ -c chứa code
                 if len(cmdline) >= 2 and cmdline[0].lower().endswith("python.exe") and "run.py" in cmdline[1]:
                     return p
             except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -504,10 +470,8 @@ def _find_bot_process():
 def get_bot_process_status(use_cache=True):
     global BOT_PROCESS
     now = time.time()
-    # Cache 5s để không quét liên tục, đặc biệt khi không có bot (tránh chậm)
     if use_cache and now - _BOT_CACHE["time"] < 5:
         return _BOT_CACHE["data"]
-    # Ưu tiên BOT_INSTANCE nếu web đang chạy cùng bot
     if BOT_INSTANCE and getattr(BOT_INSTANCE, "is_ready", lambda: False)():
         try:
             data = {"running": True, "mode": "embedded", "pid": os.getpid(), "username": str(BOT_INSTANCE.user), "latency": round(BOT_INSTANCE.latency*1000,2) if hasattr(BOT_INSTANCE,'latency') else 0}
@@ -517,7 +481,6 @@ def get_bot_process_status(use_cache=True):
             data = {"running": True, "mode": "embedded", "pid": os.getpid()}
             _BOT_CACHE.update({"time": now, "data": data})
             return data
-    # Kiểm tra subprocess do web tạo
     if BOT_PROCESS is not None:
         try:
             if BOT_PROCESS.poll() is None:
@@ -528,13 +491,11 @@ def get_bot_process_status(use_cache=True):
                 BOT_PROCESS = None
         except Exception:
             BOT_PROCESS = None
-    # Kiểm tra pid file
     if BOT_PID_FILE.exists():
         try:
             pid = int(BOT_PID_FILE.read_text().strip())
             if psutil.pid_exists(pid):
                 p = psutil.Process(pid)
-                # kiểm tra nhanh cmdline
                 try:
                     cmd = " ".join(p.cmdline())
                     if "run.py" in cmd:
@@ -544,17 +505,12 @@ def get_bot_process_status(use_cache=True):
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
             else:
-                # pid chết, xóa file
                 try:
                     BOT_PID_FILE.unlink(missing_ok=True)
                 except Exception:
                     pass
         except Exception:
             pass
-    # Quét psutil chỉ khi thực sự cần (đã cache nên lần sau sẽ nhanh)
-    # Nếu không có dấu hiệu nào của bot (không pid file, không subprocess) thì trả về nhanh, không quét toàn bộ để tránh chậm
-    # Chỉ quét khi người dùng yêu cầu kiểm tra kỹ (ví dụ sau khi bấm nút Bật)
-    # Ở đây ta vẫn quét nhưng đã tối ưu chỉ duyệt python process nên nhanh (<0.3s)
     proc = _find_bot_process()
     if proc:
         data = {"running": True, "mode": "external", "pid": proc.pid}
@@ -564,7 +520,6 @@ def get_bot_process_status(use_cache=True):
     _BOT_CACHE.update({"time": now, "data": data})
     return data
 
-# --- Route Handlers ---
 
 def get_bot_invite_url(client_id: str = None, permissions: str = "8", guild_id: str = None) -> str:
     """Tạo URL mời bot trực tiếp vào server (Guild Install).
@@ -603,7 +558,6 @@ async def handle_bot_invite(request: web.Request):
     guild_id = request.query.get("guild_id")
     invite_url = get_bot_invite_url(client_id=client_id, permissions=permissions, guild_id=guild_id)
 
-    # Nếu client yêu cầu JSON (?json=1 hoặc Accept: application/json)
     if request.query.get("json") == "1" or "application/json" in request.headers.get("Accept", ""):
         return web.json_response({
             "ok": True,
@@ -613,7 +567,6 @@ async def handle_bot_invite(request: web.Request):
             "integration_type": 0
         })
 
-    # Redirect 302 trực tiếp sang Discord invite
     raise web.HTTPFound(location=invite_url)
 
 async def handle_index(request: web.Request):
@@ -623,7 +576,6 @@ async def handle_index(request: web.Request):
         with open(landing_file, "r", encoding="utf-8") as f:
             content = f.read()
         return web.Response(text=content, content_type="text/html")
-    # fallback về index cũ
     index_file = TEMPLATES_DIR / "index.html"
     if not index_file.exists():
         return web.Response(text="<h1>Sakura Landing không tồn tại!</h1>", content_type="text/html")
@@ -642,17 +594,12 @@ async def handle_dashboard(request: web.Request):
 
 async def handle_dashboard_guild(request: web.Request):
     """Dashboard per-server tại /dashboard/{guild_id} - rõ ràng, dễ cấu hình từng server"""
-    # Vẫn trả về cùng panel, frontend sẽ tự mở drawer theo ID
-    # Kiểm tra guild_id hợp lệ (số)
     guild_id = request.match_info.get("guild_id", "")
-    # Không cần check 404 ở đây, để frontend xử lý quyền (nếu không có quyền sẽ báo 403)
     index_file = TEMPLATES_DIR / "index.html"
     if not index_file.exists():
         return web.Response(text="<h1>Dashboard không tồn tại</h1>", content_type="text/html", status=404)
     with open(index_file, "r", encoding="utf-8") as f:
         content = f.read()
-    # Inject guild_id vào HTML để JS dễ đọc (thêm meta)
-    # Đơn giản trả về như dashboard thường
     return web.Response(text=content, content_type="text/html")
 
 def _mc_404_response():
@@ -752,11 +699,9 @@ def get_discord_redirect_uri(request: web.Request) -> str:
     except Exception:
         pass
 
-    # Nhận diện scheme HTTPS/HTTP (hỗ trợ reverse proxy Nginx/Cloudflare)
     proto = request.headers.get("X-Forwarded-Proto", "").strip()
     scheme = proto.split(",")[0].strip() if proto else request.scheme
 
-    # Nhận diện host (hỗ trợ X-Forwarded-Host)
     fwd_host = request.headers.get("X-Forwarded-Host", "").strip()
     if fwd_host:
         host = fwd_host.split(",")[0].strip()
@@ -792,17 +737,14 @@ async def handle_login_page(request: web.Request):
 
     url = get_discord_oauth_login_url(request)
 
-    # Nếu client truyền ?json=1 hoặc yêu cầu json
     if request.query.get("json") == "1" or "application/json" in request.headers.get("Accept", ""):
         return web.json_response({"ok": True, "url": url})
 
-    # Nếu truyền ?page=1 thì mới render login.html giao diện Discord
     if request.query.get("page") == "1":
         login_file = TEMPLATES_DIR / "login.html"
         if login_file.exists():
             return web.Response(text=login_file.read_text(encoding="utf-8"), content_type="text/html")
 
-    # Mặc định: Chuyển hướng 302 trực tiếp sang Discord OAuth login
     raise web.HTTPFound(location=url)
 
 async def handle_help_page(request: web.Request):
@@ -1013,7 +955,6 @@ async def handle_ws_scribble(request: web.Request):
                         avatar_data = data.get("avatar_data")
                         player = room.add_player(pid, pname, pavatar, avatar_data, ws)
 
-                        # Gửi gói tin welcome để client đồng bộ chính xác Player ID
                         await ws.send_str(json.dumps({
                             "type": "welcome",
                             "your_id": player.pid,
@@ -1021,9 +962,7 @@ async def handle_ws_scribble(request: web.Request):
                             "is_host": (room.host_id == player.pid)
                         }, ensure_ascii=False))
 
-                        # Gửi trạng thái phòng hiện tại
                         await ws.send_str(json.dumps(room.get_room_state_dict(), ensure_ascii=False))
-                        # Gửi lại nét vẽ hiện tại nếu đang trong round
                         if room.state == "drawing" and room.strokes:
                             for s in room.strokes:
                                 await ws.send_str(json.dumps({"type": "redraw_stroke", "stroke": s}, ensure_ascii=False))
@@ -1066,7 +1005,7 @@ async def handle_ws_scribble(request: web.Request):
                     elif mtype == "undo" and player:
                         if (room.state == "drawing" and room.drawer_id == player.pid) or room.game_mode == "practice" or room.state == "waiting":
                             if room.strokes:
-                                room.strokes.pop()  # Xóa toàn bộ 1 nét vẽ (1 continuous stroke)
+                                room.strokes.pop()
                                 await room.broadcast({"type": "clear"})
                                 for s in room.strokes:
                                     await room.broadcast({"type": "redraw_stroke", "stroke": s})
@@ -1212,9 +1151,6 @@ async def handle_wordlist(request: web.Request):
         words=["hoa hồng","hồng nhung","nhung nhớ","nhớ nhà","nhà cửa"]
     return web.json_response({"ok":True,"words":words})
 
-# ==============================================================================
-# HỆ THỐNG QUẢN LÝ MINIGAME NỐI CHỮ (WORD CHAIN MANAGEMENT)
-# ==============================================================================
 
 async def handle_wordchain_stats(request: web.Request):
     sess = require_auth(request)
@@ -1320,7 +1256,6 @@ async def handle_wordchain_add_word(request: web.Request):
         with open(dict_file, "a", encoding="utf-8") as f:
             f.write(f"\n{raw_word}")
 
-        # Đồng bộ vào bộ nhớ Cog nếu bot đang chạy
         if BOT_INSTANCE:
             cog = BOT_INSTANCE.get_cog("WordChainGame")
             if cog and hasattr(cog, "add_new_word_to_dict"):
@@ -1360,7 +1295,6 @@ async def handle_wordchain_delete_word(request: web.Request):
         with open(dict_file, "w", encoding="utf-8") as f:
             f.write("\n".join(new_lines) + "\n")
 
-        # Cập nhật cache bot
         if BOT_INSTANCE:
             cog = BOT_INSTANCE.get_cog("WordChainGame")
             if cog and hasattr(cog, "word_set") and target in cog.word_set:
@@ -1390,7 +1324,6 @@ async def handle_wordchain_leaderboard(request: web.Request):
                     raw_scores = json.load(f)
             except Exception: pass
 
-        # Gộp điểm nếu guild_id không chỉ định (toàn cục) hoặc lọc theo guild
         merged_scores = {}
         for g_id, p_map in raw_scores.items():
             if guild_id and str(g_id) != str(guild_id):
@@ -1457,7 +1390,6 @@ async def handle_wordchain_adjust_score(request: web.Request):
         with open(scores_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-        # Cập nhật cache bot nếu có
         if BOT_INSTANCE:
             cog = BOT_INSTANCE.get_cog("WordChainGame")
             if cog:
@@ -1470,7 +1402,6 @@ async def handle_wordchain_adjust_score(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Game BXH per game ---
 def _game_lb_file(game: str): return DATA_DIR / f"game_{game}_leaderboard.json"
 def _load_lb(game: str):
     p=_game_lb_file(game)
@@ -1482,7 +1413,6 @@ def _save_lb(game: str, data: dict):
     except: pass
 
 async def handle_game_leaderboard(request: web.Request):
-    # Không yêu cầu đăng nhập để xem BXH
     game=request.match_info.get("game")
     if game not in ("xo","chess","wordchain","scribble"): return web.json_response({"ok":False,"error":"game không hợp lệ"},status=400)
     lb=_load_lb(game)
@@ -1506,10 +1436,9 @@ async def handle_game_score(request: web.Request):
     if game not in ("xo","chess","wordchain","scribble"): return web.json_response({"ok":False,"error":"game không hợp lệ"},status=400)
     try:
         body=await request.json()
-        result=str(body.get("result","")).lower() # win/loss/draw
+        result=str(body.get("result","")).lower()
         if result not in ("win","loss","draw"): return web.json_response({"ok":False,"error":"result phải là win/loss/draw"},status=400)
         
-        # Nếu đã đăng nhập thì lấy username tài khoản, nếu chưa thì lấy guest name unknowplayer#{number}
         if sess:
             raw_u = sess.get("username")
             if isinstance(raw_u, dict):
@@ -1535,7 +1464,6 @@ async def handle_game_score(request: web.Request):
     except Exception as e:
         return web.json_response({"ok":False,"error":str(e)},status=500)
 
-# --- TikTok Downloader Page & APIs ---
 async def handle_tiktok_page(request: web.Request):
     f = TEMPLATES_DIR / "tiktok.html"
     if not f.exists():
@@ -1562,7 +1490,6 @@ async def handle_api_tiktok_info(request: web.Request):
                 pass
 
             data = None
-            # Ưu tiên 1: TikWM API với hd=1
             try:
                 async with session.post("https://www.tikwm.com/api/", data={"url": canonical_url, "hd": 1}, timeout=20) as resp:
                     if resp.status == 200:
@@ -1572,7 +1499,6 @@ async def handle_api_tiktok_info(request: web.Request):
             except Exception:
                 pass
 
-            # Dự phòng 1: TikWM API không kèm hd
             if not data:
                 try:
                     async with session.post("https://www.tikwm.com/api/", data={"url": canonical_url}, timeout=20) as resp:
@@ -1780,10 +1706,8 @@ async def handle_global_chat_page(request: web.Request):
     return web.Response(text=gc_file.read_text(encoding="utf-8"),content_type="text/html")
 
 async def handle_account_page(request: web.Request):
-    # yêu cầu đăng nhập, nếu chưa thì vẫn trả về trang nhưng JS sẽ redirect
     sess = get_session(request)
     if not sess:
-        # vẫn trả về trang để JS xử lý, hoặc redirect
         pass
     acc_file = TEMPLATES_DIR / "account.html"
     if not acc_file.exists():
@@ -1878,7 +1802,6 @@ async def handle_account_info(request: web.Request):
     u = users.get(sess.get("username"))
     if not u:
         return web.json_response({"ok": False, "error": "Không tìm thấy tài khoản"}, status=404)
-    # ẩn password_hash
     info = {k: v for k, v in u.items() if k != "password_hash"}
     discord_id = u.get("discord_id")
     finance = {"coins": 0, "bank": 0, "xu": 0, "networth": 0}
@@ -1899,7 +1822,6 @@ async def handle_account_info(request: web.Request):
             pass
     info["finance"] = finance
 
-    # 3. Trạng thái liên kết Minecraft Server Plugin
     mc_info = {"linked": False, "minecraft_name": None, "minecraft_uuid": None, "linked_at": None}
     if discord_id:
         try:
@@ -1916,7 +1838,6 @@ async def handle_account_info(request: web.Request):
             pass
     info["mc_link"] = mc_info
 
-    # 4. Trạng thái Hôn Nhân & Hẹn Hò
     marriage_info = {"is_married": False}
     if discord_id:
         try:
@@ -1972,17 +1893,14 @@ async def handle_account_change(request: web.Request):
     users = load_users()
     if new_username in users:
         return web.json_response({"ok": False, "error": "Tên đã tồn tại"}, status=400)
-    # Không cho đổi thành admin nếu không phải admin
     if new_username.lower() == "admin" and sess.get("role") != "admin":
         return web.json_response({"ok": False, "error": "Không thể đổi thành admin"}, status=403)
     old_username = sess.get("username")
     if old_username not in users:
         return web.json_response({"ok": False, "error": "Tài khoản không tồn tại"}, status=404)
-    # đổi tên
     users[new_username] = users.pop(old_username)
     users[new_username]["username"] = new_username
     save_users(users)
-    # cập nhật session
     token = get_token_from_request(request)
     from web.auth import load_sessions, save_sessions
     sessions_data = load_sessions()
@@ -2009,16 +1927,13 @@ async def handle_account_resetpass(request: web.Request):
     u = users.get(uname)
     if not u:
         return web.json_response({"ok": False, "error": "Không tìm thấy tài khoản"}, status=404)
-    # nếu tài khoản có password_hash thì phải kiểm tra old_password (trừ khi là Discord account chưa có pass thì cho phép để trống)
     has_pass = bool(u.get("password_hash"))
     if has_pass:
         from web.auth import _verify_password, _hash_password
         if not _verify_password(old_password, u.get("password_hash","")):
             return web.json_response({"ok": False, "error": "Mật khẩu cũ không đúng"}, status=403)
     else:
-        # chưa có pass (Discord) thì không cần old
         from web.auth import _hash_password
-    # cập nhật
     from web.auth import _hash_password
     users[uname]["password_hash"] = _hash_password(new_password)
     save_users(users)
@@ -2042,7 +1957,6 @@ async def handle_account_achievements(request: web.Request):
         unlocked = u_data.get("unlocked", {})
         titles = u_data.get("titles", [])
 
-        # Merge custom achievements if any
         custom_ach_file = DATA_DIR / "custom_achievements.json"
         custom_ach = load_json(custom_ach_file, {})
         for cid, cval in custom_ach.items():
@@ -2264,7 +2178,6 @@ async def handle_account_avatar(request: web.Request):
     sess = get_session(request)
     if not sess:
         return web.json_response({"ok": False, "error": "Unauthorized"}, status=401)
-    # multipart
     try:
         reader = await request.multipart()
     except Exception:
@@ -2273,7 +2186,6 @@ async def handle_account_avatar(request: web.Request):
     if not field or field.name != 'avatar':
         return web.json_response({"ok": False, "error": "Thiếu file avatar"}, status=400)
     filename = field.filename or "avatar.png"
-    # kiểm tra sớm bằng security helper (MIME sẽ check sau khi đọc)
     ext = Path(filename).suffix.lower()
     if ext not in [".png",".jpg",".jpeg",".gif",".webp"]:
         return web.json_response({"ok": False, "error": "Chỉ hỗ trợ png/jpg/jpeg/gif/webp"}, status=400)
@@ -2291,12 +2203,10 @@ async def handle_account_avatar(request: web.Request):
         data += chunk
     if not data:
         return web.json_response({"ok": False, "error": "File rỗng"}, status=400)
-    # MIME sniff: check magic bytes
     mime = field.headers.get("Content-Type","")
     err = validate_avatar(filename, mime, size)
     if err:
         return web.json_response({"ok": False, "error": err}, status=400)
-    # thêm check magic bytes đơn giản
     if first_chunk[:8] == b"\x89PNG\r\n\x1a\n":
         pass
     elif first_chunk[:2] == b"\xff\xd8":
@@ -2306,24 +2216,19 @@ async def handle_account_avatar(request: web.Request):
     elif first_chunk[:4] == b"RIFF" and b"WEBP" in first_chunk[:12]:
         pass
     else:
-        # cho phép webp khác, không chặn strict để tránh false positive, nhưng log
         add_log("WARNING", f"Avatar MIME lạ {filename} {mime} {first_chunk[:4].hex()}")
-    # lưu
     try:
         avatars_dir = STATIC_DIR / "avatars"
         avatars_dir.mkdir(parents=True, exist_ok=True)
-        # tên file an toàn
         safe_user = "".join(c if c.isalnum() or c in "_-" else "_" for c in sess.get("username","user"))
         fname = f"{safe_user}_{int(time.time())}.{ext}"
         fpath = avatars_dir / fname
         with open(fpath, "wb") as f:
             f.write(data)
         avatar_url = f"/static/avatars/{fname}"
-        # cập nhật user
         users = load_users()
         uname = sess.get("username")
         if uname in users:
-            # xóa avatar cũ nếu là local file
             old = users[uname].get("avatar","")
             if old and old.startswith("/static/avatars/"):
                 try:
@@ -2334,7 +2239,6 @@ async def handle_account_avatar(request: web.Request):
                     pass
             users[uname]["avatar"] = avatar_url
             save_users(users)
-        # cập nhật session extra
         token = get_token_from_request(request)
         if token:
             from web.auth import load_sessions, save_sessions
@@ -2348,7 +2252,6 @@ async def handle_account_avatar(request: web.Request):
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
 async def handle_auth_forgot(request: web.Request):
-    # Quên mật khẩu không cần đăng nhập: cung cấp username + new_password
     try:
         data = await request.json()
     except Exception:
@@ -2360,18 +2263,15 @@ async def handle_auth_forgot(request: web.Request):
     users = load_users()
     if username not in users:
         return web.json_response({"ok": False, "error": "Tài khoản không tồn tại"}, status=404)
-    # Không cho reset admin qua forgot nếu không phải admin? cho phép nhưng log
     from web.auth import _hash_password
     users[username]["password_hash"] = _hash_password(new_password)
     save_users(users)
 async def handle_auth_forgot(request: web.Request):
     return web.json_response({"ok": False, "error": "Tính năng mật khẩu đã bị vô hiệu hóa do hệ thống dùng Discord OAuth"}, status=400)
 
-# Legacy login & local credentials disabled
 async def handle_login(request: web.Request):
     return web.json_response({"ok": False, "message": "Đăng nhập mật khẩu đã tắt. Vui lòng đăng nhập qua Discord tại /login"}, status=400)
 
-# ========== NEW AUTH ROUTES (DISCORD ONLY) ==========
 async def handle_auth_login(request: web.Request):
     return web.json_response({"ok": False, "message": "Đăng nhập tài khoản/mật khẩu đã bị xóa. Vui lòng đăng nhập qua Discord tại /login"}, status=400)
 
@@ -2393,15 +2293,12 @@ async def handle_auth_me(request: web.Request):
         return web.json_response({"ok": False, "error": "Unauthorized"}, status=401)
     manageable = get_manageable_guild_ids_for_session(sess)
     client_id, _ = get_discord_oauth_config()
-    # lấy avatar từ web_users.json
     avatar=""
     try:
         users=load_json(DATA_DIR/"web_users.json",{})
         u=users.get(sess.get("username"),{})
         avatar=u.get("avatar","") or sess.get("extra",{}).get("avatar","")
-        # nếu là discord user, thử lấy từ discord cdn nếu chưa có
         if not avatar and sess.get("discord_id"):
-            # fallback generic
             avatar=f"https://cdn.discordapp.com/embed/avatars/0.png"
     except: pass
     raw_u = sess.get("username")
@@ -2454,7 +2351,6 @@ async def handle_discord_callback(request: web.Request):
             err_code = token_data.get("_error", "unknown") if token_data else "unknown"
             err_desc = token_data.get("_error_description", "") if token_data else ""
 
-            # Hướng dẫn xử lý chi tiết theo mã lỗi chính xác từ Discord API
             fix_tip = ""
             if err_code == "redirect_uri_mismatch":
                 fix_tip = f'''
@@ -2525,9 +2421,7 @@ async def handle_discord_callback(request: web.Request):
         manage_guilds = filter_manage_guilds(guilds)
         manage_ids = [str(g["id"]) for g in manage_guilds]
 
-        # Lấy tên Discord làm tên tài khoản
         users_tmp = load_users()
-        # Nếu đã có tài khoản cũ theo discord_id (kiểu discord_ID) thì giữ nguyên để không tạo trùng
         existing_by_discord = None
         for uname, udata in users_tmp.items():
             if str(udata.get("discord_id")) == str(discord_user["id"]):
@@ -2558,7 +2452,6 @@ async def handle_discord_callback(request: web.Request):
         d_global_name = str(discord_user.get("global_name", "") or "").strip().lower()
         d_tag_clean = discord_tag.lower().replace("@", "").strip()
 
-        # Nhận diện chủ bot @linhxinh_dev để cấp toàn quyền điều khiển bot
         import config
         owner_id_cfg = str(getattr(config, "OWNER_ID", "") or "").strip()
         owner_tag_cfg = str(getattr(config, "OWNER_DISCORD_TAG", "") or "").strip().lower().replace("@", "")
@@ -2575,7 +2468,7 @@ async def handle_discord_callback(request: web.Request):
         if is_linhxinh_dev:
             is_owner = True
             user_role = "admin"
-            manage_ids = None  # None = Toàn quyền quản lý tất cả server bot đang ở
+            manage_ids = None
             add_log("SUCCESS", f"👑 CHỦ BOT ĐĂNG NHẬP: @linhxinh_dev ({discord_id_str}) — Đã cấp toàn quyền quản lý hệ thống Sakura Bot!")
             print(f"\n\033[92m👑 [SAKURA BOT] PHÁT HIỆN CHỦ BOT @linhxinh_dev ĐĂNG NHẬP — ĐÃ CẤP TOÀN QUYỀN QUẢN TRỊ!\033[0m\n")
         else:
@@ -2584,10 +2477,8 @@ async def handle_discord_callback(request: web.Request):
             existing_role = existing_user_data.get("role", "user")
             user_role = "admin" if (existing_role == "admin") else "user"
 
-        # Save or update user
         users = load_users()
         if username not in users:
-            # Create new user entry for discord login (no password)
             users[username] = {
                 "username": username,
                 "password_hash": "",
@@ -2611,15 +2502,12 @@ async def handle_discord_callback(request: web.Request):
                 users[username]["is_owner"] = True
             save_users(users)
 
-        # Create session with manage list
         extra_session = {"manage_guild_ids": manage_ids, "discord_tag": discord_tag, "avatar": avatar, "is_owner": is_linhxinh_dev}
         token = create_session(username, user_role, discord_id=discord_id_str, extra=extra_session)
         add_log("SUCCESS", f"Discord OAuth login: {discord_tag} ({discord_user['id']}) - Role: {user_role} - {'Toàn quyền (Owner)' if is_linhxinh_dev else f'{len(manage_ids or [])} server có quyền quản lý'}")
 
-        # Hiển thị số server (an toàn khi manage_ids là None với Owner)
         guild_count_str = "tất cả" if manage_ids is None else str(len(manage_ids))
 
-        # Redirect to dashboard with token
         html = f"""
         <!DOCTYPE html>
         <html><head><meta charset="utf-8"><title>Đăng nhập thành công</title></head>
@@ -2659,7 +2547,6 @@ async def _proxy_to_bot_web(request: web.Request, path: str):
             return None
         import config
         base_port = getattr(config, "WEB_PORT", 8080)
-        # Tìm cổng thực của bot (thử base..base+9)
         import aiohttp
         token = get_token_from_request(request)
         headers = {}
@@ -2681,17 +2568,14 @@ async def _proxy_to_bot_web(request: web.Request, path: str):
                     url += f"?{request.query_string}"
                 async with aiohttp.ClientSession() as sess_cli:
                     async with sess_cli.request(request.method, url, headers=headers, cookies=cookies, data=body, timeout=aiohttp.ClientTimeout(total=2)) as resp:
-                        # Chỉ chấp nhận nếu bot trả về JSON ok hoặc 200 và không phải 404 proxy loop
                         if resp.status in (401,403):
                             data = await resp.read()
                             return web.Response(body=data, status=resp.status, content_type=resp.content_type, headers={"X-Proxied-By": f"sakura-standalone->{bot_port}"})
                         if resp.status == 200:
                             data = await resp.read()
-                            # Kiểm tra có phải Sakura API không (tránh proxy nhầm service khác)
                             ctype = resp.content_type or ""
                             if "json" in ctype or path.startswith("/api/"):
                                 return web.Response(body=data, status=resp.status, content_type=resp.content_type, headers={"X-Proxied-By": f"sakura-standalone->{bot_port}"})
-                            # Với path khác vẫn trả
                             return web.Response(body=data, status=resp.status, content_type=resp.content_type, headers={"X-Proxied-By": f"sakura-standalone->{bot_port}"})
             except: 
                 continue
@@ -2715,7 +2599,6 @@ async def check_lavalink_health() -> Dict[str, Any]:
     active_players = 0
     wavelink_connected = False
     
-    # 1. Kiểm tra qua pool Wavelink của bot nếu đang chạy
     try:
         import wavelink
         nodes = list(wavelink.Pool.nodes.values())
@@ -2731,7 +2614,6 @@ async def check_lavalink_health() -> Dict[str, Any]:
     except Exception:
         pass
 
-    # 2. Thử nghiệm kết nối HTTP & Ping socket trực tiếp
     t0 = time.time()
     status_code = "off"
     state_label = "tắt"
@@ -2780,8 +2662,8 @@ async def check_lavalink_health() -> Dict[str, Any]:
         detail = "Node Wavelink đang kết nối và truyền phát âm nhạc bình thường"
 
     return {
-        "status": status_code,          # "on" | "off" | "error"
-        "state_label": state_label,     # "ổn" | "tắt" | "sự cố"
+        "status": status_code,
+        "state_label": state_label,
         "display_title": display_title,
         "host": host,
         "port": port,
@@ -2799,7 +2681,6 @@ async def check_integrated_apis() -> List[Dict[str, Any]]:
     
     apis = []
 
-    # 1. Discord Gateway & REST API
     discord_lat = round(BOT_INSTANCE.latency * 1000, 1) if (BOT_INSTANCE and getattr(BOT_INSTANCE, "is_ready", lambda: False)()) else 0
     apis.append({
         "id": "discord",
@@ -2813,7 +2694,6 @@ async def check_integrated_apis() -> List[Dict[str, Any]]:
         "note": "Kết nối Gateway thời gian thực & Discord Slash Commands"
     })
 
-    # 2. SQLite Database
     t0 = time.time()
     db_ok = False
     try:
@@ -2841,7 +2721,6 @@ async def check_integrated_apis() -> List[Dict[str, Any]]:
         "note": "Cơ sở dữ liệu người dùng, tiền tệ, level, hôn lễ & hệ thống"
     })
 
-    # Discord Gateway & REST
     gw_lat = round(bot_instance.latency * 1000, 1) if (bot_instance and getattr(bot_instance, "latency", None)) else 0
     apis.append({
         "id": "discord_gateway",
@@ -2855,7 +2734,6 @@ async def check_integrated_apis() -> List[Dict[str, Any]]:
         "note": "Kết nối WebSocket thời gian thực giữa SakuraBot và Discord Gateway"
     })
 
-    # External probes
     async def probe(session, api_id, name, cat, icon, url, headers=None):
         headers = headers or {}
         t_start = time.time()
@@ -2927,19 +2805,15 @@ async def check_integrated_apis() -> List[Dict[str, Any]]:
         async with aiohttp.ClientSession() as session:
             tasks = []
             
-            # Lavalink Music Server
             lava_host = getattr(config, "LAVALINK_HOST", "lava2.kasawa.pro")
             lava_port = getattr(config, "LAVALINK_PORT", 2334)
             tasks.append(probe(session, "lavalink", f"Lavalink Music Server ({lava_host})", "Dịch Vụ Âm Nhạc", "🎵", f"http://{lava_host}:{lava_port}/version"))
 
-            # Minecraft Plugin Link Server (Port 5001)
             tasks.append(probe(session, "mc_link", "Minecraft Link API (Port 5001)", "Liên Kết Game", "⛏️", "http://127.0.0.1:5001/api/link"))
 
-            # Sakura Web Server / Dashboard Local
             web_p = getattr(config, "WEB_PORT", 10272)
             tasks.append(probe(session, "web_dashboard", f"Sakura Web Server (Port {web_p})", "Giao Diện Quản Trị", "🌸", f"http://127.0.0.1:{web_p}/"))
 
-            # Google Gemini AI
             if gemini_key:
                 gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={gemini_key}"
                 tasks.append(probe(session, "gemini", "Google Gemini AI API", "Trí Tuệ Nhân Tạo", "✨", gemini_url))
@@ -2956,7 +2830,6 @@ async def check_integrated_apis() -> List[Dict[str, Any]]:
                     "note": "Chưa đặt GEMINI_API_KEY trong config"
                 })
 
-            # Groq Cloud AI
             if groq_key:
                 groq_url = "https://api.groq.com/openai/v1/models"
                 tasks.append(probe(session, "groq", "Groq Cloud LLaMA AI", "Trí Tuệ Nhân Tạo", "⚡", groq_url, headers={"Authorization": f"Bearer {groq_key}"}))
@@ -2973,13 +2846,10 @@ async def check_integrated_apis() -> List[Dict[str, Any]]:
                     "note": "Chưa đặt GROQ_API_KEY trong config"
                 })
 
-            # EnkaNetwork API
             tasks.append(probe(session, "enka", "Enka.Network API", "Dữ Liệu Game (Genshin/HSR)", "⚔️", "https://enka.network"))
 
-            # HoyoLab / Takumi API
             tasks.append(probe(session, "hoyolab", "HoYoverse Takumi & BBS API", "Dịch Vụ HoyoVerse", "🎁", "https://bbs-api-os.hoyolab.com/community/painter/wapi/explore/topic/list"))
 
-            # FalixNodes Minecraft API
             if falix_key:
                 apis.append({
                     "id": "falixnodes",
@@ -3045,7 +2915,6 @@ def get_detailed_bot_info() -> Dict[str, Any]:
         except Exception:
             pass
 
-    # DB sizes
     db_size_str = "0 KB"
     db_file = DATA_DIR / "bot.db"
     if db_file.exists():
@@ -3137,7 +3006,6 @@ async def handle_status(request: web.Request):
     sess = require_auth(request)
     if not sess:
         return web.json_response({"ok": False, "error": "Unauthorized"}, status=401)
-    # Standalone proxy → để web ở 8081 vẫn nhận bot ở 8080
     proxied = await _proxy_to_bot_web(request, "/api/status")
     if proxied is not None:
         return proxied
@@ -3167,7 +3035,6 @@ async def handle_status(request: web.Request):
             bot_info["id"] = str(BOT_INSTANCE.user.id)
             bot_info["avatar"] = str(BOT_INSTANCE.user.display_avatar.url) if (BOT_INSTANCE.user and BOT_INSTANCE.user.display_avatar) else "/images/avatar-bot.jpg"
             bot_info["latency"] = round(BOT_INSTANCE.latency * 1000, 2)
-            # Filter counts for non-admin
             if is_admin:
                 bot_info["guilds_count"] = len(BOT_INSTANCE.guilds)
                 bot_info["users_count"] = sum(g.member_count or len(g.members) for g in BOT_INSTANCE.guilds)
@@ -3193,7 +3060,6 @@ async def handle_status(request: web.Request):
         "os": sys.platform
     }
     if not is_admin:
-        # hide sensitive system info for normal users
         system_info = {"cpu_percent": 0, "ram_percent": 0, "ram_used_mb": 0, "ram_total_mb": 0, "disk_percent": 0, "python_version": system_info["python_version"], "os": system_info["os"]}
 
     res_data = {
@@ -3243,7 +3109,6 @@ async def handle_get_guild_detail(request: web.Request):
     sess = require_auth(request)
     if not sess:
         return web.json_response({"ok": False, "error": "Unauthorized"}, status=401)
-    # Proxy cho standalone
     proxied = await _proxy_to_bot_web(request, f"/api/guilds/{request.match_info.get('id')}")
     if proxied is not None:
         return proxied
@@ -3358,12 +3223,10 @@ async def handle_get_guild_members(request: web.Request):
         guild=BOT_INSTANCE.get_guild(int(gid))
         if not guild: return web.json_response({"ok":False,"error":"Không tìm thấy server — bot chưa ở server này"},status=404)
         members=[]
-        # 1) thử cache
         try:
             for m in list(guild.members)[:800]:
                 members.append({"id":str(m.id),"name":m.display_name,"username":str(m),"avatar":str(m.display_avatar.url) if m.display_avatar else "","bot":m.bot})
         except: pass
-        # 2) nếu cache rỗng, thử chunk
         if not members:
             try:
                 await guild.chunk(cache=True)
@@ -3372,10 +3235,8 @@ async def handle_get_guild_members(request: web.Request):
                         members.append({"id":str(m.id),"name":m.display_name,"username":str(m),"avatar":str(m.display_avatar.url) if m.display_avatar else "","bot":m.bot})
             except Exception as e:
                 add_log("WARNING", f"Chunk {gid} fail: {e}")
-        # 3) nếu vẫn ít, fetch_members
         if len(members) < 5:
             try:
-                # discord.py 2.x: fetch_members là async iterator
                 fetched=[]
                 async for mm in guild.fetch_members(limit=300):
                     fetched.append(mm)
@@ -3385,7 +3246,6 @@ async def handle_get_guild_members(request: web.Request):
                     if len(members)>=300: break
             except Exception as e:
                 add_log("WARNING", f"fetch_members {gid} fail: {e}")
-        # 4) fallback: ít nhất owner + bot
         if not members:
             try:
                 owner=guild.owner or await guild.fetch_member(guild.owner_id) if guild.owner_id else None
@@ -3421,7 +3281,6 @@ async def handle_update_guild_settings(request: web.Request):
             languages[str(guild_id)] = new_lang
             save_json(DATA_DIR / "server_language.json", languages)
             add_log("INFO", f"User {sess.get('username')} đổi ngôn ngữ server {guild_id} thành '{new_lang}'")
-        # Reine-style server_config switches (giữ tiktok)
         sc = _load_server_config()
         gid = str(guild_id)
         if "admin_only" in body or "automod_enabled" in body or "leveling_enabled" in body or "economy_enabled" in body or "tiktok_enabled" in body:
@@ -3436,7 +3295,6 @@ async def handle_update_guild_settings(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Reine per-guild configs: welcome/audit/tempvoice/server-config ---
 async def handle_get_server_config(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -3445,7 +3303,6 @@ async def handle_get_server_config(request: web.Request):
     proxied=await _proxy_to_bot_web(request, f"/api/guilds/{gid}/server-config")
     if proxied is not None: return proxied
     sc=_load_server_config().get(str(gid), _default_server_config())
-    # merge prefix/lang for Cài đặt chung
     prefixes=load_json(DATA_DIR/"prefixes.json",{})
     langs=load_json(DATA_DIR/"server_language.json",{})
     sc["prefix"]=prefixes.get(str(gid),"s!")
@@ -3578,7 +3435,6 @@ def _load_automod_detailed(gid: str):
     cfg=d.get(str(gid), {})
     adv = cfg.get("advanced", {"anti_invite": False, "anti_link": False, "anti_mention": False, "anti_caps": False, "anti_emoji": False, "anti_duplicate": False, "anti_zalgo": False})
     adv_set = cfg.get("advanced_settings", {})
-    # defaults cho từng mục nâng cao
     defaults = {
         "mention_limit": 4,
         "caps_min": 8,
@@ -3589,7 +3445,6 @@ def _load_automod_detailed(gid: str):
         "link_whitelist": ["youtube.com","youtu.be","discord.com","tenor.com","giphy.com","imgur.com"],
         "invite_allow_own": True,
     }
-    # merge
     for k,v in defaults.items():
         if k not in adv_set:
             adv_set[k]=v
@@ -3607,7 +3462,6 @@ def _load_automod_detailed(gid: str):
     }
 def _save_automod_detailed(gid: str, cfg: dict):
     d=load_json(DATA_DIR/"automod_detailed.json", {})
-    # sanitize
     def _clean_words(words):
         out=[]
         for w in words or []:
@@ -3617,12 +3471,10 @@ def _save_automod_detailed(gid: str, cfg: dict):
             if not word: continue
             out.append({"word": word, "type": typ})
         return out[:200]
-    # advanced_settings sanitize
     adv_set_raw = cfg.get("advanced_settings", {})
     def _clean_domains(v):
         out=[]
         if isinstance(v, str):
-            # chấp nhận chuỗi cách nhau bởi dấu phẩy / xuống dòng
             parts = re.split(r'[\s,;\n]+', v)
         elif isinstance(v, list):
             parts=v
@@ -3630,14 +3482,12 @@ def _save_automod_detailed(gid: str, cfg: dict):
             parts=[]
         for p in parts:
             p=str(p).lower().strip().strip('.')
-            # loại bỏ scheme nếu có
             if '://' in p:
                 p=p.split('://',1)[1].split('/')[0]
             p=p.split('/')[0].strip()
             if not p or '.' not in p: continue
             if len(p)>60: continue
             out.append(p)
-        # loại trùng, giữ 30
         seen=set(); uniq=[]
         for x in out:
             if x not in seen:
@@ -3665,12 +3515,10 @@ def _save_automod_detailed(gid: str, cfg: dict):
         "advanced_settings": adv_settings_clean,
         "updated_at": int(time.time())
     }
-    # đảm bảo đủ 7 key advanced
     for k in ("anti_invite","anti_link","anti_mention","anti_caps","anti_emoji","anti_duplicate","anti_zalgo"):
         clean["advanced"].setdefault(k, False)
     d[str(gid)]=clean
     save_json(DATA_DIR/"automod_detailed.json", d)
-    # đồng bộ sang file cũ để bot cũ vẫn đọc: forbidden_words + spam_settings
     try:
         fw=load_json(DATA_DIR/"forbidden_words.json", {})
         fw[str(gid)]=[w["word"] for w in clean["words"]]
@@ -3691,7 +3539,6 @@ async def handle_get_automod(request: web.Request):
     if not can_access_guild(sess,gid): return web.json_response({"ok":False,"error":"Không có quyền"},status=403)
     proxied=await _proxy_to_bot_web(request, f"/api/guilds/{gid}/automod")
     if proxied is not None: return proxied
-    # kiểm tra bật tổng thể ở Cài đặt chung để disable UI
     sc=_load_server_config().get(str(gid), _default_server_config())
     cfg=_load_automod_detailed(gid)
     cfg["global_enabled"]= sc.get("automod_enabled", True)
@@ -3732,7 +3579,6 @@ async def handle_save_audit(request: web.Request):
         return web.json_response({"ok":True,"message":"Đã lưu Audit Logs"})
     except Exception as e: return web.json_response({"ok":False,"error":str(e)},status=500)
 
-# --- Blacklist (cấm dùng bot): phạm vi server + global cho admin ---
 def _load_blacklist_raw():
     p=DATA_DIR/"blacklist.json"
     if not p.exists():
@@ -3751,7 +3597,6 @@ def _load_blacklist_raw():
     return {"global": [], "guilds": {}}
 def _save_blacklist_raw(obj):
     p=DATA_DIR/"blacklist.json"
-    # chuẩn hoá
     out={"global": sorted(set(str(x) for x in obj.get("global", []) if str(x).isdigit()), key=lambda x: int(x)),
          "guilds": {}}
     for gid, lst in (obj.get("guilds") or {}).items():
@@ -3759,7 +3604,6 @@ def _save_blacklist_raw(obj):
         if clean:
             out["guilds"][str(gid)]=clean
     save_json(p, out)
-    # nếu bot đang chạy embedded, reload memory
     try:
         import importlib
         bl_mod=importlib.import_module("Command.command_blacklist")
@@ -3767,7 +3611,6 @@ def _save_blacklist_raw(obj):
     except: pass
     return out
 def _enrich_blacklist_ids(ids):
-    # trả về list {id, name, avatar, is_global}
     out=[]
     for uid in ids:
         name=str(uid); avatar="https://cdn.discordapp.com/embed/avatars/0.png"
@@ -3775,12 +3618,10 @@ def _enrich_blacklist_ids(ids):
             if BOT_INSTANCE and getattr(BOT_INSTANCE,"is_ready",lambda:False)():
                 u=BOT_INSTANCE.get_user(int(uid))
                 if not u:
-                    # thử fetch
                     pass
                 if u:
                     name=str(u); avatar=str(u.display_avatar.url) if u.display_avatar else avatar
                 else:
-                    # thử tìm trong guilds
                     for g in BOT_INSTANCE.guilds:
                         m=g.get_member(int(uid))
                         if m:
@@ -3801,7 +3642,6 @@ async def handle_get_guild_blacklist(request: web.Request):
     raw=_load_blacklist_raw()
     guild_ids=raw["guilds"].get(str(gid), [])
     global_ids=raw["global"]
-    # enrich
     return web.json_response({"ok":True, "guild_blacklist": _enrich_blacklist_ids(guild_ids), "global_blacklist": _enrich_blacklist_ids(global_ids) if is_admin_session(sess) else [], "is_admin": is_admin_session(sess)})
 
 async def handle_guild_blacklist_action(request: web.Request):
@@ -3816,7 +3656,6 @@ async def handle_guild_blacklist_action(request: web.Request):
         if not uid.isdigit(): return web.json_response({"ok":False,"error":"Thiếu user_id hợp lệ"},status=400)
         raw=_load_blacklist_raw()
         if action in ("add","ban","cấm"):
-            # không cho tự cấm mình
             if sess.get("discord_id") and str(sess.get("discord_id"))==uid:
                 return web.json_response({"ok":False,"error":"Không thể tự cấm mình"},status=400)
             lst=raw["guilds"].setdefault(str(gid), [])
@@ -3923,7 +3762,6 @@ def _save_confession(gid: str, body: dict):
         "create_thread": bool(body.get("create_thread", True)),
         "anon_reply": bool(body.get("anon_reply", True)),
     }
-    # if both channels missing and disabled, keep minimal
     cfg[str(gid)]=clean
     save_json(DATA_DIR/"cfs_config.json", cfg)
     return clean
@@ -3962,7 +3800,6 @@ async def handle_post_confession_panel(request: web.Request):
         body=await request.json()
         target_id=body.get("channel_id")
         cfs=_load_confession(gid)
-        # ưu tiên channel truyền lên, fallback confession_channel_id
         ch_id = int(target_id) if target_id and str(target_id).isdigit() else cfs.get("confession_channel_id")
         if not ch_id:
             return web.json_response({"ok":False,"error":"Chưa chọn kênh Confession"},status=400)
@@ -3970,22 +3807,17 @@ async def handle_post_confession_panel(request: web.Request):
         if not ch:
             try: ch=await BOT_INSTANCE.fetch_channel(int(ch_id))
             except: return web.json_response({"ok":False,"error":"Không tìm thấy kênh"},status=404)
-        # xóa panel cũ (20 tin gần nhất) nếu trùng title
         try:
             from Check.i18n import t
-            # need guild for t
             guild=BOT_INSTANCE.get_guild(int(gid))
             async for msg in ch.history(limit=20):
                 if msg.author.id==BOT_INSTANCE.user.id and msg.embeds and msg.embeds[0].title and "Confession" in msg.embeds[0].title:
                     try: await msg.delete()
                     except: pass
         except: pass
-        # gửi panel mới, tôn trọng allow_public/anonymous để ẩn nút
         from Command.confession import create_panel_embed, CreateConfessionView
         import discord
         view=CreateConfessionView(BOT_INSTANCE)
-        # filter buttons theo config
-        # CreateConfessionView có 2 nút cfs_anonymous / cfs_public; nếu tắt thì disable/remove
         if not cfs.get("allow_anonymous", True):
             for child in list(view.children):
                 if getattr(child, 'custom_id', '')=='cfs_anonymous':
@@ -4008,7 +3840,6 @@ async def handle_post_confession_panel(request: web.Request):
 def _load_level_config(gid: str):
     ls=load_json(DATA_DIR/"level_settings.json",{})
     cfg=ls.get(str(gid),{})
-    # mặc định như Reine: bật hết
     return {"exp_enabled": cfg.get("exp_enabled", True), "voice_exp": cfg.get("voice_exp", True), "level_up_announce": cfg.get("level_up_announce", True), "announce_channel": cfg.get("announce_channel")}
 def _save_level_config(gid: str, cfg: dict):
     ls=load_json(DATA_DIR/"level_settings.json",{})
@@ -4023,7 +3854,6 @@ async def handle_get_level_config(request: web.Request):
     proxied=await _proxy_to_bot_web(request, f"/api/guilds/{gid}/level-config")
     if proxied is not None: return proxied
 
-    # Đọc dữ liệu trực tiếp từ SQLite Database (data/bot_database.db)
     try:
         from data.database import get_guild_level_and_economy_stats
         db_stats = await get_guild_level_and_economy_stats(gid)
@@ -4033,7 +3863,6 @@ async def handle_get_level_config(request: web.Request):
         top_rich_raw = db_stats.get("top_rich", [])
     except Exception as e:
         print(f"[Web] Lỗi đọc database level: {e}")
-        # fallback levels.json nếu database chưa sẵn sàng
         levels = load_json(_levels_file(), {})
         users = levels.get(str(gid), {})
         cnt_level = sum(1 for v in users.values() if isinstance(v, dict) and int(v.get("xp", 0)) > 0)
@@ -4041,7 +3870,6 @@ async def handle_get_level_config(request: web.Request):
         top_level_raw = [{"user_id": uid, "xp": int(v.get("xp", 0)), "level": int(v.get("level", 0))} for uid, v in users.items() if isinstance(v, dict)][:5]
         top_rich_raw = [{"user_id": uid, "coins": int(v.get("coins", 0))} for uid, v in users.items() if isinstance(v, dict)][:5]
 
-    # top + enrich tên/avatar từ BOT_INSTANCE (hiện tên + avatar thay vì chỉ ID)
     def _enrich(uid):
         name = str(uid)
         avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
@@ -4084,7 +3912,6 @@ async def handle_save_level_config(request: web.Request):
         return web.json_response({"ok":True,"message":"Đã lưu Level & Economy"})
     except Exception as e: return web.json_response({"ok":False,"error":str(e)},status=500)
 
-# --- Level Roles API ---
 async def handle_get_level_roles(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -4146,7 +3973,6 @@ async def handle_delete_level_role(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Fishing Guild Settings API ---
 async def handle_get_fishing_config(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -4206,7 +4032,6 @@ async def handle_save_fishing_config(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Custom Keys API ---
 async def handle_get_custom_keys(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -4306,7 +4131,6 @@ async def handle_download_custom_key_file(request: web.Request):
         return web.Response(text="File không tồn tại", status=404)
     return web.FileResponse(path=str(p))
 
-# --- Backups API ---
 async def handle_get_backups(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -4399,7 +4223,6 @@ async def handle_download_backup(request: web.Request):
     if not p.exists(): return web.Response(text="Không tìm thấy file", status=404)
     return web.FileResponse(path=str(p), headers={"Content-Disposition": f'attachment; filename="{fname}"'})
 
-# --- Bot Profile Per-Server API ---
 async def handle_get_bot_profile(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -4502,7 +4325,6 @@ async def handle_save_bot_profile(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": f"Lỗi lưu hồ sơ bot: {e}"}, status=500)
 
-# --- AutoRole API ---
 async def handle_get_autorole(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -4551,7 +4373,6 @@ async def handle_save_autorole(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Reaction Role API ---
 async def handle_get_reaction_roles(request: web.Request):
     sess = require_auth(request)
     if not sess: return web.json_response({"ok": False, "error": "Unauthorized"}, status=401)
@@ -4658,7 +4479,6 @@ async def handle_create_reaction_role(request: web.Request):
                     except Exception:
                         pass
 
-        # Lưu dữ liệu vào cache của Cog và file SQLite
         if cog:
             await cog.save_panel_db(str(sent_msg.id), panel_data)
         else:
@@ -4705,7 +4525,6 @@ async def handle_delete_reaction_role(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Hoyo Code API ---
 async def handle_get_hoyo_config(request: web.Request):
     sess = require_auth(request)
     if not sess: return web.json_response({"ok": False, "error": "Unauthorized"}, status=401)
@@ -4830,7 +4649,6 @@ async def handle_post_hoyo_code(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Streak API ---
 async def handle_get_streak(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -4865,7 +4683,6 @@ async def handle_save_streak(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Rule API ---
 async def handle_get_rule_config(request: web.Request):
     sess=require_auth(request)
     if not sess: return web.json_response({"ok":False,"error":"Unauthorized"},status=401)
@@ -4989,7 +4806,6 @@ async def handle_send_channel_message(request: web.Request):
         if not channel_id:
             return web.json_response({"ok": False, "error": "Thiếu channel_id"}, status=400)
 
-        # Check guild access via channel's guild
         channel = BOT_INSTANCE.get_channel(channel_id)
         if not channel:
             return web.json_response({"ok": False, "error": "Không tìm thấy channel"}, status=404)
@@ -5038,7 +4854,6 @@ async def handle_bot_action(request: web.Request):
     sess = require_auth(request)
     if not sess:
         return web.json_response({"ok": False, "error": "Unauthorized"}, status=401)
-    # Only admin or for presence change allow guild managers? Spec says user control bot per server, but bot actions are global => admin only
     if not is_admin_session(sess):
         return web.json_response({"ok": False, "error": "Chỉ admin mới thực hiện thao tác bot toàn cục"}, status=403)
     try:
@@ -5088,7 +4903,6 @@ async def handle_bot_action(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Minecraft Endpoints (admin only) ---
 async def handle_mc_status(request: web.Request):
     sess = require_auth(request)
     if not sess:
@@ -5190,9 +5004,6 @@ async def handle_mc_control(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# HỆ THỐNG API WEB HOSTING MINECRAFT DASHBOARD (/minecraft, /console, /file, /properties)
-# ==============================================================================
 
 async def handle_api_mc_hosting_servers(request: web.Request):
     sess = get_session(request)
@@ -5385,7 +5196,6 @@ async def handle_api_mc_hosting_send_chat(request: web.Request):
         from Command.minecraft import send_rcon_command_sync
         await asyncio.to_thread(send_rcon_command_sync, cmd, host="127.0.0.1", port=rcon_port, password=rcon_pass)
 
-        # Gửi đồng bộ sang kênh chat Discord nếu có
         cfg_file = DATA_DIR / "mc_hosting_servers.json"
         all_cfg = load_json(cfg_file, {})
         chat_ch_id = all_cfg.get(server_id, {}).get("chat_channel_id")
@@ -5715,7 +5525,6 @@ async def handle_api_mc_hosting_manager_users_delete(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Anti & Security Endpoints (admin only) ---
 async def handle_get_anti_settings(request: web.Request):
     sess = require_auth(request)
     if not sess:
@@ -5780,9 +5589,7 @@ async def handle_save_anti_settings(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Levels & Economy Endpoints (admin only) — Đọc & ghi trực tiếp SQLite Database (data/bot_database.db) ---
 def _levels_file():
-    # hỗ trợ alias lever.json nếu bạn đổi tên, ưu tiên lever.json nếu tồn tại (fallback)
     p = DATA_DIR / "lever.json"
     if p.exists():
         return p
@@ -5801,7 +5608,6 @@ async def handle_get_levels(request: web.Request):
         total_users = db_res.get("total_users", len(leaderboard))
     except Exception as e:
         print(f"[Web] Lỗi đọc leaderboard từ SQLite database: {e}")
-        # fallback JSON cũ nếu có lỗi
         levels = load_json(_levels_file(), {})
         user_map = {}
         for gid, users in levels.items():
@@ -5815,7 +5621,6 @@ async def handle_get_levels(request: web.Request):
         leaderboard = sorted(user_map.values(), key=lambda x: (x["level"], x["xp"], x["coins"]), reverse=True)[:100]
         total_users = len(user_map)
 
-    # Bỏ qua Owner khỏi BXH Level
     owner_ids = {"1144785664458637394"}
     try:
         from config import OWNER_ID
@@ -5824,7 +5629,6 @@ async def handle_get_levels(request: web.Request):
         pass
     leaderboard = [e for e in leaderboard if str(e.get("user_id", "")) not in owner_ids]
 
-    # Enrich tên và avatar từ bot cache
     for entry in leaderboard:
         uid_str = str(entry.get("user_id", ""))
         username = None
@@ -5857,11 +5661,9 @@ async def handle_update_user_level(request: web.Request):
         if not uid:
             return web.json_response({"ok": False, "error": "Thiếu user_id"}, status=400)
 
-        # 1. Cập nhật trực tiếp vào SQLite Database
         from data.database import update_user_level_stats
         await update_user_level_stats(uid, gid, new_level, new_xp, new_coins, new_bank, new_xu)
 
-        # 2. Cập nhật đồng thời file JSON cũ nếu tồn tại (để tương thích ngược tối đa)
         try:
             lf = _levels_file()
             if lf.exists():
@@ -5957,7 +5759,6 @@ async def handle_economy_adjust(request: web.Request):
             new_xu = cur_xu
 
 
-        # Đồng bộ JSON cũ
         try:
             lf = _levels_file()
             if lf.exists():
@@ -6028,7 +5829,6 @@ async def handle_get_fishing_leaderboard(request: web.Request):
             biggest_name = biggest.get("name") or biggest.get("fish_name", "Chưa có") if isinstance(biggest, dict) else "Chưa có"
             equipped_rod = udata.get("equipped_rod", "rod_wood")
 
-            # Thông tin chi tiết cần câu, cấp đập đồ, sao & enchant
             user_rods = udata.get("rods", {})
             cur_rod_data = user_rods.get(equipped_rod, {})
             rod_display_name = cur_rod_data.get("name", equipped_rod)
@@ -6077,9 +5877,6 @@ async def handle_get_fishing_leaderboard(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# QUẢN TRỊ CÂU CÁ (ADMIN FISHING MANAGEMENT)
-# ==============================================================================
 
 async def handle_get_admin_fishing_fish_list(request: web.Request):
     sess = require_admin(request)
@@ -6146,7 +5943,6 @@ async def handle_admin_fishing_add_fish(request: web.Request):
             "obtain_source": obtain_source
         }
 
-        # Lưu vào data/custom_fish.json
         custom_file = DATA_DIR / "custom_fish.json"
         custom_fishes = load_json(custom_file, [])
         if not isinstance(custom_fishes, list):
@@ -6162,7 +5958,6 @@ async def handle_admin_fishing_add_fish(request: web.Request):
             custom_fishes.append(new_fish)
         save_json(custom_file, custom_fishes)
 
-        # Cập nhật danh sách in-memory data.data.fish_list
         from data.data import fish_list
         found = False
         for idx, f in enumerate(fish_list):
@@ -6173,7 +5968,6 @@ async def handle_admin_fishing_add_fish(request: web.Request):
         if not found:
             fish_list.append(new_fish)
 
-        # Cập nhật vào Cog nếu Bot đang chạy
         if BOT_INSTANCE:
             for cog_name in ("Fishing", "fishing", "CommandFishing", "FishingCog"):
                 cog = BOT_INSTANCE.get_cog(cog_name)
@@ -6730,7 +6524,6 @@ async def handle_admin_fishing_user_action(request: web.Request):
             mutation = body.get("mutation") or None
             count = max(1, min(100, int(body.get("count", 1))))
 
-            # Dynamic price calculation based on size and mutation
             if weight < 1.5:
                 size_multi = 0.75
                 calc_size_name = "Bé Tí"
@@ -7305,9 +7098,6 @@ async def handle_generate_daily_giftcode(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# QUẢN TRỊ CỬA HÀNG (SHOP ADMIN HANDLERS)
-# ==============================================================================
 async def handle_get_admin_shop_items(request: web.Request):
     sess = require_admin(request)
     if not sess:
@@ -7385,9 +7175,6 @@ async def handle_admin_shop_toggle_hide(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# QUẢN TRỊ HÔN LỄ (MARRIAGE ADMIN HANDLERS)
-# ==============================================================================
 async def handle_get_admin_marriages(request: web.Request):
     sess = require_admin(request)
     if not sess:
@@ -7482,9 +7269,6 @@ async def handle_admin_marriage_action(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# QUẢN TRỊ NÔNG TRẠI (FARM ADMIN HANDLERS)
-# ==============================================================================
 async def handle_get_admin_farm_catalogs(request: web.Request):
     """Lấy danh mục hạt giống, hoa màu, sâu bọ, dụng cụ, mầm bệnh, đột biến & thời tiết."""
     sess = require_auth(request)
@@ -7552,7 +7336,6 @@ async def handle_get_admin_farm_user(request: web.Request):
                 username = f"{u.name} ({u.display_name})"
                 avatar = u.display_avatar.url if hasattr(u, "display_avatar") else avatar
 
-        # Tính toán tiến độ từng ô đất
         plots_info = []
         for p in farm.get("plots", []):
             pct, ready = get_plot_growth_progress(p, season, weather)
@@ -7747,7 +7530,7 @@ async def handle_admin_farm_create_item(request: web.Request):
         return web.json_response({"ok": False, "error": "Chỉ dành cho Admin"}, status=403)
     try:
         body = await request.json()
-        category = str(body.get("category", "")).strip().lower() # seed, fertilizer, tool, pest, disease
+        category = str(body.get("category", "")).strip().lower()
         if category in ["crop", "crops"]:
             category = "seed"
         item_id = str(body.get("id") or body.get("item_id") or "").strip().lower()
@@ -7859,9 +7642,6 @@ async def handle_admin_farm_delete_item(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# HỆ THỐNG API QUẢN TRỊ KHOÁNG SẢN (MINING ADMIN)
-# ==============================================================================
 async def handle_get_admin_mining_catalogs(request: web.Request):
     """Lấy danh mục bách khoa toàn thư mỏ khoáng: cuốc, quặng, khu mỏ, vật tư, đột biến."""
     sess = require_admin(request)
@@ -7907,7 +7687,6 @@ async def _resolve_miner_user(query_str: str):
     if not raw_str:
         return None, "Vui lòng nhập ID hoặc tên người dùng", "https://cdn.discordapp.com/embed/avatars/0.png"
     
-    # Trích xuất snowflake ID nếu chuỗi chứa dãy số dài (6-22 chữ số)
     id_match = re.search(r'\b\d{6,22}\b', raw_str)
     clean_id = id_match.group(0) if id_match else re.sub(r'[<@!#>]', '', raw_str).strip()
     if not clean_id:
@@ -7917,7 +7696,6 @@ async def _resolve_miner_user(query_str: str):
     username = f"User {clean_id}"
     avatar = "https://cdn.discordapp.com/embed/avatars/0.png"
 
-    # 1. Tìm trong web_users.json
     try:
         web_users = load_json(DATA_DIR / "web_users.json", {})
         for w_key, w_val in web_users.items():
@@ -7935,7 +7713,6 @@ async def _resolve_miner_user(query_str: str):
     except Exception:
         pass
 
-    # 2. Tìm trong mining_data.json
     if not target_id:
         try:
             mdata = load_json(Path("data/mining_data.json"), {})
@@ -7950,7 +7727,6 @@ async def _resolve_miner_user(query_str: str):
         except Exception:
             pass
 
-    # 3. Tìm trong BOT_INSTANCE (Guilds & Users Cache)
     if not target_id and clean_id.isdigit():
         target_id = clean_id
 
@@ -7983,7 +7759,6 @@ async def _resolve_miner_user(query_str: str):
             except Exception:
                 pass
 
-        # Lấy info user từ cache hoặc fetch với timeout cực ngắn tránh nghẽn
         if target_id and target_id.isdigit():
             try:
                 uid_int = int(target_id)
@@ -8035,7 +7810,6 @@ async def handle_get_admin_mining_users(request: web.Request):
                 "stamina": udata.get("stamina", 100)
             })
 
-        # Thêm các user đã đăng nhập web dashboard nếu chưa có
         try:
             web_users = load_json(DATA_DIR / "web_users.json", {})
             for w_key, w_val in web_users.items():
@@ -8068,7 +7842,6 @@ async def handle_get_admin_mining_user(request: web.Request):
         from Command.command_mining import load_mining_data, get_user_mining, mining_state
         load_mining_data()
 
-        # Nếu user_id_raw trống hoặc là 'auto', fallback đến thợ mỏ đầu tiên hoặc tài khoản đang đăng nhập
         if not user_id_raw or user_id_raw == "auto":
             m_users = list(mining_state.get("users", {}).keys())
             if m_users:
@@ -8286,9 +8059,6 @@ async def handle_admin_mining_create_item(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# WAIFU GACHA ADMIN & LEADERBOARD & VOICE LEADERBOARD APIS
-# ==============================================================================
 async def handle_get_admin_gacha_stats(request: web.Request):
     """Lấy thống kê toàn hệ thống Gacha Waifu cho Admin."""
     sess = require_admin(request)
@@ -8497,9 +8267,6 @@ async def handle_get_voice_leaderboard(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# API THAO TÚNG TỈ LỆ GAME (ADMIN GAME RATES CONTROL)
-# ==============================================================================
 async def handle_get_admin_game_rates(request: web.Request):
     """Lấy cấu hình thao túng tỉ lệ game (cường hóa, sao, may mắn, quặng...)."""
     sess = require_admin(request)
@@ -8526,9 +8293,6 @@ async def handle_save_admin_game_rates(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# API LIÊN KẾT TÀI KHOẢN DISCORD & MINECRAFT (CỔNG 10272)
-# ==============================================================================
 async def handle_link_request(request: web.Request):
     """API endpoint /api/link dùng cho Plugin Minecraft gửi mã liên kết tới SakuraBot (cùng cổng 10272)."""
     try:
@@ -8593,9 +8357,6 @@ async def handle_link_request(request: web.Request):
         "message": f"Liên kết thành công tài khoản {mc_name} với Discord!"
     })
 
-# ==============================================================================
-# API KẾT NỐI MINECRAFT CHO TỪNG SERVER THEO GUILD (RCON & PLUGIN)
-# ==============================================================================
 GUILD_MC_CONFIG_FILE = DATA_DIR / "guild_mc_connections.json"
 
 def _load_guild_mc_configs():
@@ -8693,7 +8454,6 @@ async def handle_save_guild_mc_connection(request: web.Request):
         rcon_port = int(body.get("rcon_port") or rcon_data.get("port") or 25575)
         rcon_password = str(body.get("rcon_password") or rcon_data.get("password") or "").strip()
         
-        # Nếu password để trống trong request nhưng đã có password lưu từ trước, giữ lại không xóa
         if not rcon_password and str(gid) in configs and configs[str(gid)].get("rcon_password"):
             rcon_password = configs[str(gid)]["rcon_password"]
 
@@ -8754,7 +8514,6 @@ async def handle_test_guild_mc_connection(request: web.Request):
         r_port = int(body.get("rcon_port") or rcon_data.get("port") or gcfg.get("rcon_port", 25575))
         r_pass = str(body.get("rcon_password") or rcon_data.get("password") or gcfg.get("rcon_password", "")).strip()
 
-        # Fallback lấy mật khẩu từ server.properties nếu host là localhost / 127.0.0.1
         if not r_pass and r_host in ["localhost", "127.0.0.1"]:
             sp_file = SERVER_DIR / "server.properties"
             if sp_file.exists():
@@ -8851,7 +8610,6 @@ async def handle_command_guild_mc_connection(request: web.Request):
         r_host = gcfg.get("rcon_host", gcfg.get("host", "snow.pikamc.vn"))
         r_port = int(gcfg.get("rcon_port", 25575))
 
-        # Fallback local nếu host là localhost / 127.0.0.1
         if not r_pass and r_host in ["localhost", "127.0.0.1"]:
             sp_file = SERVER_DIR / "server.properties"
             if sp_file.exists():
@@ -8864,7 +8622,6 @@ async def handle_command_guild_mc_connection(request: web.Request):
                 except Exception:
                     pass
 
-        # Ưu tiên RCON nếu có mật khẩu
         if (mode == "rcon" or not gcfg.get("api_key")) and r_pass:
             from mctools import RCONClient
             from Command.minecraft import clean_minecraft_text_static
@@ -8898,9 +8655,6 @@ async def handle_command_guild_mc_connection(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# API HOYO TEST CODE & PLUGIN COMMANDS
-# ==============================================================================
 async def handle_test_hoyo_code(request: web.Request):
     """Gửi tin nhắn test mã Hoyo Code mẫu (mã DEMO) vào kênh đã cài đặt và ghi lại setup."""
     sess = require_auth(request)
@@ -8920,7 +8674,6 @@ async def handle_test_hoyo_code(request: web.Request):
         game_key = str(body.get("game_key") or body.get("game") or "genshin").strip().lower()
         test_code = str(body.get("code") or "DEMO").strip().upper()
 
-        # Cho phép truyền trực tiếp channel_id và role_id từ giao diện để test và lưu lại (ghi lại những setup)
         custom_ch = body.get("channel_id")
         custom_role = body.get("role_id")
         save_setup = body.get("save", True)
@@ -8998,7 +8751,6 @@ async def handle_get_plugin_commands(request: web.Request):
         plugin_yml_path = BASE_DIR / "plugin" / "src" / "main" / "resources" / "plugin.yml"
         commands_dict = {}
         if plugin_yml_path.exists():
-            # 1. Thử parse bằng yaml nếu có
             parsed = False
             try:
                 import yaml
@@ -9019,7 +8771,6 @@ async def handle_get_plugin_commands(request: web.Request):
             except Exception:
                 pass
 
-            # 2. Fallback regex line parser nếu không có thư viện yaml
             if not parsed or not commands_dict:
                 try:
                     with open(plugin_yml_path, "r", encoding="utf-8") as f:
@@ -9108,7 +8859,6 @@ async def handle_get_plugin_commands(request: web.Request):
                 "commands": cmd_list
             })
 
-        # Bổ sung các lệnh còn lại trong commands_dict nếu chưa được phân loại
         other_cmds = []
         for c_name, c_data in commands_dict.items():
             if c_name not in assigned:
@@ -9132,9 +8882,6 @@ async def handle_get_plugin_commands(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# HỆ THỐNG API MINECRAFT PLUGIN & QUẢN TRỊ SERVER MINECRAFT
-# ==============================================================================
 
 async def handle_mc_plugin_heartbeat(request: web.Request):
     """Minecraft Plugin gửi heartbeat định kỳ (10-30s) kèm thông tin server."""
@@ -9409,7 +9156,6 @@ async def handle_mc_plugin_economy_sync(request: web.Request):
         discord_id = str(link.get("discord_id") or link.get("discord_user_id") or "")
         mc_name = str(link.get("minecraft_name") or link.get("mc_player_name") or "")
 
-        # Lấy tên / tag Discord
         discord_tag = f"Discord ID {discord_id}"
         if BOT_INSTANCE and discord_id.isdigit():
             u = BOT_INSTANCE.get_user(int(discord_id))
@@ -9434,7 +9180,7 @@ async def handle_mc_plugin_economy_sync(request: web.Request):
                 res["discord_tag"] = discord_tag
                 res["minecraft_name"] = mc_name
             return web.json_response(res)
-        else: # "balance", "status"
+        else:
             u_data = await get_user_data(0, int(discord_id) if discord_id.isdigit() else 0)
             d_coins = int(u_data.get("coins", 0))
             d_bank = int(u_data.get("bank", 0))
@@ -9469,7 +9215,6 @@ async def handle_mc_admin_servers(request: web.Request):
         seen_guild_ids = set()
         seen_keys = set()
 
-        # 1. Các server qua Plugin Sakura
         for s in servers:
             s_copy = dict(s)
             s_key = s.get("server_key", "")
@@ -9508,11 +9253,9 @@ async def handle_mc_admin_servers(request: web.Request):
 
             res_servers.append(s_copy)
 
-        # 2. Hợp nhất các server RCON từ guild_mc_connections.json
         guild_configs = _load_guild_mc_configs()
         for gid, gcfg in guild_configs.items():
             if str(gid) in seen_guild_ids:
-                # Đã có server plugin nối với guild này, đính kèm thêm RCON port nếu có
                 for existing in res_servers:
                     if str(existing.get("guild_id")) == str(gid):
                         existing["has_rcon"] = bool(gcfg.get("rcon_password"))
@@ -9520,7 +9263,6 @@ async def handle_mc_admin_servers(request: web.Request):
                         existing["rcon_host"] = gcfg.get("rcon_host") or gcfg.get("host")
                         break
             else:
-                # Server RCON độc lập
                 r_host = gcfg.get("rcon_host") or gcfg.get("host") or "127.0.0.1"
                 r_port = int(gcfg.get("rcon_port") or 25575)
                 mc_port = int(gcfg.get("port") or 25565)
@@ -9558,7 +9300,6 @@ async def handle_mc_admin_servers(request: web.Request):
                 })
                 seen_guild_ids.add(str(gid))
 
-        # 3. Thêm Local Server nếu có server.properties và chưa có trong list
         sp_file = SERVER_DIR / "server.properties"
         if sp_file.exists() and "local_server" not in seen_keys:
             try:
@@ -9667,13 +9408,11 @@ async def handle_mc_admin_server_detail(request: web.Request):
                 s_dict["guild_name"] = g.name
                 s_dict["guild_icon"] = g.icon.url if g.icon else None
 
-        # Bổ sung thông tin địa chỉ console và mã console điều khiển
         host = s_dict.get("server_ip") or "127.0.0.1"
         port = s_dict.get("server_port") or 25565
         rcon_port = s_dict.get("rcon_port") or 25575
         rcon_pass = s_dict.get("rcon_password") or ""
 
-        # Nạp từ server.properties nếu host là localhost / 127.0.0.1
         if host in ["127.0.0.1", "localhost"] and not rcon_pass:
             sp_file = SERVER_DIR / "server.properties"
             if sp_file.exists():
@@ -9895,7 +9634,6 @@ async def handle_mc_admin_server_command(request: web.Request):
 
         clean_cmd = command.lstrip("/")
 
-        # 1. Kiểm tra xem có phải RCON Server không
         configs = _load_guild_mc_configs()
         gid = server_id.replace("rcon_", "")
         gcfg = configs.get(gid, {})
@@ -9943,7 +9681,6 @@ async def handle_mc_admin_server_command(request: web.Request):
                 else:
                     return web.json_response({"ok": False, "error": out}, status=400)
 
-        # 2. Xử lý qua Plugin Bridge
         from data.database import get_mc_server, queue_mc_command
         server = await get_mc_server(server_id)
         if not server:
@@ -10148,7 +9885,6 @@ async def handle_end_guild_giveaway(request: web.Request):
         if gw["status"] != "running":
             return web.json_response({"ok": False, "error": "Giveaway này đã kết thúc hoặc đã hủy"}, status=400)
         
-        # Gọi finalize trong Cog giveaway
         gw_cog = BOT_INSTANCE.get_cog("Giveaway") if BOT_INSTANCE else None
         if gw_cog:
             import asyncio
@@ -10179,7 +9915,6 @@ async def handle_delete_guild_giveaway(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Tickets Endpoints (admin only) ---
 async def handle_get_tickets(request: web.Request):
     sess = require_auth(request)
     if not sess:
@@ -10360,7 +10095,6 @@ async def handle_save_panel_config(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- System Config & AI Settings (admin only) ---
 async def handle_get_config(request: web.Request):
     sess = require_auth(request)
     if not sess:
@@ -10491,7 +10225,6 @@ async def handle_save_raw_config(request: web.Request):
         if not content:
             return web.json_response({"ok": False, "error": "Nội dung config không được để trống"}, status=400)
 
-        # Kiểm tra tính hợp lệ cú pháp Python
         try:
             compile(content, "config.py", "exec")
         except SyntaxError as se:
@@ -10507,7 +10240,6 @@ async def handle_save_raw_config(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Bot Commands Web API (đồng bộ với bot, loại trừ MC) ---
 async def handle_get_bot_commands(request: web.Request):
     """API lấy danh sách toàn bộ lệnh bot đồng bộ theo thời gian thực (đã loại trừ Minecraft)"""
     try:
@@ -10522,7 +10254,6 @@ async def handle_get_bot_commands(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Mod Commands Web API (đã phân loại, loại trừ MC) ---
 async def handle_get_mod_commands(request: web.Request):
     sess = get_session(request)
     if not sess:
@@ -10558,7 +10289,6 @@ async def handle_save_mod_command(request: web.Request):
             return web.json_response({"ok": False, "error": "Thiếu guild_id/cmd_id"}, status=400)
         if not can_access_guild(sess, guild_id):
             return web.json_response({"ok": False, "error": "Không có quyền"}, status=403)
-        # Chặn MC
         if cmd_id.startswith("mc_") or cmd_id in ["mc", "minecraft"]:
             return web.json_response({"ok": False, "error": "Lệnh MC không cho cấu hình trên web"}, status=403)
         from web.mod_commands import set_guild_command
@@ -10577,7 +10307,7 @@ async def handle_mod_action(request: web.Request):
     try:
         body = await request.json()
         guild_id = str(body.get("guild_id", "")).strip()
-        action = str(body.get("action", "")).strip()  # ban/kick/mute/unban/unmute/clear/warn/move etc.
+        action = str(body.get("action", "")).strip()
         target_id = str(body.get("target_id", "")).strip()
         reason = str(body.get("reason", "Thực hiện từ Web Dashboard")).strip() or "Từ Web"
         minutes = int(body.get("minutes", 10)) if body.get("minutes") else 10
@@ -10587,19 +10317,16 @@ async def handle_mod_action(request: web.Request):
             return web.json_response({"ok": False, "error": "Thiếu guild_id/action"}, status=400)
         if not can_access_guild(sess, guild_id):
             return web.json_response({"ok": False, "error": "Không có quyền"}, status=403)
-        # Chặn MC
         if action.startswith("mc"):
             return web.json_response({"ok": False, "error": "Hành động MC không hỗ trợ trên web"}, status=403)
         import discord
         guild = BOT_INSTANCE.get_guild(int(guild_id))
         if not guild:
             return web.json_response({"ok": False, "error": "Không tìm thấy server"}, status=404)
-        # Kiểm tra lệnh có bị tắt không
         from web.mod_commands import get_guild_mod_config
         cfg = get_guild_mod_config(guild_id)
         if cfg.get(action) is False:
             return web.json_response({"ok": False, "error": f"Lệnh {action} đang bị tắt cho server này"}, status=403)
-        # Thực thi từng action
         if action == "ban":
             if not target_id:
                 return web.json_response({"ok": False, "error": "Thiếu target_id"}, status=400)
@@ -10672,7 +10399,6 @@ async def handle_mod_action(request: web.Request):
             except Exception as e:
                 return web.json_response({"ok": False, "error": str(e)}, status=500)
         elif action == "warn":
-            # chỉ ghi log, không có lưu warn thực tế qua web (giữ đơn giản)
             add_log("INFO", f"Web warn {target_id} tại {guild.name} lý do {reason}")
             return web.json_response({"ok": True, "message": f"Đã ghi cảnh cáo {target_id}"})
         else:
@@ -10681,7 +10407,6 @@ async def handle_mod_action(request: web.Request):
         import traceback; traceback.print_exc()
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# --- Bot Connection & Power (tách web panel mở riêng, admin điều khiển) ---
 async def handle_bot_connection(request: web.Request):
     proxied = await _proxy_to_bot_web(request, "/api/bot/connection")
     if proxied is not None:
@@ -10696,7 +10421,6 @@ async def handle_bot_connection(request: web.Request):
             info["discord"] = {"username": str(BOT_INSTANCE.user), "id": str(BOT_INSTANCE.user.id), "guilds": len(BOT_INSTANCE.guilds), "latency": round(BOT_INSTANCE.latency*1000,2)}
         except Exception:
             pass
-    # thêm thông tin web panel tách riêng
     info["web_standalone"] = BOT_INSTANCE is None
     info["can_control"] = is_admin_session(sess)
     return web.json_response({"ok": True, "bot": info})
@@ -10704,18 +10428,15 @@ async def handle_bot_connection(request: web.Request):
 async def handle_bot_power(request: web.Request):
     return web.json_response({"ok": False, "error": "Chức năng bật/tắt/restart đã gỡ theo yêu cầu"}, status=410)
 
-# --- Dedicated MC WebSocket ---
 async def handle_ws_mc(request: web.Request):
     token = request.query.get("token", "") or request.cookies.get("sakura_token", "")
     if token:
         sess = verify_session(token)
         if not sess and not is_admin_session(sess or {}):
-            # vẫn cho phép nhưng chỉ admin mới thấy MC
             pass
     ws = web.WebSocketResponse()
     await ws.prepare(request)
     MC_WS_CLIENTS.add(ws)
-    # Gửi lịch sử MC
     for entry in MC_LOG_BUFFER[-100:]:
         await ws.send_str(json.dumps({"type": "log", "data": entry}))
     try:
@@ -10727,9 +10448,7 @@ async def handle_ws_mc(request: web.Request):
                         cmd_text=data.get("cmd","").strip()
                         if cmd_text:
                             add_mc_log("CMD", f"> {cmd_text}")
-                            # Thử gửi qua RCON nếu cấu hình; fallback chỉ log
                             try:
-                                # Cố gắng dùng mc rcon từ Command/minecraft.py nếu có
                                 import importlib
                                 mc_mod=None
                                 for name in ["Command.minecraft","Command.minecraft","minecraft"]:
@@ -10737,7 +10456,6 @@ async def handle_ws_mc(request: web.Request):
                                         mc_mod=importlib.import_module(name)
                                         break
                                     except: pass
-                                # Nếu có hàm gửi RCON, thử gọi
                                 sent=False
                                 if mc_mod and hasattr(mc_mod, "send_rcon_command"):
                                     res=await mc_mod.send_rcon_command(cmd_text)
@@ -10763,7 +10481,6 @@ async def handle_chat(request: web.Request):
         msg=sanitize_text(str(body.get("message","")), 1000).strip()
         if not msg:
             return web.json_response({"ok":False,"error":"Thiếu message"},status=400)
-        # Thử gọi Kiro API trước, fallback Groq
         reply=None
         try:
             import config
@@ -10802,7 +10519,6 @@ async def handle_chat(request: web.Request):
         except Exception as e:
             print(f"[Chat] AI fail: {e}")
         if not reply:
-            # fallback Sakura personality
             lowers=msg.lower()
             if any(k in lowers for k in ["xin chào","hello","hi"]):
                 reply="Chào bạn! 🌸 Sakura đây — cần giúp gì về bot hoặc cài đặt máy chủ Discord không?"
@@ -10887,9 +10603,7 @@ async def handle_global_chat_send(request: web.Request):
         attachment_name = sanitize_text(str(body.get("attachment_name","")), 100).strip()
         is_image = bool(body.get("is_image", True))
         if not text and not attachment: return web.json_response({"ok":False,"error":"Thiếu nội dung hoặc tệp"},status=400)
-        # lấy info user
         username=sess.get("username","Ẩn danh")
-        # avatar từ web_users.json
         users=load_json(DATA_DIR/"web_users.json",{})
         avatar=users.get(username,{}).get("avatar","")
         entry={
@@ -10905,7 +10619,6 @@ async def handle_global_chat_send(request: web.Request):
         arr=_load_web_global(); arr.append(entry)
         if len(arr)>300: arr=arr[-300:]
         _save_web_global(arr)
-        # broadcast WS
         if WEB_GLOBAL_WS:
             msg=json.dumps({"type":"global_chat","data":entry})
             for ws in list(WEB_GLOBAL_WS):
@@ -10924,7 +10637,6 @@ async def handle_ws_global_chat(request: web.Request):
     ws=web.WebSocketResponse()
     await ws.prepare(request)
     WEB_GLOBAL_WS.add(ws)
-    # gửi lịch sử
     for m in _load_web_global()[-30:]:
         await ws.send_str(json.dumps({"type":"global_chat","data":m}))
     try:
@@ -10963,7 +10675,6 @@ async def handle_ws_global_chat(request: web.Request):
         WEB_GLOBAL_WS.discard(ws)
     return ws
 
-# --- Profile System Handlers (Sakura Bio) ---
 async def handle_add_profile_page(request: web.Request):
     f = TEMPLATES_DIR / "add_profile.html"
     if not f.exists():
@@ -11055,7 +10766,6 @@ async def handle_save_profile(request: web.Request):
 
         existing = profiles.get(username)
         if existing:
-            # Kiểm tra quyền: chỉ chủ sở hữu hoặc admin mới được chỉnh sửa
             is_admin = is_admin_session(sess)
             owner_id = str(existing.get("owner_id") or existing.get("discord_id") or "")
             owner_name = str(existing.get("owner_name") or "").lower()
@@ -11071,7 +10781,6 @@ async def handle_save_profile(request: web.Request):
         data["owner_name"] = existing.get("owner_name", user_name) if existing else user_name
         data["updated_at"] = int(time.time())
 
-        # Hỗ trợ tùy chỉnh ảnh nền web, màu nền, màu tương tác, màu hộp, thứ tự hiển thị
         if "background_image" in data:
             data["background_image"] = str(data.get("background_image", "")).strip()
         if "bg_color" in data:
@@ -11141,10 +10850,8 @@ async def handle_list_profiles_api(request: web.Request):
         "current_user": current_user
     })
 
-# --- Top.gg Webhook & Vote Tracking ---
 async def handle_topgg_webhook(request: web.Request):
     try:
-        # Kiểm tra xác thực Webhook Authorization nếu có cấu hình
         try:
             from config import TOPGG_WEBHOOK_AUTH
             if TOPGG_WEBHOOK_AUTH:
@@ -11161,7 +10868,6 @@ async def handle_topgg_webhook(request: web.Request):
         if user_id:
             from Command.vote import record_vote, send_vote_success_dm
             record_vote(user_id)
-            # Thưởng Coin và XP vào DB
             try:
                 from data.database import update_user_level_stats, get_user_data
                 user_data = await get_user_data(0, int(user_id))
@@ -11172,7 +10878,6 @@ async def handle_topgg_webhook(request: web.Request):
             except Exception:
                 pass
 
-            # Gửi tin nhắn riêng (DM) chúc mừng và thông báo quyền lợi (hỗ trợ cả REST API fallback khi bot chạy riêng)
             dm_sent = False
             try:
                 dm_sent = await send_vote_success_dm(BOT_INSTANCE, user_id)
@@ -11224,23 +10929,15 @@ async def handle_mc_logs(request: web.Request):
         return web.json_response({"ok":False,"error":"Chỉ admin mới xem MC logs"},status=403)
     return web.json_response({"ok":True,"logs":MC_LOG_BUFFER[-200:]})
 
-# --- WebSocket Live Log Stream ---
 async def handle_ws_logs(request: web.Request):
-    # Allow query token for WS auth; if admin required maybe check
     token = request.query.get("token", "") or request.cookies.get("sakura_token", "")
-    # try check session if present, but allow connection and filter broadcast? Keep simple: require auth if session system active
-    # For now, allow if token valid or fallback to no check (to support old behavior)
     if token:
         sess = verify_session(token)
-        # if token invalid and not legacy, reject?
-        # legacy token check
         if not sess:
             try:
                 import config
                 legacy = getattr(config, "WEB_PASSWORD", "")
                 if legacy and token != legacy:
-                    # Check more strictly: need valid session
-                    # But allow anonymous for backward compat? We enforce auth
                     pass
             except Exception:
                 pass
@@ -11271,9 +10968,6 @@ async def handle_ws_logs(request: web.Request):
     return ws
 
 
-# ==============================================================================
-# 👥 WEB ADMIN MANAGEMENT API (QUẢN TRỊ ADMIN WEB - DÀNH RIÊNG CHO OWNER)
-# ==============================================================================
 async def handle_get_admin_users(request: web.Request):
     """Lấy danh sách tất cả tài khoản web và trạng thái phân quyền (Chỉ Owner)."""
     sess = require_owner(request)
@@ -11311,7 +11005,6 @@ async def handle_get_admin_users(request: web.Request):
                 "created_at": udata.get("created_at") or 0
             })
 
-        # Sắp xếp: Owner lên đầu, kế đến Admin, sau đó User
         role_priority = {"owner": 0, "admin": 1, "user": 2}
         users_list.sort(key=lambda u: (role_priority.get(u["role"], 3), u["username"]))
 
@@ -11334,7 +11027,6 @@ async def handle_set_user_role(request: web.Request):
 
         users = load_users()
         if target_user not in users:
-            # Thử tìm theo discord_id
             for u_k, u_v in users.items():
                 if str(u_v.get("discord_id")) == target_user:
                     target_user = u_k
@@ -11354,7 +11046,6 @@ async def handle_set_user_role(request: web.Request):
         u_data["role"] = new_role
         save_users(users)
 
-        # Cập nhật session đang hoạt động
         try:
             from web.auth import load_sessions, save_sessions
             sessions = load_sessions()
@@ -11409,7 +11100,6 @@ async def handle_add_web_admin(request: web.Request):
             save_users(users)
             user_label = matched_uname
         else:
-            # Nếu chưa có tài khoản, tạo trước hồ sơ Admin bằng Discord ID
             clean_id = "".join(c for c in target if c.isdigit())
             if clean_id and len(clean_id) >= 15:
                 uname = f"discord_{clean_id}"
@@ -11442,7 +11132,6 @@ async def handle_add_web_admin(request: web.Request):
                 save_users(users)
                 user_label = uname
 
-        # Cập nhật session nếu có
         try:
             from web.auth import load_sessions, save_sessions
             sessions = load_sessions()
@@ -11496,7 +11185,6 @@ async def handle_remove_web_admin(request: web.Request):
         u_data["role"] = "user"
         save_users(users)
 
-        # Cập nhật session
         try:
             from web.auth import load_sessions, save_sessions
             sessions = load_sessions()
@@ -11515,18 +11203,13 @@ async def handle_remove_web_admin(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# ==============================================================================
-# SAKURA WEB UTILITIES / TIỆN ÍCH WEB (Translate, QR Code, TTS, Shortener, Hub)
-# ==============================================================================
 
-# 1. Tools Hub Page
 async def handle_tools_hub_page(request: web.Request):
     f = TEMPLATES_DIR / "tools.html"
     if not f.exists():
         return web.Response(text="<h1>tools.html chưa tạo</h1>", content_type="text/html", status=404)
     return web.Response(text=f.read_text(encoding="utf-8"), content_type="text/html")
 
-# 2. Translate Page & API
 async def handle_translate_page(request: web.Request):
     f = TEMPLATES_DIR / "translate.html"
     if not f.exists():
@@ -11549,7 +11232,6 @@ async def handle_api_translate(request: web.Request):
         translated_text = ""
         detected_source = source
 
-        # Method 1: Google GTX Single Endpoint (Fast, high-fidelity)
         try:
             def _fetch_gtx():
                 import urllib.request
@@ -11570,7 +11252,6 @@ async def handle_api_translate(request: web.Request):
         except Exception:
             translated_text = ""
 
-        # Method 2: Fallback to deep_translator
         if not translated_text:
             try:
                 from deep_translator import GoogleTranslator
@@ -11590,7 +11271,6 @@ async def handle_api_translate(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# 3. QR Code Page, Generator API, Scanner API & Download
 async def handle_qrcode_page(request: web.Request):
     f = TEMPLATES_DIR / "qrcode.html"
     if not f.exists():
@@ -11631,7 +11311,6 @@ async def handle_api_qrcode_generate(request: web.Request):
             img = qr.make_image(fill_color=fg_color, back_color=bg_color).convert("RGBA")
             img = img.resize((size, size), Image.Resampling.LANCZOS)
 
-            # Overlay logo if requested
             if logo_choice != "none":
                 logo_path = None
                 if logo_choice == "bot":
@@ -11736,7 +11415,6 @@ async def handle_api_qrcode_scan(request: web.Request):
     except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
 
-# 4. Text-To-Speech (TTS) Page & API
 TTS_CACHE_DIR = DATA_DIR / "tts_cache"
 
 async def handle_tts_page(request: web.Request):
@@ -11798,7 +11476,6 @@ async def handle_api_tts_audio(request: web.Request):
     data = filepath.read_bytes()
     return web.Response(body=data, content_type="audio/mpeg")
 
-# 5. URL Shortener Page, API & Redirect
 SHORT_LINKS_FILE = DATA_DIR / "short_links.json"
 
 def _load_short_links() -> dict:
@@ -11922,7 +11599,6 @@ async def handle_short_redirect(request: web.Request):
         status=404
     )
 
-# --- HoYoverse Web Captcha & OTP Handlers ---
 async def handle_hoyo_captcha_page(request: web.Request):
     """Trang giao diện người dùng giải Geetest Captcha của HoYoverse."""
     f = TEMPLATES_DIR / "hoyo_captcha.html"
@@ -11964,13 +11640,11 @@ async def handle_api_hoyo_captcha_info(request: web.Request):
         new_captcha = raw.get("new_captcha") if "new_captcha" in raw else getattr(mmt, "new_captcha", 1)
         success = raw.get("success") if "success" in raw else getattr(mmt, "success", 1)
 
-        # Chuẩn hóa nếu một trong 2 trường bị trống
         if not gt and captcha_id:
             gt = captcha_id
         if not captcha_id and gt:
             captcha_id = gt
 
-        # Geetest v4 hay v3 ưu tiên lấy trực tiếp từ session do genshin xác định
         if "is_v4" in sess:
             is_v4 = bool(sess["is_v4"])
         elif challenge:
@@ -12238,7 +11912,6 @@ async def handle_api_hoyo_web_login(request: web.Request):
 
 def create_app() -> web.Application:
     app = web.Application(middlewares=[security_headers_middleware])
-    # Bot File Manager & Cog Reloader Routes (Dành cho Admin Web)
     app.router.add_get("/admin/files", handle_bot_files_page)
     app.router.add_get("/bot/files", handle_bot_files_page)
     app.router.add_get("/api/admin/bot-files/list", handle_api_bot_files_list)
@@ -12256,7 +11929,6 @@ def create_app() -> web.Application:
     app.router.add_get("/api/admin/database/table-data", handle_api_database_table_data)
     app.router.add_post("/api/admin/database/query", handle_api_database_query)
 
-    # Public routes - "/" là trang giới thiệu, "/dashboard" là panel
     app.router.add_get("/", handle_index)
     app.router.add_get("/admin", handle_admin_page)
     app.router.add_get("/hoyo/captcha", handle_hoyo_captcha_page)
@@ -12273,7 +11945,6 @@ def create_app() -> web.Application:
     app.router.add_get("/dashboard", handle_dashboard)
     app.router.add_get("/login", handle_login_page)
     app.router.add_get("/help", handle_help_page)
-    # Minecraft Web Hosting Dashboard Pages
     app.router.add_get("/mc", handle_mc_servers_page)
     app.router.add_get("/minecraft", handle_mc_servers_page)
     app.router.add_get("/mc/console", handle_mc_console_page)
@@ -12315,7 +11986,6 @@ def create_app() -> web.Application:
     app.router.add_get("/tarot", handle_tarot_page)
     app.router.add_get("/api/scribble/rooms", handle_scribble_rooms)
     app.router.add_get("/api/wordlist", handle_wordlist)
-    # Wordchain Management Routes
     app.router.add_get("/api/wordchain/stats", handle_wordchain_stats)
     app.router.add_get("/api/wordchain/words", handle_wordchain_get_words)
     app.router.add_post("/api/wordchain/words/add", handle_wordchain_add_word)
@@ -12328,7 +11998,6 @@ def create_app() -> web.Application:
     app.router.add_post("/api/tarot/interpret", handle_tarot_interpret)
     app.router.add_get("/api/yt/files", handle_yt_files)
     app.router.add_get("/yt/video", handle_yt_video)
-    # TikTok Downloader Routes
     app.router.add_get("/tiktok", handle_tiktok_page)
     app.router.add_post("/api/tiktok/info", handle_api_tiktok_info)
     app.router.add_get("/api/tiktok/download", handle_api_tiktok_download)
@@ -12339,8 +12008,7 @@ def create_app() -> web.Application:
     app.router.add_get("/account", handle_account_page)
     app.router.add_get("/account/change", handle_account_page)
     app.router.add_get("/account/resetpass", handle_account_page)
-    app.router.add_post("/api/login", handle_login)  # legacy
-    # New auth routes
+    app.router.add_post("/api/login", handle_login)
     app.router.add_post("/api/auth/login", handle_auth_login)
     app.router.add_post("/api/auth/register", handle_auth_register)
     app.router.add_post("/api/auth/logout", handle_auth_logout)
@@ -12348,7 +12016,6 @@ def create_app() -> web.Application:
     app.router.add_get("/api/auth/discord/login", handle_discord_login)
     app.router.add_get("/api/auth/discord/callback", handle_discord_callback)
     app.router.add_post("/api/auth/forgot", handle_auth_forgot)
-    # Account API
     app.router.add_get("/api/account/info", handle_account_info)
     app.router.add_post("/api/account/change", handle_account_change)
     app.router.add_post("/api/account/resetpass", handle_account_resetpass)
@@ -12358,7 +12025,6 @@ def create_app() -> web.Application:
     app.router.add_get("/api/achievements/admin/list", handle_get_admin_achievements_list)
     app.router.add_post("/api/achievements/admin/add", handle_add_admin_achievement)
     app.router.add_post("/api/achievements/admin/user/action", handle_admin_user_achievement_action)
-    # Protected API
     app.router.add_get("/api/status", handle_status)
     app.router.add_get("/api/guilds", handle_get_guilds)
     app.router.add_get("/api/guilds/{id}", handle_get_guild_detail)
@@ -12462,7 +12128,6 @@ def create_app() -> web.Application:
     app.router.add_post("/api/farm/admin/item/create", handle_admin_farm_create_item)
     app.router.add_post("/api/farm/admin/item/delete", handle_admin_farm_delete_item)
 
-    # Mining Admin API
     app.router.add_get("/api/mining/admin/catalogs", handle_get_admin_mining_catalogs)
     app.router.add_get("/api/mining/admin/users", handle_get_admin_mining_users)
     app.router.add_get("/api/mining/admin/user", handle_get_admin_mining_user)
@@ -12470,37 +12135,29 @@ def create_app() -> web.Application:
     app.router.add_post("/api/mining/admin/item/create", handle_admin_mining_create_item)
     app.router.add_get("/api/admin/rates", handle_get_admin_game_rates)
     app.router.add_post("/api/admin/rates", handle_save_admin_game_rates)
-    # Web Admin Management APIs (Chỉ Owner)
     app.router.add_get("/api/admin/users", handle_get_admin_users)
     app.router.add_post("/api/admin/users/role", handle_set_user_role)
     app.router.add_post("/api/admin/users/add-admin", handle_add_web_admin)
     app.router.add_post("/api/admin/users/remove-admin", handle_remove_web_admin)
-# Waifu Gacha API & Admin Endpoints
     app.router.add_get("/api/gacha/admin/stats", handle_get_admin_gacha_stats)
     app.router.add_get("/api/gacha/admin/user", handle_get_admin_gacha_user)
     app.router.add_post("/api/gacha/admin/user/action", handle_admin_gacha_user_action)
     app.router.add_get("/api/gacha/characters", handle_get_gacha_characters)
     app.router.add_get("/api/gacha/leaderboard", handle_get_gacha_leaderboard)
 
-    # Voice Leaderboard API
     app.router.add_get("/api/voice/leaderboard", handle_get_voice_leaderboard)
 
-    # Hoyo Test Code API
     app.router.add_post("/api/guilds/{id}/hoyo-test-code", handle_test_hoyo_code)
 
-    # Per-Guild Minecraft Connection API (RCON & Plugin)
     app.router.add_get("/api/guilds/{id}/mc-connection", handle_get_guild_mc_connection)
     app.router.add_post("/api/guilds/{id}/mc-connection", handle_save_guild_mc_connection)
     app.router.add_post("/api/guilds/{id}/mc-connection/test", handle_test_guild_mc_connection)
     app.router.add_post("/api/guilds/{id}/mc-connection/command", handle_command_guild_mc_connection)
 
-    # Plugin Commands API
     app.router.add_get("/api/bot/plugin-commands", handle_get_plugin_commands)
 
-    # Minecraft Link Account API (Cổng 10272)
     app.router.add_post("/api/link", handle_link_request)
 
-    # Minecraft Plugin & Admin API Endpoints
     app.router.add_post("/api/mc/plugin/heartbeat", handle_mc_plugin_heartbeat)
     app.router.add_post("/api/mc/plugin/server/create_link_code", handle_mc_plugin_create_link_code)
     app.router.add_post("/api/mc/plugin/event", handle_mc_plugin_event)
@@ -12518,7 +12175,6 @@ def create_app() -> web.Application:
     app.router.add_get("/api/mc/admin/server/players", handle_mc_admin_server_players)
     app.router.add_post("/api/mc/admin/economy/convert", handle_mc_admin_economy_convert)
 
-    # Minecraft Web Hosting System APIs
     app.router.add_get("/api/mc/hosting/servers", handle_api_mc_hosting_servers)
     app.router.add_get("/api/mc/hosting/server/{id}/detail", handle_api_mc_hosting_server_detail)
     app.router.add_post("/api/mc/hosting/server/{id}/power", handle_api_mc_hosting_server_power)
@@ -12560,7 +12216,6 @@ def create_app() -> web.Application:
     app.router.add_get("/ws/global-chat", handle_ws_global_chat)
     app.router.add_get("/ws/logs", handle_ws_logs)
 
-    # Sakura Bio Profiles: /profile, /profiles, /linh/profile, /{username}/profile, /add-profile
     app.router.add_get("/profile", handle_profile_directory_page)
     app.router.add_get("/profiles", handle_profile_directory_page)
     app.router.add_get("/api/profiles", handle_list_profiles_api)
@@ -12569,13 +12224,11 @@ def create_app() -> web.Application:
     app.router.add_post("/api/profile/save", handle_save_profile)
     app.router.add_get("/{username}/profile", handle_user_profile_page)
 
-    # Top.gg Webhook & Vote Tracking
     app.router.add_post("/api/topgg/webhook", handle_topgg_webhook)
     app.router.add_post("/dblwebhook", handle_topgg_webhook)
     app.router.add_get("/api/vote/status/{user_id}", handle_get_vote_status)
     app.router.add_get("/api/vote/toggle-status", handle_get_vote_toggle)
     app.router.add_post("/api/vote/toggle", handle_post_vote_toggle)
-    # --- Sakura Web Utilities Routes ---
     app.router.add_get("/tools", handle_tools_hub_page)
     app.router.add_get("/translate", handle_translate_page)
     app.router.add_get("/qrcode", handle_qrcode_page)
@@ -12635,7 +12288,6 @@ async def start_web_dashboard(bot=None, host: str = "0.0.0.0", port: int = 8080)
             started = True
             break
         except OSError as e:
-            # Nếu là bot tích hợp (có BOT_INSTANCE) mà cổng gốc bị chiếm → cảnh báo rõ
             if bot is not None and try_port == port:
                 print(f"\033[93m⚠️ Cổng {port} đã bị chiếm (có thể do 'python web/server.py' đang chạy). Bot sẽ thử cổng {port+1}...\033[0m")
                 print(f"   → Để bot và web cùng 1 cổng {port}: tắt web standalone rồi chạy lại 'python run.py' trước.\033[0m")
@@ -12652,7 +12304,6 @@ async def start_web_dashboard(bot=None, host: str = "0.0.0.0", port: int = 8080)
     return runner, actual_port
 
 if __name__ == "__main__":
-    # Nếu bot đã chạy, standalone không nên chiếm 8080 của bot
     try:
         st = get_bot_process_status(use_cache=False)
         if st.get("running"):
@@ -12666,7 +12317,6 @@ if __name__ == "__main__":
         import config
         standalone_port = getattr(config, "WEB_PORT", 10272)
         loop.run_until_complete(start_web_dashboard(port=standalone_port))
-        # standalone cũng cần tail MC
         try: loop.create_task(tail_mc_log_file())
         except: pass
         loop.run_forever()

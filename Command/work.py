@@ -22,11 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 CAREER_DATA_FILE = BASE_DIR / "data" / "career_system.json"
 VN_TZ = timezone(timedelta(hours=7))
 
-WORK_COOLDOWN_SECONDS = 1800  # 30 phút một ca làm việc
+WORK_COOLDOWN_SECONDS = 1800
 
-# ==============================================================================
-# HỆ THỐNG DANH MỤC NGHỀ NGHIỆP & CÁC BẬC THĂNG TIẾN
-# ==============================================================================
 CAREER_CATALOG = {
     "tech": {
         "name_vi": "💻 Ngành Công Nghệ Thông Tin",
@@ -431,9 +428,6 @@ def get_tier_config(career_id: str, tier: int) -> Optional[dict]:
     return None
 
 
-# ==============================================================================
-# VIEW NỘP ĐƠN ỨNG TUYỂN / CHUYỂN ĐỔI NGÀNH NGHỀ
-# ==============================================================================
 class JobMarketView(View):
     def __init__(self, author: discord.Member, parent_view: "WorkMainView"):
         super().__init__(timeout=90)
@@ -511,9 +505,6 @@ class JobMarketView(View):
         await interaction.response.edit_message(embed=embed, view=self.parent_view)
 
 
-# ==============================================================================
-# GIAO DIỆN CHÍNH CỦA HỆ THỐNG WORK & SỰ NGHIỆP
-# ==============================================================================
 class WorkMainView(View):
     def __init__(self, author: discord.Member, guild_id: int):
         super().__init__(timeout=180)
@@ -722,7 +713,6 @@ class WorkMainView(View):
                 )
             return await interaction.followup.send(res, ephemeral=False)
 
-        # Xử lý khi làm việc thành công
         rec["success_shifts"] = rec.get("success_shifts", 0) + 1
         rec["reputation"] = min(100, rec.get("reputation", 100) + 2)
         rec["career_exp"] = min(100, rec.get("career_exp", 0) + random.randint(8, 15))
@@ -838,9 +828,6 @@ class WorkMainView(View):
         await interaction.response.edit_message(embed=embed, view=self)
 
 
-# ==============================================================================
-# LỚP COG CHÍNH TÍCH HỢP
-# ==============================================================================
 class CareerCog(commands.Cog, name="Sự Nghiệp & Việc Làm"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot

@@ -12,20 +12,17 @@ from collections import defaultdict, deque
 from pathlib import Path
 from aiohttp import web
 
-# ---- Rate limiter ----
 class RateLimiter:
     def __init__(self):
-        self.buckets = defaultdict(deque)  # key -> deque[timestamps]
-        self.lockouts = {}  # key -> unlock_time
+        self.buckets = defaultdict(deque)
+        self.lockouts = {}
 
     def is_limited(self, key: str, limit: int, window: int):
         now = time.time()
-        # kiểm tra lockout
         unlock = self.lockouts.get(key)
         if unlock and now < unlock:
             return True, int(unlock - now)
         dq = self.buckets[key]
-        # trượt cửa sổ
         while dq and now - dq[0] > window:
             dq.popleft()
         if len(dq) >= limit:
@@ -38,10 +35,9 @@ class RateLimiter:
 
 limiter = RateLimiter()
 
-# giới hạn mặc định
 LIMITS = {
-    "login": (5, 60),       # 5 lần/phút
-    "chat": (20, 60),       # 20 tin/phút
+    "login": (5, 60),
+    "chat": (20, 60),
     "global": (15, 60),
     "game_score": (30, 60),
     "default": (60, 60),
@@ -54,7 +50,6 @@ def check_rate(request: web.Request, name: str = "default"):
     limited, retry = limiter.is_limited(key, limit, window)
     return limited, retry, key
 
-# ---- Security headers middleware ----
 SECURITY_HEADERS = {
     "X-Frame-Options": "DENY",
     "X-Content-Type-Options": "nosniff",
@@ -66,25 +61,19 @@ SECURITY_HEADERS = {
 
 @web.middleware
 async def security_headers_middleware(request, handler):
-    # chặn body quá lớn (DoS)
     if request.content_length and request.content_length > 6 * 1024 * 1024:
         return web.json_response({"ok": False, "error": "Payload quá lớn (>6MB)"}, status=413)
-    # chặn host lạ (host header injection) — cho phép localhost, lan, và domain cấu hình
     try:
         host = request.headers.get("Host","")
-        # cho phép mọi host nội bộ, không chặn strict để tránh break LAN/IP
     except: pass
     resp = await handler(request)
     for k,v in SECURITY_HEADERS.items():
         resp.headers.setdefault(k, v)
-    # cookie an toàn
     return resp
 
-# ---- Sanitizers ----
 def sanitize_text(s: str, max_len: int = 500) -> str:
     if not isinstance(s, str): s = str(s)
     s = s.strip()[:max_len]
-    # loại bỏ ký tự điều khiển
     s = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F]", "", s)
     return s
 
@@ -109,7 +98,6 @@ def validate_avatar(filename: str, content_type: str, size: int) -> str:
         return "Tên file không hợp lệ"
     return ""
 
-# ---- Brute-force tracking ----
 failed_logins = defaultdict(lambda: {"count":0, "first":0})
 
 def record_failed(ip: str):
@@ -120,7 +108,7 @@ def record_failed(ip: str):
     else:
         rec["count"]+=1
     if rec["count"] >= 5:
-        limiter.lock(f"login:{ip}", 300)  # khóa 5 phút
+        limiter.lock(f"login:{ip}", 300)
         return True
     return False
 

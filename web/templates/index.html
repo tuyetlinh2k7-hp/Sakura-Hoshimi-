@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌸 Sakura Bot - Bảng Điều Khiển Quản Lý (Web Dashboard)</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <!-- Chart.js for real-time telemetry -->
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="icon" href="/images/avatar-bot.jpg"
         type="image/png">
@@ -31,7 +31,7 @@
 
 <body>
     <div class="app-container">
-        <!-- ================= SIDEBAR ================= -->
+        
         <aside class="sidebar">
             <div class="brand-section">
                 <div class="brand-clickable" onclick="location.href='/'" style="display:flex;align-items:center;gap:14px;cursor:pointer;flex:1;min-width:0">
@@ -47,7 +47,7 @@
                 <button class="mobile-close-btn" onclick="toggleMobileMenu(false)" aria-label="Đóng menu">✕</button>
             </div>
 
-            <!-- Mobile Drawer Quick Bar -->
+            
             <div class="mobile-drawer-quick-bar">
                 <div class="mobile-quick-stats">
                     <span class="mobile-stat-item">📡 <strong id="mobilePing">0 ms</strong></span>
@@ -103,7 +103,7 @@
                     </a>
                 </li>
 
-                <!-- Dedicated Admin Portal Button (Chỉ hiển thị với Admin & Owner) -->
+                
                 <li data-admin-only="true" class="admin-only" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,121,198,0.25);">
                     <a class="nav-item" href="/admin" onclick="location.href='/admin'; return false;" style="background: linear-gradient(135deg, rgba(255, 121, 198, 0.16), rgba(189, 147, 249, 0.16)); border: 1px solid rgba(255, 121, 198, 0.35); color: #ff79c6; font-weight: 700; border-radius: 12px;">
                         <i>👑</i>
@@ -136,9 +136,9 @@
         </aside>
 
         <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu(false)"></div>
-        <!-- ================= MAIN WRAPPER ================= -->
+        
         <main class="main-wrapper">
-            <!-- Sticky Banner: Xem trước góc nhìn người dùng thường -->
+            
             <div id="userPreviewStickyBanner" style="display:none; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 10px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10000; box-shadow: 0 4px 14px rgba(0,0,0,0.3); border-bottom: 2px solid #60a5fa;">
                 <div style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.88rem;">
                     <span style="font-size: 1.25rem;">👁️</span>
@@ -148,7 +148,7 @@
                     👑 Quay Lại Góc Nhìn Admin
                 </button>
             </div>
-            <!-- Top Header -->
+            
             <header class="top-header">
                 <div class="header-left">
                     <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
@@ -205,19 +205,19 @@
                 </div>
             </header>
 
-            <!-- Main Body Content -->
+            
             <div class="content-body">
 
-                <!-- Non-admin banner - không lộ tk admin -->
+                
                 <div id="userLimitedBanner"
                     style="display:none; margin-bottom:20px; padding:14px 18px; background: rgba(139,233,253,0.08); border:1px solid rgba(139,233,253,0.3); border-radius:12px; color:var(--text-muted); font-size:.9rem;">
                     <strong style="color:var(--accent-cyan);">👤 Chế độ người dùng:</strong> Bạn chỉ thấy và điều khiển
                     các máy chủ Discord mà bạn có quyền <code>Quản lý Server</code>.
                 </div>
 
-                <!-- ================= TAB 1: DASHBOARD ================= -->
+                
                 <section class="tab-content active" id="tab-dashboard">
-                    <!-- Metric Cards -->
+                    
                     <div class="card-grid-4">
                         <div class="glass-card stat-card">
                             <div class="stat-icon">🏰</div>
@@ -259,7 +259,7 @@
                         </div>
                     </div>
 
-                    <!-- Performance Chart & Quick Control -->
+                    
                     <div class="card-grid-2">
                         <div class="glass-card">
                             <div class="card-header">
@@ -299,7 +299,7 @@
                             </button>
                         </div>
                     </div>
-                    <!-- Bot Status (tích hợp) -->
+                    
                     <div class="glass-card admin-only" style="margin-bottom:24px">
                         <div class="card-header">
                             <h3><i>🤖</i> Trạng thái Bot (tích hợp)</h3>
@@ -323,7 +323,7 @@
                         </div>
                     </div>
 
-                    <!-- ================= ADMIN ONLY: HỆ THỐNG LAVALINK, API TÍCH HỢP & CHI TIẾT BOT ================= -->
+                    
                     <div class="admin-only" id="adminOverviewSection" style="margin-bottom: 28px;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
                             <div style="display:flex;align-items:center;gap:10px">
@@ -343,9 +343,9 @@
                             </button>
                         </div>
 
-                        <!-- Grid 2 Cột: Card Lavalink & Card APIs -->
+                        
                         <div class="card-grid-2">
-                            <!-- Card Lavalink -->
+                            
                             <div class="glass-card" style="display:flex;flex-direction:column;justify-content:space-between">
                                 <div>
                                     <div class="card-header" style="margin-bottom:14px">
@@ -384,7 +384,7 @@
                                 </div>
                             </div>
 
-                            <!-- Card Trạng thái APIs -->
+                            
                             <div class="glass-card" style="display:flex;flex-direction:column;justify-content:space-between">
                                 <div>
                                     <div class="card-header" style="margin-bottom:14px">
@@ -399,7 +399,7 @@
                                     </div>
 
                                     <div id="apisStatusList" style="display:flex;flex-direction:column;gap:8px">
-                                        <!-- Dynamic list of APIs rendered by JS -->
+                                        
                                         <div style="text-align:center;color:var(--text-dim);padding:20px 0;font-size:.85rem">Đang tải trạng thái các API...</div>
                                     </div>
                                 </div>
@@ -410,7 +410,7 @@
                             </div>
                         </div>
 
-                        <!-- Card Chi tiết Bot Thông số kỹ thuật -->
+                        
                         <div class="glass-card" style="margin-top:20px">
                             <div class="card-header" style="margin-bottom:16px">
                                 <div style="display:flex;align-items:center;gap:10px">
@@ -459,13 +459,13 @@
                                 </div>
                             </div>
 
-                            <!-- Danh sách Cogs đã nạp -->
+                            
                             <details style="background:rgba(0,0,0,0.15);border-radius:10px;padding:10px 14px;border:1px solid var(--border-subtle);margin-top:10px">
                                 <summary style="cursor:pointer;font-weight:600;font-size:.85rem;color:var(--text-muted);outline:none;user-select:none">
                                     📦 Xem danh sách <span id="botDiagCogsSummaryCount">0</span> Cogs / Modules đang nạp
                                 </summary>
                                 <div id="botDiagCogsPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:160px;overflow-y:auto;padding-right:4px">
-                                    <!-- Pills rendered by JS -->
+                                    
                                 </div>
                             </details>
                         </div>
@@ -488,9 +488,9 @@
                             <button class="btn btn-primary btn-sm" onclick="doInvite()">+ Mời bot</button>
                         </div>
                     </div>
-                    <!-- MEE6-style server grid -->
+                    
                     <div class="guilds-grid" id="guildsList">
-                        <!-- Rendered by JS: meebot-style cards -->
+                        
                     </div>
                     <div id="guildsEmpty"
                         style="display:none;text-align:center;padding:40px 20px;color:var(--text-muted)">
@@ -519,7 +519,7 @@
                             </div>
                         </div>
 
-                        <!-- Search and Category Filters -->
+                        
                         <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;">
                             <div class="search-input-wrapper">
                                 <span class="search-icon">🔍</span>
@@ -543,7 +543,7 @@
                         </div>
                     </div>
 
-                    <!-- Commands Grid -->
+                    
                     <div class="commands-grid" id="commandsGrid">
                         <div class="loading-state" style="grid-column: 1 / -1; padding: 40px; text-align: center; color: var(--text-muted);">
                             <div class="spinner" style="margin: 0 auto 12px;"></div>
@@ -559,7 +559,7 @@
                 </section>
 
 <section class="tab-content" id="tab-leaderboards">
-                    <!-- Top Sub-Tabs Navigation Pills -->
+                    
                     <div class="glass-card" style="margin-bottom: 20px;">
                         <div class="card-header" style="flex-wrap: wrap; gap: 12px; justify-content: space-between;">
                             <div>
@@ -582,7 +582,7 @@
                         </div>
                     </div>
 
-                    <!-- SUBVIEW 1: WAIFU GACHA LEADERBOARD -->
+                    
                     <div id="lbViewWaifu" class="lb-subview">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 20px;">
                             <div style="background: rgba(255, 215, 0, 0.08); border-radius: 12px; padding: 16px; border: 1px solid rgba(255, 215, 0, 0.3);">
@@ -617,14 +617,14 @@
                                         </tr>
                                     </thead>
                                     <tbody id="waifuLbTableBody">
-                                        <!-- Rendered by JS -->
+                                        
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SUBVIEW 2: LEVELS & ECONOMY LEADERBOARD -->
+                    
                     <div id="lbViewLevels" class="lb-subview" style="display: none;">
                         <div class="glass-card">
                             <div class="card-header">
@@ -650,14 +650,14 @@
                                         </tr>
                                     </thead>
                                     <tbody id="levelsTableBody">
-                                        <!-- Rendered by JS -->
+                                        
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SUBVIEW 3: VOICE LEADERBOARD -->
+                    
                     <div id="lbViewVoice" class="lb-subview" style="display: none;">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 20px;">
                             <div style="background: rgba(147, 112, 219, 0.08); border-radius: 12px; padding: 16px; border: 1px solid rgba(147, 112, 219, 0.3);">
@@ -692,14 +692,14 @@
                                         </tr>
                                     </thead>
                                     <tbody id="voiceLbTableBody">
-                                        <!-- Rendered by JS -->
+                                        
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SUBVIEW 4: FISHING LEADERBOARD -->
+                    
                     <div id="lbViewFishing" class="lb-subview" style="display: none;">
                         <div class="glass-card">
                             <div class="card-header">
@@ -728,14 +728,14 @@
                                         </tr>
                                     </thead>
                                     <tbody id="fishingLbTableBody">
-                                        <!-- Rendered by JS -->
+                                        
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SUBVIEW 5: ACHIEVEMENTS LEADERBOARD -->
+                    
                     <div id="lbViewAchievements" class="lb-subview" style="display: none;">
                         <div class="glass-card" style="margin-bottom: 20px;">
                             <div class="card-header" style="flex-wrap: wrap; gap: 12px; justify-content: space-between;">
@@ -830,7 +830,7 @@
                         </div>
                     </div>
 
-                    <!-- SUBVIEW 6: MINIGAMES LEADERBOARD -->
+                    
                     <div id="lbViewMinigames" class="lb-subview" style="display: none;">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
                             <div class="glass-card">
@@ -893,9 +893,9 @@
         </main>
     </div>
 
-    <!-- ================= MODALS ================= -->
+    
 
-    <!-- Guild Settings Modal (legacy - kept hidden) -->
+    
     <div class="modal-overlay" id="guildSettingsModal" style="display:none">
         <div class="modal-box">
             <div class="card-header">
@@ -921,7 +921,7 @@
         </div>
     </div>
 
-    <!-- MEE6-style Guild Control Drawer -->
+    
     <div class="drawer-overlay" id="guildDrawer" onclick="if(event.target===this) closeGuildDrawer()">
         <div class="drawer">
             <div class="drawer-header">
@@ -1008,7 +1008,7 @@
                     </div>
                 </aside>
                 <main class="drawer-main">
-                    <!-- Panel: General - Reine style: Prefix + Language + 5 toggles (giữ TikTok) -->
+                    
                     <div class="drawer-panel" id="panel-general">
                         <div class="module-card">
                             <div class="module-head">
@@ -1043,7 +1043,7 @@
                                 </div>
                             </div>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px">
-                                <!-- Cột 1: Form chỉnh sửa -->
+                                
                                 <div>
                                     <div class="form-group">
                                         <label style="font-size:.8rem;color:var(--text-dim);font-weight:700">BIỆT DANH BOT (SERVER NICKNAME)</label>
@@ -1068,7 +1068,7 @@
                                     </div>
                                     <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="saveBotProfile()">💾 Lưu Hồ Sơ Bot Server</button>
                                 </div>
-                                <!-- Cột 2: Discord Profile Live Preview -->
+                                
                                 <div>
                                     <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);margin-bottom:8px">XEM TRƯỚC HỒ SƠ (DISCORD PROFILE PREVIEW)</div>
                                     <div style="border-radius:12px;background:#18191c;border:1px solid rgba(255,255,255,0.08);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
@@ -1141,7 +1141,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Panel: Welcome / Goodbye -->
+                    
                     <div class="drawer-panel" id="panel-welcome" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -1190,7 +1190,7 @@
                                 <div class="table-card" style="padding:14px;border:1px solid var(--border-glass);border-radius:12px;background:rgba(255,255,255,.02)">
                                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
                                         <div style="font-weight:700;color:var(--sakura-pink)">📝 Bảng nội dung thông báo</div>
-                                        <!-- Menu nhỏ chọn mục -->
+                                        
                                         <div style="display:flex;gap:6px">
                                             <button type="button" class="cmd-pill active" id="btnWcTabWelcome" onclick="switchWelcomeSubTab('welcome')" style="font-size:.78rem;padding:4px 10px">👋 Welcome</button>
                                             <button type="button" class="cmd-pill" id="btnWcTabGoodbye" onclick="switchWelcomeSubTab('goodbye')" style="font-size:.78rem;padding:4px 10px">🚪 Goodbye</button>
@@ -1198,7 +1198,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Mục 1: Welcome Sub-tab -->
+                                    
                                     <div id="wcSubPaneWelcome" class="wc-subpane">
                                         <div style="display:grid;grid-template-columns:1fr 140px;gap:10px;margin-bottom:10px">
                                             <div class="form-group" style="margin-bottom:0">
@@ -1230,7 +1230,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Mục 2: Goodbye Sub-tab -->
+                                    
                                     <div id="wcSubPaneGoodbye" class="wc-subpane" style="display:none">
                                         <div style="display:grid;grid-template-columns:1fr 140px;gap:10px;margin-bottom:10px">
                                             <div class="form-group" style="margin-bottom:0">
@@ -1262,7 +1262,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Mục 3: Boost Sub-tab -->
+                                    
                                     <div id="wcSubPaneBoost" class="wc-subpane" style="display:none">
                                         <div style="display:grid;grid-template-columns:1fr 140px;gap:10px;margin-bottom:10px">
                                             <div class="form-group" style="margin-bottom:0">
@@ -1319,21 +1319,21 @@
                                 <div>• <code>{guild_name}</code> = tên server trong thông báo boost</div>
                             </div>
                             <div style="margin-top:14px">
-                                <!-- Hộp Review 1: Welcome Preview -->
+                                
                                 <div id="wcPreviewCardWelcome" class="wc-preview-box" style="padding:14px;border:1px solid var(--border-glass);border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(117,199,255,0.06));min-height:180px">
                                     <div style="font-weight:700;color:var(--sakura-pink);margin-bottom:10px;display:flex;align-items:center;gap:6px"><span>👋</span> Xem Trước Thông Báo Chào Mừng (Welcome)</div>
                                     <div id="welcomePreviewChannels" style="font-size:.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px"></div>
                                     <div id="welcomePreviewMessage" style="padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--border-glass);color:var(--text-color);line-height:1.7;white-space:pre-wrap"></div>
                                     <div id="welcomePreviewImage" style="margin-top:12px;font-size:.8rem;color:var(--text-muted)"></div>
                                 </div>
-                                <!-- Hộp Review 2: Goodbye Preview -->
+                                
                                 <div id="wcPreviewCardGoodbye" class="wc-preview-box" style="display:none;padding:14px;border:1px solid var(--border-glass);border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,112,166,0.06));min-height:180px">
                                     <div style="font-weight:700;color:var(--sakura-pink);margin-bottom:10px;display:flex;align-items:center;gap:6px"><span>👋</span> Xem Trước Thông Báo Tạm Biệt (Goodbye)</div>
                                     <div id="goodbyePreviewChannels" style="font-size:.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px"></div>
                                     <div id="goodbyePreviewMessage" style="padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--border-glass);color:var(--text-color);line-height:1.7;white-space:pre-wrap"></div>
                                     <div id="goodbyePreviewImage" style="margin-top:12px;font-size:.8rem;color:var(--text-muted)"></div>
                                 </div>
-                                <!-- Hộp Review 3: Boost Preview -->
+                                
                                 <div id="wcPreviewCardBoost" class="wc-preview-box" style="display:none;padding:14px;border:1px solid var(--border-glass);border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,198,80,0.06));min-height:180px">
                                     <div style="font-weight:700;color:var(--sakura-pink);margin-bottom:10px;display:flex;align-items:center;gap:6px"><span>🚀</span> Xem Trước Thông Báo Server Boost</div>
                                     <div id="boostPreviewChannel" style="font-size:.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px"></div>
@@ -1446,7 +1446,7 @@
                             <button class="btn btn-primary" onclick="saveMinigameConfig()">💾 Lưu cấu hình MiniGame</button>
                         </div>
                     </div>
-                    <!-- Panel: Auto-Moderation — như hình Reine (pastel pink) -->
+                    
                     <div class="drawer-panel" id="panel-moderation" style="display:none">
                         <div id="amGlobalOffNotice" style="display:none;margin-bottom:12px;padding:10px 12px;background:rgba(255,121,198,0.12);border:1px solid #ffd6e7;border-radius:10px;color:#d81b60;font-size:.85rem">⚠️ Auto-Mod đang <b>TẮT</b> ở Cài đặt chung → bật <b>Auto-Moderation</b> ở tab Tổng quan để có hiệu lực.</div>
                         <div class="module-card">
@@ -1524,7 +1524,7 @@
                             <h3>🧹 Bộ lọc nâng cao</h3>
                             <p style="color:var(--text-muted);font-size:.85rem">Bật cái nào cần — vi phạm sẽ bị xóa + cảnh cáo (đủ ngưỡng thì timeout). Mỗi mục có cài đặt riêng khi bật.</p>
                             <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
-                                <!-- Anti-Invite -->
+                                
                                 <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px;overflow:hidden">
                                     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px"><div><strong>🔗 Anti-Invite</strong><div style="font-size:.8rem;color:var(--text-muted)">Chặn link mời Discord (discord.gg/...)</div></div><div class="switch" id="amAntiInvite" onclick="toggleSwitch(this); updateAdvVisibility()"></div></div>
                                     <div id="amAdvInviteSettings" style="display:none; padding:10px 12px; border-top:1px solid var(--border-subtle); background:rgba(255,240,245,0.4)">
@@ -1532,7 +1532,7 @@
                                         <div style="font-size:.72rem; color:var(--text-muted); margin-top:4px">Nếu tắt, mọi invite đều bị xóa kể cả của server.</div>
                                     </div>
                                 </div>
-                                <!-- Anti-Link -->
+                                
                                 <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px;overflow:hidden">
                                     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px"><div><strong>🌐 Anti-Link</strong><div style="font-size:.8rem;color:var(--text-muted)">Chặn mọi URL trừ whitelist bên dưới</div></div><div class="switch" id="amAntiLink" onclick="toggleSwitch(this); updateAdvVisibility()"></div></div>
                                     <div id="amAdvLinkSettings" style="display:none; padding:10px 12px; border-top:1px solid var(--border-subtle); background:rgba(255,240,245,0.4)">
@@ -1541,7 +1541,7 @@
                                         <div style="font-size:.72rem; color:var(--text-muted); margin-top:4px">Mặc định: youtube.com, youtu.be, discord.com, tenor.com, giphy.com, imgur.com — để trống sẽ chặn hết.</div>
                                     </div>
                                 </div>
-                                <!-- Anti-Mention -->
+                                
                                 <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px;overflow:hidden">
                                     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px"><div><strong>📣 Anti-Mention Spam</strong><div style="font-size:.8rem;color:var(--text-muted)">Tag quá nhiều người/role trong 1 tin</div></div><div class="switch" id="amAntiMention" onclick="toggleSwitch(this); updateAdvVisibility()"></div></div>
                                     <div id="amAdvMentionSettings" style="display:none; padding:10px 12px; border-top:1px solid var(--border-subtle); background:rgba(255,240,245,0.4); align-items:center; gap:8px">
@@ -1549,7 +1549,7 @@
                                         <span style="font-size:.75rem; color:var(--text-muted)">Quá ngưỡng → xóa</span>
                                     </div>
                                 </div>
-                                <!-- Anti-Caps -->
+                                
                                 <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px;overflow:hidden">
                                     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px"><div><strong>🔠 Anti-Caps</strong><div style="font-size:.8rem;color:var(--text-muted)">Quá nhiều chữ IN HOA</div></div><div class="switch" id="amAntiCaps" onclick="toggleSwitch(this); updateAdvVisibility()"></div></div>
                                     <div id="amAdvCapsSettings" style="display:none; padding:10px 12px; border-top:1px solid var(--border-subtle); background:rgba(255,240,245,0.4)">
@@ -1560,14 +1560,14 @@
                                         <div style="font-size:.72rem; color:var(--text-muted); margin-top:4px">VD: 8 ký tự trở lên và &gt;70% là hoa → xóa.</div>
                                     </div>
                                 </div>
-                                <!-- Anti-Emoji -->
+                                
                                 <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px;overflow:hidden">
                                     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px"><div><strong>😀 Anti-Emoji Spam</strong><div style="font-size:.8rem;color:var(--text-muted)">Quá nhiều emoji trong 1 tin</div></div><div class="switch" id="amAntiEmoji" onclick="toggleSwitch(this); updateAdvVisibility()"></div></div>
                                     <div id="amAdvEmojiSettings" style="display:none; padding:10px 12px; border-top:1px solid var(--border-subtle); background:rgba(255,240,245,0.4); align-items:center; gap:8px">
                                         <label style="font-size:.85rem; display:flex; align-items:center; gap:8px">Số emoji tối đa (3-30): <input type="number" id="amEmojiLimit" class="form-control" value="7" min="3" max="30" style="width:80px; padding:6px 8px"></label>
                                     </div>
                                 </div>
-                                <!-- Anti-Duplicate -->
+                                
                                 <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px;overflow:hidden">
                                     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px"><div><strong>📄 Anti-Duplicate</strong><div style="font-size:.8rem;color:var(--text-muted)">Gửi lặp lại cùng 1 nội dung</div></div><div class="switch" id="amAntiDuplicate" onclick="toggleSwitch(this); updateAdvVisibility()"></div></div>
                                     <div id="amAdvDuplicateSettings" style="display:none; padding:10px 12px; border-top:1px solid var(--border-subtle); background:rgba(255,240,245,0.4)">
@@ -1575,7 +1575,7 @@
                                         <div style="font-size:.72rem; color:var(--text-muted); margin-top:4px">Tin nhắn giống hệt nhau quá ngưỡng trong lịch sử gần đây → xóa.</div>
                                     </div>
                                 </div>
-                                <!-- Anti-Zalgo -->
+                                
                                 <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px;overflow:hidden">
                                     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px"><div><strong>🌀 Anti-Zalgo</strong><div style="font-size:.8rem;color:var(--text-muted)">Chặn ký tự rối (H̶e̶l̶l̶o̶)</div></div><div class="switch" id="amAntiZalgo" onclick="toggleSwitch(this); updateAdvVisibility()"></div></div>
                                     <div id="amAdvZalgoSettings" style="display:none; padding:10px 12px; border-top:1px solid var(--border-subtle); background:rgba(255,240,245,0.4)">
@@ -1589,7 +1589,7 @@
                             <button class="btn btn-primary" onclick="saveAutomod()">💾 Lưu thay đổi</button>
                         </div>
                     </div>
-                    <!-- Panel: Mod (phân loại, loại trừ MC) -->
+                    
                     <div class="drawer-panel" id="panel-mod" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -1639,13 +1639,13 @@
                             <button class="btn btn-primary" onclick="executeModAction()">🚀 Thực thi</button>
                         </div>
                     </div>
-                    <!-- Panel: Blacklist — Cấm dùng bot (server + global cho admin) -->
+                    
                     <div class="drawer-panel" id="panel-blacklist" style="display:none">
                         <div class="module-card" style="border:1.5px solid #ffd6e7; background:#fff;">
                             <h3 style="font-size:1.05rem; font-weight:800; color:var(--text-main); margin:0">🚫 Blacklist — Cấm dùng bot</h3>
                             <p style="color:#8b8099; font-size:.88rem; margin-top:8px; line-height:1.5">Cấm user dùng bot ở <b>phạm vi máy chủ</b> (chỉ server này) hoặc <b>toàn cục</b> (mọi server — chỉ admin). Bị cấm sẽ không thực hiện được lệnh (trừ <code>s!appeal</code>).</p>
 
-                            <!-- Server scope -->
+                            
                             <div style="margin-top:16px; padding:14px; background:rgba(255,240,245,0.5); border:1.5px solid #ffd6e7; border-radius:12px">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
                                     <div><strong style="font-size:.95rem">🏰 Blacklist server</strong><div style="font-size:.75rem; color:#a08fa0">Phạm vi máy chủ — chỉ cấm ở server này</div></div>
@@ -1673,7 +1673,7 @@
                                 </div>
                             </div>
 
-                            <!-- Global scope (admin only) -->
+                            
                             <div id="blGlobalSection" style="margin-top:14px; padding:14px; background:rgba(255,248,240,0.9); border:1.5px solid #ffe4c4; border-radius:12px; display:none">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
                                     <div><strong style="font-size:.95rem">🌐 Blacklist toàn cục</strong><div style="font-size:.75rem; color:#a08fa0">Phạm vi global — cấm mọi server (chỉ admin)</div></div>
@@ -1693,7 +1693,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Panel: TempVoice — như hình pastel -->
+                    
                     <div class="drawer-panel" id="panel-tempvoice" style="display:none">
                         <div class="module-card" style="border:1.5px solid #ffd6e7; background:#fff;">
                             <h3 style="font-size:1.05rem; font-weight:800; color:var(--text-main); margin:0">TempVoice — Kênh thoại tạm</h3>
@@ -1723,7 +1723,7 @@
                             <div id="tempVoicePreview" style="margin-top:10px; font-size:.85rem; color:var(--text-muted)">—</div>
                         </div>
                     </div>
-                    <!-- Panel: Confession — như hình pastel -->
+                    
                     <div class="drawer-panel" id="panel-confession" style="display:none">
                         <div class="module-card" style="border:1.5px solid #ffd6e7; background:#fff;">
                             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
@@ -1801,7 +1801,7 @@
                             <div id="cfsPostStatus" style="margin-top:8px; font-size:.8rem; color:var(--text-muted)"></div>
                         </div>
                     </div>
-                    <!-- Panel: Audit Logs — như hình -->
+                    
                     <div class="drawer-panel" id="panel-logging" style="display:none">
                         <div class="module-card" style="border:1.5px solid #ffd6e7; background:#fff;">
                             <h3 style="font-size:1.25rem; font-weight:800; margin:0; color:var(--text-main)">Audit Logs</h3>
@@ -1841,7 +1841,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Panel: Level & Economy — Reine style -->
+                    
                     <div class="drawer-panel" id="panel-level" style="display:none">
                         <div class="module-card">
                             <h3>Level & Economy</h3>
@@ -1901,7 +1901,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Fish (Câu Cá) -->
+                    
                     <div class="drawer-panel" id="panel-fish" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -1950,7 +1950,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Custom Keys -->
+                    
                     <div class="drawer-panel" id="panel-custom-keys" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -1988,7 +1988,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Backups -->
+                    
                     <div class="drawer-panel" id="panel-backups" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -2008,7 +2008,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Auto Role -->
+                    
                     <div class="drawer-panel" id="panel-autorole" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -2032,7 +2032,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Reaction Role -->
+                    
                     <div class="drawer-panel" id="panel-reaction-role" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -2086,7 +2086,7 @@
                                 </div>
                             </div>
 
-                            <!-- Thêm cặp Role + Emoji -->
+                            
                             <div style="margin-top:18px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid var(--border-glass);border-radius:12px">
                                 <div style="font-weight:700;font-size:.9rem;color:var(--sakura-pink);margin-bottom:10px">➕ Thêm Role Vào Bảng</div>
                                 <div style="display:grid;grid-template-columns:1fr 90px 1fr 110px auto;gap:8px;align-items:flex-end">
@@ -2115,7 +2115,7 @@
                                 </div>
 
                                 <div id="rrConfiguredRolesBox" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
-                                    <!-- Rendered dynamically -->
+                                    
                                     <span style="font-size:.82rem;color:var(--text-dim)">Chưa có role nào được thêm.</span>
                                 </div>
                             </div>
@@ -2123,7 +2123,7 @@
                             <button class="btn btn-primary" style="margin-top:16px;width:100%" onclick="submitCreateReactionRole()">🚀 Đăng Bảng Reaction Role Lên Server</button>
                         </div>
 
-                        <!-- Danh sách các bảng Role đã tạo -->
+                        
                         <div class="module-card" style="margin-top:16px">
                             <div class="module-head">
                                 <div>
@@ -2138,7 +2138,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Hoyo Code -->
+                    
                     <div class="drawer-panel" id="panel-hoyo" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -2150,7 +2150,7 @@
                             </div>
 
                             <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px">
-                                <!-- Genshin Impact -->
+                                
                                 <div style="padding:12px;background:rgba(75,105,255,0.06);border:1px solid rgba(75,105,255,0.25);border-radius:12px">
                                     <div style="font-weight:700;color:#4B69FF;display:flex;align-items:center;justify-content:space-between">
                                         <div style="display:flex;align-items:center;gap:8px">
@@ -2172,7 +2172,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Honkai: Star Rail -->
+                                
                                 <div style="padding:12px;background:rgba(222,134,255,0.06);border:1px solid rgba(222,134,255,0.25);border-radius:12px">
                                     <div style="font-weight:700;color:#DE86FF;display:flex;align-items:center;justify-content:space-between">
                                         <div style="display:flex;align-items:center;gap:8px">
@@ -2194,7 +2194,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Zenless Zone Zero -->
+                                
                                 <div style="padding:12px;background:rgba(255,223,0,0.06);border:1px solid rgba(255,223,0,0.25);border-radius:12px">
                                     <div style="font-weight:700;color:#FFDF00;display:flex;align-items:center;justify-content:space-between">
                                         <div style="display:flex;align-items:center;gap:8px">
@@ -2216,7 +2216,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Neverness to Everness -->
+                                
                                 <div style="padding:12px;background:rgba(0,240,255,0.06);border:1px solid rgba(0,240,255,0.25);border-radius:12px">
                                     <div style="font-weight:700;color:#00F0FF;display:flex;align-items:center;justify-content:space-between">
                                         <div style="display:flex;align-items:center;gap:8px">
@@ -2238,7 +2238,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Arknights: Endfield -->
+                                
                                 <div style="padding:12px;background:rgba(255,87,34,0.06);border:1px solid rgba(255,87,34,0.25);border-radius:12px">
                                     <div style="font-weight:700;color:#FF5722;display:flex;align-items:center;justify-content:space-between">
                                         <div style="display:flex;align-items:center;gap:8px">
@@ -2264,7 +2264,7 @@
                             <button class="btn btn-primary" style="margin-top:16px" onclick="saveHoyoConfig()">💾 Lưu Cài Đặt Hoyo Codes</button>
                         </div>
 
-                        <!-- Gán Code Thủ Công -->
+                        
                         <div class="module-card" style="margin-top:16px">
                             <div class="module-head">
                                 <div>
@@ -2302,7 +2302,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Channel Streak -->
+                    
                     <div class="drawer-panel" id="panel-streak" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -2327,7 +2327,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Giveaway -->
+                    
                     <div class="drawer-panel" id="panel-giveaway" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -2368,7 +2368,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Rule -->
+                    
                     <div class="drawer-panel" id="panel-rule" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -2395,7 +2395,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Panel: Announce -->
+                    
                     <div class="drawer-panel" id="panel-announce" style="display:none">
                         <div class="module-card">
                             <h3>📢 Gửi thông báo</h3>
@@ -2415,7 +2415,7 @@
                         </div>
                     </div>
 
-                    <!-- Panel: Minecraft Per-Server (RCON & Plugin) -->
+                    
                     <div class="drawer-panel" id="panel-minecraft" style="display:none">
                         <div class="module-card">
                             <div class="module-head">
@@ -2429,7 +2429,7 @@
                                 <button type="button" class="cmd-pill" id="btnGmcTabPlugin" onclick="switchGuildMcSubTab('plugin')">🔌 Liên Kết Plugin</button>
                             </div>
 
-                            <!-- Sub-tab 1: RCON & Query -->
+                            
                             <div id="gmcSubPaneRcon" style="margin-top:16px">
                                 <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
                                     <div class="form-group">
@@ -2482,7 +2482,7 @@
                                     <button class="btn btn-secondary" onclick="testGuildMcConnection()">🧪 Kiểm Tra Kết Nối Live</button>
                                 </div>
 
-                                <!-- Thẻ Trạng Thái Server Live -->
+                                
                                 <div id="gmcStatusCard" style="margin-top:18px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border-glass);border-radius:12px;display:none">
                                     <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px">
                                         <div style="display:flex;align-items:center;gap:10px">
@@ -2506,7 +2506,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Terminal Lệnh RCON -->
+                                
                                 <div style="margin-top:18px">
                                     <label style="font-size:.8rem;color:var(--text-dim);font-weight:700">GỬI LỆNH CONSOLE (RCON TERMINAL)</label>
                                     <div style="display:flex;gap:8px;margin-top:6px">
@@ -2517,7 +2517,7 @@
                                 </div>
                             </div>
 
-                            <!-- Sub-tab 2: Plugin -->
+                            
                             <div id="gmcSubPanePlugin" style="display:none;margin-top:16px">
                                 <div id="gmcPluginConnectedCard" style="display:none;padding:16px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.25);border-radius:12px;margin-bottom:16px">
                                     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -2550,7 +2550,7 @@
         </div>
     </div>
 
-    <!-- Send Message Modal -->
+    
     <div class="modal-overlay" id="sendMsgModal">
         <div class="modal-box" style="max-width: 600px;">
             <div class="card-header">
@@ -2567,7 +2567,7 @@
                 <textarea id="msgContent" class="form-control" rows="3" placeholder="Nhập nội dung thông báo..."></textarea>
             </div>
 
-            <!-- Tệp đính kèm -->
+            
             <div class="form-group" style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px dashed var(--border-subtle);">
                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                     <span>📎 Đính Kèm Tệp / Hình Ảnh / Video:</span>
@@ -2576,7 +2576,7 @@
                 <small style="display:block;margin-top:4px;color:var(--text-muted)">Hỗ trợ gửi hình ảnh, video, âm thanh hoặc tài liệu đính kèm cùng thông báo.</small>
             </div>
 
-            <!-- Cấu hình Embed -->
+            
             <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; margin-top: 10px;">
                 <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--accent-pink);">🎨 Cấu Hình Khung Embed (Tùy Chọn)</h4>
                 <div style="display: grid; grid-template-columns: 1fr 100px; gap: 12px;">
@@ -2616,7 +2616,7 @@
         </div>
     </div>
 
-    <!-- Create Giveaway Modal -->
+    
     <div class="modal-overlay" id="createGiveawayModal">
         <div class="modal-box" style="max-width: 520px;">
             <div class="card-header">
@@ -2648,7 +2648,7 @@
         </div>
     </div>
 
-    <!-- Edit User Level Modal -->
+    
     <div class="modal-overlay" id="editLevelModal">
         <div class="modal-box">
             <div class="card-header">
@@ -2677,7 +2677,7 @@
         </div>
     </div>
 
-    <!-- Edit Shop Item Modal -->
+    
     <div class="modal-overlay" id="afEditShopItemModal">
         <div class="modal-box" style="max-width: 520px;">
             <div class="card-header">
@@ -2727,7 +2727,7 @@
         </div>
     </div>
 
-    <!-- Edit Marriage Modal -->
+    
     <div class="modal-overlay" id="afEditMarriageModal">
         <div class="modal-box" style="max-width: 500px;">
             <div class="card-header">
@@ -2764,7 +2764,7 @@
         </div>
     </div>
 
-    <!-- Edit User Fishing Rod Modal -->
+    
     <div class="modal-overlay" id="afEditRodModal">
         <div class="modal-box" style="max-width: 500px;">
             <div class="card-header">
@@ -2811,7 +2811,7 @@
         </div>
     </div>
 
-    <!-- User Achievements Detail Modal -->
+    
     <div class="modal-overlay" id="userAchDetailModal">
         <div class="modal-box" style="max-width: 650px; max-height: 85vh; display: flex; flex-direction: column;">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -2821,17 +2821,17 @@
                 <button class="btn btn-secondary btn-sm" onclick="closeUserAchDetailModal()">✕</button>
             </div>
             <div id="userAchDetailStats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0;">
-                <!-- Rendered dynamically -->
+                
             </div>
             <div style="overflow-y: auto; flex: 1; margin-top: 8px; padding-right: 4px;">
                 <div id="userAchDetailList" style="display: flex; flex-direction: column; gap: 8px;">
-                    <!-- Rendered dynamically -->
+                    
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Login Modal -->
+    
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box" style="max-width: 420px; text-align: center;">
             <div style="font-size: 2.5rem; margin-bottom: 12px;">🌸</div>
@@ -2850,10 +2850,10 @@
         </div>
     </div>
 
-    <!-- Toast Notifications Container -->
+    
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Sakura FX Engine (Petals + Swaying Branches + Theme) -->
+    
     <script src="/static/js/sakura-fx.js"></script>
     <script src="/static/js/i18n.js"></script>
     <script src="/static/js/app.js"></script>
