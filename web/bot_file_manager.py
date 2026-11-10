@@ -43,7 +43,7 @@ def get_extension_from_path(rel_path: str) -> Optional[str]:
     if norm.endswith(".py"):
         norm = norm[:-3]
     parts = norm.split("/")
-    if len(parts) == 2 and parts[0] in ("Command", "Anti", "Logs_vi"):
+    if len(parts) == 2 and parts[0] in ("Command", "Anti", "Log"):
         return f"{parts[0]}.{parts[1]}"
     return None
 
@@ -243,7 +243,7 @@ def get_registered_extensions(bot=None) -> List[Dict[str, Any]]:
     try:
         import file2
         for e in getattr(file2, "EXTENSION_LOGS", ()):
-            defined_exts.add(f"Logs_vi.{e}")
+            defined_exts.add(f"Log.{e}")
     except Exception:
         pass
 
@@ -494,7 +494,7 @@ async def handle_api_bot_files_delete(request: web.Request):
             return web.json_response({"ok": False, "error": "Không thể xóa thư mục gốc của Bot!"}, status=400)
 
         # Chặn xóa các thư mục cốt lõi trực tiếp
-        if target.parent.resolve() == BASE_DIR.resolve() and target.name in ("Command", "Anti", "Logs_vi", "Check", "web", "data"):
+        if target.parent.resolve() == BASE_DIR.resolve() and target.name in ("Command", "Anti", "Log", "Check", "web", "data"):
             return web.json_response({"ok": False, "error": f"Không được phép xóa thư mục cốt lõi `{target.name}`!"}, status=400)
 
         if target.is_dir():

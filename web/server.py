@@ -247,7 +247,7 @@ def _save_audit_config(gid: str, cfg: dict):
             clean[k]=None
     audit[str(gid)]=clean
     save_json(DATA_DIR / "audit_config.json", audit)
-    # Đồng bộ sang data.json để bot cũ (Logs_vi) vẫn đọc được
+    # Đồng bộ sang data.json để bot cũ (Log) vẫn đọc được
     data = load_json(DATA_DIR / "data.json", {})
     sync_map=[("message","delete_log_channels"),("member","member_log_channels"),("join","join_log_channels"),("voice","voice_log_channels"),("server","server_log_channels")]
     for k, key in sync_map:
@@ -5060,10 +5060,10 @@ async def handle_bot_action(request: web.Request):
                     errors.append(f"Command.{ext}: {e}")
             for ext in EXTENSION_LOGS:
                 try:
-                    await BOT_INSTANCE.reload_extension(f"Logs_vi.{ext}")
+                    await BOT_INSTANCE.reload_extension(f"Log.{ext}")
                     reloaded += 1
                 except Exception as e:
-                    errors.append(f"Logs_vi.{ext}: {e}")
+                    errors.append(f"Log.{ext}: {e}")
             for ext in EXTENSION_ANTIS:
                 try:
                     await BOT_INSTANCE.reload_extension(f"Anti.{ext}")

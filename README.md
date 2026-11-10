@@ -59,7 +59,7 @@ SakuraBot/
 ├── Check/                # Helper utilities, permissions, prefix handlers, and decorators
 ├── Command/              # Discord command cogs (music, economy, gacha, games, admin, etc.)
 ├── Database/             # SQLite connection class and database schema initializers
-├── Logs_vi/              # Event logging and audit tracking cogs
+├── Log/              # Event logging and audit tracking cogs
 ├── data/                 # Dictionaries, game assets, template configs, and database scripts
 ├── languages/            # Multi-language localization files (vi, en, ja, cn)
 ├── view/                 # Interactive Discord UI Components (Buttons, Selects, Modals)
@@ -83,7 +83,7 @@ SakuraBot/
 
 ### Step 1: Clone the repository
 ```bash
-git clone https://github.com/<your-username>/Sakura-Hoshimi-.git
+git clone https://github.com/tuyetlinh2k7_hp/Sakura-Hoshimi-.git
 cd Sakura-Hoshimi-
 ```
 

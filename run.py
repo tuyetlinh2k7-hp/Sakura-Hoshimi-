@@ -107,7 +107,7 @@ async def setup_hook():
         print(f"{Colors.WARNING}⚠️ Không thể khởi động API liên kết Minecraft: {e}{Colors.ENDC}")
 
     await load_extensions(EXTENSIONS, "Command")
-    await load_extensions(EXTENSION_LOGS, "Logs_vi")
+    await load_extensions(EXTENSION_LOGS, "Log")
     await load_extensions(EXTENSION_ANTIS, "Anti")
 
     try:
